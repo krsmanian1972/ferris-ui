@@ -1,0 +1,12 @@
+[
+    {
+        "label": "Home",
+        "key": "home",
+        "isLandingPage": true
+    },
+    {
+        "label": "About",
+        "key":  "about",
+        "isLandingPage": false
+    }
+]

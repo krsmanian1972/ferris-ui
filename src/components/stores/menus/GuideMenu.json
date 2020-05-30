@@ -1,0 +1,19 @@
+[
+    {
+        "label": "Programs",
+        "key": "programs",
+        "isLandingPage": true
+    },
+
+    {
+        "label": "Teams",
+        "key": "teams",
+        "isLandingPage": false
+    },
+    {
+        "label": "Planning",
+        "key":  "planning",
+        "isLandingPage": false
+    }
+
+]

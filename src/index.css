@@ -1,0 +1,45 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+#paper {
+  background-size: 15px 15px;
+  background-image: linear-gradient(to right, #eeeeee 1px, transparent 1px), linear-gradient(to bottom, #cccccc 1px, transparent 1px);
+}
+
+.logo {
+  background-image: url("./images/krust.svg");
+  width: 47px;
+  height: 31px;
+  margin: 16px 24px 16px 0;
+  float: left;
+}
+
+.site-layout .site-layout-background {
+  background: #fff;
+}
+
+/* For demo */
+.ant-carousel .slick-slide {
+  text-align: center;
+  height: 160px;
+  line-height: 160px;
+  background: #364d79;
+  overflow: hidden;
+}
+
+.ant-carousel .slick-slide h3 {
+  color: #fff;
+}
+
