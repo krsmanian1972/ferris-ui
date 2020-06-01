@@ -1,12 +1,14 @@
 import React, { Component  } from 'react';
-import { inject } from 'mobx-react';
-import { Carousel,Card, Typography,Row,Col,Timeline } from 'antd';
-import { Affix, Button } from 'antd';
-import { TeamOutlined } from '@ant-design/icons';
+import { inject, observer} from 'mobx-react';
+import { Card, Typography,Row,Col,Timeline,Space } from 'antd';
+import { Affix, Button,Tooltip } from 'antd';
+import { TeamOutlined,VideoCameraOutlined,BookOutlined } from '@ant-design/icons';
 
+import BookPage from './BookPage'
+import Broadcast from './Broadcast'
 
+const { Title } = Typography;
 
-const { Title, Text } = Typography;
 
 const stageStyle = {
     display: 'flex',
@@ -23,45 +25,45 @@ const videoStyle = {
 };
 
 @inject("appStore")
+@observer
 class HomeUI extends Component {
     constructor(props) {
         super(props);
     }
-    
-    getCode = () => {
-        var code = String.raw`
-            struct Circle {
-                x: f64,
-                y: f64,
-                radius: f64,
-            }
-            
-            trait HasArea {
-                fn area(&self) -> f64;
-            }
-            
-            impl HasArea for Circle {
-                fn area(&self) -> f64 {
-                    std::f64::consts::PI * (self.radius * self.radius)
-                }
-            }     
-        `;
+  
+    changeView = (key,e) => {
+        e.preventDefault();
+        this.props.appStore.setMode(key);
+     }
 
-        return(
-            <pre>
-                {code}
-            </pre>
-
-        )
+    getComponent = () => {
+        let key = this.props.appStore.mode;
+        if(key=="book") {
+            return <BookPage/>
+        }
+        return <Broadcast/>    
     }
+
     stage = () => {
         return(
-            <Card style={stageStyle} title={<Title level={4}>Session - Traits in RUST</Title>}>
+            <Card>
+                 <Row>
+                     <Col span={22}>
+                        <Title level={4}>Session - Traits in RUST</Title>
+                    </Col>
+                     <Col span={2}>
+                         <Space>
+                            <Tooltip title="Camera">
+                                <Button id="camera"  onClick={(e) => this.changeView("camera", e)} type="primary" icon= {<VideoCameraOutlined/>} shape="circle"/>
+                            </Tooltip>     
+                            <Tooltip title="Book View">
+                                <Button id="book"  onClick={(e) => this.changeView("book", e)} type="primary" icon= {<BookOutlined/>} shape="circle"/>
+                            </Tooltip>
+                         </Space>   
+                     </Col>
+                 </Row>
                  <div style={videoStyle}>
-                    <p>A trait is a language feature that tells the Rust compiler about functionality a type must provide.</p>
-                    <Text code="true">  
-                        {this.getCode()}
-                    </Text>
+                    {this.getComponent()}
                 </div>
             </Card>
         )
@@ -91,25 +93,6 @@ class HomeUI extends Component {
         )
     }
 
-    members = () => {
-        return (
-            <Carousel>
-                <div>
-                    <h3>Raja</h3>
-                </div>
-                <div>
-                    <h3>Harini</h3>
-                </div>
-                <div>
-                    <h3>Skanda</h3>
-                </div>
-                <div>
-                    <h3>Subbu</h3>
-                </div>
-          </Carousel>
-        )
-    }
-
     render() {
         return (
             <>
@@ -124,8 +107,10 @@ class HomeUI extends Component {
                     </Col>  
                 </Row>
 
-                <Affix style={{position:'fixed',bottom:10,right:10}}>
-                    <Button type="primary" icon= {<TeamOutlined/>} shape="circle"/>
+                <Affix style={{position:'fixed',bottom:10,right:20}}>
+                    <Tooltip title="Enrolled Members">
+                        <Button type="primary" icon= {<TeamOutlined/>} shape="circle"/>
+                    </Tooltip>
                 </Affix>
             </>  
         )
