@@ -26,6 +26,12 @@ code {
   float: left;
 }
 
+.owner-logo {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
 .site-layout .site-layout-background {
   background: #fff;
 }
@@ -33,8 +39,7 @@ code {
 /* For demo */
 .ant-carousel .slick-slide {
   text-align: center;
-  height: 160px;
-  line-height: 160px;
+  line-height: 250px;
   background: #364d79;
   overflow: hidden;
 }
@@ -42,4 +47,10 @@ code {
 .ant-carousel .slick-slide h3 {
   color: #fff;
 }
+
+.steps {
+  height: 250px;
+  overflow: hidden;
+}
+
 
