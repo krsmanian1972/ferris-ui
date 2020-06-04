@@ -34,8 +34,7 @@ class AppStore {
     validationMessage = '';
     isEditable=true;
     state=INIT;
-    mode="camera";
-
+   
     constructor() {
         this.setSessionFromStorage();
     }
@@ -158,10 +157,7 @@ class AppStore {
     setProxy = (apiProxy) =>{
         this.apiProxy = apiProxy;
     }
-
-    setMode = (mode) => {
-        this.mode = mode;
-    }
+   
 }
 
 decorate(AppStore, {
@@ -169,8 +165,7 @@ decorate(AppStore, {
     validationMessage: observable,
     isEditable:observable,
     menus: observable,
-    mode: observable,
-
+  
     currentComponent: observable,
   
     credentials: observable,
@@ -180,8 +175,6 @@ decorate(AppStore, {
     authenticate: action,
     transitionTo: action,
     navigateTo: action,
-
-    setMode: action,
 });
 
 export const appStore = new AppStore();

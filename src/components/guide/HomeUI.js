@@ -1,14 +1,15 @@
 import React, { Component  } from 'react';
 import { inject, observer} from 'mobx-react';
-import { Card, Typography,Row,Col,Timeline,Space } from 'antd';
+import { Card, Typography,Row,Col,Timeline} from 'antd';
 import { Affix, Button,Tooltip } from 'antd';
-import { TeamOutlined,VideoCameraOutlined,BookOutlined } from '@ant-design/icons';
+import { TeamOutlined} from '@ant-design/icons';
+
+import ChatStore from '../stores/ChatStore';
 
 import BookPage from './BookPage'
 import Broadcast from './Broadcast'
 
 const { Title } = Typography;
-
 
 const stageStyle = {
     display: 'flex',
@@ -16,59 +17,16 @@ const stageStyle = {
     alignItems: 'left',
 };
 
-const videoStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: 300,
-};
+
 
 @inject("appStore")
 @observer
 class HomeUI extends Component {
     constructor(props) {
         super(props);
+        this.chatStore = new ChatStore();
     }
-  
-    changeView = (key,e) => {
-        e.preventDefault();
-        this.props.appStore.setMode(key);
-     }
-
-    getComponent = () => {
-        let key = this.props.appStore.mode;
-        if(key=="book") {
-            return <BookPage/>
-        }
-        return <Broadcast/>    
-    }
-
-    stage = () => {
-        return(
-            <Card>
-                 <Row>
-                     <Col span={22}>
-                        <Title level={4}>Session - Traits in RUST</Title>
-                    </Col>
-                     <Col span={2}>
-                         <Space>
-                            <Tooltip title="Camera">
-                                <Button id="camera"  onClick={(e) => this.changeView("camera", e)} type="primary" icon= {<VideoCameraOutlined/>} shape="circle"/>
-                            </Tooltip>     
-                            <Tooltip title="Book View">
-                                <Button id="book"  onClick={(e) => this.changeView("book", e)} type="primary" icon= {<BookOutlined/>} shape="circle"/>
-                            </Tooltip>
-                         </Space>   
-                     </Col>
-                 </Row>
-                 <div style={videoStyle}>
-                    {this.getComponent()}
-                </div>
-            </Card>
-        )
-    }
-
+    
     steps = () => {
         return (
             <Card style={stageStyle} title={<Title level={4}>Session Progress</Title>}>
@@ -98,7 +56,7 @@ class HomeUI extends Component {
             <>
                 <Row>
                     <Col span={24}>
-                        {this.stage()}
+                        <Broadcast chatStore={this.chatStore}/>
                     </Col>
                 </Row>
                 <Row>    
