@@ -17,7 +17,8 @@ class MediaDevice extends BaseStreamHandler {
             audio: true
         };
 
-        navigator.mediaDevices
+        navigator
+            .mediaDevices
             .getUserMedia(constraints)
             .then((stream) => {
                 this.stream = stream;
@@ -33,6 +34,26 @@ class MediaDevice extends BaseStreamHandler {
 
         return this;
     }
+
+    shareScreen() {
+        navigator
+            .mediaDevices
+            .getDisplayMedia({video: true})
+            .then((stream) => {
+                this.stream = stream;
+                this.emit('screen', stream);
+            })
+            .catch((err) => {
+                if (err instanceof DOMException) {
+                    alert('Cannot start screen capture');
+                } else {
+                    console.log(err);
+                }
+            });
+
+        return this;
+    }
+
 
     /**
      * Turn on/off a device

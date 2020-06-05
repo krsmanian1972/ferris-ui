@@ -18,7 +18,7 @@ class PeerConnection extends BaseStreamHandler {
   constructor(peerId) {
     super();
     this.pc = new RTCPeerConnection(CONFIGURATION);
-    
+
     this.pc.onicecandidate = (event) => socket.emit('call', {
       to: this.peerId,
       candidate: event.candidate
@@ -42,8 +42,17 @@ class PeerConnection extends BaseStreamHandler {
           this.pc.addTrack(track, stream);
         });
         this.emit('localStream', stream);
-        if (isCaller) socket.emit('request', { to: this.peerId });
-        else this.createOffer();
+        if (isCaller) {
+          socket.emit('request', { to: this.peerId });
+        }
+        else {
+          this.createOffer();
+        }
+      })
+      .on('screen', (stream) => {
+        let videoTrack = stream.getVideoTracks()[0]
+        const transceiver = this.pc.getTransceivers()[0]
+        transceiver['sender'].replaceTrack(videoTrack) 
       })
       .start(config);
 

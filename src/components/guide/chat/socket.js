@@ -5,6 +5,6 @@
  */
 import io from 'socket.io-client';
 
-const socket = io.connect("https://685b8f218e3a.ngrok.io");
+const socket = io.connect("https://140265f24eac.ngrok.io");
 
 export default socket;
