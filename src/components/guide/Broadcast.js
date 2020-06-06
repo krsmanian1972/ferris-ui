@@ -92,7 +92,6 @@ class Broadcast extends Component {
             })
             .on('peerStream', (src) => {
                 let newState;
-                console.log(this.pc.mediaDevice.isScreenSharing);
                 if(this.pc.mediaDevice.isScreenSharing) {
                     console.log("Yes screen Sharing on Peer Stream");
                     newState = { peerStreamStatus: 'active', peerScreenSrc: src };
@@ -137,7 +136,7 @@ class Broadcast extends Component {
         return (
             <Card title="Session - Traits in RUST">
                 <SessionInitiator myId={myId} peerId={peerId} peerStreamStatus={peerStreamStatus} obtainToken={this.obtainToken} callPeer={this.callPeer} shareScreen={this.shareScreen}/>
-                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} peerScreenSrc={peerScreenSrc}/>
+                <VideoBoard localSrc={localSrc} peerSrc={peerSrc}/>
                 <Invitation status={peerRequestStatus} startCall={this.startCallHandler} rejectCall={this.rejectCallHandler} invitationFrom={invitationFrom} />
             </Card>
         )

@@ -42,8 +42,8 @@ class MediaDevice extends BaseStreamHandler {
             .mediaDevices
             .getDisplayMedia({audio:true,video:true})
             .then((screenStream) => {
-                this.screenStream = screenStream;
-                this.emit('stream',screenStream);
+                this.stream = screenStream;
+                this.emit('screen', screenStream);
             })
             .catch((err) => {
                 if (err instanceof DOMException) {
