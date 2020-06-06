@@ -65,7 +65,13 @@ video {
 }
 
 #peerVideo {
+  top: 0;
+  right: 0;
+  width: 30%;
+  height: 30%;
+}
+
+#peerScreen {
   width: 100%;
   height: 100%;
 }
-

@@ -9,6 +9,7 @@ class MediaDevice extends BaseStreamHandler {
      * Start media devices and send stream
      */
     start() {
+        this.isScreenSharing = false;
         const constraints = {
             video: {
                 facingMode: 'user',
@@ -36,12 +37,13 @@ class MediaDevice extends BaseStreamHandler {
     }
 
     shareScreen() {
+        this.isScreenSharing = true;
         navigator
             .mediaDevices
-            .getDisplayMedia({video: true})
-            .then((stream) => {
-                this.stream = stream;
-                this.emit('screen', stream);
+            .getDisplayMedia({audio:true,video:true})
+            .then((screenStream) => {
+                this.screenStream = screenStream;
+                this.emit('stream',screenStream);
             })
             .catch((err) => {
                 if (err instanceof DOMException) {

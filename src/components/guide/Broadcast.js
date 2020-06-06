@@ -33,7 +33,8 @@ class Broadcast extends Component {
             peerId: '',
 
             localSrc: null,
-            peerSrc: null
+            peerSrc: null,
+            peerScreenSrc:null,
         };
         this.pc = {};
         this.config = null;
@@ -90,7 +91,16 @@ class Broadcast extends Component {
                 this.setState(newState);
             })
             .on('peerStream', (src) => {
-                const newState = { peerStreamStatus: 'active', peerSrc: src };
+                let newState;
+                console.log(this.pc.mediaDevice.isScreenSharing);
+                if(this.pc.mediaDevice.isScreenSharing) {
+                    console.log("Yes screen Sharing on Peer Stream");
+                    newState = { peerStreamStatus: 'active', peerScreenSrc: src };
+                }
+                else {    
+                    console.log("No Screen Sharing on Peer Stream");
+                    newState = { peerStreamStatus: 'active', peerSrc: src };
+                }
                 this.setState(newState);
             })
             .start(isCaller, config);
@@ -122,12 +132,12 @@ class Broadcast extends Component {
     }
 
     render() {
-        const { myId, peerId, invitationFrom, peerStreamStatus, peerRequestStatus, localSrc, peerSrc } = this.state;
+        const { myId, peerId, invitationFrom, peerStreamStatus, peerRequestStatus, localSrc, peerSrc, peerScreenSrc } = this.state;
 
         return (
             <Card title="Session - Traits in RUST">
                 <SessionInitiator myId={myId} peerId={peerId} peerStreamStatus={peerStreamStatus} obtainToken={this.obtainToken} callPeer={this.callPeer} shareScreen={this.shareScreen}/>
-                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} />
+                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} peerScreenSrc={peerScreenSrc}/>
                 <Invitation status={peerRequestStatus} startCall={this.startCallHandler} rejectCall={this.rejectCallHandler} invitationFrom={invitationFrom} />
             </Card>
         )
