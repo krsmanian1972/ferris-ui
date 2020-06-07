@@ -15,11 +15,16 @@ function VideoBoard({ screenStatus, peerSrc, localSrc,screenSrc }) {
     const peerScreen = useRef(null);
   
     useEffect(() => {
-        if (peerVideo.current && peerSrc) peerVideo.current.srcObject = peerSrc;
+        if (peerVideo.current && peerSrc) {
+            peerVideo.current.srcObject = peerSrc;
+        }
         if (localVideo.current && localSrc) localVideo.current.srcObject = localSrc;
-        if (peerScreen.current && screenSrc) peerScreen.current.srcObject = screenSrc;
+        
+        if (peerScreen.current && screenSrc) {
+            peerScreen.current.srcObject = screenSrc;
+        }
     });
-
+    
     return (
         <div style={stageStyle}>
             <video id="peerVideo" ref={peerVideo} autoPlay />

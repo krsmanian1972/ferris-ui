@@ -28,7 +28,7 @@ class Broadcast extends Component {
             localStreamStatus: '',
             peerStreamStatus: '',
             screenStatus:'',
-
+  
             peerRequestStatus: '',
             invitationFrom: '',
             peerId: '',
@@ -39,6 +39,7 @@ class Broadcast extends Component {
         };
         this.pc = {};
         this.config = null;
+        this.firstFlag=true,
 
         this.startCallHandler = this.startCall.bind(this);
         this.endCallHandler = this.endCall.bind(this);
@@ -92,14 +93,15 @@ class Broadcast extends Component {
                 this.setState(newState);
             })
             .on('peerStream', (src) => {
-                let newState;
-                if (this.pc.mediaDevice.isScreenSharing) {
-                    newState = { screenStatus: 'active', screenSrc: src };
+                if (this.state.peerStreamStatus==='active') {
+                    const newState = { screenStatus: 'active', screenSrc: src };
+                    this.setState(newState);
                 }
                 else {
-                    newState = { peerStreamStatus: 'active', peerSrc: src };
+                    const newState = { peerStreamStatus: 'active', peerSrc: src };
+                    this.setState(newState);
                 }
-                this.setState(newState);
+                
             })
             .start(isCaller, config);
     }
