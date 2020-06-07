@@ -25,10 +25,8 @@ class Broadcast extends Component {
         this.state = {
             myId: '',
 
-            localStreamStatus: '',
-            peerStreamStatus: '',
             screenStatus:'',
-  
+            
             peerRequestStatus: '',
             invitationFrom: '',
             peerId: '',
@@ -40,6 +38,7 @@ class Broadcast extends Component {
         this.pc = {};
         this.config = null;
         this.firstFlag=true,
+        this.peerStreamStatus = '';
 
         this.startCallHandler = this.startCall.bind(this);
         this.endCallHandler = this.endCall.bind(this);
@@ -49,7 +48,7 @@ class Broadcast extends Component {
     obtainToken = (e) => {
         e.preventDefault();
         socket
-            .on('init', ({ id: myId }) => {
+            .on('token', ({ id: myId }) => {
                 message.success(`Your Id is ${myId}`, 5);
                 this.setState({ myId });
             })
@@ -86,19 +85,20 @@ class Broadcast extends Component {
         this.config = config;
         this.pc = new PeerConnection(peerId)
             .on('localStream', (src) => {
-                const newState = { localStreamStatus: 'active', peerId: peerId, localSrc: src };
+                const newState = { peerId: peerId, localSrc: src };
                 if (!isCaller) {
                     newState.peerRequestStatus = '';
                 }
                 this.setState(newState);
             })
             .on('peerStream', (src) => {
-                if (this.state.peerStreamStatus==='active') {
+                if (this.peerStreamStatus==='active') {
                     const newState = { screenStatus: 'active', screenSrc: src };
                     this.setState(newState);
                 }
                 else {
-                    const newState = { peerStreamStatus: 'active', peerSrc: src };
+                    this.peerStreamStatus='active';
+                    const newState = { peerSrc: src };
                     this.setState(newState);
                 }
                 
@@ -132,11 +132,11 @@ class Broadcast extends Component {
     }
 
     render() {
-        const { myId, peerId, invitationFrom, peerStreamStatus, screenStatus,peerRequestStatus, localSrc, peerSrc, screenSrc } = this.state;
+        const { myId, peerId, invitationFrom, screenStatus,peerRequestStatus, localSrc, peerSrc, screenSrc } = this.state;
 
         return (
             <Card title="Session - Traits in RUST">
-                <SessionInitiator myId={myId} peerId={peerId} peerStreamStatus={peerStreamStatus} obtainToken={this.obtainToken} callPeer={this.callPeer} shareScreen={this.shareScreen} />
+                <SessionInitiator myId={myId} peerId={peerId} peerStreamStatus={this.peerStreamStatus} obtainToken={this.obtainToken} callPeer={this.callPeer} shareScreen={this.shareScreen} />
                 <VideoBoard screenStatus={screenStatus} localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} />
                 <Invitation status={peerRequestStatus} startCall={this.startCallHandler} rejectCall={this.rejectCallHandler} invitationFrom={invitationFrom} />
             </Card>

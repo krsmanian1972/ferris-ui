@@ -28,7 +28,7 @@ class PeerConnection extends BaseStreamHandler {
     this.peerId = peerId;
 
     this.pc.ontrack = (event) => {
-      this.emit('peerStream',event.streams[0]);
+        this.emit('peerStream',event.streams[0]);
     };
   }
 
@@ -41,7 +41,6 @@ class PeerConnection extends BaseStreamHandler {
     this.mediaDevice
       .on('stream', (stream) => {
         stream.getTracks().forEach((track) => {
-          track.contentHint='VideoSharing';
           this.pc.addTrack(track, stream);
         });
 
