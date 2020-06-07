@@ -27,6 +27,7 @@ class Broadcast extends Component {
 
             localStreamStatus: '',
             peerStreamStatus: '',
+            screenStatus:'',
 
             peerRequestStatus: '',
             invitationFrom: '',
@@ -34,7 +35,7 @@ class Broadcast extends Component {
 
             localSrc: null,
             peerSrc: null,
-            peerScreenSrc:null,
+            screenSrc: null,
         };
         this.pc = {};
         this.config = null;
@@ -92,12 +93,10 @@ class Broadcast extends Component {
             })
             .on('peerStream', (src) => {
                 let newState;
-                if(this.pc.mediaDevice.isScreenSharing) {
-                    console.log("Yes screen Sharing on Peer Stream");
-                    newState = { peerStreamStatus: 'active', peerScreenSrc: src };
+                if (this.pc.mediaDevice.isScreenSharing) {
+                    newState = { screenStatus: 'active', screenSrc: src };
                 }
-                else {    
-                    console.log("No Screen Sharing on Peer Stream");
+                else {
                     newState = { peerStreamStatus: 'active', peerSrc: src };
                 }
                 this.setState(newState);
@@ -131,12 +130,12 @@ class Broadcast extends Component {
     }
 
     render() {
-        const { myId, peerId, invitationFrom, peerStreamStatus, peerRequestStatus, localSrc, peerSrc, peerScreenSrc } = this.state;
+        const { myId, peerId, invitationFrom, peerStreamStatus, screenStatus,peerRequestStatus, localSrc, peerSrc, screenSrc } = this.state;
 
         return (
             <Card title="Session - Traits in RUST">
-                <SessionInitiator myId={myId} peerId={peerId} peerStreamStatus={peerStreamStatus} obtainToken={this.obtainToken} callPeer={this.callPeer} shareScreen={this.shareScreen}/>
-                <VideoBoard localSrc={localSrc} peerSrc={peerSrc}/>
+                <SessionInitiator myId={myId} peerId={peerId} peerStreamStatus={peerStreamStatus} obtainToken={this.obtainToken} callPeer={this.callPeer} shareScreen={this.shareScreen} />
+                <VideoBoard screenStatus={screenStatus} localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} />
                 <Invitation status={peerRequestStatus} startCall={this.startCallHandler} rejectCall={this.rejectCallHandler} invitationFrom={invitationFrom} />
             </Card>
         )

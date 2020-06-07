@@ -9,26 +9,31 @@ const stageStyle = {
     minHeight: 300
 };
 
-function VideoBoard({ peerSrc, localSrc }) {
+function VideoBoard({ screenStatus, peerSrc, localSrc,screenSrc }) {
     const peerVideo = useRef(null);
     const localVideo = useRef(null);
+    const peerScreen = useRef(null);
   
     useEffect(() => {
         if (peerVideo.current && peerSrc) peerVideo.current.srcObject = peerSrc;
         if (localVideo.current && localSrc) localVideo.current.srcObject = localSrc;
+        if (peerScreen.current && screenSrc) peerScreen.current.srcObject = screenSrc;
     });
 
     return (
         <div style={stageStyle}>
             <video id="peerVideo" ref={peerVideo} autoPlay />
             <video id="localVideo" ref={localVideo} autoPlay muted />
+            <video id="peerScreen" ref={peerScreen} autoPlay />
         </div>
     );
 }
 
 VideoBoard.propTypes = {
-    localSrc: PropTypes.object, // eslint-disable-line
-    peerSrc: PropTypes.object, // eslint-disable-line
+    screenStatus:PropTypes.string.isRequired,
+    localSrc: PropTypes.object, 
+    peerSrc: PropTypes.object,
+    screenSrc:PropTypes.object, 
 };
 
 export default VideoBoard;

@@ -28,8 +28,8 @@ class PeerConnection extends BaseStreamHandler {
     this.peerId = peerId;
 
     this.pc.ontrack = (event) => {
-      this.emit('peerStream', event.streams[0]);
-      console.log("On Track is invoked");
+      console.log(event);
+      this.emit('peerStream',event.streams[0]);
     };
   }
 
@@ -54,12 +54,13 @@ class PeerConnection extends BaseStreamHandler {
           this.createOffer();
         }
       })
-      .on('screen', (stream) => {
-        let screenStream = stream.getVideoTracks()[0];
-        const transceiver = this.pc.getTransceivers()[0];
-        transceiver['sender'].replaceTrack(screenStream);  
+      .on("screen", (stream) => {
 
-        this.emit('localStream', stream);
+        stream.getTracks().forEach((track) => {
+          this.pc.addTrack(track, stream);
+        });
+
+        this.createOffer();
       })
       .start(config);
 
