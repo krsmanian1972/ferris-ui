@@ -46,7 +46,7 @@ class About extends Component {
                         <Card style={commentsStyle} title="Our sincere thanks to:">
                             <Row>
                                 <Col>
-                                    <p>Rust Lang</p>
+                                    <p>Moz://a, Rust Lang</p>
                                     <p>Actix, Juniper, Diesel</p>
                                     <p>React,MobX, Antd</p>
                                     <p>MySql</p>

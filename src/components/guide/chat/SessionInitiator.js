@@ -7,18 +7,16 @@ import { ShareAltOutlined, IdcardOutlined } from '@ant-design/icons';
 
 const { Search } = Input;
 
-function SessionInitiator({ myId, peerId, peerStreamStatus, obtainToken,callPeer,shareScreen }) {
+function SessionInitiator({ myId, peerId, peerStreamStatus, obtainToken, callPeer, shareScreen }) {
     const isReady = myId.length > 0;
 
     const beforeToken = () => {
         return (
             <Row>
                 <Col span={22}>
-                    <Space>
-                        <Tooltip title="By clicking here; you will get a Token to communicate with your audiance.">
-                            <Button id="idCard" onClick={obtainToken} type="primary" icon={<IdcardOutlined />} shape="circle" />
-                        </Tooltip>
-                    </Space>
+                    <Tooltip title="By clicking here; you will get a Token ID to communicate with your audience.">
+                        <Button id="idCard" onClick={obtainToken} type="primary" icon={<IdcardOutlined />} shape="circle" />
+                    </Tooltip>
                 </Col>
             </Row>
         )
@@ -28,36 +26,32 @@ function SessionInitiator({ myId, peerId, peerStreamStatus, obtainToken,callPeer
         return (
             <Row>
                 <Col span={20}>
-                    <Space>
-                        <Tag color="#108ee9">{myId}</Tag>
-                    </Space>
+                    <Tag color="#108ee9">{myId}</Tag>
                 </Col>
                 <Col span={4}>
-                    <Space>
-                        <Search placeholder="Your Peer's Id" enterButton="Call" size="small" onSearch={value => callPeer(value)} />
-                    </Space>
+                    <Tooltip title="Enter your Peer's Token ID, if you know it. Soon we will provide the list of Peers to select from. Thanks !">
+                        <Search placeholder="Your Peer's Token ID" enterButton="Call" size="small" onSearch={value => callPeer(value)} />
+                    </Tooltip>    
                 </Col>
             </Row>
         )
     }
 
     const enterCall = () => {
-        const canShare = peerStreamStatus==="active";
+        const canShare = peerStreamStatus === "active";
 
         return (
             <Row>
                 <Col span={20}>
                     <Space>
                         <Tag color="#108ee9">{myId}</Tag>
-                    </Space>
-                </Col>
-                <Col span={4}>
-                    <Space>
-                        <Tag color="#87d068">{peerId}</Tag>
                         <Tooltip title="Share Screen">
                             <Button onClick={shareScreen} disabled={!canShare} id="screenShare" type="primary" icon={<ShareAltOutlined />} shape="circle" />
                         </Tooltip>
                     </Space>
+                </Col>
+                <Col span={4} style={{ textAlign: "right" }}>
+                    <Tag color="#87d068">{peerId}</Tag>
                 </Col>
             </Row>
         )
@@ -69,8 +63,7 @@ function SessionInitiator({ myId, peerId, peerStreamStatus, obtainToken,callPeer
         if (peerId.length > 0) {
             row = enterCall();
         }
-        else
-        { 
+        else {
             row = isReady ? afterToken() : beforeToken();
         }
 
@@ -79,7 +72,7 @@ function SessionInitiator({ myId, peerId, peerStreamStatus, obtainToken,callPeer
 
     return (
         <>
-            { evalControl() }
+            {evalControl()}
         </>
     )
 }
@@ -87,7 +80,7 @@ function SessionInitiator({ myId, peerId, peerStreamStatus, obtainToken,callPeer
 SessionInitiator.propTypes = {
     myId: PropTypes.string.isRequired,
     peerId: PropTypes.string.isRequired,
-    peerStreamStatus:PropTypes.string.isRequired, 
+    peerStreamStatus: PropTypes.string.isRequired,
     obtainToken: PropTypes.func.isRequired,
     callPeer: PropTypes.func.isRequired,
     shareScreen: PropTypes.func.isRequired,

@@ -11,7 +11,7 @@ import Invitation from './chat/Invitation';
 
 
 import { Tag, Card, Row, Col, Space } from 'antd';
-import { message, Input, Button, Tooltip } from 'antd';
+import { message, Input, notification, Button, Tooltip } from 'antd';
 import { ShareAltOutlined, IdcardOutlined } from '@ant-design/icons';
 
 
@@ -26,7 +26,7 @@ class Broadcast extends Component {
             myId: '',
 
             screenStatus:'',
-            
+
             peerRequestStatus: '',
             invitationFrom: '',
             peerId: '',
@@ -49,7 +49,7 @@ class Broadcast extends Component {
         e.preventDefault();
         socket
             .on('token', ({ id: myId }) => {
-                message.success(`Your Id is ${myId}`, 5);
+                message.success(`Your Token ID is ${myId}`, 5);
                 this.setState({ myId });
             })
             .on('request', ({ from: invitationFrom }) => {
@@ -72,6 +72,14 @@ class Broadcast extends Component {
     }
 
     callPeer = (peerId) => {
+        if(peerId.trim() == this.state.myId.trim()) {
+            notification["error"]({
+                message: 'Talking to Self',
+                description:
+                  'My precious, remembers Gollum of The Lord of the Rings !!!. You have entered your own Token ID, instead of your Peer\'s Token ID. Please enter your Peer\'s Token ID.',
+            })
+            return;    
+        }
         const config = { audio: true, video: true };
         if (peerId) {
             this.startCall(true, peerId, config);
