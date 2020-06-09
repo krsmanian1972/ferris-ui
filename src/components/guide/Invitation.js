@@ -6,11 +6,11 @@ import { Button, Tooltip } from 'antd';
 
 import { VideoCameraOutlined,AudioOutlined,StopOutlined } from '@ant-design/icons';
 
-function Invitation({ status, invitationFrom, startCall, rejectCall }) {
+function Invitation({ status, invitationFrom, joinCall, rejectCall }) {
     
     const acceptWithVideo = (video) => {
         const config = { audio: true, video };
-        return () => startCall(false, invitationFrom, config);
+        return () => joinCall(invitationFrom,config);
     };
 
     var stageStyle = {display: "none"};
@@ -45,7 +45,7 @@ function Invitation({ status, invitationFrom, startCall, rejectCall }) {
 Invitation.propTypes = {
     status: PropTypes.string.isRequired,
     invitationFrom: PropTypes.string.isRequired,
-    startCall: PropTypes.func.isRequired,
+    joinCall: PropTypes.func.isRequired,
     rejectCall: PropTypes.func.isRequired
 };
 

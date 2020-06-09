@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "../../.."
+		},
+		{
+			"path": "../../../../../rust/ferris"
+		},
+		{
+			"path": "../../../../ferex"
+		}
+	],
+	"settings": {
+		"git.ignoreLimitWarning": true
+	}
+}

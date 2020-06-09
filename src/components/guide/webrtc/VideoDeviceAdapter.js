@@ -2,14 +2,20 @@ import _ from 'lodash';
 import BaseStreamHandler from './BaseStreamHandler';
 
 /**
- * Manage all media devices
+ * To emit streams from the User Media devices namely 
+ * the Camera and Audio.
+ * 
+ * The Listener shall attach a callback, using the On Method of
+ * the BaseStreamHandler.
+ *  
  */
-class MediaDevice extends BaseStreamHandler {
+class VideoDeviceAdapter extends BaseStreamHandler {
+    
     /**
-     * Start media devices and send stream
+     * Start the media devices and send stream.
+     * The emitted stream will be leveraged by the Listener
      */
-    start() {
-        this.isScreenSharing = false;
+    startStreaming() {
         const constraints = {
             video: {
                 facingMode: 'user',
@@ -27,7 +33,7 @@ class MediaDevice extends BaseStreamHandler {
             })
             .catch((err) => {
                 if (err instanceof DOMException) {
-                    alert('Cannot open webcam and/or microphone');
+                    alert('Unable to open the user media device like webcam and/or microphone');
                 } else {
                     console.log(err);
                 }
@@ -35,27 +41,6 @@ class MediaDevice extends BaseStreamHandler {
 
         return this;
     }
-
-    shareScreen() {
-        this.isScreenSharing = true;
-        navigator
-            .mediaDevices
-            .getDisplayMedia({audio:true,video:true})
-            .then((screenStream) => {
-                this.stream = screenStream;
-                this.emit('screen', screenStream);
-            })
-            .catch((err) => {
-                if (err instanceof DOMException) {
-                    alert('Cannot start screen capture');
-                } else {
-                    console.log(err);
-                }
-            });
-
-        return this;
-    }
-
 
     /**
      * Turn on/off a device
@@ -84,4 +69,4 @@ class MediaDevice extends BaseStreamHandler {
     }
 }
 
-export default MediaDevice;
+export default VideoDeviceAdapter;

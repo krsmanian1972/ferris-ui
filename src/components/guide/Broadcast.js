@@ -2,20 +2,20 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import _ from 'lodash';
 
-import socket from './chat/socket';
-import PeerConnection from './chat/PeerConnection';
+import socket from './webrtc/socket';
+import VideoStreamTransceiver from './webrtc/VideoStreamTransceiver';
+import ScreenStreamTransceiver from './webrtc/ScreenStreamTransceiver';
 
-import SessionInitiator from './chat/SessionInitiator';
-import VideoBoard from './chat/VideoBoard';
-import Invitation from './chat/Invitation';
+import SessionInitiator from './SessionInitiator';
+import VideoBoard from './VideoBoard';
+import Invitation from './Invitation';
 
+import { Card } from 'antd';
+import { message, notification, } from 'antd';
 
-import { Tag, Card, Row, Col, Space } from 'antd';
-import { message, Input, notification, Button, Tooltip } from 'antd';
-import { ShareAltOutlined, IdcardOutlined } from '@ant-design/icons';
+const CONNECTION_KEY_VIDEO_STREAM = "peerVideoStream";
+const CONNECTION_KEY_SCREEN_STREAM = "peerScreenStream";
 
-
-const { Search } = Input;
 
 @inject("appStore")
 @observer
@@ -25,7 +25,7 @@ class Broadcast extends Component {
         this.state = {
             myId: '',
 
-            screenStatus:'',
+            screenStatus: '',
 
             peerRequestStatus: '',
             invitationFrom: '',
@@ -35,14 +35,65 @@ class Broadcast extends Component {
             peerSrc: null,
             screenSrc: null,
         };
-        this.pc = {};
-        this.config = null;
-        this.firstFlag=true,
-        this.peerStreamStatus = '';
 
-        this.startCallHandler = this.startCall.bind(this);
+        this.transceivers = {};
+        
+        this.isCaller = false;
+        this.peerStreamStatus = '';
+    
         this.endCallHandler = this.endCall.bind(this);
         this.rejectCallHandler = this.rejectCall.bind(this);
+    }
+
+    buildtransceivers = (peerId) => {
+        this.transceivers[CONNECTION_KEY_VIDEO_STREAM] = this.buildVideotransceiver(peerId);
+        this.transceivers[CONNECTION_KEY_SCREEN_STREAM] = this.buildScreentransceiver(peerId);
+    }
+
+    buildVideotransceiver = (peerId) => {
+        return new VideoStreamTransceiver(peerId, CONNECTION_KEY_VIDEO_STREAM)
+            .on('localStream', (src) => {
+                const newState = { peerId: peerId, localSrc: src };
+                if (!this.isCaller) {
+                    newState.peerRequestStatus = '';
+                }
+                this.setState(newState);
+            })
+            .on(CONNECTION_KEY_VIDEO_STREAM, (src) => {
+                    this.peerStreamStatus = 'active';
+                    const newState = { peerSrc: src };
+                    this.setState(newState);
+            });
+    }
+
+    buildScreentransceiver = (peerId) => {
+        return new ScreenStreamTransceiver(peerId, CONNECTION_KEY_SCREEN_STREAM)
+            .on(CONNECTION_KEY_SCREEN_STREAM, (src) => {
+                const newState = { screenStatus: 'active', screenSrc: src };
+                this.setState(newState);
+            })
+    }
+
+    handleNegotiation = (data) => {
+        if (!data.connectionKey) {
+            console.log("Data without connection key");
+            console.log(data);
+            return;
+        }
+
+        // Obtain the respective Transceiver to negotiate
+        
+        const transceiver = this.transceivers[data.connectionKey];
+
+        if (data.sdp) {
+            transceiver.setRemoteDescription(data.sdp);
+            if (data.sdp.type === 'offer') {
+                transceiver.createAnswer();
+            }
+        }
+        else {
+            transceiver.addIceCandidate(data.candidate);
+        }
     }
 
     obtainToken = (e) => {
@@ -56,62 +107,37 @@ class Broadcast extends Component {
                 message.info(`Call from ${invitationFrom}`, 5)
                 this.setState({ peerRequestStatus: 'active', invitationFrom });
             })
-            .on('call', (data) => {
-                if (data.sdp) {
-                    this.pc.setRemoteDescription(data.sdp);
-                    if (data.sdp.type === 'offer') {
-                        this.pc.createAnswer();
-                    }
-                }
-                else {
-                    this.pc.addIceCandidate(data.candidate);
-                }
-            })
+            .on('call', (data) => { this.handleNegotiation(data) })
             .on('end', this.endCall.bind(this, false))
             .emit('init');
     }
 
     callPeer = (peerId) => {
-        if(peerId.trim() == this.state.myId.trim()) {
+        if (peerId.trim() == this.state.myId.trim()) {
             notification["error"]({
                 message: 'Talking to Self',
                 description:
-                  'My precious, remembers Gollum of The Lord of the Rings !!!. You have entered your own Token ID, instead of your Peer\'s Token ID. Please enter your Peer\'s Token ID.',
+                    'My precious, remembers Gollum of The Lord of the Rings !!!. You have entered your own Token ID, instead of your Peer\'s Token ID. Please enter your Peer\'s Token ID.',
             })
-            return;    
+            return;
         }
-        const config = { audio: true, video: true };
+
+        this.isCaller = true;
+        this.buildtransceivers(peerId);
+
         if (peerId) {
-            this.startCall(true, peerId, config);
+            this.transceivers[CONNECTION_KEY_VIDEO_STREAM].start(true);
         }
     }
 
-    /**
-     * To Start a call with the Peer
-     */
-    startCall = (isCaller, peerId, config) => {
-        this.config = config;
-        this.pc = new PeerConnection(peerId)
-            .on('localStream', (src) => {
-                const newState = { peerId: peerId, localSrc: src };
-                if (!isCaller) {
-                    newState.peerRequestStatus = '';
-                }
-                this.setState(newState);
-            })
-            .on('peerStream', (src) => {
-                if (this.peerStreamStatus==='active') {
-                    const newState = { screenStatus: 'active', screenSrc: src };
-                    this.setState(newState);
-                }
-                else {
-                    this.peerStreamStatus='active';
-                    const newState = { peerSrc: src };
-                    this.setState(newState);
-                }
-                
-            })
-            .start(isCaller, config);
+    joinCall = (peerId,preference) => {
+        this.isCaller = false;
+        this.buildtransceivers(peerId);
+        this.transceivers[CONNECTION_KEY_VIDEO_STREAM].join(preference);
+    }
+
+    shareScreen = () => {
+        this.transceivers[CONNECTION_KEY_SCREEN_STREAM].start();
     }
 
     rejectCall() {
@@ -122,11 +148,6 @@ class Broadcast extends Component {
 
     endCall(isStarter) {
         console.log("end Call");
-        if (_.isFunction(this.pc.stop)) {
-            this.pc.stop(isStarter);
-        }
-        this.pc = {};
-        this.config = null;
         this.setState({
             localStreamStatus: '',
             peerRequestStatus: '',
@@ -135,18 +156,15 @@ class Broadcast extends Component {
         });
     }
 
-    shareScreen = () => {
-        this.pc.mediaDevice.shareScreen();
-    }
 
     render() {
-        const { myId, peerId, invitationFrom, screenStatus,peerRequestStatus, localSrc, peerSrc, screenSrc } = this.state;
+        const { myId, peerId, invitationFrom, screenStatus, peerRequestStatus, localSrc, peerSrc, screenSrc } = this.state;
 
         return (
             <Card title="Session - Traits in RUST">
                 <SessionInitiator myId={myId} peerId={peerId} peerStreamStatus={this.peerStreamStatus} obtainToken={this.obtainToken} callPeer={this.callPeer} shareScreen={this.shareScreen} />
                 <VideoBoard screenStatus={screenStatus} localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} />
-                <Invitation status={peerRequestStatus} startCall={this.startCallHandler} rejectCall={this.rejectCallHandler} invitationFrom={invitationFrom} />
+                <Invitation status={peerRequestStatus} joinCall={this.joinCall} rejectCall={this.rejectCallHandler} invitationFrom={invitationFrom} />
             </Card>
         )
     }
