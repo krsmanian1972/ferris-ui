@@ -8,6 +8,7 @@ import ScreenStreamTransceiver from './webrtc/ScreenStreamTransceiver';
 
 import SessionInitiator from './SessionInitiator';
 import VideoBoard from './VideoBoard';
+import ScreenBoard from './ScreenBoard';
 import Invitation from './Invitation';
 
 import { Card } from 'antd';
@@ -163,8 +164,9 @@ class Broadcast extends Component {
         return (
             <Card title="Session - Traits in RUST">
                 <SessionInitiator myId={myId} peerId={peerId} peerStreamStatus={this.peerStreamStatus} obtainToken={this.obtainToken} callPeer={this.callPeer} shareScreen={this.shareScreen} />
-                <VideoBoard screenStatus={screenStatus} localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} />
                 <Invitation status={peerRequestStatus} joinCall={this.joinCall} rejectCall={this.rejectCallHandler} invitationFrom={invitationFrom} />
+                <VideoBoard screenStatus={screenStatus} localSrc={localSrc} peerSrc={peerSrc} />
+                <ScreenBoard screenStatus={screenStatus} screenSrc={screenSrc} />
             </Card>
         )
     }
