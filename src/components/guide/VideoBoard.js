@@ -2,12 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
 const stageStyle = {
+    minHeight: 400,
     position: "relative",
     overflow: "hidden",
-    width: "100%",
-    height: "100%",
-    minHeight: 300,
-    marginTop: 5,
 };
 
 function VideoBoard({ screenStatus, localSrc, peerSrc }) {

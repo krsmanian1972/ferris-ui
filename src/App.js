@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Provider } from 'mobx-react';
 import { Layout } from 'antd';
+import { Affix, Button, Tooltip } from 'antd';
+import { TeamOutlined } from '@ant-design/icons';
 
 import ToolBar from './components/ToolBar';
 import About from './components/About';
@@ -22,6 +24,11 @@ export default class App extends Component {
         <Layout>
           <Header style={{ position: 'fixed', zIndex: 1, width: '100%', background: '#fff'}}>
             <ToolBar />
+            <Affix style={{ position: 'fixed', top: 10, right: 20 }}>
+              <Tooltip title="Online status of your Peer">
+                  <Button type="primary" icon={<TeamOutlined />} shape="circle" />
+              </Tooltip>
+            </Affix>
           </Header>
           <Content className="site-layout" style={{ padding: '0 0px', marginTop: 64 }}>
             <div className="site-layout-background" style={{ padding: 5, minHeight: 380 }}>

@@ -64,22 +64,18 @@ video {
 }
 
 #localVideo {
-  top: 0;
-  left: 0;
+  bottom: 0;
+  right: 0;
   width: 25%;
   height: 25%;
-  width:auto;
 }
 
 #peerVideo {
-  min-width: 100%; 
-  min-height: 100%;
   height: 100%;
+  width:75%;
 }
 
 #peerScreen {
-  min-width: 100%; 
-  min-height: 100%;
   height: 100%;
-  width:auto;
+  width:100%;
 }

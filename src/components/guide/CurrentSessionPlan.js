@@ -1,14 +1,13 @@
-import React, { Component  } from 'react';
-import { inject, observer} from 'mobx-react';
-import { Card, Timeline,Typography} from 'antd';
+import React, { Component } from 'react';
+import { inject, observer } from 'mobx-react';
+import { Timeline } from 'antd';
 
 const stageStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'left',
+    minHeight: 400,
+    maxHeight: 400,
+    position: "relative",
+    overflow: "hidden",
 };
-
-const { Title } = Typography;
 
 @inject("appStore")
 @observer
@@ -20,7 +19,7 @@ class CurrentSessionPlan extends Component {
 
     render() {
         return (
-           <Card style={stageStyle} title={<Title level={4}>Session Progress</Title>}>
+            <div style={stageStyle}>
                 <Timeline>
                     <Timeline.Item color="green">Introduction</Timeline.Item>
                     <Timeline.Item color="green">Returning Traits with Dyn</Timeline.Item>
@@ -33,12 +32,12 @@ class CurrentSessionPlan extends Component {
                         <p>Example1</p>
                         <p>Example2</p>
                     </Timeline.Item>
-                    <Timeline.Item color="gray">Assignments 
+                    <Timeline.Item color="gray">Assignments
                         <p>Exercise - 1</p>
                         <p>Exercise - 2</p>
                     </Timeline.Item>
                 </Timeline>
-            </Card>
+            </div>
         )
     }
 }

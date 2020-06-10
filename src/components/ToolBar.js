@@ -62,9 +62,6 @@ export default class ToolBar extends Component {
                         <img src={ownerLogo} width="100" height="62" />
                     </div> 
                 </Col>
-                <Col className="gutter-row" span={8}>
-                    {this.renderRightMenu()}
-                </Col>
             </Row>
         )
     }

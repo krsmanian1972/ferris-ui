@@ -1,11 +1,18 @@
-import React, { Component  } from 'react';
+import React, { Component } from 'react';
 import { inject } from 'mobx-react';
+
+const stageStyle = {
+    minHeight: 400,
+    maxHeight: 400,
+    position: "relative",
+    overflow: "hidden",
+};
 
 @inject("appStore")
 class BookPage extends Component {
 
     getCode = () => {
-        
+
         var code = String.raw`
             struct Circle {
                 x: f64,
@@ -24,17 +31,17 @@ class BookPage extends Component {
             }     
         `;
 
-        return(
+        return (
             <pre>{code}</pre>
         )
     }
 
     render() {
         return (
-            <>
+            <div style={stageStyle}>
                 <p>A trait is a language feature that tells the Rust compiler about functionality a type must provide.</p>
                 {this.getCode()}
-            </>    
+            </div>
         )
     }
 }

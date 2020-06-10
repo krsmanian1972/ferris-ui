@@ -7,16 +7,20 @@ import VideoStreamTransceiver from './webrtc/VideoStreamTransceiver';
 import ScreenStreamTransceiver from './webrtc/ScreenStreamTransceiver';
 
 import SessionInitiator from './SessionInitiator';
+import Invitation from './Invitation';
 import VideoBoard from './VideoBoard';
 import ScreenBoard from './ScreenBoard';
-import Invitation from './Invitation';
+import CurrentSessionPlan from './CurrentSessionPlan';
+import BookPage from './BookPage';
 
-import { Card } from 'antd';
+import { Card,Tabs,Tooltip } from 'antd';
 import { message, notification, } from 'antd';
+import { CameraOutlined, DesktopOutlined, AimOutlined, BookOutlined, CodepenOutlined, EditOutlined } from '@ant-design/icons';
 
 const CONNECTION_KEY_VIDEO_STREAM = "peerVideoStream";
 const CONNECTION_KEY_SCREEN_STREAM = "peerScreenStream";
 
+const { TabPane } = Tabs;
 
 @inject("appStore")
 @observer
@@ -163,10 +167,26 @@ class Broadcast extends Component {
 
         return (
             <Card title="Session - Traits in RUST">
+                <Tabs defaultActiveKey="1" tabPosition="left" style={{ minHeight: 400}}>
+                    <TabPane key="5"tab={<Tooltip title="Session Plan"><AimOutlined/></Tooltip>} >
+                        <CurrentSessionPlan/>
+                    </TabPane>    
+                    <TabPane key="1" tab={<Tooltip title="Video" ><CameraOutlined /></Tooltip>}>
+                        <VideoBoard screenStatus={screenStatus} localSrc={localSrc} peerSrc={peerSrc} />
+                    </TabPane>
+                    <TabPane key="2" tab={<Tooltip title="Screen Sharing" ><DesktopOutlined /></Tooltip>}>
+                        <ScreenBoard screenStatus={screenStatus} screenSrc={screenSrc} />
+                    </TabPane>
+                    <TabPane key="3" tab={<Tooltip title="Writing Aid"><EditOutlined/></Tooltip>}>
+                        Writtable Canvas Here
+                    </TabPane>
+                    <TabPane key="4" tab={<Tooltip title="References"><BookOutlined/></Tooltip>}>
+                        <BookPage/>
+                    </TabPane>
+                </Tabs>
+
                 <SessionInitiator myId={myId} peerId={peerId} peerStreamStatus={this.peerStreamStatus} obtainToken={this.obtainToken} callPeer={this.callPeer} shareScreen={this.shareScreen} />
                 <Invitation status={peerRequestStatus} joinCall={this.joinCall} rejectCall={this.rejectCallHandler} invitationFrom={invitationFrom} />
-                <VideoBoard screenStatus={screenStatus} localSrc={localSrc} peerSrc={peerSrc} />
-                <ScreenBoard screenStatus={screenStatus} screenSrc={screenSrc} />
             </Card>
         )
     }
