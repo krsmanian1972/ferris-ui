@@ -13,7 +13,7 @@ import ScreenBoard from './ScreenBoard';
 import CurrentSessionPlan from './CurrentSessionPlan';
 import BookPage from './BookPage';
 
-import { Card,Tabs,Tooltip } from 'antd';
+import { Card,Tabs } from 'antd';
 import { message, notification, } from 'antd';
 import { CameraOutlined, DesktopOutlined, AimOutlined, BookOutlined, CodepenOutlined, EditOutlined } from '@ant-design/icons';
 
@@ -166,26 +166,27 @@ class Broadcast extends Component {
         const { myId, peerId, invitationFrom, screenStatus, peerRequestStatus, localSrc, peerSrc, screenSrc } = this.state;
 
         return (
-            <Card title="Session - Traits in RUST">
-                <Tabs defaultActiveKey="1" tabPosition="left" style={{ minHeight: 400}}>
-                    <TabPane key="5"tab={<Tooltip title="Session Plan"><AimOutlined/></Tooltip>} >
-                        <CurrentSessionPlan/>
-                    </TabPane>    
-                    <TabPane key="1" tab={<Tooltip title="Video" ><CameraOutlined /></Tooltip>}>
+            <Card title="Session - Traits in Rust">
+                <SessionInitiator myId={myId} peerId={peerId} peerStreamStatus={this.peerStreamStatus} obtainToken={this.obtainToken} callPeer={this.callPeer} shareScreen={this.shareScreen} />
+ 
+                <Tabs defaultActiveKey="1" tabPosition="top" style={{ minHeight: 400}}>    
+                    <TabPane key="1" tab={<span><CameraOutlined />Video</span>}>
                         <VideoBoard screenStatus={screenStatus} localSrc={localSrc} peerSrc={peerSrc} />
                     </TabPane>
-                    <TabPane key="2" tab={<Tooltip title="Screen Sharing" ><DesktopOutlined /></Tooltip>}>
+                    <TabPane key="2" tab={<span><DesktopOutlined />Screen Sharing</span>}>
                         <ScreenBoard screenStatus={screenStatus} screenSrc={screenSrc} />
                     </TabPane>
-                    <TabPane key="3" tab={<Tooltip title="Writing Aid"><EditOutlined/></Tooltip>}>
+                    <TabPane key="3" tab={<span><EditOutlined/>White Board</span>}>
                         Writtable Canvas Here
                     </TabPane>
-                    <TabPane key="4" tab={<Tooltip title="References"><BookOutlined/></Tooltip>}>
+                    <TabPane key="4" tab={<span><BookOutlined/>References</span>}>
                         <BookPage/>
+                    </TabPane>
+                    <TabPane key="5"tab={<span><AimOutlined/>Session Plan</span>} >
+                        <CurrentSessionPlan/>
                     </TabPane>
                 </Tabs>
 
-                <SessionInitiator myId={myId} peerId={peerId} peerStreamStatus={this.peerStreamStatus} obtainToken={this.obtainToken} callPeer={this.callPeer} shareScreen={this.shareScreen} />
                 <Invitation status={peerRequestStatus} joinCall={this.joinCall} rejectCall={this.rejectCallHandler} invitationFrom={invitationFrom} />
             </Card>
         )

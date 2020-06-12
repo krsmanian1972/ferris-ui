@@ -22,16 +22,9 @@ export default class App extends Component {
     return (
       <Provider appStore={appStore} drawerStore={drawerStore}>
         <Layout>
-          <Header style={{ position: 'fixed', zIndex: 1, width: '100%', background: '#fff'}}>
-            <ToolBar />
-            <Affix style={{ position: 'fixed', top: 10, right: 20 }}>
-              <Tooltip title="Online status of your Peer">
-                  <Button type="primary" icon={<TeamOutlined />} shape="circle" />
-              </Tooltip>
-            </Affix>
-          </Header>
+          <ToolBar />
           <Content className="site-layout" style={{ padding: '0 0px', marginTop: 64 }}>
-            <div className="site-layout-background" style={{ padding: 5, minHeight: 380 }}>
+            <div className="site-layout-background" style={{ padding: 5, minHeight: 400 }}>
               <SelectedComponent />
             </div>
           </Content>

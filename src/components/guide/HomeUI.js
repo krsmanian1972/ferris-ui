@@ -3,9 +3,8 @@ import { inject, observer } from 'mobx-react';
 
 import ChatStore from '../stores/ChatStore';
 
-
 import Broadcast from './Broadcast';
-
+import ProgramUI from './ProgramUI';
 
 @inject("appStore")
 @observer
@@ -17,9 +16,7 @@ class HomeUI extends Component {
 
     render() {
         return (
-            <>
-                <Broadcast chatStore={this.chatStore} />
-            </>
+            <ProgramUI />
         )
     }
 }

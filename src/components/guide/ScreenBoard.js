@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
 const stageStyle = {
-    minHeight: 400,
+    minHeight: 600,
     position: "relative",
     overflow: "hidden",
 };

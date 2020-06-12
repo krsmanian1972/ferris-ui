@@ -26,10 +26,15 @@ code {
   float: left;
 }
 
-.owner-logo {
+.nav-left {
   display:flex;
-  align-items:center;
-  justify-content:center;
+  flex-wrap:wrap;
+  float:left;
+}
+.nav-right {
+  display: flex;
+  flex-wrap: wrap;
+  float:right;
 }
 
 .site-layout .site-layout-background {

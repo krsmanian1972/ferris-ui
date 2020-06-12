@@ -1,18 +1,14 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import AccountMenu from './AccountMenu';
-import { Dropdown, Menu,  Input, Typography,Space } from 'antd';
-import { Row, Col } from 'antd';
-import { AlertOutlined, UserOutlined } from '@ant-design/icons';
+import { Dropdown, Menu, Layout, Input, Space } from 'antd';
+import { UserOutlined } from '@ant-design/icons';
 import ownerLogo from '../images/pm-power.png';
 
 const { Search } = Input;
+const { Header } = Layout;
 
-const ownerStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-};
+const caption = "PM Power Consulting";
 
 @inject("appStore")
 @observer
@@ -41,28 +37,29 @@ export default class ToolBar extends Component {
         if (!appStore.isLoggedIn()) return null;
 
         return (
-            <Space>
+            <Space align="start">
                 <Search placeholder="search" onSearch={value => console.log(value)} style={{ width: 200 }} />
-                <AlertOutlined />    
                 <Dropdown.Button overlay={<AccountMenu />} trigger={['click']} icon={<UserOutlined />}>
-                        {appStore.credentials.username}
+                    {appStore.credentials.username}
                 </Dropdown.Button>
-            </Space>    
+            </Space>
         )
     }
 
     render() {
         return (
-            <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-                <Col className="gutter-row" span={8}>
-                    {this.renderRoleTabs()}
-                </Col>
-                <Col className="gutter-row" span={8}>
-                    <div className="owner-logo">
-                        <img src={ownerLogo} width="100" height="62" />
-                    </div> 
-                </Col>
-            </Row>
+            <Header style={{ position: 'fixed', zIndex: 1, width: '100%', background: '#fff' }}>
+                    <div className="nav-left">
+                        <img src={ownerLogo} width="100" height="62" title={caption} />
+                    </div>
+                    <div className="nav-right">
+                        <Space align="start">
+                            {this.renderRoleTabs()}
+                            {this.renderRightMenu()}
+                        </Space>
+                    </div>
+                
+            </Header>
         )
     }
 }
