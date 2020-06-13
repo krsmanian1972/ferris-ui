@@ -41,12 +41,7 @@ code {
   background: #fff;
 }
 
-.ant-card .ant-card-body {
-  padding-top: 10px;
-  padding-bottom: 10px;
-  padding-left:24px;
-  padding-right:24px;
-}
+
 
 .ant-carousel .slick-slide {
   text-align: center;
@@ -73,14 +68,15 @@ video {
   right: 0;
   width: 25%;
   height: 25%;
+  z-index: 3;
 }
 
 #peerVideo {
   height: 100%;
-  width:75%;
+  width:100%;
 }
 
 #peerScreen {
   height: 100%;
-  width:100%;
+  width: 100%;
 }

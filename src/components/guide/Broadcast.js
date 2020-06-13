@@ -13,9 +13,9 @@ import ScreenBoard from './ScreenBoard';
 import CurrentSessionPlan from './CurrentSessionPlan';
 import BookPage from './BookPage';
 
-import { Card,Tabs } from 'antd';
+import { Tabs, Button } from 'antd';
 import { message, notification, } from 'antd';
-import { CameraOutlined, DesktopOutlined, AimOutlined, BookOutlined, CodepenOutlined, EditOutlined } from '@ant-design/icons';
+import { CameraOutlined, DesktopOutlined, AimOutlined, BookOutlined, ShareAltOutlined, EditOutlined } from '@ant-design/icons';
 
 const CONNECTION_KEY_VIDEO_STREAM = "peerVideoStream";
 const CONNECTION_KEY_SCREEN_STREAM = "peerScreenStream";
@@ -42,10 +42,10 @@ class Broadcast extends Component {
         };
 
         this.transceivers = {};
-        
+
         this.isCaller = false;
         this.peerStreamStatus = '';
-    
+
         this.endCallHandler = this.endCall.bind(this);
         this.rejectCallHandler = this.rejectCall.bind(this);
     }
@@ -65,9 +65,9 @@ class Broadcast extends Component {
                 this.setState(newState);
             })
             .on(CONNECTION_KEY_VIDEO_STREAM, (src) => {
-                    this.peerStreamStatus = 'active';
-                    const newState = { peerSrc: src };
-                    this.setState(newState);
+                this.peerStreamStatus = 'active';
+                const newState = { peerSrc: src };
+                this.setState(newState);
             });
     }
 
@@ -87,7 +87,7 @@ class Broadcast extends Component {
         }
 
         // Obtain the respective Transceiver to negotiate
-        
+
         const transceiver = this.transceivers[data.connectionKey];
 
         if (data.sdp) {
@@ -135,7 +135,7 @@ class Broadcast extends Component {
         }
     }
 
-    joinCall = (peerId,preference) => {
+    joinCall = (peerId, preference) => {
         this.isCaller = false;
         this.buildtransceivers(peerId);
         this.transceivers[CONNECTION_KEY_VIDEO_STREAM].join(preference);
@@ -164,31 +164,41 @@ class Broadcast extends Component {
 
     render() {
         const { myId, peerId, invitationFrom, screenStatus, peerRequestStatus, localSrc, peerSrc, screenSrc } = this.state;
+        const portalSize = this.props.portalSize;
+        const viewHeight = portalSize.height*0.80;
+        const canShare = this.peerStreamStatus === "active";
 
         return (
-            <Card title="Session - Traits in Rust">
-                <SessionInitiator myId={myId} peerId={peerId} peerStreamStatus={this.peerStreamStatus} obtainToken={this.obtainToken} callPeer={this.callPeer} shareScreen={this.shareScreen} />
- 
-                <Tabs defaultActiveKey="1" tabPosition="top" style={{ minHeight: 400}}>    
+            <div style={{ padding: 10}}>
+                <Tabs defaultActiveKey="1" tabPosition="top">
                     <TabPane key="1" tab={<span><CameraOutlined />Video</span>}>
-                        <VideoBoard screenStatus={screenStatus} localSrc={localSrc} peerSrc={peerSrc} />
+                        <div style={{height:viewHeight}}>
+                            <VideoBoard screenStatus={screenStatus} localSrc={localSrc} peerSrc={peerSrc} portalSize={portalSize} />
+                        </div>
+                        <div style={{paddingTop:5}}>
+                            <SessionInitiator myId={myId} peerId={peerId} peerStreamStatus={this.peerStreamStatus} obtainToken={this.obtainToken} callPeer={this.callPeer} shareScreen={this.shareScreen} />
+                        </div>    
                     </TabPane>
                     <TabPane key="2" tab={<span><DesktopOutlined />Screen Sharing</span>}>
-                        <ScreenBoard screenStatus={screenStatus} screenSrc={screenSrc} />
+                        <div style={{height:viewHeight}}>
+                            <ScreenBoard screenStatus={screenStatus} screenSrc={screenSrc} />
+                        </div>
+                        <div style={{paddingTop:5}}>
+                            <Button onClick={this.shareScreen} disabled={!canShare} id="screenShare" type="primary" icon={<ShareAltOutlined />} shape="circle" />
+                        </div>        
                     </TabPane>
-                    <TabPane key="3" tab={<span><EditOutlined/>White Board</span>}>
+                    <TabPane key="3" tab={<span><EditOutlined />White Board</span>}>
                         Writtable Canvas Here
+                        </TabPane>
+                    <TabPane key="4" tab={<span><BookOutlined />References</span>}>
+                        <BookPage />
                     </TabPane>
-                    <TabPane key="4" tab={<span><BookOutlined/>References</span>}>
-                        <BookPage/>
-                    </TabPane>
-                    <TabPane key="5"tab={<span><AimOutlined/>Session Plan</span>} >
-                        <CurrentSessionPlan/>
+                    <TabPane key="5" tab={<span><AimOutlined />Session Plan</span>} >
+                        <CurrentSessionPlan />
                     </TabPane>
                 </Tabs>
-
                 <Invitation status={peerRequestStatus} joinCall={this.joinCall} rejectCall={this.rejectCallHandler} invitationFrom={invitationFrom} />
-            </Card>
+            </div>
         )
     }
 }

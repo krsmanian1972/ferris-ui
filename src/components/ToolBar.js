@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import AccountMenu from './AccountMenu';
-import { Dropdown, Menu, Layout, Input, Space } from 'antd';
+import { Dropdown, Menu, Layout, Input, Space, Row, Col } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import ownerLogo from '../images/pm-power.png';
 
@@ -37,28 +37,26 @@ export default class ToolBar extends Component {
         if (!appStore.isLoggedIn()) return null;
 
         return (
-            <Space align="start">
-                <Search placeholder="search" onSearch={value => console.log(value)} style={{ width: 200 }} />
-                <Dropdown.Button overlay={<AccountMenu />} trigger={['click']} icon={<UserOutlined />}>
-                    {appStore.credentials.username}
-                </Dropdown.Button>
-            </Space>
+            <Dropdown.Button overlay={<AccountMenu />} trigger={['click']} icon={<UserOutlined />}>
+                {appStore.credentials.username}
+            </Dropdown.Button>
         )
     }
 
     render() {
         return (
-            <Header style={{ position: 'fixed', zIndex: 1, width: '100%', background: '#fff' }}>
-                    <div className="nav-left">
-                        <img src={ownerLogo} width="100" height="62" title={caption} />
-                    </div>
-                    <div className="nav-right">
-                        <Space align="start">
-                            {this.renderRoleTabs()}
-                            {this.renderRightMenu()}
-                        </Space>
-                    </div>
-                
+            <Header style={{ position: 'fixed', zIndex: 1, width: '100%', background: '#fff', padding: "0px 5px 0px 5px" }}>
+                <Row>
+                    <Col span={6}>
+                        <img src={ownerLogo} align="left" width="100" height="62" title={caption} />
+                    </Col>
+                    <Col span={12}>
+                        {this.renderRoleTabs()}
+                    </Col>
+                    <Col span={6}>
+                        {this.renderRightMenu()}
+                    </Col>
+                </Row>
             </Header>
         )
     }

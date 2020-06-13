@@ -15,9 +15,12 @@ class SessionLauncher extends Component {
         super(props);
         this.state = {
             showWindowPortal: false,
+            portalSize:{height:screen.height*0.75,width:screen.width*0.75}
         };
+
         this.toggleWindowPortal = this.toggleWindowPortal.bind(this);
         this.closeWindowPortal = this.closeWindowPortal.bind(this);
+        this.portalResized = this.portalResized.bind(this);
     }
 
     componentDidMount() {
@@ -37,17 +40,23 @@ class SessionLauncher extends Component {
         this.setState({ showWindowPortal: false })
     }
 
+    portalResized(size) {
+        this.setState({portalSize:size});
+    }
+
+
     render() {
         return (
-            <Card>
-                <Meta description="Launch" style={{ marginBottom: 5 }} />
+            <Card style={{ height: 135 }}>
+                <Meta description="Launch" style={{ marginBottom: 10 }} />
+
                 <Button type="primary" onClick={this.toggleWindowPortal}>
                     {this.state.showWindowPortal ? 'End the' : 'Start the'} Session
                 </Button>
 
                 {this.state.showWindowPortal && (
-                    <XPortal name="Session - Traits in Rust" closeWindowPortal={this.closeWindowPortal}>
-                        <Broadcast />
+                    <XPortal name="Current Session - Traits in Rust" closeWindowPortal={this.closeWindowPortal} portalResized={this.portalResized}>
+                        <Broadcast portalSize = {this.state.portalSize}/>
                     </XPortal>
                 )}
             </Card>

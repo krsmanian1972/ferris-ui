@@ -30,25 +30,27 @@ class XPortal extends React.PureComponent {
     componentDidMount() {
         const h = screen.height*0.75;
         const w = screen.width*0.75;
-        this.externalWindow = window.open(
-                '', 
-                'Session', 
-                'toolbar=yes ,location=0, status=no,titlebar=no,menubar=yes,width='+w +',height=' +h
-                );
 
         // STEP 3: open a new browser window and store a reference to it
-        //this.externalWindow = window.open('', this.props.name, 'width=600,height=400,left=200,top=200');
+        this.externalWindow = window.open('', '', 'toolbar=yes ,location=0, status=no,titlebar=no,menubar=yes,width='+w +',height=' +h);
 
+        
+       
         // STEP 4: append the container <div> (that has props.children appended to it) to the body of the new window
         this.externalWindow.document.body.appendChild(this.containerEl);
-
         this.externalWindow.document.title = this.props.name;
+
         copyStyles(document, this.externalWindow.document);
 
         // update the state in the parent component if the user closes the 
         // new window
         this.externalWindow.addEventListener('beforeunload', () => {
             this.props.closeWindowPortal();
+        });
+
+        this.externalWindow.addEventListener("resize", () => { 
+            const portalSize = {height:this.externalWindow.innerHeight,width:this.externalWindow.innerWidth};
+            this.props.portalResized(portalSize);
         });
     }
 

@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-const stageStyle = {
-    minHeight: 600,
+const standardStyle = {
+    height:"100%",
+    width:"100%",
+    background: "#666",
     position: "relative",
     overflow: "hidden",
 };
@@ -16,7 +18,7 @@ function ScreenBoard({ screenStatus, screenSrc }) {
     });
 
     return (
-        <div style={stageStyle}>
+        <div style={standardStyle}>
             <video id="peerScreen" ref={peerScreen} autoPlay />
         </div>
     );

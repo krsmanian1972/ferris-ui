@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import { Provider } from 'mobx-react';
 import { Layout } from 'antd';
-import { Affix, Button, Tooltip } from 'antd';
-import { TeamOutlined } from '@ant-design/icons';
 
 import ToolBar from './components/ToolBar';
 import About from './components/About';
@@ -11,7 +9,7 @@ import SelectedComponent from './components/SelectedComponent'
 import { appStore } from './components/stores/AppStore';
 import { drawerStore } from './components/stores/DrawerStore';
 
-const { Header, Content, Footer } = Layout;
+const { Content, Footer } = Layout;
 
 export default class App extends Component {
 

@@ -13,7 +13,7 @@ function SessionInitiator({ myId, peerId, peerStreamStatus, obtainToken, callPee
     const beforeToken = () => {
         return (
             <Row>
-                <Col span={22}>
+                <Col span={24}>
                     <Tooltip title="By clicking here; you will get a Token ID to communicate with your audience.">
                         <Button id="idCard" onClick={obtainToken} type="primary" icon={<IdcardOutlined />} shape="circle" />
                     </Tooltip>
@@ -25,10 +25,10 @@ function SessionInitiator({ myId, peerId, peerStreamStatus, obtainToken, callPee
     const afterToken = () => {
         return (
             <Row>
-                <Col span={20}>
+                <Col span={16}>
                     <Tag color="#108ee9">{myId}</Tag>
                 </Col>
-                <Col span={4}>
+                <Col span={8}>
                     <Tooltip title="Enter your Peer's Token ID, if you know it. Soon we will provide the list of Peers to select from. Thanks !">
                         <Search placeholder="Your Peer's Token ID" enterButton="Call" size="small" onSearch={value => callPeer(value)} />
                     </Tooltip>    
