@@ -1,7 +1,7 @@
-import { action, decorate, observable } from 'mobx';
+import { action, decorate, observable, computed } from 'mobx';
 import APIProxy from './APIProxy';
 import LoginStore from './LoginStore';
-import {isBlank} from './Util';
+import { isBlank } from './Util';
 
 
 const blankCredentials = {
@@ -9,7 +9,7 @@ const blankCredentials = {
     token: '',
     role: '',
     username: '',
-    userFuzzyId:''
+    userFuzzyId: ''
 }
 
 const INIT = 'init';
@@ -32,9 +32,10 @@ class AppStore {
     menus = [];
 
     validationMessage = '';
-    isEditable=true;
-    state=INIT;
-   
+    isEditable = true;
+    state = INIT;
+    featureToken = null;
+
     constructor() {
         this.setSessionFromStorage();
     }
@@ -52,7 +53,7 @@ class AppStore {
         }
     }
 
-   
+
     authenticate = async () => {
 
         this.notifyProgress();
@@ -60,7 +61,7 @@ class AppStore {
         this.credentials = blankCredentials;
 
         const data = await this.loginStore.authenticate();
-        
+
         if (data == null || data.token == null) {
             this.notifyError(INVALID_CREDENTIAL);
             return;
@@ -73,7 +74,7 @@ class AppStore {
         this.credentials.userFuzzyId = data.fuzzyId;
 
         this.apiProxy.updateCredentialHeaders(this.credentials);
- 
+
         this.updateContext();
         this.persistCredentials();
         this.notifySuccess();
@@ -93,7 +94,7 @@ class AppStore {
 
     notifySuccess = () => {
         this.state = DONE;
-        this.isEditable=false;
+        this.isEditable = false;
         this.validationMessage = SUCCESS;
     }
 
@@ -154,20 +155,31 @@ class AppStore {
         window.location.reload();
     }
 
-    setProxy = (apiProxy) =>{
+    setProxy = (apiProxy) => {
         this.apiProxy = apiProxy;
     }
-   
+
+    get hasFeatureToken() {
+        return !isBlank(this.featureToken)
+    }
+
+    updatePreferredRoute = (featureKey, token) => {
+        if (featureKey && token && this.isLoggedIn()) {
+            this.featureToken = token;
+            this.currentComponent = { "label": "window", "key": featureKey };
+        }
+    }
+
 }
 
 decorate(AppStore, {
-    state:observable,
+    state: observable,
     validationMessage: observable,
-    isEditable:observable,
+    isEditable: observable,
     menus: observable,
-  
+
     currentComponent: observable,
-  
+
     credentials: observable,
     setCredentials: action,
     logout: action,
@@ -175,6 +187,10 @@ decorate(AppStore, {
     authenticate: action,
     transitionTo: action,
     navigateTo: action,
+
+    featureToken: observable,
+    hasFeatureToken: computed,
+    updatePreferredRoute: action,
 });
 
 export const appStore = new AppStore();

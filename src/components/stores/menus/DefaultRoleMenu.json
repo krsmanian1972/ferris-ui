@@ -1,7 +1,8 @@
 [
     {
-        "label": "About",
-        "key":  "about",
+        "label": "Programs",
+        "key": "programs",
         "isLandingPage": true
     }
+
 ]

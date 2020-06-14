@@ -1,12 +1,8 @@
 [
     {
-        "label": "Home",
-        "key": "home",
+        "label": "Ferris - The Coaching Assistant",
+        "key": "login",
         "isLandingPage": true
-    },
-    {
-        "label": "About",
-        "key":  "about",
-        "isLandingPage": false
     }
+   
 ]

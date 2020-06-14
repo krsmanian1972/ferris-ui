@@ -23,7 +23,6 @@
     "react-intl": "^2.8.0",
     "react-moment": "^0.9.7",
     "react-portal-tooltip": "^2.4.7",
-    "react-router-dom": "^4.3.1",
     "react-rtc-real": "^1.11.22",
     "react-scripts": "^3.4.1",
     "react-select": "^2.4.4",

@@ -24,7 +24,7 @@ const { TabPane } = Tabs;
 
 @inject("appStore")
 @observer
-class Broadcast extends Component {
+class BroadcastOld extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -39,6 +39,7 @@ class Broadcast extends Component {
             localSrc: null,
             peerSrc: null,
             screenSrc: null,
+            portalSize: { height: window.innerHeight, width: window.innerWidth}
         };
 
         this.transceivers = {};
@@ -161,31 +162,36 @@ class Broadcast extends Component {
         });
     }
 
+    componentDidMount() {
+        window.addEventListener("resize", () => {
+            const portalSize = { height: window.innerHeight, width: window.innerWidth };
+            this.setState({ portalSize: portalSize });
+        });
+    }
 
     render() {
-        const { myId, peerId, invitationFrom, screenStatus, peerRequestStatus, localSrc, peerSrc, screenSrc } = this.state;
-        const portalSize = this.props.portalSize;
-        const viewHeight = portalSize.height*0.80;
+        const { myId, peerId, invitationFrom, screenStatus, peerRequestStatus, localSrc, peerSrc, screenSrc, portalSize } = this.state;
+        const viewHeight = portalSize.height * 0.80;
         const canShare = this.peerStreamStatus === "active";
 
         return (
-            <div style={{ padding: 10}}>
+            <div style={{ padding: 10 }}>
                 <Tabs defaultActiveKey="1" tabPosition="top">
                     <TabPane key="1" tab={<span><CameraOutlined />Video</span>}>
-                        <div style={{height:viewHeight}}>
-                            <VideoBoard screenStatus={screenStatus} localSrc={localSrc} peerSrc={peerSrc} portalSize={portalSize} />
+                        <div style={{ height: viewHeight }}>
+                            <VideoBoard screenStatus={screenStatus} localSrc={localSrc} peerSrc={peerSrc} />
                         </div>
-                        <div style={{paddingTop:5}}>
+                        <div style={{ paddingTop: 5 }}>
                             <SessionInitiator myId={myId} peerId={peerId} peerStreamStatus={this.peerStreamStatus} obtainToken={this.obtainToken} callPeer={this.callPeer} shareScreen={this.shareScreen} />
-                        </div>    
+                        </div>
                     </TabPane>
                     <TabPane key="2" tab={<span><DesktopOutlined />Screen Sharing</span>}>
-                        <div style={{height:viewHeight}}>
+                        <div style={{ height: viewHeight }}>
                             <ScreenBoard screenStatus={screenStatus} screenSrc={screenSrc} />
                         </div>
-                        <div style={{paddingTop:5}}>
+                        <div style={{ paddingTop: 5 }}>
                             <Button onClick={this.shareScreen} disabled={!canShare} id="screenShare" type="primary" icon={<ShareAltOutlined />} shape="circle" />
-                        </div>        
+                        </div>
                     </TabPane>
                     <TabPane key="3" tab={<span><EditOutlined />White Board</span>}>
                         Writtable Canvas Here
@@ -202,4 +208,4 @@ class Broadcast extends Component {
         )
     }
 }
-export default Broadcast
+export default BroadcastOld

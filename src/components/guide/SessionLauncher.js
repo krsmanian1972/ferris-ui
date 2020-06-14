@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
-import { Card, Button, Row } from 'antd';
-
-import Broadcast from './Broadcast';
-import XPortal from './XPortal';
+import { Card, Button } from 'antd';
+import {baseUrl} from '../stores/APIEndpoints'; 
 
 const { Meta } = Card;
 
@@ -21,6 +19,7 @@ class SessionLauncher extends Component {
         this.toggleWindowPortal = this.toggleWindowPortal.bind(this);
         this.closeWindowPortal = this.closeWindowPortal.bind(this);
         this.portalResized = this.portalResized.bind(this);
+        this.openWindow = this.openWindow.bind(this);
     }
 
     componentDidMount() {
@@ -44,6 +43,16 @@ class SessionLauncher extends Component {
         this.setState({portalSize:size});
     }
 
+    openWindow(featureKey) {
+        const h = screen.height*0.75;
+        const w = screen.width*0.75;
+
+        const url = `${baseUrl}?featureKey=${featureKey}&token=${123}`;
+
+        // STEP 3: open a new browser window and store a reference to it
+        this.externalWindow = window.open(url, 'Current Session - Traits In Rust', 'toolbar=yes ,location=0, status=no,titlebar=no,menubar=yes,width='+w +',height=' +h);
+
+    }
 
     render() {
         return (
@@ -55,9 +64,7 @@ class SessionLauncher extends Component {
                 </Button>
 
                 {this.state.showWindowPortal && (
-                    <XPortal name="Current Session - Traits in Rust" closeWindowPortal={this.closeWindowPortal} portalResized={this.portalResized}>
-                        <Broadcast portalSize = {this.state.portalSize}/>
-                    </XPortal>
+                    this.openWindow("broadcast")
                 )}
             </Card>
         )

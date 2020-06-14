@@ -1,20 +1,28 @@
-import { decorate, observable} from 'mobx';
+import { decorate, observable } from 'mobx';
 import { loginUrl } from './APIEndpoints';
-import {isBlank} from './Util';
+import { isBlank } from './Util';
 
-const temp_credentials = {
-    email: "gopal@krscode.com",
-    token:"123",
-    role:"guide",
+const temp_coach_credentials = {
+    email: "gopal@pm-powerconsulting.com",
+    token: "111",
+    role: "guide",
     username: "Gopal",
-    fuzzyId:"1-1"
+    fuzzyId: "1-1"
+};
+
+const temp_member_credentials = {
+    email: "raja@krscode.com",
+    token: "999",
+    role: "member",
+    username: "Raja",
+    fuzzyId: "9-9"
 };
 
 export default class LoginStore {
     loginCredentials = {
         email: '',
         password: '',
-        client_name: 'krscode'
+        client_name: 'ferris_ui'
     }
 
     constructor(props) {
@@ -22,13 +30,22 @@ export default class LoginStore {
         this.appStore = props.appStore
     }
 
-    authenticate = async() => {
-        return temp_credentials;
+    authenticate = async () => {
+        if (this.isEmptyCredentials()) {
+            return null;
+        }
+
+        if (this.loginCredentials.email === 'gopal@pm-powerconsulting.com') {
+            return temp_coach_credentials;
+        }
+        if (this.loginCredentials.email === 'raja@krscode.com') {
+            return temp_member_credentials;
+        }
+        return null;
     }
 
     actual_authenticate = async () => {
-        if(this.isEmptyCredentials())
-        {
+        if (this.isEmptyCredentials()) {
             return null;
         }
 

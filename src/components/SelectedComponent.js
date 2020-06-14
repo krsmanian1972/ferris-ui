@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
+
+import Login from './LoginScreen';
 import About from './About';
 import WorkflowUI from './guide/WorkflowUI';
 import HomeUI from './guide/HomeUI';
+import Broadcast from './guide/Broadcast';
 
 
 @inject("appStore")
@@ -20,6 +23,12 @@ class SelectedComponent extends Component {
             }
             case 'planning': {
                 return <WorkflowUI />;
+            }
+            case 'login': {
+                return <Login />;
+            }
+            case 'broadcast' : {
+                return <Broadcast />
             }
             case 'about': {
                 return <About />;

@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import AccountMenu from './AccountMenu';
-import { Dropdown, Menu, Layout, Input, Space, Row, Col } from 'antd';
+import { Dropdown, Menu, Layout, Typography, Row, Col } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import ownerLogo from '../images/pm-power.png';
 
-const { Search } = Input;
+const { Text } = Typography;
 const { Header } = Layout;
 
 const caption = "PM Power Consulting";
@@ -21,6 +21,12 @@ export default class ToolBar extends Component {
 
     renderRoleTabs = () => {
         const appStore = this.props.appStore;
+        if (!appStore.isLoggedIn()) {
+            return (
+                null
+            )
+        }
+
         return (
             <Menu theme="light" mode="horizontal" defaultSelectedKeys={['0']} >
                 {
@@ -34,7 +40,11 @@ export default class ToolBar extends Component {
 
     renderRightMenu() {
         const appStore = this.props.appStore;
-        if (!appStore.isLoggedIn()) return null;
+        if (!appStore.isLoggedIn()) {
+            return (
+                <Text strong={true}>Ferris - The Coaching Assistant</Text>
+            )
+        }
 
         return (
             <Dropdown.Button overlay={<AccountMenu />} trigger={['click']} icon={<UserOutlined />}>

@@ -9,7 +9,7 @@ const standardStyle = {
     overflow: "hidden",
 };
 
-function VideoBoard({ screenStatus, localSrc, peerSrc,portalSize }) {
+function VideoBoard({ screenStatus, localSrc, peerSrc }) {
  
     const peerVideo = useRef(null);
     const localVideo = useRef(null);
@@ -32,7 +32,6 @@ VideoBoard.propTypes = {
     screenStatus: PropTypes.string.isRequired,
     localSrc: PropTypes.object,
     peerSrc: PropTypes.object,
-    portalSize: PropTypes.object
 };
 
 export default VideoBoard;
