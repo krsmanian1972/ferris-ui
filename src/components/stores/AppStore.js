@@ -2,14 +2,14 @@ import { action, decorate, observable, computed } from 'mobx';
 import APIProxy from './APIProxy';
 import LoginStore from './LoginStore';
 import { isBlank } from './Util';
-
+import socket from './socket';
 
 const blankCredentials = {
     email: '',
     token: '',
     role: '',
     username: '',
-    userFuzzyId: ''
+    userFuzzyId: '',
 }
 
 const INIT = 'init';
@@ -34,7 +34,9 @@ class AppStore {
     validationMessage = '';
     isEditable = true;
     state = INIT;
-    featureToken = null;
+
+    sessionId = null;
+    socketToken = null;
 
     constructor() {
         this.setSessionFromStorage();
@@ -105,6 +107,7 @@ class AppStore {
 
     updateContext = () => {
         this.apiProxy.updateCredentialHeaders(this.credentials);
+        this.registerSocket();
         this.resolveMenu();
         this.resolveLandingPage();
     }
@@ -137,6 +140,18 @@ class AppStore {
         })
     }
 
+    registerSocket = () => {
+        if (!this.isLoggedIn()) {
+            return;
+        }
+
+        socket
+            .on('token', ({ id }) => {
+                this.socketToken = id;
+            })
+            .emit('init', ({ fuzzyId: this.credentials.userFuzzyId, name:this.credentials.username}));
+    }
+
     navigateTo(index) {
         const menu = this.menus[index];
         this.currentComponent = menu;
@@ -159,13 +174,13 @@ class AppStore {
         this.apiProxy = apiProxy;
     }
 
-    get hasFeatureToken() {
-        return !isBlank(this.featureToken)
+    get hasSessionId() {
+        return !isBlank(this.sessionId)
     }
 
-    updatePreferredRoute = (featureKey, token) => {
-        if (featureKey && token && this.isLoggedIn()) {
-            this.featureToken = token;
+    updatePreferredRoute = (featureKey, sessionId) => {
+        if (featureKey && sessionId && this.isLoggedIn()) {
+            this.sessionId = sessionId;
             this.currentComponent = { "label": "window", "key": featureKey };
         }
     }
@@ -188,8 +203,9 @@ decorate(AppStore, {
     transitionTo: action,
     navigateTo: action,
 
-    featureToken: observable,
-    hasFeatureToken: computed,
+    sessionId: observable,
+    socketToken: observable,
+    hasSessionId: computed,
     updatePreferredRoute: action,
 });
 

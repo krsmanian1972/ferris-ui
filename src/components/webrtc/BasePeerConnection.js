@@ -16,7 +16,7 @@
  * classes (xxxTransceivers)
  * 
  */
-import socket from './socket';
+import socket from '../stores/socket';
 import BaseStreamHandler from './BaseStreamHandler';
 
 const CONFIGURATION = { iceServers: [{ urls: ['stun:stun.l.google.com:19302'] }] };

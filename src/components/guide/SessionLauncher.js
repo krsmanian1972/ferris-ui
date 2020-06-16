@@ -1,7 +1,12 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+
 import { inject, observer } from 'mobx-react';
+
 import { Card, Button } from 'antd';
+
 import {baseUrl} from '../stores/APIEndpoints'; 
+
 
 const { Meta } = Card;
 
@@ -13,12 +18,10 @@ class SessionLauncher extends Component {
         super(props);
         this.state = {
             showWindowPortal: false,
-            portalSize:{height:screen.height*0.75,width:screen.width*0.75}
         };
 
         this.toggleWindowPortal = this.toggleWindowPortal.bind(this);
         this.closeWindowPortal = this.closeWindowPortal.bind(this);
-        this.portalResized = this.portalResized.bind(this);
         this.openWindow = this.openWindow.bind(this);
     }
 
@@ -39,19 +42,36 @@ class SessionLauncher extends Component {
         this.setState({ showWindowPortal: false })
     }
 
-    portalResized(size) {
-        this.setState({portalSize:size});
-    }
 
     openWindow(featureKey) {
         const h = screen.height*0.75;
         const w = screen.width*0.75;
 
-        const url = `${baseUrl}?featureKey=${featureKey}&token=${123}`;
+        const role = this.props.appStore.credentials.role; 
+        const sessionId = this.props.sessionId;
+        const fuzzyId = this.props.appStore.credentials.userFuzzyId;
+        
+        const sessionData = {sessionId:sessionId,fuzzyId:fuzzyId,role:role};
+    
+        const url = `${baseUrl}?featureKey=${featureKey}&sessionId=${this.props.sessionId}`;
+        this.externalWindow = window.open(url, this.props.title, 'toolbar=yes ,location=0, status=no,titlebar=no,menubar=yes,width='+w +',height=' +h);
+          
+    }
 
-        // STEP 3: open a new browser window and store a reference to it
-        this.externalWindow = window.open(url, 'Current Session - Traits In Rust', 'toolbar=yes ,location=0, status=no,titlebar=no,menubar=yes,width='+w +',height=' +h);
+    getButtonLabel = () =>{
+        const role = this.props.appStore.credentials.role;
 
+        if( role === 'guide') {
+            if(!this.state.showWindowPortal) {
+                return "Start Session";
+            }
+            return "End Session";
+        }
+
+        if(!this.state.showWindowPortal) {
+            return "Join Session";
+        }
+        return "Exit Session";
     }
 
     render() {
@@ -60,7 +80,7 @@ class SessionLauncher extends Component {
                 <Meta description="Launch" style={{ marginBottom: 10 }} />
 
                 <Button type="primary" onClick={this.toggleWindowPortal}>
-                    {this.state.showWindowPortal ? 'End the' : 'Start the'} Session
+                    {this.getButtonLabel()}
                 </Button>
 
                 {this.state.showWindowPortal && (
@@ -70,5 +90,10 @@ class SessionLauncher extends Component {
         )
     }
 }
+
+SessionLauncher.propTypes = {
+    title: PropTypes.string.isRequired,
+    sessionId: PropTypes.string.isRequired,
+};
 
 export default SessionLauncher

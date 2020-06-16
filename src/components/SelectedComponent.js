@@ -13,8 +13,12 @@ import Broadcast from './guide/Broadcast';
 class SelectedComponent extends Component {
 
     evaluateComponent() {
-        const appStore = this.props.appStore;
-        switch (appStore.currentComponent.key) {
+        const currentComponent = this.props.appStore.currentComponent;
+        if(!currentComponent)
+        {
+            return <Login />;
+        }
+        switch (currentComponent.key) {
             case 'programs': {
                 return <HomeUI />;
             }

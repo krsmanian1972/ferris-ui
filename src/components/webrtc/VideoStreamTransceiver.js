@@ -5,7 +5,7 @@
  * 
  * 
  */
-import socket from './socket';
+import socket from '../stores/socket';
 import BasePeerConnection from './BasePeerConnection';
 import VideoDeviceAdapter from './VideoDeviceAdapter';
 

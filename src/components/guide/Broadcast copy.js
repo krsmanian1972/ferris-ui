@@ -6,6 +6,7 @@ import socket from '../stores/socket';
 import VideoStreamTransceiver from '../webrtc/VideoStreamTransceiver';
 import ScreenStreamTransceiver from '../webrtc/ScreenStreamTransceiver';
 
+import SessionInitiator from './SessionInitiator';
 import Invitation from './Invitation';
 import VideoBoard from './VideoBoard';
 import ScreenBoard from './ScreenBoard';
@@ -23,10 +24,11 @@ const { TabPane } = Tabs;
 
 @inject("appStore")
 @observer
-class Broadcast extends Component {
+class BroadcastOld extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            myId: '',
 
             screenStatus: '',
 
@@ -37,7 +39,7 @@ class Broadcast extends Component {
             localSrc: null,
             peerSrc: null,
             screenSrc: null,
-            portalSize: { height: window.innerHeight, width: window.innerWidth }
+            portalSize: { height: window.innerHeight, width: window.innerWidth}
         };
 
         this.transceivers = {};
@@ -47,16 +49,14 @@ class Broadcast extends Component {
 
         this.endCallHandler = this.endCall.bind(this);
         this.rejectCallHandler = this.rejectCall.bind(this);
-
-        this.sessionData = { sessionId: "24", coachFuzzyId: "1-1", memberFuzzyId: "9-9" };
     }
 
-    buildTransceivers = (peerId) => {
-        this.transceivers[CONNECTION_KEY_VIDEO_STREAM] = this.buildVideoTransceiver(peerId);
-        this.transceivers[CONNECTION_KEY_SCREEN_STREAM] = this.buildScreenTransceiver(peerId);
+    buildtransceivers = (peerId) => {
+        this.transceivers[CONNECTION_KEY_VIDEO_STREAM] = this.buildVideotransceiver(peerId);
+        this.transceivers[CONNECTION_KEY_SCREEN_STREAM] = this.buildScreentransceiver(peerId);
     }
 
-    buildVideoTransceiver = (peerId) => {
+    buildVideotransceiver = (peerId) => {
         return new VideoStreamTransceiver(peerId, CONNECTION_KEY_VIDEO_STREAM)
             .on('localStream', (src) => {
                 const newState = { peerId: peerId, localSrc: src };
@@ -72,7 +72,7 @@ class Broadcast extends Component {
             });
     }
 
-    buildScreenTransceiver = (peerId) => {
+    buildScreentransceiver = (peerId) => {
         return new ScreenStreamTransceiver(peerId, CONNECTION_KEY_SCREEN_STREAM)
             .on(CONNECTION_KEY_SCREEN_STREAM, (src) => {
                 const newState = { screenStatus: 'active', screenSrc: src };
@@ -102,44 +102,34 @@ class Broadcast extends Component {
         }
     }
 
-    handleCallAdvice = (advice) => {
-        const role = this.props.appStore.credentials.role;  
-        if(role === "guide" && advice.status === "ok") {
-            this.callPeer(advice.memberSocketId);
-        }
-        if(role !== "guide" && advice.status === "ok") {
-            this.callPeer(advice.guideSocketId);
-        }
-    }
-
-    registerSocketHooks = () => {
-
-        const sessionId = this.props.appStore.sessionId;
-        const role = this.props.appStore.credentials.role;
-        const fuzzyId = this.props.appStore.credentials.userFuzzyId;
-
-        const sessionData = { sessionId: sessionId, fuzzyId: fuzzyId, role: role };
-
+    obtainToken = (e) => {
+        e.preventDefault();
         socket
+            .on('token', ({ id: myId }) => {
+                message.success(`Your Token ID is ${myId}`, 5);
+                this.setState({ myId });
+            })
             .on('request', ({ from: invitationFrom }) => {
-                const callerName = invitationFrom.split('~')[1];
-                message.info(`Call from ${callerName}`, 5)
+                message.info(`Call from ${invitationFrom}`, 5)
                 this.setState({ peerRequestStatus: 'active', invitationFrom });
             })
             .on('call', (data) => { this.handleNegotiation(data) })
             .on('end', this.endCall.bind(this, false))
-            .on('callAdvice', (data) => { this.handleCallAdvice(data) })
-            .emit('joinSession', sessionData);
+            .emit('init',({fuzzyId:'harini'}));
     }
 
-
-    /**
-     * The PeerId is the socket id of either the coach or the member
-     */
     callPeer = (peerId) => {
+        if (peerId.trim() == this.state.myId.trim()) {
+            notification["error"]({
+                message: 'Talking to Self',
+                description:
+                    'My precious, remembers Gollum of The Lord of the Rings !!!. You have entered your own Token ID, instead of your Peer\'s Token ID. Please enter your Peer\'s Token ID.',
+            })
+            return;
+        }
 
         this.isCaller = true;
-        this.buildTransceivers(peerId);
+        this.buildtransceivers(peerId);
 
         if (peerId) {
             this.transceivers[CONNECTION_KEY_VIDEO_STREAM].start(true);
@@ -148,7 +138,7 @@ class Broadcast extends Component {
 
     joinCall = (peerId, preference) => {
         this.isCaller = false;
-        this.buildTransceivers(peerId);
+        this.buildtransceivers(peerId);
         this.transceivers[CONNECTION_KEY_VIDEO_STREAM].join(preference);
     }
 
@@ -173,17 +163,14 @@ class Broadcast extends Component {
     }
 
     componentDidMount() {
-
         window.addEventListener("resize", () => {
             const portalSize = { height: window.innerHeight, width: window.innerWidth };
             this.setState({ portalSize: portalSize });
         });
-
-        this.registerSocketHooks();
     }
 
     render() {
-        const {invitationFrom, screenStatus, peerRequestStatus, localSrc, peerSrc, screenSrc, portalSize } = this.state;
+        const { myId, peerId, invitationFrom, screenStatus, peerRequestStatus, localSrc, peerSrc, screenSrc, portalSize } = this.state;
         const viewHeight = portalSize.height * 0.80;
         const canShare = this.peerStreamStatus === "active";
 
@@ -193,6 +180,9 @@ class Broadcast extends Component {
                     <TabPane key="1" tab={<span><CameraOutlined />Video</span>}>
                         <div style={{ height: viewHeight }}>
                             <VideoBoard screenStatus={screenStatus} localSrc={localSrc} peerSrc={peerSrc} />
+                        </div>
+                        <div style={{ paddingTop: 5 }}>
+                            <SessionInitiator myId={myId} peerId={peerId} peerStreamStatus={this.peerStreamStatus} obtainToken={this.obtainToken} callPeer={this.callPeer} shareScreen={this.shareScreen} />
                         </div>
                     </TabPane>
                     <TabPane key="2" tab={<span><DesktopOutlined />Screen Sharing</span>}>
@@ -218,4 +208,4 @@ class Broadcast extends Component {
         )
     }
 }
-export default Broadcast
+export default BroadcastOld

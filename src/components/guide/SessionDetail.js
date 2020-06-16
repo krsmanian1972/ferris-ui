@@ -1,12 +1,15 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
-import { Card, Avatar, Typography, Statistic, Row, Col, Tag, Space, Divider } from 'antd';
-import { TagOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
+
+
+import { Card, Typography, Statistic, Row, Col, Tag} from 'antd';
+import { MailOutlined, PhoneOutlined } from '@ant-design/icons';
 import Moment from 'react-moment';
 import moment from 'moment';
 import 'moment-timezone';
 
 import SessionLauncher from './SessionLauncher';
+import PeerStatus from './PeerStatus';
 
 const { Meta } = Card;
 const { Text } = Typography;
@@ -25,6 +28,7 @@ class SessionDetail extends Component {
     onFinish = () => {
         console.log("Finished");
     }
+
     render() {
         return (
             <Card title="Traits in Rust" extra={<a href="#">Current Session</a>}>
@@ -40,6 +44,7 @@ class SessionDetail extends Component {
                             <p></p>
                             <p><Text><MailOutlined /> gopals@pmpowerxx.com</Text></p>
                             <p><Text><PhoneOutlined /> (91)99999 99999</Text></p>
+                            <PeerStatus fuzzyId={"1-1"}/>
                         </Card>
                     </Col>
                     <Col span={12}>
@@ -48,6 +53,7 @@ class SessionDetail extends Component {
                             <p></p>
                             <p><Text><MailOutlined /> raja@pmpowerxx.com</Text></p>
                             <p><Text><PhoneOutlined /> (91)99999 xxxx9</Text></p>
+                            <PeerStatus fuzzyId={"9-9"}/>
                         </Card>
                     </Col>
                 </Row>
@@ -61,7 +67,7 @@ class SessionDetail extends Component {
                         </Card>
                     </Col>
                     <Col span={12}>
-                        <SessionLauncher title="Traits in Rust" />
+                        <SessionLauncher title="Traits in Rust" sessionId="24"/>
                     </Col>
                 </Row>
             </Card>

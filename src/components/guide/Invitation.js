@@ -24,10 +24,13 @@ function Invitation({ status, invitationFrom, joinCall, rejectCall }) {
         isReady = false;
     }
 
+    const callerName = invitationFrom.split('~')[1];
+
     return (
+
         <div style={stageStyle}>
             <Space>
-                <Tag color="#108ee9">{`${invitationFrom} is calling`}</Tag>
+                <Tag color="#108ee9">{`${callerName} is calling`}</Tag>
                 <Tooltip title="Join as video call">
                     <Button disabled={!isReady} id="video_call" onClick={acceptWithVideo(true)} type="primary" icon={<VideoCameraOutlined />} shape="circle" />
                 </Tooltip>

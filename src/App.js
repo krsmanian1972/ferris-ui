@@ -23,16 +23,16 @@ export default class App extends Component {
     const search = window.location.search;
     const params = new URLSearchParams(search);
     const featureKey = params.get("featureKey");
-    const token = params.get("token");
+    const sessionId = params.get("sessionId");
 
-    if (featureKey && token) {
-      appStore.updatePreferredRoute(featureKey, token);
+    if (featureKey && sessionId) { 
+      appStore.updatePreferredRoute(featureKey, sessionId);
     }
   }
 
   renderLayout = () => {
-    if (appStore.hasFeatureToken) {
-      return this.renderFeatureLayout();
+    if (appStore.hasSessionId) {
+      return this.renderSessionLayout();
     }
     return this.renderRegularLayout();
   }
@@ -54,7 +54,7 @@ export default class App extends Component {
     )
   }
   
-  renderFeatureLayout = () => {
+  renderSessionLayout = () => {
     return (
       <>
         <Content className="site-layout">

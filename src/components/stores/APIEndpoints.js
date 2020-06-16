@@ -1,5 +1,5 @@
 
-let backendHost = 'https://ferris.krscode.com/';
+let backendHost = 'https://146a43ae84c8.ngrok.io';
 let authLoginUrl = 'https://auth.krscode.com/auth';
 
 const hostname = window && window.location && window.location.hostname;

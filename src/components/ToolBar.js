@@ -22,9 +22,7 @@ export default class ToolBar extends Component {
     renderRoleTabs = () => {
         const appStore = this.props.appStore;
         if (!appStore.isLoggedIn()) {
-            return (
-                null
-            )
+            return <></>
         }
 
         return (
