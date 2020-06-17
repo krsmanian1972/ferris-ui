@@ -61,6 +61,7 @@ video {
   position: absolute;
 }
 
+
 #localVideo {
   bottom: 0;
   right: 0;
@@ -84,7 +85,3 @@ video {
   width:100%;
 }
 
-#peerScreen {
-  height: 100%;
-  width: 100%;
-}

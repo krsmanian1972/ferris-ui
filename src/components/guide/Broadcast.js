@@ -11,7 +11,7 @@ import VideoBoard from './VideoBoard';
 
 import { Button,Row,Col,Tooltip,Space } from 'antd';
 import { message } from 'antd';
-import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, SwapOutlined } from '@ant-design/icons';
+import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined } from '@ant-design/icons';
 
 const CONNECTION_KEY_VIDEO_STREAM = "peerVideoStream";
 const CONNECTION_KEY_SCREEN_STREAM = "peerScreenStream";
@@ -193,9 +193,6 @@ class Broadcast extends Component {
         )
     }
 
-    toggleVisual = () => {
-        
-    }
 
     render() {
         const { invitationFrom, screenStatus, peerRequestStatus, localSrc, peerSrc, screenSrc, portalSize } = this.state;
@@ -214,9 +211,6 @@ class Broadcast extends Component {
                             <Tooltip title="Share Screen">
                                 <Button onClick={this.shareScreen} disabled={!canShare} id="screenShare" type="primary" icon={<ShareAltOutlined />} shape="circle" />
                             </Tooltip>
-                            <Tooltip title="Swap Visual">
-                                <Button onClick={this.toggleVisual} disabled={!canShare} type="primary" icon={<SwapOutlined />} shape="circle" />
-                            </Tooltip>   
                             <Tooltip title="Mute Camera">
                                 <Button disabled={true} type="primary" icon={<CameraOutlined />} shape="circle" />
                             </Tooltip>
