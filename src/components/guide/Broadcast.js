@@ -37,6 +37,7 @@ class Broadcast extends Component {
             localSrc: null,
             peerSrc: null,
             screenSrc: null,
+
             portalSize: { height: window.innerHeight, width: window.innerWidth }
         };
 
@@ -103,33 +104,38 @@ class Broadcast extends Component {
     }
 
     handleCallAdvice = (advice) => {
-        const role = this.props.appStore.credentials.role;  
-        if(role === "guide" && advice.status === "ok") {
+        const role = this.props.appStore.credentials.role;
+        if (role === "guide" && advice.status === "ok") {
             this.callPeer(advice.memberSocketId);
         }
-        if(role !== "guide" && advice.status === "ok") {
+        if (role !== "guide" && advice.status === "ok") {
             this.callPeer(advice.guideSocketId);
         }
     }
 
-    registerSocketHooks = () => {
-
+    getSessionData = () => {
         const sessionId = this.props.appStore.sessionId;
         const role = this.props.appStore.credentials.role;
         const fuzzyId = this.props.appStore.credentials.userFuzzyId;
 
-        const sessionData = { sessionId: sessionId, fuzzyId: fuzzyId, role: role };
+        return { sessionId: sessionId, fuzzyId: fuzzyId, role: role };
+    }
 
+    handleInvitation = ({ from: invitationFrom }) => {
+        const callerName = invitationFrom.split('~')[1];
+        message.info(`Call from ${callerName}`, 5)
+
+        this.setState({ peerRequestStatus: 'active', invitationFrom });
+    }
+
+    registerSocketHooks = () => {
+    
         socket
-            .on('request', ({ from: invitationFrom }) => {
-                const callerName = invitationFrom.split('~')[1];
-                message.info(`Call from ${callerName}`, 5)
-                this.setState({ peerRequestStatus: 'active', invitationFrom });
-            })
-            .on('call', (data) => { this.handleNegotiation(data) })
+            .on('request', (data) => this.handleInvitation(data))
+            .on('call', (data) => this.handleNegotiation(data))
             .on('end', this.endCall.bind(this, false))
-            .on('callAdvice', (data) => { this.handleCallAdvice(data) })
-            .emit('joinSession', sessionData);
+            .on('callAdvice', (data) => this.handleCallAdvice(data))
+            .emit('joinSession', this.getSessionData());
     }
 
 
@@ -183,7 +189,7 @@ class Broadcast extends Component {
     }
 
     render() {
-        const {invitationFrom, screenStatus, peerRequestStatus, localSrc, peerSrc, screenSrc, portalSize } = this.state;
+        const { invitationFrom, screenStatus, peerRequestStatus, localSrc, peerSrc, screenSrc, portalSize } = this.state;
         const viewHeight = portalSize.height * 0.80;
         const canShare = this.peerStreamStatus === "active";
 
