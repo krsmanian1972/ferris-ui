@@ -5,7 +5,7 @@ import socket from '../stores/socket';
 
 function PeerStatus({ fuzzyId }) {
 
-    const PING_INTERVAL = 5000;
+    const PING_INTERVAL = 60000;
     const [status, setStatus] = useState('wait...');
 
     useEffect(() => {

@@ -8,14 +8,18 @@ import ScreenStreamTransceiver from '../webrtc/ScreenStreamTransceiver';
 
 import Invitation from './Invitation';
 import VideoBoard from './VideoBoard';
+import ScreenBoard from './ScreenBoard';
+import CurrentSessionPlan from './CurrentSessionPlan';
+import BookPage from './BookPage';
 
-import { Button,Row,Col,Tooltip,Space } from 'antd';
-import { message } from 'antd';
-import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, SwapOutlined } from '@ant-design/icons';
+import { Tabs, Button } from 'antd';
+import { message, notification, } from 'antd';
+import { CameraOutlined, DesktopOutlined, AimOutlined, BookOutlined, ShareAltOutlined, EditOutlined } from '@ant-design/icons';
 
 const CONNECTION_KEY_VIDEO_STREAM = "peerVideoStream";
 const CONNECTION_KEY_SCREEN_STREAM = "peerScreenStream";
 
+const { TabPane } = Tabs;
 
 @inject("appStore")
 @observer
@@ -184,51 +188,38 @@ class Broadcast extends Component {
         this.registerSocketHooks();
     }
 
-    shareSreenButton = () => {
-        const canShare = this.peerStreamStatus === "active";
-        return (
-            <Tooltip title="Share Screen">
-                <Button onClick={this.shareScreen} disabled={!canShare} id="screenShare" type="primary" icon={<ShareAltOutlined />} shape="circle" />
-            </Tooltip>
-        )
-    }
-
-    toggleVisual = () => {
-        
-    }
-
     render() {
         const { invitationFrom, screenStatus, peerRequestStatus, localSrc, peerSrc, screenSrc, portalSize } = this.state;
-        const viewHeight = portalSize.height * 0.95;
+        const viewHeight = portalSize.height * 0.80;
         const canShare = this.peerStreamStatus === "active";
 
         return (
-            <div style={{ padding: 10, height: viewHeight }}>
-                <VideoBoard screenStatus={screenStatus} localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} />
-                <Row>
-                    <Col span={12}>
-                        <Invitation status={peerRequestStatus} joinCall={this.joinCall} rejectCall={this.rejectCallHandler} invitationFrom={invitationFrom} />        
-                    </Col>
-                    <Col span={12} style={{textAlign: "right"}}>
-                        <Space>
-                            <Tooltip title="Share Screen">
-                                <Button onClick={this.shareScreen} disabled={!canShare} id="screenShare" type="primary" icon={<ShareAltOutlined />} shape="circle" />
-                            </Tooltip>
-                            <Tooltip title="Swap Visual">
-                                <Button onClick={this.toggleVisual} disabled={!canShare} type="primary" icon={<SwapOutlined />} shape="circle" />
-                            </Tooltip>   
-                            <Tooltip title="Mute Camera">
-                                <Button disabled={true} type="primary" icon={<CameraOutlined />} shape="circle" />
-                            </Tooltip>
-                            <Tooltip title="Mute Audio">
-                                <Button disabled={true} type="primary" icon={<AudioOutlined />} shape="circle" />
-                            </Tooltip>    
-                            <Tooltip title="Close Activity">
-                                <Button disabled={true} type="primary" icon={<StopOutlined />} shape="circle" />
-                            </Tooltip> 
-                         </Space>  
-                    </Col>    
-                </Row>
+            <div style={{ padding: 10 }}>
+                <Tabs defaultActiveKey="1" tabPosition="top">
+                    <TabPane key="1" tab={<span><CameraOutlined />Video</span>}>
+                        <div style={{ height: viewHeight }}>
+                            <VideoBoard screenStatus={screenStatus} localSrc={localSrc} peerSrc={peerSrc} />
+                        </div>
+                    </TabPane>
+                    <TabPane key="2" tab={<span><DesktopOutlined />Screen Sharing</span>}>
+                        <div style={{ height: viewHeight }}>
+                            <ScreenBoard screenStatus={screenStatus} screenSrc={screenSrc} />
+                        </div>
+                        <div style={{ paddingTop: 5 }}>
+                            <Button onClick={this.shareScreen} disabled={!canShare} id="screenShare" type="primary" icon={<ShareAltOutlined />} shape="circle" />
+                        </div>
+                    </TabPane>
+                    <TabPane key="3" tab={<span><EditOutlined />White Board</span>}>
+                        Writtable Canvas Here
+                        </TabPane>
+                    <TabPane key="4" tab={<span><BookOutlined />References</span>}>
+                        <BookPage />
+                    </TabPane>
+                    <TabPane key="5" tab={<span><AimOutlined />Session Plan</span>} >
+                        <CurrentSessionPlan />
+                    </TabPane>
+                </Tabs>
+                <Invitation status={peerRequestStatus} joinCall={this.joinCall} rejectCall={this.rejectCallHandler} invitationFrom={invitationFrom} />
             </div>
         )
     }

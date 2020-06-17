@@ -19,7 +19,7 @@ function ScreenBoard({ screenStatus, screenSrc }) {
 
     return (
         <div style={standardStyle}>
-            <video id="peerScreen" ref={peerScreen} autoPlay />
+            <video id="minPeerVideo" ref={peerScreen} autoPlay />
         </div>
     );
 }
