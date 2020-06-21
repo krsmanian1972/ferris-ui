@@ -8,6 +8,12 @@
 		},
 		{
 			"path": "../../../../ferex"
+		},
+		{
+			"path": "../../../../../rust/webrtc-demo-server"
+		},
+		{
+			"path": "../../../../../rust/ferric"
 		}
 	],
 	"settings": {

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Card, Typography, Button, Row, Col } from 'antd';
 import { observer, inject } from 'mobx-react';
 import { inputField, passwordField } from './InputElements';
-import signInImage from '../images/login-logo.png';
+import signInImage from '../images/pm-power-logo.png';
 import krust from '../images/krust.svg';
 
 const { Title, Text } = Typography;
