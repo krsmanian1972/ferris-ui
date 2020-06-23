@@ -1,6 +1,6 @@
 
-let backendHost = 'https://e8936039e425.ngrok.io';
-let authLoginUrl = 'https://auth.krscode.com/auth';
+let backendHost = 'https://krscode.com/';
+let authLoginUrl = 'https://krscode.com/auth/';
 
 const hostname = window && window.location && window.location.hostname;
 

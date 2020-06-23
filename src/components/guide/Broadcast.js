@@ -6,7 +6,6 @@ import socket from '../stores/socket';
 import VideoStreamTransceiver from '../webrtc/VideoStreamTransceiver';
 import ScreenStreamTransceiver from '../webrtc/ScreenStreamTransceiver';
 
-import Invitation from './Invitation';
 import VideoBoard from './VideoBoard';
 
 import { Button,Row,Col,Tooltip,Space } from 'antd';
@@ -119,9 +118,12 @@ class Broadcast extends Component {
 
     handleInvitation = ({ from: invitationFrom }) => {
         const callerName = invitationFrom.split('~')[1];
-        message.info(`Call from ${callerName}`, 5)
-
+        
+        message.info(`${callerName} is joining`, 5)
+        
         this.setState({ peerRequestStatus: 'active', invitationFrom });
+
+        this.joinCall(invitationFrom);
     }
 
     registerSocketHooks = () => {
@@ -148,7 +150,8 @@ class Broadcast extends Component {
         }
     }
 
-    joinCall = (peerId, preference) => {
+    joinCall = (peerId) => {
+        const preference = { audio: true, video:true };
         this.isCaller = false;
         this.buildTransceivers(peerId);
         this.transceivers[CONNECTION_KEY_VIDEO_STREAM].join(preference);
@@ -195,17 +198,15 @@ class Broadcast extends Component {
 
 
     render() {
-        const { invitationFrom, screenStatus, peerRequestStatus, localSrc, peerSrc, screenSrc, portalSize } = this.state;
+        const {localSrc, peerSrc, screenSrc, portalSize } = this.state;
         const viewHeight = portalSize.height * 0.95;
         const canShare = this.peerStreamStatus === "active";
 
         return (
             <div style={{ padding: 10, height: viewHeight }}>
-                <VideoBoard screenStatus={screenStatus} localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} />
+                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} />
                 <Row>
-                    <Col span={12}>
-                        <Invitation status={peerRequestStatus} joinCall={this.joinCall} rejectCall={this.rejectCallHandler} invitationFrom={invitationFrom} />        
-                    </Col>
+                    <Col span={12}></Col>
                     <Col span={12} style={{textAlign: "right"}}>
                         <Space>
                             <Tooltip title="Share Screen">
