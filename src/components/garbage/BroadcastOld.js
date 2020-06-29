@@ -6,11 +6,11 @@ import socket from '../stores/socket';
 import VideoStreamTransceiver from '../webrtc/VideoStreamTransceiver';
 import ScreenStreamTransceiver from '../webrtc/ScreenStreamTransceiver';
 
-import Invitation from './Invitation';
-import VideoBoard from './VideoBoard';
-import ScreenBoard from './ScreenBoard';
-import CurrentSessionPlan from './CurrentSessionPlan';
-import BookPage from './BookPage';
+import Invitation from '../guide/Invitation';
+import VideoBoard from '../guide/VideoBoard';
+import ScreenBoard from '../guide/ScreenBoard';
+import CurrentSessionPlan from '../guide/CurrentSessionPlan';
+import BookPage from '../guide/BookPage';
 
 import { Tabs, Button } from 'antd';
 import { message, notification, } from 'antd';

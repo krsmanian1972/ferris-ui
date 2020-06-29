@@ -8,7 +8,7 @@ import ScreenStreamTransceiver from '../webrtc/ScreenStreamTransceiver';
 
 import VideoBoard from './VideoBoard';
 
-import { Button,Row,Col,Tooltip,Space } from 'antd';
+import { Button, Row, Col, Tooltip, Space } from 'antd';
 import { message } from 'antd';
 import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined } from '@ant-design/icons';
 
@@ -43,8 +43,6 @@ class Broadcast extends Component {
 
         this.endCallHandler = this.endCall.bind(this);
         this.rejectCallHandler = this.rejectCall.bind(this);
-
-        this.sessionData = { sessionId: "24", coachFuzzyId: "1-1", memberFuzzyId: "9-9" };
     }
 
     buildTransceivers = (peerId) => {
@@ -84,7 +82,6 @@ class Broadcast extends Component {
         }
 
         // Obtain the respective Transceiver to negotiate
-
         const transceiver = this.transceivers[data.connectionKey];
 
         if (data.sdp) {
@@ -99,7 +96,9 @@ class Broadcast extends Component {
     }
 
     handleCallAdvice = (advice) => {
+
         const role = this.props.appStore.credentials.role;
+
         if (role === "guide" && advice.status === "ok") {
             this.callPeer(advice.memberSocketId);
         }
@@ -118,16 +117,16 @@ class Broadcast extends Component {
 
     handleInvitation = ({ from: invitationFrom }) => {
         const callerName = invitationFrom.split('~')[1];
-        
+
         message.info(`${callerName} is joining`, 5)
-        
+
         this.setState({ peerRequestStatus: 'active', invitationFrom });
 
         this.joinCall(invitationFrom);
     }
 
     registerSocketHooks = () => {
-    
+
         socket
             .on('request', (data) => this.handleInvitation(data))
             .on('call', (data) => this.handleNegotiation(data))
@@ -151,7 +150,7 @@ class Broadcast extends Component {
     }
 
     joinCall = (peerId) => {
-        const preference = { audio: true, video:true };
+        const preference = { audio: true, video: true };
         this.isCaller = false;
         this.buildTransceivers(peerId);
         this.transceivers[CONNECTION_KEY_VIDEO_STREAM].join(preference);
@@ -198,7 +197,7 @@ class Broadcast extends Component {
 
 
     render() {
-        const {localSrc, peerSrc, screenSrc, portalSize } = this.state;
+        const { localSrc, peerSrc, screenSrc, portalSize } = this.state;
         const viewHeight = portalSize.height * 0.95;
         const canShare = this.peerStreamStatus === "active";
 
@@ -207,7 +206,7 @@ class Broadcast extends Component {
                 <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} />
                 <Row>
                     <Col span={12}></Col>
-                    <Col span={12} style={{textAlign: "right"}}>
+                    <Col span={12} style={{ textAlign: "right" }}>
                         <Space>
                             <Tooltip title="Share Screen">
                                 <Button onClick={this.shareScreen} disabled={!canShare} id="screenShare" type="primary" icon={<ShareAltOutlined />} shape="circle" />
@@ -217,12 +216,12 @@ class Broadcast extends Component {
                             </Tooltip>
                             <Tooltip title="Mute Audio">
                                 <Button disabled={true} type="primary" icon={<AudioOutlined />} shape="circle" />
-                            </Tooltip>    
+                            </Tooltip>
                             <Tooltip title="Close Activity">
                                 <Button disabled={true} type="primary" icon={<StopOutlined />} shape="circle" />
-                            </Tooltip> 
-                         </Space>  
-                    </Col>    
+                            </Tooltip>
+                        </Space>
+                    </Col>
                 </Row>
             </div>
         )

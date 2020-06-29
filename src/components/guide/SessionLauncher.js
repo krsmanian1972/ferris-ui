@@ -46,15 +46,12 @@ class SessionLauncher extends Component {
     openWindow(featureKey) {
         const h = screen.height*0.75;
         const w = screen.width*0.75;
-
-        const role = this.props.appStore.credentials.role; 
-        const sessionId = this.props.sessionId;
-        const fuzzyId = this.props.appStore.credentials.userFuzzyId;
-        
-        const sessionData = {sessionId:sessionId,fuzzyId:fuzzyId,role:role};
-    
+        const l = (screen.width-w)/2;
+        const t = (screen.height-h)/2;
+      
         const url = `${baseUrl}?featureKey=${featureKey}&sessionId=${this.props.sessionId}`;
-        this.externalWindow = window.open(url, this.props.title, 'toolbar=yes ,location=0, status=no,titlebar=no,menubar=yes,width='+w +',height=' +h);
+        const specs = `'toolbar=yes ,location=0, status=no,titlebar=no,menubar=yes,width=${w},height=${h},left=${l},top=${t}`;
+        this.externalWindow = window.open(url, this.props.title, specs);
           
     }
 
