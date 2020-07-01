@@ -72,7 +72,7 @@ function VideoBoard({ localSrc, peerSrc, screenSrc }) {
         if (myKey === "none") {
             return { width: "33.3%" };
         }
-      
+
         return { width: "50%" };
     }
 
@@ -97,7 +97,13 @@ function VideoBoard({ localSrc, peerSrc, screenSrc }) {
     const myWidgets = new Map();
     for (var i = 1; i < 3; i++) {
         const boardKey = `Board - ${i}`;
-        const el = <div key={boardKey} className="videoItem" style={getMyStyle(boardKey)} onClick={() => setSelected(boardKey, "self")} >{boardKey}</div>
+        const el = <div
+            key={boardKey}
+            className="videoItem"
+            style={getMyStyle(boardKey)}
+            onClick={() => setSelected(boardKey, "self")} >
+                <TestCanvas key={boardKey} boardId={boardKey} />
+        </div>
         myWidgets.set(boardKey, el);
     }
     myWidgets.set("myVideo", <video key="myVideo" className="videoItem" style={getMyStyle("myVideo")} poster="videoSelf.png" onClick={() => minimizeAll()} ref={localVideo} autoPlay muted />)
@@ -118,7 +124,9 @@ function VideoBoard({ localSrc, peerSrc, screenSrc }) {
     return (
         <div style={standardStyle} >
 
-            <div className="activeItem">{getActiveItem()}</div>
+            <div className="activeItem">
+                {getActiveItem()}
+            </div>
 
             <div className="peerVideoContainer">
                 {getSuspendedItems(peerWidgets, peerKey).map(value => value)}
@@ -128,6 +136,7 @@ function VideoBoard({ localSrc, peerSrc, screenSrc }) {
                 {getSuspendedItems(myWidgets, myKey).map(value => value)}
             </div>
         </div>
+
     );
 }
 
