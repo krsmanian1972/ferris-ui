@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import TestCanvas from './TestCanvas';
+import MiniBoard from './MiniBoard';
 
 const standardStyle = {
     height: "100%",
@@ -10,7 +10,7 @@ const standardStyle = {
     overflow: "hidden",
 };
 
-function VideoBoard({ localSrc, peerSrc, screenSrc }) {
+function VideoBoard({ localSrc, peerSrc, screenSrc, myBoards, getBoardData }) {
 
     const [peerKey, setPeerKey] = useState('none');
     const [myKey, setMyKey] = useState('none');
@@ -88,7 +88,6 @@ function VideoBoard({ localSrc, peerSrc, screenSrc }) {
         return toSuspend;
     }
 
-
     const peerWidgets = new Map();
     peerWidgets.set("peerVideo", <video key="peerVideo" className="videoItem" style={getPeerStyle("peerVideo")} poster="videoPeer.png" ref={peerVideo} autoPlay onClick={() => setSelected("peerVideo", "peer")} />);
     peerWidgets.set("peerScreen", <video key="peerScreen" className="videoItem" style={getPeerStyle("peerScreen")} poster="peerScreen.png" ref={peerScreen} autoPlay onClick={() => setSelected("peerScreen", "peer")} />);
@@ -97,17 +96,17 @@ function VideoBoard({ localSrc, peerSrc, screenSrc }) {
     const myWidgets = new Map();
     for (var i = 1; i < 3; i++) {
         const boardKey = `Board - ${i}`;
+       
         const el = <div
             key={boardKey}
             className="videoItem"
             style={getMyStyle(boardKey)}
             onClick={() => setSelected(boardKey, "self")} >
-                <TestCanvas key={boardKey} boardId={boardKey} />
+            <MiniBoard key={boardKey} boardId={boardKey} getBoardData={getBoardData}/>
         </div>
+
         myWidgets.set(boardKey, el);
     }
-    myWidgets.set("myVideo", <video key="myVideo" className="videoItem" style={getMyStyle("myVideo")} poster="videoSelf.png" onClick={() => minimizeAll()} ref={localVideo} autoPlay muted />)
-
 
     const getActiveItem = () => {
         if (myKey === "none" && peerKey === "none") {
@@ -118,7 +117,7 @@ function VideoBoard({ localSrc, peerSrc, screenSrc }) {
             return peerWidgets.get(peerKey);
         }
 
-        return myWidgets.get(myKey);
+        return myBoards.get(myKey);
     }
 
     return (
@@ -134,6 +133,7 @@ function VideoBoard({ localSrc, peerSrc, screenSrc }) {
 
             <div className="myVideoContainer">
                 {getSuspendedItems(myWidgets, myKey).map(value => value)}
+                <video key="myVideo" className="videoItem" style={getMyStyle("myVideo")} poster="videoSelf.png" onClick={() => minimizeAll()} ref={localVideo} autoPlay muted />
             </div>
         </div>
 
@@ -144,6 +144,8 @@ VideoBoard.propTypes = {
     localSrc: PropTypes.object,
     peerSrc: PropTypes.object,
     screenSrc: PropTypes.object,
+    myBoards: PropTypes.object,
+    getBoardData: PropTypes.func,
 };
 
 export default VideoBoard;

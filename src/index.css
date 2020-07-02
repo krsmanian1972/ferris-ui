@@ -101,10 +101,21 @@ code {
   text-align: center;
   font-weight: bold;
   color:rgba(153, 153, 153);
-  background-color: rgba(34, 34, 34);
+  background-color: rgba(34, 34, 34,0);
 }
 
 .activeItem {
   height: 100%;
   width:100%;
+}
+
+.activeBoard {
+  background-color: rgba(100,100,100,0.5);
+}
+
+.boardTitle {
+  color:white;
+  font-weight: bold;
+  text-align: center;
+  height:1%
 }

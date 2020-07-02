@@ -7,6 +7,7 @@ import VideoStreamTransceiver from '../webrtc/VideoStreamTransceiver';
 import ScreenStreamTransceiver from '../webrtc/ScreenStreamTransceiver';
 
 import VideoBoard from './VideoBoard';
+import Board from './Board';
 
 import { Button, Row, Col, Tooltip, Space } from 'antd';
 import { message } from 'antd';
@@ -43,7 +44,31 @@ class Broadcast extends Component {
 
         this.endCallHandler = this.endCall.bind(this);
         this.rejectCallHandler = this.rejectCall.bind(this);
+
+        this.initializeBoards();
     }
+
+    initializeBoards = () => {
+        this.myBoards = new Map();
+        this.boardData = new Map();
+
+        for (var i = 1; i < 3; i++) {
+            const boardKey = `Board - ${i}`;
+            const el = <Board key={boardKey} boardId={boardKey} saveBoardData={this.saveBoardData} getBoardData={this.getBoardData} />
+            this.myBoards.set(boardKey, el);
+            this.boardData.set(boardKey, null);
+        }
+    }
+
+    saveBoardData = (boardKey, data) => {
+        this.boardData.set(boardKey, data);
+    }
+
+    getBoardData = (boardKey) => {
+        return this.boardData.get(boardKey);
+    }
+
+
 
     buildTransceivers = (peerId) => {
         this.transceivers[CONNECTION_KEY_VIDEO_STREAM] = this.buildVideoTransceiver(peerId);
@@ -203,7 +228,7 @@ class Broadcast extends Component {
 
         return (
             <div style={{ padding: 10, height: viewHeight }}>
-                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} />
+                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} myBoards={this.myBoards} getBoardData={this.getBoardData} />
                 <Row>
                     <Col span={12}></Col>
                     <Col span={12} style={{ textAlign: "right" }}>
