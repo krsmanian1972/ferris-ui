@@ -4,7 +4,7 @@ import { observer, inject } from 'mobx-react';
 import Login from './LoginScreen';
 import About from './About';
 import WorkflowUI from './guide/WorkflowUI';
-import HomeUI from './guide/HomeUI';
+import ProgramUI from './guide/ProgramUI';
 import Broadcast from './guide/Broadcast';
 
 
@@ -20,7 +20,7 @@ class SelectedComponent extends Component {
         }
         switch (currentComponent.key) {
             case 'programs': {
-                return <HomeUI />;
+                return <ProgramUI />;
             }
             case 'teams' : {
                 return <About />;

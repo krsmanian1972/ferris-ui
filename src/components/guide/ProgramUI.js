@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { Tabs } from 'antd';
-import { HistoryOutlined, ThunderboltOutlined, CalendarOutlined } from '@ant-design/icons';
+import { HistoryOutlined, ThunderboltOutlined, CalendarOutlined, HourglassOutlined } from '@ant-design/icons';
 import SessionDetail from './SessionDetail';
+import TodaySessions from './TodaySessions';
 
 const { TabPane } = Tabs;
 
@@ -18,16 +19,20 @@ class ProgramUI extends Component {
         return (
             <>
 
-                <Tabs defaultActiveKey="1" tabPosition="left" style={{ minHeight: 400}}>
+                <Tabs defaultActiveKey="1" tabPosition="top"  style={{ minHeight: 400}}>
                     <TabPane key="1" tab={<span><ThunderboltOutlined/>Current</span>}>
-                        <SessionDetail id={1}/>
+                        <SessionDetail sessionId={24}/>
                     </TabPane>
 
-                    <TabPane key="2" tab={<span><CalendarOutlined/>Next</span>}>
-                        
+                    <TabPane key="2" tab={<span><HourglassOutlined/>Today</span>}>
+                        <TodaySessions />
                     </TabPane>
 
-                    <TabPane key="3" tab={<span><HistoryOutlined/>Past</span>}>
+                    <TabPane key="3" tab={<span><CalendarOutlined/>Next</span>}>
+                        <TodaySessions />
+                    </TabPane>
+
+                    <TabPane key="4" tab={<span><HistoryOutlined/>Past</span>}>
                         
                     </TabPane>
                 </Tabs>               

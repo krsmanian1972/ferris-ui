@@ -22,17 +22,23 @@ export default class ToolBar extends Component {
     renderRoleTabs = () => {
         const appStore = this.props.appStore;
         if (!appStore.isLoggedIn()) {
-            return <></>
+            return ( 
+                <Col span={17} style={{textAlign:"right"}}>
+                    <Text strong={true}>Ferris - The Coaching Assistant</Text>
+                </Col>
+            )    
         }
 
         return (
-            <Menu theme="light" mode="horizontal" defaultSelectedKeys={['0']} >
-                {
-                    appStore.menus.map((item, index) => (
-                        <Menu.Item key={index} onClick={this.handleEvent} >{item.label}</Menu.Item>)
-                    )
-                }
-            </Menu>
+            <Col span={12}>
+                <Menu mode="horizontal" defaultSelectedKeys={['0']} style={{borderStyle:"none"}}>
+                    {
+                        appStore.menus.map((item, index) => (
+                            <Menu.Item key={index} onClick={this.handleEvent} >{item.label}</Menu.Item>)
+                        )
+                    }
+                </Menu>
+            </Col>
         )
     }
 
@@ -40,14 +46,16 @@ export default class ToolBar extends Component {
         const appStore = this.props.appStore;
         if (!appStore.isLoggedIn()) {
             return (
-                <Text strong={true}>Ferris - The Coaching Assistant</Text>
+                <></>
             )
         }
 
         return (
-            <Dropdown.Button overlay={<AccountMenu />} trigger={['click']} icon={<UserOutlined />}>
-                {appStore.credentials.username}
-            </Dropdown.Button>
+            <Col span={6}>
+                <Dropdown.Button overlay={<AccountMenu />} trigger={['click']} icon={<UserOutlined />}>
+                    {appStore.credentials.username}
+                </Dropdown.Button>
+            </Col>
         )
     }
 
@@ -58,12 +66,8 @@ export default class ToolBar extends Component {
                     <Col span={6}>
                         <img src={ownerLogo} align="left" width="100" height="62" title={caption} />
                     </Col>
-                    <Col span={12}>
-                        {this.renderRoleTabs()}
-                    </Col>
-                    <Col span={6}>
-                        {this.renderRightMenu()}
-                    </Col>
+                    {this.renderRoleTabs()}
+                    {this.renderRightMenu()}
                 </Row>
             </Header>
         )

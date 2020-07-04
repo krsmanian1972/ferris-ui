@@ -41,6 +41,7 @@ code {
   background: #fff;
 }
 
+
 .ant-carousel .slick-slide {
   text-align: center;
   line-height: 250px;
@@ -119,3 +120,42 @@ code {
   text-align: center;
   height:1%
 }
+
+.container {
+  display: flex;
+  flex-direction: column;                                                                       
+}
+
+.slot {
+  display:flex;
+  flex-direction:row;
+  padding-bottom: 3px;
+}
+
+.slot-hour {
+  display:flex;
+  flex-direction:column;
+  width:20%;
+  background-color: rgb(42,75,124);
+  border: 1px ridge rgb(42,75,124);
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  padding: 5px;
+  color:white;
+}
+
+.slot-detail {
+  width:80%;
+  display: flex;
+  padding: 5px;
+  flex-direction: column;
+  border: 1px ridge lightgray;
+}
+
+.slot-item {
+  border-left: 3px solid orange;
+  margin-top:10px;
+  padding-left: 10px;
+}
+
