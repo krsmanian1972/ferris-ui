@@ -1,0 +1,54 @@
+[
+
+    {
+        "start":"03-Jul-2020 10:00 AM",
+        "end":"03-Jul-2020 11:00 AM",
+        "coach":"Gopal",
+        "actor":"Raja",
+        "sessionId":"24",
+        "sessionDetail":"Rust Language Features - An Introduction",
+        "status":"done"
+    },
+
+    {
+        "start":"03-Jul-2020 12:00 PM",
+        "end":"03-Jul-2020 01:00 PM",
+        "coach":"Gopal",
+        "actor":"Raja",
+        "sessionId":"25",
+        "sessionDetail":"Memory Safety vs Memory Leaks",
+        "status":"cancelled"
+    },
+
+    {
+        "start":"03-Jul-2020 03:00 PM",
+        "end":"03-Jul-2020 05:00 PM",
+        "coach":"Gopal",
+        "actor":"Raja",
+        "sessionId":"26",
+        "sessionDetail":"Memory Safety vs Memory Leaks",
+        "status":""
+    },
+
+
+    {
+        "start":"03-Jul-2020 07:00 PM",
+        "end":"03-Jul-2020 09:00 PM",
+        "coach":"Gopal",
+        "actor":"Raja",
+        "sessionId":"27",
+        "sessionDetail":"Ownership and Borrowing - Significance",
+        "status":""
+    },
+
+    {
+        "start":"04-Jul-2020 10:30 AM",
+        "end":"04-Jul-2020 11:30 AM",
+        "coach":"Gopal",
+        "actor":"Raja",
+        "sessionId":"28",
+        "sessionDetail":"Introduction to Traits - Move & Copy",
+        "status":""
+    }
+ 
+]

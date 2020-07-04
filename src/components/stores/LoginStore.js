@@ -35,10 +35,10 @@ export default class LoginStore {
             return null;
         }
 
-        if (this.loginCredentials.email === 'gopal@pm-powerconsulting.com') {
+        if (this.loginCredentials.email.toLowerCase() === 'gopal@pm-powerconsulting.com') {
             return temp_coach_credentials;
         }
-        if (this.loginCredentials.email === 'raja@krscode.com') {
+        if (this.loginCredentials.email.toLowerCase() === 'raja@krscode.com') {
             return temp_member_credentials;
         }
         return null;

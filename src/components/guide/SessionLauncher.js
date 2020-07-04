@@ -73,8 +73,7 @@ class SessionLauncher extends Component {
 
     render() {
         return (
-            <Card style={{ height: 135 }}>
-                <Meta description="Launch" style={{ marginBottom: 10 }} />
+            <Card bordered={false}>
 
                 <Button type="primary" onClick={this.toggleWindowPortal}>
                     {this.getButtonLabel()}
