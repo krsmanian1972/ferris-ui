@@ -25,7 +25,7 @@ class ProgramUI extends Component {
                     </TabPane>
 
                     <TabPane key="2" tab={<span><HourglassOutlined/>Today</span>}>
-                        <TodaySessions />
+                        <TodaySessions/>
                     </TabPane>
 
                     <TabPane key="3" tab={<span><CalendarOutlined/>Next</span>}>

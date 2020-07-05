@@ -1,8 +1,8 @@
 [
 
     {
-        "start":"03-Jul-2020 10:00 AM",
-        "end":"03-Jul-2020 11:00 AM",
+        "start":"2020-07-05T14:00:00Z",
+        "end":  "2020-07-05T15:00:00Z",
         "coach":"Gopal",
         "actor":"Raja",
         "sessionId":"24",
@@ -11,8 +11,18 @@
     },
 
     {
-        "start":"03-Jul-2020 12:00 PM",
-        "end":"03-Jul-2020 01:00 PM",
+        "start":"2020-07-05T15:00:00Z",
+        "end":  "2020-07-05T16:00:00Z",
+        "coach":"Gopal",
+        "actor":"Raja",
+        "sessionId":"24",
+        "sessionDetail":"Rust Language - Constructs",
+        "status":""
+    },
+
+    {
+        "start":"2020-07-05T16:00:00Z",
+        "end":  "2020-07-05T17:00:00Z",
         "coach":"Gopal",
         "actor":"Raja",
         "sessionId":"25",
@@ -21,8 +31,8 @@
     },
 
     {
-        "start":"03-Jul-2020 03:00 PM",
-        "end":"03-Jul-2020 05:00 PM",
+        "start":"2020-07-05T18:00:00Z",
+        "end":  "2020-07-05T20:00:00Z",
         "coach":"Gopal",
         "actor":"Raja",
         "sessionId":"26",
@@ -32,8 +42,8 @@
 
 
     {
-        "start":"03-Jul-2020 07:00 PM",
-        "end":"03-Jul-2020 09:00 PM",
+        "start":"2020-07-05T20:00:00Z",
+        "end":  "2020-07-05T23:00:00Z",
         "coach":"Gopal",
         "actor":"Raja",
         "sessionId":"27",
@@ -42,8 +52,8 @@
     },
 
     {
-        "start":"04-Jul-2020 10:30 AM",
-        "end":"04-Jul-2020 11:30 AM",
+        "start":"2020-07-05T22:00:00Z",
+        "end":  "2020-07-05T23:00:00Z",
         "coach":"Gopal",
         "actor":"Raja",
         "sessionId":"28",
