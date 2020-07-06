@@ -3,6 +3,8 @@ import { observer } from 'mobx-react';
 import { DatePicker, Button, Form, Input, Tooltip, InputNumber} from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 
+const { TextArea } = Input;
+
 const formItemLayout = {
     labelCol: {
         xs: { span: 24 },
@@ -24,9 +26,14 @@ class ScheduleForm extends Component {
         //this.formRef.current.setFieldsValue({programName:'Rust the future'});
     }
 
-    handleSave = (e) => {
-        
-        
+    /**
+     * 
+     * Disable the Button and enable if error.
+     * 
+     */
+    onFinish = (values) => {
+        console.log(values);
+        this.props.sessionStore.createSchedule(values);
     }
 
     markAsDirty = (e) => {
@@ -48,22 +55,43 @@ class ScheduleForm extends Component {
     render() {
 
         return (
-            <Form {...formItemLayout} ref={this.formRef} onFinish={this.handleSave} >
-                <Form.Item 
-                        name="programName" 
-                        rules={[{ type: 'string', required: true, message: 'Please select Program Name' }]}
+            <Form {...formItemLayout} ref={this.formRef} onFinish={this.onFinish} >
+                <Form.Item name="programId" 
+                        rules={[{ required: true, message: 'Please select a Program' }]}
                         label={this.getProgramLabel()}>
                     <Input onChange={this.markAsDirty} />
                 </Form.Item>
 
+                <Form.Item name="name"  
+                        rules={[{ required: true, message: 'This is the topic of the session' }]}
+                        label="Session Name">
+                    <Input/>
+                </Form.Item>
+
+                <Form.Item 
+                        name="shortDesc"  
+                        rules={[{ required: true, message: 'Please provide a short description about this session' }]}
+                        label="Short Description">
+                    <TextArea rows={4} />
+                </Form.Item>
+
                 <Form.Item 
                         name="startTime"  
-                        rules={[{ type: 'object', required: true, message: 'Please select Session Start Time' }]}
+                        rules={[{ required: true, message: 'Please select the Start Time of this session' }]}
                         label="Start Time">
                     <DatePicker showTime format="DD-MMM-YYYY HH:mm A" />
                 </Form.Item>
 
-                <Button onClick={this.handleSave} type="primary">Save</Button>
+                <Form.Item 
+                        name="duration"  
+                        rules={[{ required: true, message: 'Please provide a duration for the session' }]}
+                        label="Duration">
+                    <InputNumber min={1} max={10} />
+                </Form.Item>
+
+                <Form.Item>
+                    <Button type="primary" htmlType="submit">Save</Button>
+                </Form.Item>
             </Form>
         );
     }

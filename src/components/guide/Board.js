@@ -240,7 +240,9 @@ class Board extends Component {
         return (
             <div style={{ padding: 0, height: screen.height }}>
                 <Row>
-                    <Col span={12}></Col>
+                    <Col span={12}>
+                        <p className="boardTitle">{this.props.boardId}</p>
+                    </Col>
                     <Col span={12} style={{ textAlign: "left" }}>
                         <Space>
                             <Tooltip title="Pen">
@@ -253,7 +255,7 @@ class Board extends Component {
 
                     </Col>
                 </Row>
-                <p className="boardTitle">{this.props.boardId}</p>
+               
                 <canvas height={screen.height} width={screen.width} className="activeBoard" key={boardKey} ref={ref => (this.canvas = ref)} />
             </div>
         )
