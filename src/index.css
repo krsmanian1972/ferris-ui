@@ -145,6 +145,7 @@ code {
   color:white;
 }
 
+
 .slot-detail {
   width:80%;
   display: flex;
@@ -153,9 +154,31 @@ code {
   border: 1px ridge lightgray;
 }
 
+
 .slot-item {
-  border-left: 3px solid orange;
+  border-left: 3px solid blue;
   margin-top:10px;
   padding-left: 10px;
+  display:flex;
+  flex-direction: column;
 }
 
+.slot-title {
+  font-weight: bold; 
+}
+
+.cancelled {
+  border-left: 3px solid black;
+}
+
+.overdue {
+  border-left: 4px solid red;
+}
+
+.current {
+  border-left: 3px solid orange;
+}
+
+.done {
+  border-left: 3px solid green;
+}
