@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import Tools from './Tools';
 import { Button, Row, Col, Tooltip, Space } from 'antd';
 import { message } from 'antd';
 import { EditOutlined, ItalicOutlined } from '@ant-design/icons';
