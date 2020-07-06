@@ -1,8 +1,18 @@
 import React, { Component } from 'react';
+import Tools from './Tools';
+import { Button, Row, Col, Tooltip, Space } from 'antd';
+import { message } from 'antd';
+import { EditOutlined, ItalicOutlined } from '@ant-design/icons';
 
-const cursorColour = '#FFFFFF';
+const POINTER = 'Pointer';
+const PEN ='PEN';
+const ERASER = 'ERASER';
+const TEXTBOX = 'TEXTBOX';
+const DEFAULT = '';
+
+const cursorColour = '#000000';
 const cursorBlinkSpeed = 1*1000;
-const backgroundColour = '#666';
+const backgroundColour = '#FFFFFF';
 const cursorSize = { width: 1, height: 15 };
 
 class Board extends Component {
@@ -15,6 +25,15 @@ class Board extends Component {
         this.canWrite = -1;
         this.textWidth = 0;
         this.cursorPos= { x: 0, y: 0 };
+        this.mode = DEFAULT;
+        this.gridPixelSize = 16;
+        this.majorGrid = this.gridPixelSize*10
+        this.majorGridLineWidth = 1
+        this.minorGridLineWidth = 0.5
+        this.state = {
+            penShape : "square",
+            textBoxShape: "square"
+        }; 
     }
 
     componentDidMount() {
@@ -25,21 +44,76 @@ class Board extends Component {
         this.cursorPos= { x: 0, y: 0 };
 
         this.ctx = this.canvas.getContext("2d");
-        this.ctx.font = "16px Arial";
+        this.ctx.font = "16px Courier";
         this.ctx.fillStyle = "white";
 
         var temp = this.ctx.measureText('M');
         this.yOffset = temp.actualBoundingBoxAscent;
         this.textWidth = temp.width;
-
+        this.drawGrid();    
         this.canvas.addEventListener("dblclick", this.toggleWriting);
+        //In mouse down start drawing
+        this.canvas.addEventListener('mousedown', (e) => {
+
+        this.ctx.beginPath();
+        
+        if (this.mode === TEXTBOX){
+                if(e.buttons === 1){
+                    this.textBox(e);
+                }
+            }
+
+        });
+
+        this.canvas.addEventListener('mousemove', (e) => {
+            if(this.mode === PEN){
+            
+                // Check whether we're holding the left click down while moving the mouse
+                if (e.buttons === 1) {
+                    this.paint(e);
+                }
+            
+            }
+        });
         window.addEventListener("keypress", this.write);
         this.restore();
     }
-
     componentWillUnmount() {
         
         this.save();
+    }
+
+    drawGrid = () => {
+        this.ctx.lineWidth = 0.5;
+        this.ctx.strokeStyle = '#FFFFFF';
+        
+        // horizontal grid lines
+        for (var i = 0; i <= this.canvas.height; i = i + this.gridPixelSize) {
+          this.ctx.beginPath();
+          this.ctx.moveTo(0, i);
+          this.ctx.lineTo(this.canvas.width, i);
+          if (i % parseInt(this.majorGrid) == 0) {
+            this.ctx.lineWidth = this.majorGridLineWidth;
+          } else {
+            this.ctx.lineWidth = this.minorGridLineWidth;
+          }
+          this.ctx.closePath();
+          this.ctx.stroke();
+        }
+      
+        // // vertical grid lines
+        for (var j = 0; j <= this.canvas.width; j = j + this.gridPixelSize) {
+          this.ctx.beginPath();
+          this.ctx.moveTo(j, 0);
+          this.ctx.lineTo(j, this.canvas.height);
+          if (j % parseInt(this.majorGrid) == 0) {
+            this.ctx.lineWidth = this.majorGridLineWidth;
+          } else {
+            this.ctx.lineWidth = this.minorGridLineWidth;
+          }
+          this.ctx.closePath();
+          this.ctx.stroke();
+        }
     }
 
     save = () => {
@@ -56,33 +130,26 @@ class Board extends Component {
         img.src = this.props.getBoardData(this.props.boardId);
     }
 
-    toggleWriting = (event) => {
-        if (!this.canvas) {
-            return;
+    textBox = (event) => {
+        if(this.mode === TEXTBOX) {
+            if (!this.canvas) {
+                return;
+            }
+            this.sentence = '';
+            clearInterval(this.cursorBlinkFunc);
+            this.ctx.beginPath();
+            this.ctx.clearRect(this.cursorPos.x, this.cursorPos.y - 5, 8, 8);
+            console.log("writing!!");
+            // Place Cursor at the double clicked Position
+            var rect = this.canvas.getBoundingClientRect();
+    
+            this.x = Math.round((event.clientX - rect.left)/this.gridPixelSize*this.gridPixelSize);
+            this.y = Math.round((event.clientY - rect.top)/this.gridPixelSize*this.gridPixelSize);
+            console.log(this.x, this.y);
+            this.cursorPos = {x:this.x, y:this.y - 10};
+            this.cursorBlinkFunc = setInterval(this.cursorBlink, cursorBlinkSpeed);
+
         }
-
-        this.canWrite = this.canWrite == -1 ? 0 : -1;
-
-        if (this.canWrite == -1) {
-            // Remove any dangling cursor
-            return;
-        }
-
-        this.eraseCursor();
-        this.ctx.clearRect(this.cursorPos.x, this.cursorPos.y - 5, 5, 5);
-
-        // Place Cursor at the double clicked Position
-        this.ctx.beginPath();
-        var rect = this.canvas.getBoundingClientRect();
-
-        this.x = event.clientX - rect.left;
-        this.y = event.clientY - rect.top;
-
-        this.cursorPos = {x:this.x, y:this.y - 10};
-
-        this.cursorBlinkFunc = setInterval(this.cursorBlink, cursorBlinkSpeed);
-        
-        this.sentence = '';
     }
 
     cursorBlink = () => {
@@ -134,14 +201,62 @@ class Board extends Component {
         this.cursorBlinkFunc = setInterval(this.cursorBlink, cursorBlinkSpeed);
     }
 
+    paint = (e) => {
+        
+        const rect = this.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        this.ctx.strokeStyle = cursorColour;
+        this.ctx.lineWidth = cursorSize.width;
+        this.ctx.lineJoin = 'round';
+        this.ctx.lineCap = 'round';
+        this.ctx.lineTo(x, y);
+        this.ctx.stroke();
+
+    }
+
+    freeDrawing = () => {
+        console.log("FreeDrawing!!");
+        this.mode = PEN;
+        //stop the cursor blink
+        clearInterval(this.cursorBlinkFunc);
+        this.ctx.beginPath();
+        this.ctx.clearRect(this.cursorPos.x, this.cursorPos.y - 5, 8, 8);
+
+        this.setState ({penShape : 'square', textBoxShape : 'circle'});
+    }
+    textWrite = () => {
+        this.mode = TEXTBOX;
+        this.setState ({penShape : 'circle', textBoxShape : 'square'});
+        console.log("TextBox!!");
+
+    }
+
+
     render() {
         const boardKey = `canvas-${this.props.boardId}`;
 
+
         return (
-            <>
+            <div style={{ padding: 0, height: screen.height }}>
+                <Row>
+                    <Col span={12}></Col>
+                    <Col span={12} style={{ textAlign: "left" }}>
+                        <Space>
+                            <Tooltip title="Pen">
+                                <Button onClick={this.freeDrawing} id="pen" type="primary" icon={<EditOutlined />} shape= {this.state.penShape} />
+                            </Tooltip>
+                            <Tooltip title="TextBox">
+                                <Button onClick={this.textWrite} id="pen" type="primary" icon={<ItalicOutlined />} shape={this.state.textBoxShape} />
+                            </Tooltip>
+                        </Space>
+
+                    </Col>
+                </Row>
                 <p className="boardTitle">{this.props.boardId}</p>
                 <canvas height={screen.height} width={screen.width} className="activeBoard" key={boardKey} ref={ref => (this.canvas = ref)} />
-            </>
+            </div>
         )
     }
 }
