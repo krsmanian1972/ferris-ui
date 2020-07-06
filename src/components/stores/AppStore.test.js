@@ -9,12 +9,11 @@ it('Load Login Page if no local storage is set', () =>{
     expect(appStore.credentials.token).toEqual("");
     expect(appStore.credentials.userFuzzyId).toEqual("");
 
-    expect(appStore.currentComponent.key).toEqual("Login");
-    expect(appStore.currentComponent.label).toEqual("Login");
+    expect(appStore.currentComponent.key).toEqual("login");
     expect(appStore.currentComponent.isLandingPage).toEqual(true);
 })
 
-it('should setCredentials upon succeddful authentication', async () => {
+it('should setCredentials upon successful authentication', async () => {
     const loginCredentials = require('./test_data/loginCredentials.test.json');
 
     const apiProxy = new MockAPIProxy(loginCredentials);

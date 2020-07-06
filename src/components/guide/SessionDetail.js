@@ -35,8 +35,13 @@ class SessionDetail extends Component {
                 <Card>
                     <Meta
                         description="This is the 1st of the series of sessions on Traits by Gopal."
-                        style={{ marginBottom: 10 }}
                     />
+                </Card>
+
+                <Card>
+                    <Meta description="Schedule" style={{ marginBottom: 10 }} />
+                    <Moment format="llll" style={{fontWeight:"bold"}}>{deadline}</Moment>
+                    <SessionLauncher title="Traits in Rust" sessionId="24" />
                 </Card>
 
                 <Card>
@@ -53,12 +58,7 @@ class SessionDetail extends Component {
                     <PeerStatus fuzzyId={"9-9"} />
                 </Card>
 
-                <Card>
-                    <Meta description="Schedule" style={{ marginBottom: 10 }} />
-                    <Moment format="llll" style={{"fontWeight":"bold"}}>{deadline}</Moment>
-                </Card>
-
-                <SessionLauncher title="Traits in Rust" sessionId="24" />
+                
             </Card>
         )
     }

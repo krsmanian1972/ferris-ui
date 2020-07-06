@@ -3,6 +3,11 @@
         "label": "Programs",
         "key": "programs",
         "isLandingPage": true
+    },
+    {
+        "label": "Reports",
+        "key": "about",
+        "isLandingPage": false
     }
 
 ]

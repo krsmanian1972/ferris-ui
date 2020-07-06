@@ -3,12 +3,11 @@ import PropTypes from 'prop-types';
 
 import { inject, observer } from 'mobx-react';
 
-import { Card, Button } from 'antd';
+import { Button } from 'antd';
 
 import {baseUrl} from '../stores/APIEndpoints'; 
 
 
-const { Meta } = Card;
 
 
 @inject("appStore")
@@ -73,8 +72,7 @@ class SessionLauncher extends Component {
 
     render() {
         return (
-            <Card bordered={false}>
-
+            <div style={{paddingTop: 10}}>
                 <Button type="primary" onClick={this.toggleWindowPortal}>
                     {this.getButtonLabel()}
                 </Button>
@@ -82,7 +80,7 @@ class SessionLauncher extends Component {
                 {this.state.showWindowPortal && (
                     this.openWindow("broadcast")
                 )}
-            </Card>
+            </div>
         )
     }
 }

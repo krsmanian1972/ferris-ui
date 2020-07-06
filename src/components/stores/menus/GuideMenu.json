@@ -14,6 +14,11 @@
         "label": "Planning",
         "key":  "planning",
         "isLandingPage": false
+    },
+    {
+        "label": "Reports",
+        "key":  "about",
+        "isLandingPage": false
     }
 
 ]

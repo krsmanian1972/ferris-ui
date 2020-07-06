@@ -121,9 +121,9 @@ code {
   height:1%
 }
 
-.container {
+.slot-container {
   display: flex;
-  flex-direction: column;                                                                       
+  flex-direction: column;                                                            
 }
 
 .slot {
