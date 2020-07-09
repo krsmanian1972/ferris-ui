@@ -1,0 +1,11 @@
+"""An object with an ID"""
+
+type User {
+  fuzzyId: ID!
+  name: String!
+  email: String!
+}
+
+type Query {
+  user(fuzzyId: ID!): User
+}

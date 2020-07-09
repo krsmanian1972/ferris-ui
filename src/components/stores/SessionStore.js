@@ -1,12 +1,12 @@
 import { decorate, observable, flow, action } from 'mobx';
 
-import {backendHost} from './APIEndpoints';
+import { apiHost } from './APIEndpoints';
 
 const PENDING = 'pending';
 const DONE = 'done';
 const ERROR = 'error';
 
-emptySession = { duration: 0, name: null, programId: 0, shortDesc: null, startTime: null };
+const emptySession = { duration: 0, name: null, programId: 0, shortDesc: null, startTime: null };
 
 export default class SessionStore {
 
@@ -23,25 +23,37 @@ export default class SessionStore {
         this.sessionListStore = props.sessionListStore;
     }
 
-    
+
 
     /**
      *
-     * @param {duration: 1; name: "Rust Actix", programId: "1", shortDesc: "A session on rust with actor model",startTime:} sessionRequest 
+     * @param {duration: 1; name: "Rust Actix", programId: "1", shortDesc: "A session on rust with actor model",originalStartDate: } sessionRequest 
      */
     createSchedule = async (sessionRequest) => {
+
         this.state = PENDING;
         this.isError = false;
         this.message = '';
 
-        {"query":"mutation {
-              createUser(registration:{fullName:\"Raja\",email:\"raja@krscode.com\"})
-                {fuzzyId    name }
-            }",
+        const queryString = `mutation($input: NewSessionRequest!) {
+            createSession(newSessionRequest:$input) {
+              fuzzyId
+              name
+            } 
+        }`
+
+        const variables = {
+            input: {
+                programId: 1,
+                name: "Session on TDD",
+                description: "This is the third session description",
+                duration: 1,
+                startTime: "2020-07-09 15:00:00"
+            }
         }
 
         try {
-            const response = await this.apiProxy.asyncPost(backendHost, { userId: this.copyeditor.userId, ...values });
+            const response = await this.apiProxy.mutate(apiHost, queryString, variables);
             const data = await response.json();
 
             if (data.error == true) {
@@ -50,17 +62,12 @@ export default class SessionStore {
                 this.state = DONE;
                 return;
             }
-
-            this.copyeditor = data;
-
-            this.informPeerStores();
-
-            this.isPrimaryDirty = false;
-            this.activeTab = '1';
+            this.session = data;
             this.state = DONE;
         }
         catch (e) {
             this.state = ERROR;
+            console.log(e);
         }
 
     }

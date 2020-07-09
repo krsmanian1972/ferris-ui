@@ -8,9 +8,6 @@
 		},
 		{
 			"path": "../../../../ferex"
-		},
-		{
-			"path": "../../../../../rust/ferric"
 		}
 	],
 	"settings": {

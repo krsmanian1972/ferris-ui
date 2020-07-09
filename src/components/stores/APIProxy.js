@@ -11,7 +11,7 @@ export default class APIProxy {
     this.authHeaders = {
       'token': credentials.token,
       'email': credentials.email,
-      'userFuzzyId':credentials.userFuzzyId
+      'userFuzzyId': credentials.userFuzzyId
     }
   }
 
@@ -42,6 +42,33 @@ export default class APIProxy {
         action(json);
       });
   }
+
+  query(url, queryString,variables) {
+    return fetch(url, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'access-control-allow-origin': '*',
+        ...this.authHeaders
+      },
+      body: JSON.stringify({queryString,variables})
+    });
+  }
+
+  mutate(url, mutationQueryString,variables) {
+    return fetch(url, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'access-control-allow-origin': '*',
+        ...this.authHeaders
+      },
+      body: JSON.stringify({query: mutationQueryString,variables})
+    });
+  }
+
 
   asyncPost(url, bodyParams) {
     return fetch(url, {

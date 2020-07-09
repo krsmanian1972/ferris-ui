@@ -33,7 +33,9 @@ class ScheduleForm extends Component {
      */
     onFinish = (values) => {
         console.log(values);
-        this.props.sessionStore.createSchedule(values);
+        console.log(values.startTime.format());
+        console.log(values.startTime.utc().format());
+        //this.props.sessionStore.createSchedule(values);
     }
 
     markAsDirty = (e) => {
@@ -59,7 +61,7 @@ class ScheduleForm extends Component {
                 <Form.Item name="programId" 
                         rules={[{ required: true, message: 'Please select a Program' }]}
                         label={this.getProgramLabel()}>
-                    <Input onChange={this.markAsDirty} />
+                    <InputNumber/>
                 </Form.Item>
 
                 <Form.Item name="name"  
@@ -69,7 +71,7 @@ class ScheduleForm extends Component {
                 </Form.Item>
 
                 <Form.Item 
-                        name="shortDesc"  
+                        name="description"  
                         rules={[{ required: true, message: 'Please provide a short description about this session' }]}
                         label="Short Description">
                     <TextArea rows={4} />
@@ -86,7 +88,7 @@ class ScheduleForm extends Component {
                         name="duration"  
                         rules={[{ required: true, message: 'Please provide a duration for the session' }]}
                         label="Duration">
-                    <InputNumber min={1} max={10} />
+                    <InputNumber min={1} max={8} />
                 </Form.Item>
 
                 <Form.Item>
