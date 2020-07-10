@@ -87,7 +87,7 @@ class ScheduleForm extends Component {
                 <Form.Item 
                         name="duration"  
                         rules={[{ required: true, message: 'Please provide a duration for the session' }]}
-                        label="Duration">
+                        label="Duration (Hrs)">
                     <InputNumber min={1} max={8} />
                 </Form.Item>
 

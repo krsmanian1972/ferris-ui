@@ -1,4 +1,4 @@
-export const baseUrl = 'http://localhost:3000';
+export const baseUrl = 'https://krscode.com';
 
 let backendHost = 'https://krscode.com/graphql';
 let authLoginUrl = 'https://krscode.com/auth/';

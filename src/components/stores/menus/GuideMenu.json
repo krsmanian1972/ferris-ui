@@ -1,13 +1,12 @@
 [
     {
-        "label": "Programs",
-        "key": "programs",
+        "label": "Home",
+        "key": "home",
         "isLandingPage": true
     },
-
     {
-        "label": "Teams",
-        "key": "teams",
+        "label": "Programs",
+        "key": "programs",
         "isLandingPage": false
     },
     {

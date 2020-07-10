@@ -15,7 +15,7 @@ const { TabPane } = Tabs;
 
 @inject("appStore")
 @observer
-class ProgramUI extends Component {
+class HomeUI extends Component {
     constructor(props) {
         super(props);
 
@@ -62,5 +62,4 @@ class ProgramUI extends Component {
         )
     }
 }
-
-export default ProgramUI
+export default HomeUI

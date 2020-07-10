@@ -5,17 +5,19 @@ import _ from 'lodash';
 import socket from '../stores/socket';
 import VideoStreamTransceiver from '../webrtc/VideoStreamTransceiver';
 import ScreenStreamTransceiver from '../webrtc/ScreenStreamTransceiver';
+import NotesListStore from '../stores/NotesListStore';
+import NotesStore from '../stores/NotesStore';
 
+import NotesDrawer from './NotesDrawer';
 import VideoBoard from './VideoBoard';
 import Board from './Board';
 
 import { Button, Row, Col, Tooltip, Space } from 'antd';
 import { message } from 'antd';
-import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined } from '@ant-design/icons';
+import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutlined } from '@ant-design/icons';
 
 const CONNECTION_KEY_VIDEO_STREAM = "peerVideoStream";
 const CONNECTION_KEY_SCREEN_STREAM = "peerScreenStream";
-
 
 @inject("appStore")
 @observer
@@ -45,6 +47,17 @@ class Broadcast extends Component {
         this.endCallHandler = this.endCall.bind(this);
         this.rejectCallHandler = this.rejectCall.bind(this);
 
+        this.notesListStore = new NotesListStore({ 
+            apiProxy: props.appStore.apiProxy,
+            sessionId: props.appStore.sessionId, 
+        });
+        
+        this.notesStore = new NotesStore({ 
+            apiProxy: props.appStore.apiProxy,
+            notesListStore: this.notesListStore,
+            sessionId: props.appStore.sessionId,
+        });
+
         this.initializeBoards();
     }
 
@@ -67,8 +80,6 @@ class Broadcast extends Component {
     getBoardData = (boardKey) => {
         return this.boardData.get(boardKey);
     }
-
-
 
     buildTransceivers = (peerId) => {
         this.transceivers[CONNECTION_KEY_VIDEO_STREAM] = this.buildVideoTransceiver(peerId);
@@ -211,28 +222,26 @@ class Broadcast extends Component {
         this.registerSocketHooks();
     }
 
-    shareSreenButton = () => {
-        const canShare = this.peerStreamStatus === "active";
-        return (
-            <Tooltip title="Share Screen">
-                <Button onClick={this.shareScreen} disabled={!canShare} id="screenShare" type="primary" icon={<ShareAltOutlined />} shape="circle" />
-            </Tooltip>
-        )
+    showNotes = () => {
+        this.notesStore.showDrawer = true;
     }
-
 
     render() {
         const { localSrc, peerSrc, screenSrc, portalSize } = this.state;
-        const viewHeight = portalSize.height * 0.95;
+        const viewHeight = portalSize.height * 0.94;
         const canShare = this.peerStreamStatus === "active";
 
         return (
-            <div style={{ padding: 10, height: viewHeight }}>
+            <div style={{ padding: 8, height: viewHeight }}>
                 <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} myBoards={this.myBoards} getBoardData={this.getBoardData} />
-                <Row>
-                    <Col span={12}></Col>
+                <Row style={{marginTop:2}}>
+                    <Col span={12}>
+                    </Col>
                     <Col span={12} style={{ textAlign: "right" }}>
                         <Space>
+                            <Tooltip title="Notes">
+                                <Button onClick={this.showNotes} disabled={false} id="notes" type="primary" icon={<BookOutlined />} shape="circle" />
+                            </Tooltip>
                             <Tooltip title="Share Screen">
                                 <Button onClick={this.shareScreen} disabled={!canShare} id="screenShare" type="primary" icon={<ShareAltOutlined />} shape="circle" />
                             </Tooltip>
@@ -248,6 +257,7 @@ class Broadcast extends Component {
                         </Space>
                     </Col>
                 </Row>
+                <NotesDrawer notesStore = {this.notesStore} />
             </div>
         )
     }
