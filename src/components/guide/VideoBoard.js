@@ -10,7 +10,7 @@ const standardStyle = {
     overflow: "hidden",
 };
 
-function VideoBoard({ localSrc, peerSrc, screenSrc, myBoards, getBoardData }) {
+function VideoBoard({ localSrc, peerSrc, screenSrc, myBoards, getBoardData, backGround }) {
 
     const [peerKey, setPeerKey] = useState('none');
     const [myKey, setMyKey] = useState('none');
@@ -146,6 +146,7 @@ VideoBoard.propTypes = {
     screenSrc: PropTypes.object,
     myBoards: PropTypes.object,
     getBoardData: PropTypes.func,
+    backGround: PropTypes.object,
 };
 
 export default VideoBoard;

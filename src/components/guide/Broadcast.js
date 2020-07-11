@@ -35,6 +35,7 @@ class Broadcast extends Component {
             localSrc: null,
             peerSrc: null,
             screenSrc: null,
+            localBG:null,
 
             portalSize: { height: window.innerHeight, width: window.innerWidth }
         };
@@ -227,13 +228,13 @@ class Broadcast extends Component {
     }
 
     render() {
-        const { localSrc, peerSrc, screenSrc, portalSize } = this.state;
+        const { localSrc, peerSrc, screenSrc, portalSize, localBG } = this.state;
         const viewHeight = portalSize.height * 0.94;
         const canShare = this.peerStreamStatus === "active";
 
         return (
             <div style={{ padding: 8, height: viewHeight }}>
-                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} myBoards={this.myBoards} getBoardData={this.getBoardData} />
+                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} myBoards={this.myBoards} getBoardData={this.getBoardData} backGround={localBG}/>
                 <Row style={{marginTop:2}}>
                     <Col span={12}>
                     </Col>

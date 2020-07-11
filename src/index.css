@@ -112,7 +112,14 @@ code {
 
 .activeBoard {
   background-color: rgba(100,100,100,0.5);
+  style: {{zIndex: 0}};  
+
 }
+.activeBoardBG {
+  background-color: rgba(100,100,100,0.5);
+  style: {zIndex: 1};
+}
+
 
 .boardTitle {
   color:white;
