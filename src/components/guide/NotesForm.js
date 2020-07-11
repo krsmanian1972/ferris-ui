@@ -32,7 +32,7 @@ class NotesForm extends Component {
      * 
      */
     onFinish = (values) => {
-        //this.props.notesStore.createNotes(values);
+        console.log(values);
     }
 
     markAsDirty = (e) => {
@@ -69,7 +69,7 @@ class NotesForm extends Component {
                     valuePropName="fileList"
                     getValueFromEvent={this.normFile}
                 >
-                    <Upload name="logo" action="/upload.do" listType="picture">
+                    <Upload name="file" action="http://localhost:8088/upload" listType="picture">
                         <Button>
                             <UploadOutlined /> Click to upload
                         </Button>
