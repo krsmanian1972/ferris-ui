@@ -50,6 +50,8 @@ class NotesForm extends Component {
 
     render() {
 
+        const fuzzyId = this.props.notesStore.sessionFuzzyId;
+
         return (
             <Form layout="vertical" ref={this.formRef} onFinish={this.onFinish} >
                 <Form.Item
@@ -69,7 +71,7 @@ class NotesForm extends Component {
                     valuePropName="fileList"
                     getValueFromEvent={this.normFile}
                 >
-                    <Upload name="file" action="http://localhost:8088/upload" listType="picture">
+                    <Upload name={fuzzyId} action="http://localhost:8088/upload" listType="picture">
                         <Button>
                             <UploadOutlined /> Click to upload
                         </Button>

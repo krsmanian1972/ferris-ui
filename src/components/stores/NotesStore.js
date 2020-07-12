@@ -12,7 +12,8 @@ export default class NotesStore {
     state = DONE;
 
     showDrawer = false;
-    sessionId = 0;
+    sessionId = 24;
+    sessionFuzzyId="abc-34-123";
     notesId = 0;
 
     isError = false;
@@ -40,6 +41,7 @@ export default class NotesStore {
 decorate(NotesStore, {
     showDrawer: observable,
     sessionId: observable,
+    sessionFuzzyId: observable,
     notesId: observable,
     createNotes: action,
 });
