@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Button, Row, Col, Tooltip, Space } from 'antd';
 import { message } from 'antd';
 import { EditOutlined, ItalicOutlined, UndoOutlined, RedoOutlined, ScissorOutlined } from '@ant-design/icons';
-
+import socket from '../stores/socket';
 const POINTER = 'Pointer';
 const PEN = 'PEN';
 const ERASER = 'ERASER';
@@ -38,6 +38,7 @@ class Board extends Component {
             penShape: unselected,
             textBoxShape: unselected,
         };
+        
     }
 
     componentDidMount() {
@@ -122,7 +123,9 @@ class Board extends Component {
     pushUndoList = () => {
          console.log("content pushed");
          console.log(this.undoList.length);
-         this.undoList.push(this.canvas.toDataURL());
+         var screenShot = this.canvas.toDataURL();
+         console.log(this.props.fileName);
+         socket.emit('canvasupstream', {content: screenShot, name:this.props.fileName});
     }
 
     save = () => {
@@ -213,7 +216,7 @@ class Board extends Component {
 
         var c = String.fromCharCode(event.keyCode);
         console.log(event.keyCode);
-        if(event.keyCode === 13)     {                                                                                                                                                                                                                                                                   
+        if(event.keyCode === 13){
             console.log("Enter key pressed");
             this.newLine();
             c = '';

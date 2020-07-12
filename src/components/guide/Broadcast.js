@@ -36,7 +36,7 @@ class Broadcast extends Component {
             peerSrc: null,
             screenSrc: null,
             localBG:null,
-
+            minimizeMiniBoard:false,
             portalSize: { height: window.innerHeight, width: window.innerWidth }
         };
 
@@ -68,7 +68,8 @@ class Broadcast extends Component {
 
         for (var i = 1; i < 3; i++) {
             const boardKey = `Board - ${i}`;
-            const el = <Board key={boardKey} boardId={boardKey} saveBoardData={this.saveBoardData} getBoardData={this.getBoardData} />
+            const fileName = `${this.props.appStore.sessionId}_${this.props.appStore.credentials.userFuzzyId}_${i}`;
+            const el = <Board key={boardKey} boardId={boardKey} saveBoardData={this.saveBoardData} getBoardData={this.getBoardData} fileName={fileName} />
             this.myBoards.set(boardKey, el);
             this.boardData.set(boardKey, null);
         }
@@ -226,6 +227,19 @@ class Broadcast extends Component {
     showNotes = () => {
         this.notesStore.showDrawer = true;
     }
+    minimizeMiniBoard = () => {
+	console.log("Called in Broadcast.js");
+        if(this.state.minimizeMiniBoard === true)
+        {
+		this.setState({ minimizeMiniBoard: false });
+        }
+        else 
+        {
+		this.setState({ minimizeMiniBoard: true });
+        }
+        
+        
+    }
 
     render() {
         const { localSrc, peerSrc, screenSrc, portalSize, localBG } = this.state;
@@ -234,7 +248,7 @@ class Broadcast extends Component {
 
         return (
             <div style={{ padding: 8, height: viewHeight }}>
-                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} myBoards={this.myBoards} getBoardData={this.getBoardData} backGround={localBG}/>
+                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} myBoards={this.myBoards} getBoardData={this.getBoardData} backGround={localBG} minmizeMiniBoard={this.state.minimizeMiniBoard}/>
                 <Row style={{marginTop:2}}>
                     <Col span={12}>
                     </Col>
@@ -255,6 +269,10 @@ class Broadcast extends Component {
                             <Tooltip title="Close Activity">
                                 <Button disabled={true} type="primary" icon={<StopOutlined />} shape="circle" />
                             </Tooltip>
+                            <Tooltip title="Minimize Mini Board">
+                                <Button onClick={this.minimizeMiniBoard} type="primary" icon={<StopOutlined />} shape="circle" />
+                            </Tooltip>
+
                         </Space>
                     </Col>
                 </Row>
