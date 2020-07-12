@@ -74,7 +74,6 @@ code {
   bottom: 0;
   left: 0;
   width: 45%;
-  height: 15%;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -87,7 +86,6 @@ code {
   bottom: 0;
   right: 0;
   width: 45%;
-  height: 15%;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -112,12 +110,12 @@ code {
 
 .activeBoard {
   background-color: rgba(100,100,100,0.5);
-  style: {{zIndex: 0}};  
+  z-index: 0;  
 
 }
 .activeBoardBG {
   background-color: rgba(100,100,100,0.5);
-  style: {zIndex: 1};
+  z-index: 1;  
 }
 
 
