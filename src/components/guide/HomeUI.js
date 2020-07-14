@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {inject, observer } from 'mobx-react';
-import { Tabs, Button, Tooltip } from 'antd';
+import { PageHeader, Tabs, Button, Tooltip } from 'antd';
 import { ThunderboltOutlined, CalendarOutlined, HourglassOutlined, PlusCircleOutlined } from '@ant-design/icons';
 
 import SessionDetail from './SessionDetail';
@@ -10,6 +10,7 @@ import SessionListStore from '../stores/SessionListStore';
 import SessionStore from '../stores/SessionStore';
 
 import ScheduleDrawer from './ScheduleDrawer';
+import ProgramListStore from '../stores/ProgramListStore';
 
 const { TabPane } = Tabs;
 
@@ -19,11 +20,14 @@ class HomeUI extends Component {
     constructor(props) {
         super(props);
 
+        this.programListStore = new ProgramListStore({apiProxy: props.appStore.apiProxy});
+
         this.sessionListStore = new SessionListStore({ apiProxy: props.appStore.apiProxy });
         
         this.sessionStore = new SessionStore({ 
             apiProxy: props.appStore.apiProxy,
-            sessionListStore: this.sessionListStore
+            sessionListStore: this.sessionListStore,
+            programListStore: this.programListStore
             });
     }
 
@@ -34,7 +38,7 @@ class HomeUI extends Component {
 
     newScheduleButton = () => {
         return (
-            <Tooltip title="Create New Session">
+            <Tooltip key="new_session_tip" title="Create Session">
                 <Button type="primary" icon={<PlusCircleOutlined />} onClick={()=>this.showNewSchedule()}>New</Button>
             </Tooltip>
         )
@@ -43,7 +47,13 @@ class HomeUI extends Component {
     render() {
         return (
             <>
-                <Tabs defaultActiveKey="1" tabPosition="top" style={{ minHeight: 450 }} tabBarExtraContent={this.newScheduleButton()}>
+                <PageHeader title="Your Sessions"
+                    extra={[
+                        this.newScheduleButton()
+                    ]}>
+                </PageHeader>
+
+                <Tabs defaultActiveKey="1" tabPosition="top" style={{ minHeight: 450 }}>
                     <TabPane key="1" tab={<span><ThunderboltOutlined />Current</span>} style={{ maxHeight: 450, overflow: "auto" }}>
                         <SessionDetail sessionId={24} sessionStore = {this.sessionStore}/>
                     </TabPane>

@@ -1,34 +1,31 @@
 import { decorate, observable, action } from 'mobx';
 
 import { apiHost } from './APIEndpoints';
-import {createSessionQuery} from './Queries';
+import {createProgramQuery} from './Queries';
 
 const PENDING = 'pending';
 const DONE = 'done';
 const ERROR = 'error';
 
-const emptySession = { duration: 0, name: null, programId: 0, shortDesc: null, startTime: null };
-
-export default class SessionStore {
+export default class ProgramStore {
 
     state = DONE;
 
     showDrawer = false;
-    sessionId = 0;
+    programId = 0;
 
     isError = false;
     message = '';
 
     constructor(props) {
         this.apiProxy = props.apiProxy;
-        this.sessionListStore = props.sessionListStore;
         this.programListStore = props.programListStore;
     }
 
     /**
-     * Creating a New Session.
+     * Create New Program using the programRequest
      */
-    createSchedule = async (sessionRequest) => {
+    createProgram = async (programRequest) => {
 
         this.state = PENDING;
         this.isError = false;
@@ -36,16 +33,14 @@ export default class SessionStore {
 
         const variables = {
             input: {
-                programFuzzyId: sessionRequest.programFuzzyId,
-                name: sessionRequest.name,
-                description: sessionRequest.description,
-                duration: sessionRequest.duration,
-                startTime: sessionRequest.startTime.utc().format(),
+                name: programRequest.name,
+                description: programRequest.description,
+                coachFuzzyId:this.apiProxy.getUserFuzzyId()
             }
         }
 
         try {
-            const response = await this.apiProxy.mutate(apiHost, createSessionQuery, variables);
+            const response = await this.apiProxy.mutate(apiHost, createProgramQuery, variables);
             const data = await response.json();
 
             if (data.error == true) {
@@ -54,10 +49,10 @@ export default class SessionStore {
                 this.state = DONE;
                 return;
             }
-            this.session = data;
+            this.program = data;
             this.state = DONE;
             this.showDrawer = false;
-            this.sessionListStore.buildRoster();
+            this.programListStore.fetchPrograms();
         }
         catch (e) {
             this.state = ERROR;
@@ -68,8 +63,8 @@ export default class SessionStore {
 
 }
 
-decorate(SessionStore, {
+decorate(ProgramStore, {
     showDrawer: observable,
-    sessionId: observable,
-    createSchedule: action,
+    programId: observable,
+    createProgram: action,
 });

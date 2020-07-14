@@ -1,0 +1,28 @@
+{
+    "data": {
+      "getPrograms": [
+        {
+          "program": {
+            "fuzzyId": "8b3bc8c2-d9f2-4a5b-9c1c-7657a37211df",
+            "active": true,
+            "name": "Rust Language",
+            "description": "The Book of Rust Language"
+          },
+          "coach": {
+            "email": "raja@krscode.com"
+          }
+        },
+        {
+          "program": {
+            "fuzzyId": "523b5daf-40ec-4a85-9eec-5c75c62e7bb8",
+            "active": true,
+            "name": "React with NodeJs",
+            "description": "Advanced Lectures"
+          },
+          "coach": {
+            "email": "raja@krscode.com"
+          }
+        }
+      ]
+    }
+  }

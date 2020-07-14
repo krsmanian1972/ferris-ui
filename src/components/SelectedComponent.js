@@ -4,6 +4,7 @@ import { observer, inject } from 'mobx-react';
 import Login from './LoginScreen';
 import About from './About';
 import WorkflowUI from './guide/WorkflowUI';
+import ProgramUI from './guide/ProgramUI';
 import HomeUI from './guide/HomeUI';
 import Broadcast from './guide/Broadcast';
 
@@ -23,7 +24,7 @@ class SelectedComponent extends Component {
                 return <HomeUI />;
             }
             case 'programs': {
-                return <About />;
+                return <ProgramUI />;
             }
             case 'planning': {
                 return <WorkflowUI />;

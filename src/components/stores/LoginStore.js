@@ -7,15 +7,31 @@ const temp_coach_credentials = {
     token: "111",
     role: "guide",
     username: "Gopal",
-    fuzzyId: "1-1"
+    fuzzyId: "54c6a93e-0253-4d08-9125-eec9488a8f1e"
 };
 
-const temp_member_credentials = {
+const temp_raja_credentials = {
     email: "raja@krscode.com",
-    token: "999",
+    token: "242",
     role: "member",
     username: "Raja",
-    fuzzyId: "9-9"
+    fuzzyId: "7d5dbe5e-edfc-4d92-8dc7-3df44f4be6be"
+};
+
+const temp_harini_credentials = {
+    email: "harini@krscode.com",
+    token: "249",
+    role: "member",
+    username: "Harini",
+    fuzzyId: "e7bf3a72-a1b6-4ade-9cd7-65ac9da587dd"
+};
+
+const temp_skandha_credentials = {
+    email: "skandha@krscode.com",
+    token: "999",
+    role: "member",
+    username: "Skandha",
+    fuzzyId: "cdcfebf1-92b9-4fdf-b4bf-1d5aa68aa953"
 };
 
 export default class LoginStore {
@@ -38,8 +54,15 @@ export default class LoginStore {
         if (this.loginCredentials.email.toLowerCase() === 'gopal@pm-powerconsulting.com') {
             return temp_coach_credentials;
         }
+
         if (this.loginCredentials.email.toLowerCase() === 'raja@krscode.com') {
-            return temp_member_credentials;
+            return temp_raja_credentials;
+        }
+        if (this.loginCredentials.email.toLowerCase() === 'harini@krscode.com') {
+            return temp_harini_credentials;
+        }
+        if (this.loginCredentials.email.toLowerCase() === 'skandha@krscode.com') {
+            return temp_skandha_credentials;
         }
         return null;
     }

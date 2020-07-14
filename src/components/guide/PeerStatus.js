@@ -9,19 +9,22 @@ function PeerStatus({ fuzzyId }) {
     const [status, setStatus] = useState('wait...');
 
     useEffect(() => {
-        socket
-            .on('answer', (data) => {
+        socket.on('answer', (data) => {
                 if (data && data.fuzzyId === fuzzyId) {
                     setStatus(data.ans);
                 }
-            })
+            });
+        
+        return function cleanup() {} 
     }, []);
 
     useEffect(() => {
         const interval = setInterval(() => {
             socket.emit('ding', { fuzzyId: fuzzyId });
         }, PING_INTERVAL);
+
         return () => clearInterval(interval);
+
     }, []);
 
     return (

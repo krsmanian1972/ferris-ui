@@ -2,26 +2,26 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Drawer } from 'antd';
 
-import ScheduleForm from './ScheduleForm';
+import ProgramForm from './ProgramForm';
 
 @observer
-class ScheduleDrawer extends Component {
+class ProgramDrawer extends Component {
 
     close = () => {
-        const store = this.props.sessionStore;
+        const store = this.props.programStore;
         store.showDrawer = false;
     }
 
    
     render() {
-        const store = this.props.sessionStore;
-        const title = store.sessionId === 0 ? "New Session Scheduling" : "Unknown";
+        const store = this.props.programStore;
+        const title = store.programId === 0 ? "New Program" : "Unknown";
 
         return (
             <Drawer title={title} width={"45%"} closable={true} onClose={this.close} visible={store.showDrawer} destroyOnClose>
-                <ScheduleForm sessionStore = {store}/>
+                <ProgramForm programStore = {store}/>
             </Drawer>
         );
     }
 }
-export default ScheduleDrawer
+export default ProgramDrawer

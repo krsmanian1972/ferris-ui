@@ -7,9 +7,6 @@ import { Button } from 'antd';
 
 import {baseUrl} from '../stores/APIEndpoints'; 
 
-
-
-
 @inject("appStore")
 @observer
 class SessionLauncher extends Component {
@@ -25,9 +22,11 @@ class SessionLauncher extends Component {
     }
 
     componentDidMount() {
-        window.addEventListener('beforeunload', () => {
-            this.closeWindowPortal();
-        });
+        window.addEventListener('beforeunload',this.closeWindowPortal);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('beforeunload',this.closeWindowPortal);
     }
 
     toggleWindowPortal() {
@@ -37,7 +36,7 @@ class SessionLauncher extends Component {
         }));
     }
 
-    closeWindowPortal() {
+    closeWindowPortal = ()=>{
         this.setState({ showWindowPortal: false })
     }
 

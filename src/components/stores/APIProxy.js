@@ -7,6 +7,10 @@ export default class APIProxy {
     'userFuzzyId': ''
   }
 
+  getUserFuzzyId = () => {
+    return this.authHeaders.userFuzzyId;
+  }
+
   updateCredentialHeaders(credentials) {
     this.authHeaders = {
       'token': credentials.token,
@@ -52,7 +56,7 @@ export default class APIProxy {
         'access-control-allow-origin': '*',
         ...this.authHeaders
       },
-      body: JSON.stringify({queryString,variables})
+      body: JSON.stringify({query: queryString,variables})
     });
   }
 
