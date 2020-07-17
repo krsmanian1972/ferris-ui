@@ -97,19 +97,25 @@ export default class SessionListStore {
     }
 
     /**
-     * The events are marked in utc time, hence it should be translated to
-     * local to fix into the event.
+     * The events are marked in utc time. 
+     * 
+     * We receive the the Number of Leap Seconds from the server.
+     *  
+     * Hence we need to translate the time in seconds to local time 
+     * in order to fix into the respective event slot.
+     * 
+     * We wrot an inefficient for-loop to find the matching SLOTS 
+     * for the event.
      * 
      * @param {*} roster 
      * @param {*} events 
      */
     fixRoster = (roster, events) => {
         events.map(event => {
+            const localeStart = moment(event.session.scheduleStart*1000);
+            const localeEnd = moment(event.session.scheduleEnd*1000);
+        
             for (let [key, value] of roster) {
-
-                const localeStart = moment(event.session.scheduledStart);
-                const localeEnd = moment(event.session.scheduledEnd);
-
                 if (key.isBetween(localeStart, localeEnd)) {
                     event.session.band = this.getSlotBand(event);
                     value.push(event);
