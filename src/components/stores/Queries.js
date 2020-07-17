@@ -34,5 +34,35 @@ export const createSessionQuery = `mutation($input: NewSessionRequest!) {
       message
     } 
   }
-}`
+}`;
 
+export const enrollmentsQuery = `query ($criteria: EnrollmentCriteria!) {
+  getEnrollments(criteria: $criteria) {
+    fuzzyId,
+    email,
+    name
+  }
+}`;
+
+export const eventsQuery = `query ($criteria: EventCriteria!) {
+  getSessions(criteria: $criteria) {
+    session {
+      people,
+      name,
+      fuzzyId,
+      description,
+      duration,
+      scheduleStart,
+      scheduleEnd,
+      status
+    }
+    program {
+      name
+    }
+    sessionUser{
+      fuzzyId
+      userType
+    }
+    
+  }
+}`;

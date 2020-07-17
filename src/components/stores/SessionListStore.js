@@ -2,6 +2,9 @@ import { decorate, observable, action } from 'mobx';
 import moment from 'moment';
 import { isBlank } from './Util';
 
+import { apiHost } from './APIEndpoints';
+import { eventsQuery } from './Queries';
+
 const SLOT_SIZE = 36;
 
 export default class SessionListStore {
@@ -19,13 +22,32 @@ export default class SessionListStore {
      * @param {} startDate 
      * @param {*} endDate 
      */
-    getEvents = (startDate, endDate) => {
-        return require("./test_data/sessions.test.json");
+    fetchEvents = async (startDate, endDate) => {
+        const userFuzzyId = this.apiProxy.getUserFuzzyId();
+
+        const variables = {
+            criteria: {
+                userFuzzyId: userFuzzyId
+            }
+        }
+
+        let events = [];
+
+        try {
+            const response = await this.apiProxy.query(apiHost, eventsQuery, variables);
+            const data = await response.json();
+            events =  data.data.getSessions;
+        }
+        catch (e) {
+            console.log(e);
+        }
+
+        return events;
     }
 
     buildRoster = async () => {
         const { start, end, roster } = this.buildEmptyRoster();
-        const events = this.getEvents();
+        const events = await this.fetchEvents(start, end);
 
         this.fixRoster(roster, events);
 
@@ -54,14 +76,14 @@ export default class SessionListStore {
     }
 
     getSlotBand = (event) => {
-        var status = event.status;
+        var status = event.session.status;
 
         if (!isBlank(status)) {
             return status;
         }
 
-        const localeStart = moment(event.start);
-        const localeEnd = moment(event.end);
+        const localeStart = moment(event.session.scheduledStart);
+        const localeEnd = moment(event.session.scheduledEnd);
         const now = moment();
 
         if (now.isAfter(localeStart)) {
@@ -85,11 +107,11 @@ export default class SessionListStore {
         events.map(event => {
             for (let [key, value] of roster) {
 
-                const localeStart = moment(event.start);
-                const localeEnd = moment(event.end);
+                const localeStart = moment(event.session.scheduledStart);
+                const localeEnd = moment(event.session.scheduledEnd);
 
                 if (key.isBetween(localeStart, localeEnd)) {
-                    event.band = this.getSlotBand(event);
+                    event.session.band = this.getSlotBand(event);
                     value.push(event);
                 }
             }
@@ -98,8 +120,8 @@ export default class SessionListStore {
 }
 
 decorate(SessionListStore, {
-    start:observable,
-    end:observable,
-    roster:observable,
-    buildRoster:action,
+    start: observable,
+    end: observable,
+    roster: observable,
+    buildRoster: action,
 });

@@ -41,6 +41,12 @@ class ScheduleForm extends Component {
         this.props.sessionStore.createSchedule(values);
     }
 
+    onProgramChange = (programFuzzyId) => {
+        const store = this.props.sessionStore;
+        this.formRef.current.setFieldsValue({memberFuzzyId:''});
+        store.enrollmentListStore.fetchEnrollments(programFuzzyId);
+    }
+
     getProgramLabel = () => {
         return (
             <span>
@@ -56,6 +62,7 @@ class ScheduleForm extends Component {
         
         const store = this.props.sessionStore;
         const programs = store.programListStore.programs;
+        const members = store.enrollmentListStore.members;
 
         return (
             <Form {...formItemLayout} ref={this.formRef} onFinish={this.onFinish} >
@@ -63,12 +70,24 @@ class ScheduleForm extends Component {
                     rules={[{ required: true, message: 'Please select a Program' }]}
                     label={this.getProgramLabel()}>
 
-                    <Select placeholder="Select a Program">
+                    <Select placeholder="Select a Program" onChange={this.onProgramChange}>
                         {programs.map(item => (
                             <Option key={item.program.fuzzyId}>{item.program.name}</Option>
                         ))}
                     </Select>
                 </Form.Item>
+
+                <Form.Item name="memberFuzzyId"
+                    rules={[{ required: true, message: 'Please select an enrolled member for the Program' }]}
+                    label="Enrolled Member">
+
+                    <Select placeholder="Select an enrolled Member">
+                        {members.map(item => (
+                            <Option key={item.fuzzyId}>{item.name}</Option>
+                        ))}
+                    </Select>
+                </Form.Item>
+
 
                 <Form.Item name="name"
                     rules={[{ required: true, message: 'This is the topic of the session' }]}

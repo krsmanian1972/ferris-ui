@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
-import { Button, Row, Col, Tooltip, Space } from 'antd';
+import { Button, Row, Col, Tabs, Tooltip, Space } from 'antd';
 import { message } from 'antd';
 import { EditOutlined, ItalicOutlined, UndoOutlined, RedoOutlined, ScissorOutlined } from '@ant-design/icons';
 import socket from '../stores/socket';
+
+const { TabPane } = Tabs;
+
 const POINTER = 'Pointer';
 const PEN = 'PEN';
 const ERASER = 'ERASER';
@@ -301,6 +304,10 @@ class Board extends Component {
        this.mode = ERASER;
     }
 
+    xyz = (a,b) => {
+        console.log(a,b);
+    }
+
     render() {
         const boardKey = `canvas-${this.props.boardId}`;
         const boardKeyBG = 'k';
@@ -309,7 +316,10 @@ class Board extends Component {
             <div style={{ padding: 0, height: screen.height }}>
                 <Row>
                     <Col span={12}>
-                        <p className="boardTitle" style={{ float: "left", paddingLeft: "10px" }}>{this.props.boardId}</p>
+                        <Tabs defaultActiveKey="1" tabPosition="top" style={{ maxHeight: 30 }} onTabClick={this.xyz}>
+                            <TabPane key="1" tab={"1"} style={{ maxHeight: 10 }}></TabPane>
+                            <TabPane key="2" tab={"2"} style={{ maxHeight: 10}}></TabPane>
+                        </Tabs>    
                     </Col>
                     <Col span={12}>
                         <div style={{ float: "right", textAlign: "left", paddingRight: "10px" }}>

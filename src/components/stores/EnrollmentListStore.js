@@ -1,19 +1,18 @@
 import { decorate, observable, computed,action } from 'mobx';
 
 import { apiHost } from './APIEndpoints';
-import {programsQuery} from './Queries';
+import {enrollmentsQuery} from './Queries';
 
 const PENDING = 'pending';
 const DONE = 'done';
 const ERROR = 'error';
 
-export default class ProgramListStore {
+export default class EnrollmentListStore {
 
     state = PENDING;
-    programs = [];
     members = [];
     rowCount=0;
-
+ 
     constructor(props) {
         this.apiProxy = props.apiProxy;
     }
@@ -23,23 +22,21 @@ export default class ProgramListStore {
     }
 
     /**
-     * Obtain the List of programs from the Ferris API
+     * Obtain the List of members who are enrolled into a Program
      *
      */
-    fetchPrograms = async() => {
+    fetchEnrollments = async(programFuzzyId) => {
         
         this.state  = PENDING;
 
-        const userFuzzyId = this.apiProxy.getUserFuzzyId();
-
         const variables = {
             criteria: {
-                userFuzzyId:userFuzzyId
+                programFuzzyId:programFuzzyId
             }
         }
 
         try {
-            const response = await this.apiProxy.query(apiHost, programsQuery, variables);
+            const response = await this.apiProxy.query(apiHost, enrollmentsQuery, variables);
             const data = await response.json();
 
             if (data.error == true) {
@@ -48,8 +45,8 @@ export default class ProgramListStore {
                 this.state = DONE;
                 return;
             }
-            const result = data.data.getPrograms;
-            this.programs = result;
+            const result = data.data.getEnrollments;
+            this.members = result;
             this.rowCount = result.length;
             this.state = DONE;
         }
@@ -58,12 +55,13 @@ export default class ProgramListStore {
             console.log(e);
         }
     }
+
 }
 
-decorate(ProgramListStore,{
+decorate(EnrollmentListStore,{
     state:observable,
-    rowCount:observable,
     isLoading:computed,
-    programs:observable,
-    fetchPrograms:action,
+    rowCount:observable,
+    members:observable,
+    fetchEnrollments:action,
 });

@@ -23,6 +23,7 @@ export default class SessionStore {
         this.apiProxy = props.apiProxy;
         this.sessionListStore = props.sessionListStore;
         this.programListStore = props.programListStore;
+        this.enrollmentListStore = props.enrollmentListStore;
     }
 
     /**
@@ -37,6 +38,7 @@ export default class SessionStore {
         const variables = {
             input: {
                 programFuzzyId: sessionRequest.programFuzzyId,
+                memberFuzzyId: sessionRequest.memberFuzzyId,
                 name: sessionRequest.name,
                 description: sessionRequest.description,
                 duration: sessionRequest.duration,

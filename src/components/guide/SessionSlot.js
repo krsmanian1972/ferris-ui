@@ -10,8 +10,7 @@ function SessionSlot({ date, sessions }) {
     }
 
     const people = (event) => {
-        const str = `${event.coach} and ${event.actor}`;
-        return <p style={{ float: 'left' }}>{str}</p>
+        return <p style={{ float: 'left' }}>{event.session.people}</p>
     }
 
     const bandText = (band) => {
@@ -33,12 +32,12 @@ function SessionSlot({ date, sessions }) {
             <div className="slot-detail">
                 {
                     sessions.map((event, index) =>
-                        <div key={index} className={"slot-item " + event.band}>
+                        <div key={index} className={"slot-item " + event.session.band}>
                             <div className="slot-title">
                                 {people(event)}
-                                {bandText(event.band)}
+                                {bandText(event.session.band)}
                             </div>
-                            <p>{event.sessionDetail}</p>
+                            <p>{event.session.description}</p>
                         </div>
                     )
                 }

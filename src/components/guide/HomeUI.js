@@ -11,6 +11,7 @@ import SessionStore from '../stores/SessionStore';
 
 import ScheduleDrawer from './ScheduleDrawer';
 import ProgramListStore from '../stores/ProgramListStore';
+import EnrollmentListStore from '../stores/EnrollmentListStore';
 
 const { TabPane } = Tabs;
 
@@ -21,16 +22,16 @@ class HomeUI extends Component {
         super(props);
 
         this.programListStore = new ProgramListStore({apiProxy: props.appStore.apiProxy});
-
+        this.enrollmentListStore = new EnrollmentListStore({apiProxy: props.appStore.apiProxy});
         this.sessionListStore = new SessionListStore({ apiProxy: props.appStore.apiProxy });
         
         this.sessionStore = new SessionStore({ 
             apiProxy: props.appStore.apiProxy,
+            enrollmentListStore: this.enrollmentListStore,
             sessionListStore: this.sessionListStore,
             programListStore: this.programListStore
             });
     }
-
 
     showNewSchedule = () => {
         this.sessionStore.showDrawer = true;
