@@ -79,18 +79,19 @@ export default class SessionListStore {
         var status = event.session.status;
 
         if (!isBlank(status)) {
-            return status;
+            return status.toLowerCase();
         }
 
-        const localeStart = moment(event.session.scheduledStart);
-        const localeEnd = moment(event.session.scheduledEnd);
+        const localeStart = moment(event.session.scheduleStart*1000);
+        const localeEnd = moment(event.session.scheduleEnd*1000);
+
         const now = moment();
 
         if (now.isAfter(localeStart)) {
             status = "overdue"
         }
         else {
-            status = now.isBetween(localeStart, localeEnd) ? "current" : status;
+            status = now.isBetween(localeStart, localeEnd) ? "progress" : status;
         }
 
         return status;

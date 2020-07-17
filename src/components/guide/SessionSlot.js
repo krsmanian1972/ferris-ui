@@ -10,7 +10,7 @@ function SessionSlot({ date, sessions }) {
     }
 
     const people = (event) => {
-        return <p style={{ float: 'left' }}>{event.session.people}</p>
+        return <p style={{ float: 'left' }}>{event.program.name}::{event.session.people}</p>
     }
 
     const bandText = (band) => {
