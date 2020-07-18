@@ -37,6 +37,10 @@ class Board extends Component {
         this.minorGridLineWidth = 0.5
         this.redoList = [];
         this.undoList = [];
+        this.undoTabList = {};
+        this.undoTabList[1] = [];
+        this.undoTabList[2] = [];
+        this.currentTab =1;
         this.state = {
             penShape: unselected,
             textBoxShape: unselected,
@@ -124,26 +128,27 @@ class Board extends Component {
         }
     }
     pushUndoList = () => {
-         console.log("content pushed");
-         console.log(this.undoList.length);
+         console.log("content pushed into ");
+         console.log(this.currentTab);
+//         console.log(this.undoList.length);
          var screenShot = this.canvas.toDataURL();
-         console.log(this.props.fileName);
+         this.undoTabList[this.currentTab].push(screenShot);
          socket.emit('canvasupstream', {content: screenShot, name:this.props.fileName});
     }
 
     save = () => {
-        const data = this.canvas.toDataURL();
-        this.props.saveBoardData(this.props.boardId, data);
+//        const data = this.canvas.toDataURL();
+//        this.props.saveBoardData(this.props.boardId, data);
     }
 
     restore = () => {
 
-        var img = new Image();
-        var me = this;
-        img.onload = function () {
-            me.ctx.drawImage(img, 0, 0, img.width, img.height);
-        }
-        img.src = this.props.getBoardData(this.props.boardId);
+//        var img = new Image();
+//        var me = this;
+//        img.onload = function () {
+//            me.ctx.drawImage(img, 0, 0, img.width, img.height);
+//        }
+//        img.src = this.props.getBoardData(this.props.boardId);
     }
 
     textBox = (event) => {
@@ -287,25 +292,44 @@ class Board extends Component {
         console.log("TextBox!!");
     }
     
-    undo = () => {
+    undoTab = () => {
         var img = new Image();
         var me = this;
-        img.src = this.undoList.pop();
-        console.log("content pop");
-        console.log(this.undoList.length);
-        img.onload = function () {
-            me.ctx.clearRect(0, 0, img.width, img.height);
-            me.ctx.drawImage(img, 0, 0, img.width, img.height);
+        if (this.undoTabList[this.currentTab].length === 0){
+           console.log("empty List");
+           console.log("image loaded empty list");
+           me.ctx.clearRect(0, 0, screen.height, screen.height);
         }
-       this.stopCursorBlink();
+        else
+        {        
+            img.src = this.undoTabList[this.currentTab].pop();
+            //push it back to ensure history is good
+            this.undoTabList[this.currentTab].push(img.src);
+            console.log("content pop");
+
+            img.onload = function () {
+                me.ctx.clearRect(0, 0, img.width, img.height);
+                me.ctx.drawImage(img, 0, 0, img.width, img.height);
+            }
+       }
     
     }
     erase = () => {
        this.mode = ERASER;
     }
 
-    xyz = (a,b) => {
-        console.log(a,b);
+    onTabClick = (activeTab,mouseEvent) => {
+       this.stopCursorBlink();
+       this.pushUndoList();
+       console.log("On Tab Click");
+       this.currentTab = activeTab;
+       this.undoTab();
+    }
+    onTabChange = (activeTab) => {
+//       this.pushUndoList();
+       console.log("On Tab Change called");
+//       this.currentTab = activeTab;
+//       this.undoTab();
     }
 
     render() {
@@ -316,7 +340,7 @@ class Board extends Component {
             <div style={{ padding: 0, height: screen.height }}>
                 <Row>
                     <Col span={12}>
-                        <Tabs defaultActiveKey="1" tabPosition="top" style={{ maxHeight: 30 }} onTabClick={this.xyz}>
+                        <Tabs defaultActiveKey="1" tabPosition="top" style={{ maxHeight: 30 }} onTabClick={this.onTabClick} onChange = {this.tabOnChange} >
                             <TabPane key="1" tab={"1"} style={{ maxHeight: 10 }}></TabPane>
                             <TabPane key="2" tab={"2"} style={{ maxHeight: 10}}></TabPane>
                         </Tabs>    
