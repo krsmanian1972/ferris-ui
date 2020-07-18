@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { DatePicker, Select, Spin, Button, Form, Input, Tooltip, InputNumber } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
+import moment from 'moment';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -29,6 +30,14 @@ class ScheduleForm extends Component {
         store.programListStore.fetchPrograms();
     }
 
+    disabledDate = (current) => {
+        return current && current < moment().startOf('day');
+    }
+
+    validateDate = (value) => {
+        this.props.sessionStore.validateDate(value);
+    }
+
     /**
      * 
      * Disable the Button and enable if error.
@@ -38,6 +47,7 @@ class ScheduleForm extends Component {
         console.log(values);
         console.log(values.startTime.format());
         console.log(values.startTime.utc().format());
+
         this.props.sessionStore.createSchedule(values);
     }
 
@@ -61,16 +71,30 @@ class ScheduleForm extends Component {
     render() {
         
         const store = this.props.sessionStore;
+
         const programs = store.programListStore.programs;
+        const programMsg = store.programListStore.message;
+
         const members = store.enrollmentListStore.members;
+        const memberMsg = store.enrollmentListStore.message;
+
+        const startTimeMsg = store.startTimeMsg;
 
         return (
             <Form {...formItemLayout} ref={this.formRef} onFinish={this.onFinish} >
                 <Form.Item name="programFuzzyId"
                     rules={[{ required: true, message: 'Please select a Program' }]}
-                    label={this.getProgramLabel()}>
+                    label={this.getProgramLabel()}
+                    validateStatus={programMsg.status}
+                    help={programMsg.help}>
 
-                    <Select placeholder="Select a Program" onChange={this.onProgramChange}>
+                    <Select 
+                        showSearch 
+                        filterOption={(input, option) =>
+                            option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        }
+                        placeholder="Select a Program"
+                        onChange={this.onProgramChange}>
                         {programs.map(item => (
                             <Option key={item.program.fuzzyId}>{item.program.name}</Option>
                         ))}
@@ -79,20 +103,26 @@ class ScheduleForm extends Component {
 
                 <Form.Item name="memberFuzzyId"
                     rules={[{ required: true, message: 'Please select an enrolled member for the Program' }]}
-                    label="Enrolled Member">
+                    label="Enrolled Member"
+                    validateStatus={memberMsg.status}
+                    help={memberMsg.help}>
 
-                    <Select placeholder="Select an enrolled Member">
+                    <Select 
+                        showSearch
+                        filterOption={(input, option) =>
+                            option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        }
+                        placeholder="Select an enrolled Member">
                         {members.map(item => (
                             <Option key={item.fuzzyId}>{item.name}</Option>
                         ))}
                     </Select>
                 </Form.Item>
 
-
                 <Form.Item name="name"
-                    rules={[{ required: true, message: 'This is the topic of the session' }]}
+                    rules={[{ required: true, message: 'Please provide a topic of the session' }]}
                     label="Session Name">
-                    <Input />
+                    <Input placeholder="Topic for the session"/>
                 </Form.Item>
 
                 <Form.Item
@@ -105,8 +135,11 @@ class ScheduleForm extends Component {
                 <Form.Item
                     name="startTime"
                     rules={[{ required: true, message: 'Please select the Start Time of this session' }]}
-                    label="Start Time">
-                    <DatePicker showTime format="DD-MMM-YYYY HH:mm A" />
+                    label="Start Time"
+                    validateStatus={startTimeMsg.status}
+                    help={startTimeMsg.help}>
+
+                    <DatePicker showTime format="DD-MMM-YYYY HH:mm A" disabledDate={this.disabledDate} onChange={this.validateDate}/>
                 </Form.Item>
 
                 <Form.Item

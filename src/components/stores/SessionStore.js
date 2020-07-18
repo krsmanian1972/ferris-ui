@@ -1,5 +1,5 @@
 import { decorate, observable, action } from 'mobx';
-
+import moment from 'moment';
 import { apiHost } from './APIEndpoints';
 import {createSessionQuery} from './Queries';
 
@@ -18,6 +18,7 @@ export default class SessionStore {
 
     isError = false;
     message = '';
+    startTimeMsg = {};
 
     constructor(props) {
         this.apiProxy = props.apiProxy;
@@ -56,6 +57,7 @@ export default class SessionStore {
                 this.state = DONE;
                 return;
             }
+            
             this.session = data;
             this.state = DONE;
             this.showDrawer = false;
@@ -68,10 +70,23 @@ export default class SessionStore {
 
     }
 
+    validateDate = (value) => {
+        this.startTimeMsg = {status:"",help:""};
+
+        const boundary = moment().add(1,'hour');
+        const flag = value && value > boundary;
+
+        if(!flag) {
+            this.startTimeMsg = {status:"error",help:"Provide a time at least one hour after from now."};
+        }
+    }
+
 }
 
 decorate(SessionStore, {
     showDrawer: observable,
+    startTimeMsg: observable,
     sessionId: observable,
     createSchedule: action,
+    validateDate:action,
 });

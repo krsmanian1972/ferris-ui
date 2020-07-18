@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
-import { List, Avatar, Spin } from 'antd';
+import { List, Avatar, Spin, Result } from 'antd';
 
 @observer
 class ProgramList extends Component {
@@ -21,11 +21,29 @@ class ProgramList extends Component {
         return 'Inactive';
     }
 
+    displayMessage = () => {
+        const store = this.props.programListStore;
+
+        if (store.isLoading) {
+            return (
+                <div className="loading-container">
+                    <Spin />
+                </div>
+            )
+        }
+
+        if (store.isError) {
+            return (
+                <Result status="warning" title={store.message.help}/>
+            )
+        }
+
+        return (<></>)
+    }
 
     render() {
         const store = this.props.programListStore;
         const programs = store.programs;
-        const loading = store.isLoading;
 
         return (
             <List
@@ -39,13 +57,8 @@ class ProgramList extends Component {
                         />
                         <div>{this.getActive(item.program.active)}</div>
                     </List.Item>
-                )}
-            >
-                {loading && (
-                    <div>
-                        <Spin />
-                    </div>
-                )}
+                )}>
+                {this.displayMessage()}
             </List>
         )
     }

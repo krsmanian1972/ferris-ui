@@ -7,9 +7,14 @@ const PENDING = 'pending';
 const DONE = 'done';
 const ERROR = 'error';
 
+const EMPTY_MESSAGE = { status: "", help: "" };
+const ERROR_MESSAGE = { status: "error", help: "Unable to fetch the Members enrolled for this program." };
+
 export default class EnrollmentListStore {
 
     state = PENDING;
+    message = EMPTY_MESSAGE;
+
     members = [];
     rowCount=0;
  
@@ -18,7 +23,11 @@ export default class EnrollmentListStore {
     }
 
     get isLoading() {
-        this.state !== DONE; 
+        return this.state === PENDING;
+    }
+
+    get isError() {
+        return this.state === ERROR;
     }
 
     /**
@@ -28,6 +37,7 @@ export default class EnrollmentListStore {
     fetchEnrollments = async(programFuzzyId) => {
         
         this.state  = PENDING;
+        this.message = EMPTY_MESSAGE;
 
         const variables = {
             criteria: {
@@ -40,8 +50,7 @@ export default class EnrollmentListStore {
             const data = await response.json();
 
             if (data.error == true) {
-                this.isError = true;
-                this.message = data.detailedErrorMessage;
+                this.message = ERROR_MESSAGE;
                 this.state = DONE;
                 return;
             }
@@ -52,6 +61,7 @@ export default class EnrollmentListStore {
         }
         catch (e) {
             this.state = ERROR;
+            this.message = ERROR_MESSAGE
             console.log(e);
         }
     }
@@ -60,8 +70,12 @@ export default class EnrollmentListStore {
 
 decorate(EnrollmentListStore,{
     state:observable,
-    isLoading:computed,
-    rowCount:observable,
+    message: observable,
     members:observable,
+    rowCount:observable,
+
+    isLoading:computed,
+    isError:computed,
+    
     fetchEnrollments:action,
 });

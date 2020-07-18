@@ -187,3 +187,10 @@ code {
 .done {
   border-left: 3px solid green;
 }
+
+.loading-container {
+  position: absolute;
+  bottom: 40px;
+  width: 100%;
+  text-align: center;
+}

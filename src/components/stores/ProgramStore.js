@@ -1,25 +1,39 @@
-import { decorate, observable, action } from 'mobx';
+import { decorate, observable, computed, action } from 'mobx';
 
 import { apiHost } from './APIEndpoints';
 import {createProgramQuery} from './Queries';
 
+const INIT = "init";
 const PENDING = 'pending';
 const DONE = 'done';
 const ERROR = 'error';
 
+const EMPTY_MESSAGE = { status: "", help: "" };
+const ERROR_MESSAGE = { status: "error", help: "Unable to update Programs." };
+
 export default class ProgramStore {
 
-    state = DONE;
+    state = INIT;
+    message = EMPTY_MESSAGE;
 
     showDrawer = false;
     programId = 0;
 
-    isError = false;
-    message = '';
-
     constructor(props) {
         this.apiProxy = props.apiProxy;
         this.programListStore = props.programListStore;
+    }
+
+    get isLoading() {
+        return this.state === PENDING;
+    }
+
+    get isDone() {
+        return this.state === DONE;
+    }
+
+    get isError() {
+        return this.state === ERROR;
     }
 
     /**
@@ -28,8 +42,7 @@ export default class ProgramStore {
     createProgram = async (programRequest) => {
 
         this.state = PENDING;
-        this.isError = false;
-        this.message = '';
+        this.message = EMPTY_MESSAGE;
 
         const variables = {
             input: {
@@ -44,18 +57,18 @@ export default class ProgramStore {
             const data = await response.json();
 
             if (data.error == true) {
-                this.isError = true;
-                this.message = data.detailedErrorMessage;
-                this.state = DONE;
+                this.state = ERROR;
+                this.message = ERROR_MESSAGE;
                 return;
             }
+            this.showDrawer = false;
             this.program = data;
             this.state = DONE;
-            this.showDrawer = false;
             this.programListStore.fetchPrograms();
         }
         catch (e) {
             this.state = ERROR;
+            this.message = ERROR_MESSAGE;
             console.log(e);
         }
 
@@ -64,7 +77,14 @@ export default class ProgramStore {
 }
 
 decorate(ProgramStore, {
+    state: observable,
     showDrawer: observable,
+    message: observable,
     programId: observable,
+
+    isLoading: computed,
+    isDone: computed,
+    isError: computed,
+
     createProgram: action,
 });

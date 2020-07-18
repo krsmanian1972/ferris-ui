@@ -1,40 +1,54 @@
-import { decorate, observable, computed,action } from 'mobx';
+import { decorate, observable, computed, action } from 'mobx';
 
 import { apiHost } from './APIEndpoints';
-import {programsQuery} from './Queries';
+import { programsQuery } from './Queries';
 
 const PENDING = 'pending';
 const DONE = 'done';
 const ERROR = 'error';
 
+const EMPTY_MESSAGE = { status: "", help: "" };
+const ERROR_MESSAGE = { status: "error", help: "Unable to fetch Programs." };
+
 export default class ProgramListStore {
 
     state = PENDING;
+    message = EMPTY_MESSAGE;
+
     programs = [];
     members = [];
-    rowCount=0;
+    rowCount = 0;
 
     constructor(props) {
         this.apiProxy = props.apiProxy;
     }
 
     get isLoading() {
-        this.state !== DONE; 
+        return this.state === PENDING;
+    }
+
+    get isDone() {
+        return this.state === DONE;
+    }
+
+    get isError() {
+        return this.state === ERROR;
     }
 
     /**
      * Obtain the List of programs from the Ferris API
      *
      */
-    fetchPrograms = async() => {
-        
-        this.state  = PENDING;
+    fetchPrograms = async () => {
+
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
 
         const userFuzzyId = this.apiProxy.getUserFuzzyId();
 
         const variables = {
             criteria: {
-                userFuzzyId:userFuzzyId
+                userFuzzyId: userFuzzyId
             }
         }
 
@@ -43,11 +57,11 @@ export default class ProgramListStore {
             const data = await response.json();
 
             if (data.error == true) {
-                this.isError = true;
-                this.message = data.detailedErrorMessage;
-                this.state = DONE;
+                this.state = ERROR;
+                this.message = ERROR_MESSAGE;
                 return;
             }
+
             const result = data.data.getPrograms;
             this.programs = result;
             this.rowCount = result.length;
@@ -55,15 +69,21 @@ export default class ProgramListStore {
         }
         catch (e) {
             this.state = ERROR;
+            this.message = ERROR_MESSAGE;
             console.log(e);
         }
     }
 }
 
-decorate(ProgramListStore,{
-    state:observable,
-    rowCount:observable,
-    isLoading:computed,
-    programs:observable,
-    fetchPrograms:action,
+decorate(ProgramListStore, {
+    state: observable,
+    message: observable,
+    programs: observable,
+    rowCount: observable,
+
+    isLoading: computed,
+    isDone: computed,
+    isError: computed,
+
+    fetchPrograms: action,
 });
