@@ -19,6 +19,10 @@ const cursorSize = { width: 1, height: 15 };
 
 const selected = { background: "white", color: "black", borderColor: "black" };
 const unselected = {};
+const initialPanes = [
+  { title: 'Board 1', key: '1',  closable: false, },
+  { title: 'Board 2', key: '2',  closable: false, },
+];
 
 class Board extends Component {
     constructor(props) {
@@ -41,13 +45,16 @@ class Board extends Component {
         this.undoTabList[1] = [];
         this.undoTabList[2] = [];
         this.currentTab =1;
+        this.newTabIndex = 3;
         this.state = {
             penShape: unselected,
             textBoxShape: unselected,
+            activeKey: initialPanes[0].key,
+            panes: initialPanes,
         };
         
     }
-
+   
     componentDidMount() {
         this.x = 0;
         this.y = 0;
@@ -271,11 +278,14 @@ class Board extends Component {
     }
 
     stopCursorBlink = () => {
+        if(this.mode === TEXTBOX)
+        {
         //stop the cursor blink
         clearInterval(this.cursorBlinkFunc);
         this.eraseCursor();
         this.ctx.beginPath();
         this.ctx.clearRect(this.cursorPos.x, this.cursorPos.y - 5, 8, 8);
+        }
     }
     
     freeDrawing = () => {
@@ -292,9 +302,12 @@ class Board extends Component {
         console.log("TextBox!!");
     }
     
-    undoTab = () => {
+    undoTab = (samePane) => {
         var img = new Image();
         var me = this;
+        console.log("currenTab is ");
+        console.log(this.currentTab);
+
         if (this.undoTabList[this.currentTab].length === 0){
            console.log("empty List");
            console.log("image loaded empty list");
@@ -303,8 +316,11 @@ class Board extends Component {
         else
         {        
             img.src = this.undoTabList[this.currentTab].pop();
+            if(samePane === false)
+            {
             //push it back to ensure history is good
-            this.undoTabList[this.currentTab].push(img.src);
+                this.undoTabList[this.currentTab].push(img.src);
+            }
             console.log("content pop");
 
             img.onload = function () {
@@ -323,7 +339,7 @@ class Board extends Component {
        this.pushUndoList();
        console.log("On Tab Click");
        this.currentTab = activeTab;
-       this.undoTab();
+       this.undoTab(false);
     }
     onTabChange = (activeTab) => {
 //       this.pushUndoList();
@@ -331,19 +347,45 @@ class Board extends Component {
 //       this.currentTab = activeTab;
 //       this.undoTab();
     }
+     onEdit = (targetKey, action) => {
+        this[action](targetKey);
+     };
+    undoEvent = () => {
+        this.undoTab(true);
+    }
+    add = () => {
+        console.log("Add");
+        const { panes } = this.state;
+ 	const activeKey = `${this.newTabIndex}`;
+        this.undoTabList[this.newTabIndex] = [];
+	const newPanes = [...panes];
+	newPanes.push({ title: `Board - ${this.newTabIndex}`,  key: activeKey, closable: false, });
+	    this.setState({
+	    panes: newPanes,
+	    activeKey,
+	    });
+//        this.pushUndoList();	    
+//        this.setState({currentTab: this.newTabIndex});
+  	this.newTabIndex++;
 
+	 };
+  
     render() {
         const boardKey = `canvas-${this.props.boardId}`;
         const boardKeyBG = 'k';
-
+        const { panes, activeKey } = this.state;
         return (
             <div style={{ padding: 0, height: screen.height }}>
                 <Row>
-                    <Col span={12}>
-                        <Tabs defaultActiveKey="1" tabPosition="top" style={{ maxHeight: 30 }} onTabClick={this.onTabClick} onChange = {this.tabOnChange} >
-                            <TabPane key="1" tab={"1"} style={{ maxHeight: 10 }}></TabPane>
-                            <TabPane key="2" tab={"2"} style={{ maxHeight: 10}}></TabPane>
-                        </Tabs>    
+                    <Col span={10}>
+                        <Tabs type="editable-card"
+                        defaultActiveKey="1" tabPosition="top" style={{ maxHeight: 30 }} 
+                        onTabClick={this.onTabClick} onChange = {this.tabOnChange} onEdit={this.onEdit}>
+				        	{panes.map(pane => (
+				            	<TabPane tab={pane.title} key={pane.key} closable={pane.closable}>
+				            	</TabPane>	
+					        ))} 
+					     </Tabs>    
                     </Col>
                     <Col span={12}>
                         <div style={{ float: "right", textAlign: "left", paddingRight: "10px" }}>
@@ -355,7 +397,7 @@ class Board extends Component {
                                     <Button onClick={this.textWrite} id="pen" style={this.state.textBoxShape} type="primary" icon={<ItalicOutlined />} shape={"circle"} />
                                 </Tooltip>
                                 <Tooltip title="Undo">
-                                    <Button onClick={this.undo} id="undo" style={this.state.undoShape} type="primary" icon={<UndoOutlined />} shape={"circle"} />
+                                    <Button onClick={this.undoEvent} id="undo" style={this.state.undoShape} type="primary" icon={<UndoOutlined />} shape={"circle"} />
                                 </Tooltip>
                                 <Tooltip title="Redo">
                                     <Button onClick={this.redo} id="redo" style={this.state.redoShape} type="primary" icon={<RedoOutlined />} shape={"circle"} />
