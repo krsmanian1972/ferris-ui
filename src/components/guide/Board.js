@@ -20,8 +20,8 @@ const cursorSize = { width: 1, height: 15 };
 const selected = { background: "white", color: "black", borderColor: "black" };
 const unselected = {};
 const initialPanes = [
-  { title: 'Board 1', key: '1',  closable: false, },
-  { title: 'Board 2', key: '2',  closable: false, },
+    { title: 'Board 1', key: '1', closable: false, },
+    { title: 'Board 2', key: '2', closable: false, },
 ];
 
 class Board extends Component {
@@ -31,35 +31,39 @@ class Board extends Component {
         this.x = 0;
         this.y = 0;
         this.sentence = "";
-        this.canWrite = -1;
         this.textWidth = 0;
         this.cursorPos = { x: 0, y: 0 };
+
         this.mode = DEFAULT;
+
         this.gridPixelSize = 10;
         this.majorGrid = this.gridPixelSize * 10
         this.majorGridLineWidth = 1
         this.minorGridLineWidth = 0.5
+
         this.redoList = [];
         this.undoList = [];
+
         this.undoTabList = {};
         this.undoTabList[1] = [];
         this.undoTabList[2] = [];
-        this.currentTab =1;
+
+        this.currentTab = 1;
         this.newTabIndex = 3;
+
         this.state = {
             penShape: unselected,
             textBoxShape: unselected,
             activeKey: initialPanes[0].key,
             panes: initialPanes,
         };
-        
+
     }
-   
+
     componentDidMount() {
         this.x = 0;
         this.y = 0;
         this.sentence = "";
-        this.canWrite = -1;
         this.cursorPos = { x: 0, y: 0 };
 
         this.ctx = this.canvas.getContext("2d");
@@ -70,8 +74,11 @@ class Board extends Component {
         var temp = this.ctx.measureText('M');
         this.yOffset = temp.actualBoundingBoxAscent;
         this.textWidth = temp.width;
+
         this.drawGrid();
+
         this.canvas.addEventListener("dblclick", this.toggleWriting);
+
         //In mouse down start drawing
         this.canvas.addEventListener('mousedown', (e) => {
             //save board on every mouse down in a stack
@@ -92,14 +99,17 @@ class Board extends Component {
                 if (e.buttons === 1) {
                     this.paint(e);
                 }
-           }
+            }
         });
+
         window.addEventListener("keypress", this.write);
-        this.restore();
+
     }
+
+    // unregister the event listerns
     componentWillUnmount() {
 
-        this.save();
+
     }
 
     drawGrid = () => {
@@ -134,28 +144,12 @@ class Board extends Component {
             this.bGctx.stroke();
         }
     }
+
     pushUndoList = () => {
-         console.log("content pushed into ");
-         console.log(this.currentTab);
-//         console.log(this.undoList.length);
-         var screenShot = this.canvas.toDataURL();
-         this.undoTabList[this.currentTab].push(screenShot);
-         socket.emit('canvasupstream', {content: screenShot, name:this.props.fileName});
-    }
-
-    save = () => {
-//        const data = this.canvas.toDataURL();
-//        this.props.saveBoardData(this.props.boardId, data);
-    }
-
-    restore = () => {
-
-//        var img = new Image();
-//        var me = this;
-//        img.onload = function () {
-//            me.ctx.drawImage(img, 0, 0, img.width, img.height);
-//        }
-//        img.src = this.props.getBoardData(this.props.boardId);
+        const screenShot = this.canvas.toDataURL();
+        this.undoTabList[this.currentTab].push(screenShot);
+        const fileName = this.props.fileName + "_" + this.currentTab;
+        socket.emit('canvasupstream', { content: screenShot, name: fileName });
     }
 
     textBox = (event) => {
@@ -167,12 +161,12 @@ class Board extends Component {
             clearInterval(this.cursorBlinkFunc);
             this.ctx.beginPath();
             this.ctx.clearRect(this.cursorPos.x, this.cursorPos.y - 5, 8, 8);
-            console.log("writing!!");
+
             // Place Cursor at the double clicked Position
             var rect = this.canvas.getBoundingClientRect();
             this.x = Math.round((event.clientX - rect.left) / this.gridPixelSize * this.gridPixelSize);
             this.y = Math.round((event.clientY - rect.top) / this.gridPixelSize * this.gridPixelSize);
-            console.log(this.x, this.y);
+
             this.cursorPos = { x: this.x, y: this.y - 10 };
             this.cursorBlinkFunc = setInterval(this.cursorBlink, cursorBlinkSpeed);
 
@@ -185,14 +179,10 @@ class Board extends Component {
         this.eraseCursor();
         this.ctx.beginPath();
         this.ctx.clearRect(this.cursorPos.x, this.cursorPos.y - 5, 8, 8);
-        console.log("writing!!");
+
         var rect = this.canvas.getBoundingClientRect();
         //move the cursor to a new line
         this.y = this.y + 15;
-        console.log("x,y");
-        console.log(this.x, this.y);
-        console.log("cursor pos");
-        console.log(this.cursorPos.x, this.cursorPos.y);
         this.cursorPos = { x: this.x, y: this.y - 10 };
         this.cursorBlinkFunc = setInterval(this.cursorBlink, cursorBlinkSpeed);
         this.pushUndoList();
@@ -230,14 +220,13 @@ class Board extends Component {
     write = (event) => {
 
         var c = String.fromCharCode(event.keyCode);
-        console.log(event.keyCode);
-        if(event.keyCode === 13){
-            console.log("Enter key pressed");
+
+        if (event.keyCode === 13) {
             this.newLine();
             c = '';
         }
         this.sentence += c;
-        this.ctx.beginPath();                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+        this.ctx.beginPath();
 
         clearInterval(this.cursorBlinkFunc);
 
@@ -258,134 +247,112 @@ class Board extends Component {
         const rect = this.canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-        if(this.mode === ERASER){
-        
-        this.ctx.strokeStyle = backgroundColour;
-        this.ctx.lineWidth = (cursorSize.width + 10);
+        if (this.mode === ERASER) {
+            this.ctx.strokeStyle = backgroundColour;
+            this.ctx.lineWidth = (cursorSize.width + 10);
         }
         else {
-        this.ctx.strokeStyle = "white";
-        this.ctx.lineWidth = cursorSize.width;
-        
+            this.ctx.strokeStyle = "white";
+            this.ctx.lineWidth = cursorSize.width;
         }
         this.ctx.lineJoin = 'round';
         this.ctx.lineCap = 'round';
         this.ctx.lineTo(x, y);
         this.ctx.stroke();
-        
-//        this.drawGrid();
-
     }
 
     stopCursorBlink = () => {
-        if(this.mode === TEXTBOX)
-        {
-        //stop the cursor blink
-        clearInterval(this.cursorBlinkFunc);
-        this.eraseCursor();
-        this.ctx.beginPath();
-        this.ctx.clearRect(this.cursorPos.x, this.cursorPos.y - 5, 8, 8);
+        if (this.mode === TEXTBOX) {
+            clearInterval(this.cursorBlinkFunc);
+            this.eraseCursor();
+            this.ctx.beginPath();
+            this.ctx.clearRect(this.cursorPos.x, this.cursorPos.y - 5, 8, 8);
         }
     }
-    
+
     freeDrawing = () => {
-        console.log("FreeDrawing!!");
         this.mode = PEN;
         this.stopCursorBlink();
-
         this.setState({ penShape: selected, textBoxShape: unselected });
     }
 
     textWrite = () => {
         this.mode = TEXTBOX;
         this.setState({ penShape: unselected, textBoxShape: selected });
-        console.log("TextBox!!");
     }
-    
+
     undoTab = (samePane) => {
-        var img = new Image();
-        var me = this;
-        console.log("currenTab is ");
-        console.log(this.currentTab);
-
-        if (this.undoTabList[this.currentTab].length === 0){
-           console.log("empty List");
-           console.log("image loaded empty list");
-           me.ctx.clearRect(0, 0, screen.height, screen.height);
+        if (this.undoTabList[this.currentTab].length === 0) {
+            this.ctx.clearRect(0, 0, screen.height, screen.height);
+            return;
         }
-        else
-        {        
-            img.src = this.undoTabList[this.currentTab].pop();
-            if(samePane === false)
-            {
-            //push it back to ensure history is good
-                this.undoTabList[this.currentTab].push(img.src);
-            }
-            console.log("content pop");
+        
+        var me = this;
 
-            img.onload = function () {
-                me.ctx.clearRect(0, 0, img.width, img.height);
-                me.ctx.drawImage(img, 0, 0, img.width, img.height);
-            }
-       }
-    
+        var img = new Image();
+        img.src = this.undoTabList[this.currentTab].pop();
+
+        if (samePane === false) {
+            this.undoTabList[this.currentTab].push(img.src);
+        }
+
+        img.onload = function () {
+            me.ctx.clearRect(0, 0, img.width, img.height);
+            me.ctx.drawImage(img, 0, 0, img.width, img.height);
+        }
     }
+
     erase = () => {
-       this.mode = ERASER;
+        this.mode = ERASER;
     }
 
-    onTabClick = (activeTab,mouseEvent) => {
-       this.stopCursorBlink();
-       this.pushUndoList();
-       console.log("On Tab Click");
-       this.currentTab = activeTab;
-       this.undoTab(false);
+    onTabClick = (activeTab, mouseEvent) => {
+        if(currentTab === activeTab) {
+            return;
+        }
+
+        this.stopCursorBlink();
+        this.pushUndoList();
+        this.currentTab = activeTab;
+        this.undoTab(false);
     }
-    onTabChange = (activeTab) => {
-//       this.pushUndoList();
-       console.log("On Tab Change called");
-//       this.currentTab = activeTab;
-//       this.undoTab();
-    }
-     onEdit = (targetKey, action) => {
+
+    onEdit = (targetKey, action) => {
         this[action](targetKey);
-     };
+    };
+
     undoEvent = () => {
         this.undoTab(true);
     }
-    add = () => {
-        console.log("Add");
-        const { panes } = this.state;
- 	const activeKey = `${this.newTabIndex}`;
-        this.undoTabList[this.newTabIndex] = [];
-	const newPanes = [...panes];
-	newPanes.push({ title: `Board - ${this.newTabIndex}`,  key: activeKey, closable: false, });
-	    this.setState({
-	    panes: newPanes,
-	    activeKey,
-	    });
-//        this.pushUndoList();	    
-//        this.setState({currentTab: this.newTabIndex});
-  	this.newTabIndex++;
 
-	 };
-  
+    add = () => {
+        const { panes } = this.state;
+        const activeKey = `${this.newTabIndex}`;
+        this.undoTabList[this.newTabIndex] = [];
+        const newPanes = [...panes];
+        newPanes.push({ title: `Board - ${this.newTabIndex}`, key: activeKey, closable: false, });
+        this.setState({
+            panes: newPanes,
+            activeKey,
+        });
+        this.newTabIndex++;
+    };
+
     render() {
-        const boardKey = `canvas-${this.props.boardId}`;
-        const boardKeyBG = 'k';
-        const { panes, activeKey } = this.state;
+        const { panes } = this.state;
+
         return (
             <div style={{ padding: 0, height: screen.height }}>
                 <Row>
                     <Col span={10}>
                         <Tabs type="editable-card"
-                        defaultActiveKey="1" tabPosition="top" style={{ maxHeight: 30 }} 
-                        onTabClick={this.onTabClick} onChange = {this.tabOnChange} onEdit={this.onEdit}>
-				        	{panes.map(pane => (
-				            	<TabPane tab={pane.title} key={pane.key} closable={pane.closable}>
-				            	</TabPane>	
-					        ))} 
-					     </Tabs>    
+                            defaultActiveKey="1" tabPosition="top" style={{ maxHeight: 30 }}
+                            onTabClick={this.onTabClick} onChange={this.tabOnChange} onEdit={this.onEdit}>
+                            {panes.map(pane => (
+                                <TabPane tab={pane.title} key={pane.key} closable={pane.closable}>
+                                </TabPane>
+                            ))}
+                        </Tabs>
                     </Col>
                     <Col span={12}>
                         <div style={{ float: "right", textAlign: "left", paddingRight: "10px" }}>
@@ -405,15 +372,12 @@ class Board extends Component {
                                 <Tooltip title="Erase">
                                     <Button onClick={this.erase} id="redo" style={this.state.eraseShape} type="primary" icon={<ScissorOutlined />} shape={"circle"} />
                                 </Tooltip>
-                 
                             </Space>
                         </div>
                     </Col>
                 </Row>
-
-               <canvas height={screen.height} width={screen.width} className="activeBoard" key={boardKey} ref={ref => (this.canvas = ref)} />
-              <canvas height={screen.height} width={screen.width} className="activeBoard" key={boardKeyBG} ref={ref => (this.canvasBG = ref)} />
-            </div>
+                <canvas height={screen.height} width={screen.width} className="activeBoard" key={boardKey} ref={ref => (this.canvas = ref)} />
+              </div>
         )
     }
 }
