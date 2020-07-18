@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { DatePicker, Select, Spin, Button, Form, Input, Tooltip, InputNumber } from 'antd';
-import { QuestionCircleOutlined } from '@ant-design/icons';
+
 import moment from 'moment';
+
+import { DatePicker, Select,  Button, Form, Input, Tooltip, InputNumber,notification,message } from 'antd';
+import { QuestionCircleOutlined,PlusCircleOutlined } from '@ant-design/icons';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -18,6 +20,18 @@ const formItemLayout = {
     },
 };
 
+const failureNotification = () => {
+    const args = {
+      message: 'Unable to Create Schedule',
+      description:
+        'We are very sorry. We are unable to create the requested schedule at this moment. Please try after some time.',
+      duration: 0,
+      type:'error',
+    };
+    notification.open(args);
+  };
+
+
 
 @observer
 class ScheduleForm extends Component {
@@ -25,7 +39,6 @@ class ScheduleForm extends Component {
     formRef = React.createRef();
 
     componentDidMount() {
-        //this.formRef.current.setFieldsValue({programName:'Rust the future'});
         const store = this.props.sessionStore;
         store.programListStore.fetchPrograms();
     }
@@ -43,12 +56,20 @@ class ScheduleForm extends Component {
      * Disable the Button and enable if error.
      * 
      */
-    onFinish = (values) => {
-        console.log(values);
-        console.log(values.startTime.format());
-        console.log(values.startTime.utc().format());
+    onFinish = async(values) => {
+        const store = this.props.sessionStore;
 
-        this.props.sessionStore.createSchedule(values);
+        await store.createSchedule(values);
+
+        if (store.isError) {
+            failureNotification();
+        }
+        if (store.isInvalid) {
+            message.success('Need Additional Information.');
+        }
+        if (store.isDone) {
+            message.success('Schedule is created.');
+        }
     }
 
     onProgramChange = (programFuzzyId) => {
@@ -68,15 +89,22 @@ class ScheduleForm extends Component {
         );
     }
 
+    pick = (msg1,msg2) => {
+        if(msg1.status === "error") {
+            return msg1;    
+        }
+        return msg2;
+    }
+
     render() {
         
         const store = this.props.sessionStore;
 
         const programs = store.programListStore.programs;
-        const programMsg = store.programListStore.message;
+        const programMsg = this.pick(store.programListStore.message,store.programMsg);
 
         const members = store.enrollmentListStore.members;
-        const memberMsg = store.enrollmentListStore.message;
+        const memberMsg = this.pick(store.enrollmentListStore.message,store.memberMsg);
 
         const startTimeMsg = store.startTimeMsg;
 
@@ -114,15 +142,15 @@ class ScheduleForm extends Component {
                         }
                         placeholder="Select an enrolled Member">
                         {members.map(item => (
-                            <Option key={item.fuzzyId}>{item.name}</Option>
+                            <Option key={item.fuzzyId}>{item.searchable}</Option>
                         ))}
                     </Select>
                 </Form.Item>
 
                 <Form.Item name="name"
-                    rules={[{ required: true, message: 'Please provide a topic of the session' }]}
+                    rules={[{ required: true, message: 'Please provide a topic for this session' }]}
                     label="Session Name">
-                    <Input placeholder="Topic for the session"/>
+                    <Input placeholder="Topic for this session"/>
                 </Form.Item>
 
                 <Form.Item
@@ -134,7 +162,7 @@ class ScheduleForm extends Component {
 
                 <Form.Item
                     name="startTime"
-                    rules={[{ required: true, message: 'Please select the Start Time of this session' }]}
+                    rules={[{ required: true, message: 'Please select the Start Time for this session' }]}
                     label="Start Time"
                     validateStatus={startTimeMsg.status}
                     help={startTimeMsg.help}>
@@ -144,13 +172,13 @@ class ScheduleForm extends Component {
 
                 <Form.Item
                     name="duration"
-                    rules={[{ required: true, message: 'Please provide a duration for the session' }]}
+                    rules={[{ required: true, message: 'Please provide a duration for this session' }]}
                     label="Duration (Hrs)">
                     <InputNumber min={1} max={8} />
                 </Form.Item>
 
                 <Form.Item>
-                    <Button type="primary" htmlType="submit">Save</Button>
+                    <Button type="primary" disabled={store.isLoading} htmlType="submit" icon={<PlusCircleOutlined/>}>Create Schedule</Button>
                 </Form.Item>
             </Form>
         );

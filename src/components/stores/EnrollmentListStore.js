@@ -31,6 +31,16 @@ export default class EnrollmentListStore {
     }
 
     /**
+     * To Help the user to see both name and email together
+     * 
+     * @param {*} result 
+     */
+    setSearchable = (result) => {
+        result.map(item=>{
+            item.searchable = item.name+"::"+item.email;
+        })
+    }
+    /**
      * Obtain the List of members who are enrolled into a Program
      *
      */
@@ -55,6 +65,8 @@ export default class EnrollmentListStore {
                 return;
             }
             const result = data.data.getEnrollments;
+            this.setSearchable(result);
+
             this.members = result;
             this.rowCount = result.length;
             this.state = DONE;

@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
+
 import {Button, Form, Input, notification,message} from 'antd';
+import { PlusCircleOutlined} from '@ant-design/icons';
 
 const { TextArea } = Input;
 
@@ -75,7 +77,7 @@ class ProgramForm extends Component {
                 </Form.Item>
 
                 <Form.Item>
-                    <Button type="primary" htmlType="submit" disabled={store.isLoading}>Save</Button>
+                    <Button type="primary" htmlType="submit" disabled={store.isLoading} icon={<PlusCircleOutlined/>}>Create Program</Button>
                 </Form.Item>
             </Form>
         );

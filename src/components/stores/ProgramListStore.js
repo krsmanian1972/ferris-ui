@@ -8,7 +8,7 @@ const DONE = 'done';
 const ERROR = 'error';
 
 const EMPTY_MESSAGE = { status: "", help: "" };
-const ERROR_MESSAGE = { status: "error", help: "Unable to fetch Programs." };
+const ERROR_MESSAGE = { status: ERROR, help: "Unable to fetch Programs." };
 
 export default class ProgramListStore {
 
