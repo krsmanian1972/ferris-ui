@@ -64,9 +64,11 @@ class ScheduleForm extends Component {
         if (store.isError) {
             failureNotification();
         }
+
         if (store.isInvalid) {
-            message.success('Need Additional Information.');
+            message.warning('Need Additional Information.');
         }
+        
         if (store.isDone) {
             message.success('Schedule is created.');
         }
