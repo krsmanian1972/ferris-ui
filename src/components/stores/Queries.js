@@ -36,6 +36,18 @@ export const createSessionQuery = `mutation($input: NewSessionRequest!) {
   }
 }`;
 
+export const createEnrollmentQuery = `mutation ($input: NewEnrollmentRequest!) {
+  createEnrollment(newEnrollmentRequest: $input) {
+    error {
+      field,
+      message
+    }
+    enrollment {
+      id
+    }
+  }
+}`;
+
 export const enrollmentsQuery = `query ($criteria: EnrollmentCriteria!) {
   getEnrollments(criteria: $criteria) {
     fuzzyId,
