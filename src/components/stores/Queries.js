@@ -79,7 +79,7 @@ export const eventsQuery = `query ($criteria: EventCriteria!) {
   }
 }`;
 
-export const creatNotesQuery = `mutation ($input: NewNoteRequest!) {
+export const createNotesQuery = `mutation ($input: NewNoteRequest!) {
   createNote(newNoteRequest: $input) {
     note {
       description,

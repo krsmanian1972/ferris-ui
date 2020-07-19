@@ -50,13 +50,13 @@ class Broadcast extends Component {
 
         this.notesListStore = new NotesListStore({ 
             apiProxy: props.appStore.apiProxy,
-            sessionId: props.appStore.sessionId, 
+            sessionUserFuzzyId: '71303b58-7af7-4c32-a441-308f73c9711d', 
         });
         
         this.notesStore = new NotesStore({ 
             apiProxy: props.appStore.apiProxy,
             notesListStore: this.notesListStore,
-            sessionId: props.appStore.sessionId,
+            sessionUserFuzzyId: '71303b58-7af7-4c32-a441-308f73c9711d',
         });
 
         this.initializeBoards();

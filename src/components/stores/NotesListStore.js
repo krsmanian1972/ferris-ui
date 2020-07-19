@@ -1,5 +1,7 @@
 import { decorate, observable, action } from 'mobx';
 
+import { apiHost } from './APIEndpoints';
+import { createNotesQuery } from './Queries';
 
 export default class NotesListStore {
 
@@ -8,14 +10,16 @@ export default class NotesListStore {
 
     constructor(props) {
         this.apiProxy = props.apiProxy;
-        this.sessionId = props.sessionId;
+        
     }
 
     /**
      * To be replaced with an API call
      * 
      */
-    getNotes = () => {
+    fetchNotes = () => {
+        
+
         return require("./test_data/session_notes.test.json");
     }
 

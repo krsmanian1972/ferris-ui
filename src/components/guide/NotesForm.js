@@ -5,17 +5,6 @@ import { UploadOutlined } from '@ant-design/icons';
 
 const { TextArea } = Input;
 
-const formItemLayout = {
-    labelCol: {
-        xs: { span: 24 },
-        sm: { span: 8 },
-    },
-    wrapperCol: {
-        xs: { span: 24 },
-        sm: { span: 16 },
-    },
-};
-
 
 @observer
 class NotesForm extends Component {
@@ -31,13 +20,8 @@ class NotesForm extends Component {
      * Disable the Button and enable if error.
      * 
      */
-    onFinish = (values) => {
-        console.log(values);
-    }
-
-    markAsDirty = (e) => {
-        const store = this.props.notesStore;
-        store.isDirty = true;
+    onFinish = async (values) => {
+        await this.props.notesStore.createNotes(values);
     }
 
     normFile = e => {
@@ -50,7 +34,7 @@ class NotesForm extends Component {
 
     render() {
 
-        const fuzzyId = this.props.notesStore.sessionFuzzyId;
+        const fuzzyId = this.props.notesStore.sessionUserFuzzyId;
 
         return (
             <Form layout="vertical" ref={this.formRef} onFinish={this.onFinish} >
@@ -61,7 +45,7 @@ class NotesForm extends Component {
                     <TextArea rows={5} />
                 </Form.Item>
 
-                <Form.Item name="reminderAt" label="Remind me at">
+                <Form.Item name="remindAt" label="Remind me at">
                     <DatePicker showTime format="DD-MMM-YYYY HH:mm A" />
                 </Form.Item>
 
