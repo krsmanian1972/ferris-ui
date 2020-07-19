@@ -66,3 +66,16 @@ export const eventsQuery = `query ($criteria: EventCriteria!) {
     
   }
 }`;
+
+export const creatNotesQuery = `mutation ($input: NewNoteRequest!) {
+  createNote(newNoteRequest: $input) {
+    note {
+      description,
+      fuzzyId
+    }
+    error {
+      field,
+      message
+    }
+  }
+}`
