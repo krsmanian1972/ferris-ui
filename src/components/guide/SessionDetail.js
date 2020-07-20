@@ -10,6 +10,7 @@ import 'moment-timezone';
 
 import SessionLauncher from './SessionLauncher';
 import PeerStatus from './PeerStatus';
+import MiniBoard from './MiniBoard';
 
 const { Meta } = Card;
 const { Title,Text } = Typography;
@@ -17,6 +18,8 @@ const { Title,Text } = Typography;
 const { Countdown } = Statistic;
 
 const deadline = moment().add(5, 'minute');
+
+const SESSION_USER_FUZZY_ID = 'd91e5527-9cc3-4d56-9c69-d386c9cba535';
 
 @inject("appStore")
 @observer
@@ -44,6 +47,8 @@ class SessionDetail extends Component {
                     <SessionLauncher title="Traits in Rust" sessionId="24" />
                 </Card>
 
+                <MiniBoard apiProxy={this.props.appStore.apiProxy} boardId="Board_1" sessionUserFuzzyId={SESSION_USER_FUZZY_ID}/>
+                
                 <Card>
                     <Statistic title="Coach" value="Gopal Sankaran" valueStyle={{ color: '#3f8600' }} />
                     <p><Text><MailOutlined /> gopals@pmpowerxx.com</Text></p>

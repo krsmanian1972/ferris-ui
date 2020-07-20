@@ -85,7 +85,7 @@ code {
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 45%;
+  width: 30%;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -109,10 +109,19 @@ code {
 }
 
 .activeBoard {
-  background-color: rgba(100,100,100,0.5);
-  z-index: 0;  
-
+  background-color: #646464;
 }
+
+.miniBoardFrame {
+  text-align: center;
+  height:240px;
+}
+
+.miniBoard {
+  background-color: #646464;
+  height:100%;
+}
+
 .activeBoardBG {
   background-color: rgba(100,100,100,0.5);
   z-index: 1;  

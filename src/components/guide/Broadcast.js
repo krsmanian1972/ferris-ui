@@ -19,6 +19,10 @@ import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutl
 const CONNECTION_KEY_VIDEO_STREAM = "peerVideoStream";
 const CONNECTION_KEY_SCREEN_STREAM = "peerScreenStream";
 
+const SESSION_USER_FUZZY_ID = 'd91e5527-9cc3-4d56-9c69-d386c9cba535';
+
+const MY_BOARD_KEY = 'myBoard';
+
 @inject("appStore")
 @observer
 class Broadcast extends Component {
@@ -35,8 +39,9 @@ class Broadcast extends Component {
             localSrc: null,
             peerSrc: null,
             screenSrc: null,
-            localBG:null,
-            minimizeMiniBoard:false,
+
+            minimizeMiniBoard: false,
+            
             portalSize: { height: window.innerHeight, width: window.innerWidth }
         };
 
@@ -47,40 +52,28 @@ class Broadcast extends Component {
 
         this.endCallHandler = this.endCall.bind(this);
         this.rejectCallHandler = this.rejectCall.bind(this);
-
-        this.notesListStore = new NotesListStore({ 
-            apiProxy: props.appStore.apiProxy,
-            sessionUserFuzzyId: 'd91e5527-9cc3-4d56-9c69-d386c9cba535', 
-        });
         
-        this.notesStore = new NotesStore({ 
-            apiProxy: props.appStore.apiProxy,
-            notesListStore: this.notesListStore,
-            sessionUserFuzzyId: 'd91e5527-9cc3-4d56-9c69-d386c9cba535',
+        this.initializeNotesStore();
+        this.initializeBoards();
+    }
+
+    initializeNotesStore = () => {
+        this.notesListStore = new NotesListStore({
+            apiProxy: this.props.appStore.apiProxy,
+            sessionUserFuzzyId: SESSION_USER_FUZZY_ID,
         });
 
-        this.initializeBoards();
+        this.notesStore = new NotesStore({
+            apiProxy: this.props.appStore.apiProxy,
+            notesListStore: this.notesListStore,
+            sessionUserFuzzyId: SESSION_USER_FUZZY_ID,
+        });
     }
 
     initializeBoards = () => {
         this.myBoards = new Map();
-        this.boardData = new Map();
-
-        for (var i = 1; i < 3; i++) {
-            const boardKey = `Board - ${i}`;
-            const fileName = `${this.props.appStore.sessionId}_${this.props.appStore.credentials.userFuzzyId}_${i}`;
-            const el = <Board key={boardKey} boardId={boardKey} saveBoardData={this.saveBoardData} getBoardData={this.getBoardData} fileName={fileName} />
-            this.myBoards.set(boardKey, el);
-            this.boardData.set(boardKey, null);
-        }
-    }
-
-    saveBoardData = (boardKey, data) => {
-        this.boardData.set(boardKey, data);
-    }
-
-    getBoardData = (boardKey) => {
-        return this.boardData.get(boardKey);
+        const el = <Board key={MY_BOARD_KEY} boardId={MY_BOARD_KEY} sessionUserFuzzyId={SESSION_USER_FUZZY_ID} />
+        this.myBoards.set(MY_BOARD_KEY, el);
     }
 
     buildTransceivers = (peerId) => {
@@ -227,29 +220,27 @@ class Broadcast extends Component {
     showNotes = () => {
         this.notesStore.showDrawer = true;
     }
+
     minimizeMiniBoard = () => {
-	console.log("Called in Broadcast.js");
-        if(this.state.minimizeMiniBoard === true)
-        {
-		this.setState({ minimizeMiniBoard: false });
+        if (this.state.minimizeMiniBoard === true) {
+            this.setState({ minimizeMiniBoard: false });
         }
-        else 
-        {
-		this.setState({ minimizeMiniBoard: true });
+        else {
+            this.setState({ minimizeMiniBoard: true });
         }
-        
-        
     }
 
     render() {
-        const { localSrc, peerSrc, screenSrc, portalSize, localBG } = this.state;
+        const { localSrc, peerSrc, screenSrc, portalSize,minimizeMiniBoard } = this.state;
         const viewHeight = portalSize.height * 0.94;
         const canShare = this.peerStreamStatus === "active";
 
         return (
             <div style={{ padding: 8, height: viewHeight }}>
-                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} myBoards={this.myBoards} getBoardData={this.getBoardData} backGround={localBG} minmizeMiniBoard={this.state.minimizeMiniBoard}/>
-                <Row style={{marginTop:2}}>
+                
+                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} myBoards={this.myBoards} minmizeMiniBoard={minimizeMiniBoard} />
+                
+                <Row style={{ marginTop: 2 }}>
                     <Col span={12}>
                     </Col>
                     <Col span={12} style={{ textAlign: "right" }}>
@@ -272,11 +263,11 @@ class Broadcast extends Component {
                             <Tooltip title="Minimize Mini Board">
                                 <Button onClick={this.minimizeMiniBoard} type="primary" icon={<StopOutlined />} shape="circle" />
                             </Tooltip>
-
                         </Space>
                     </Col>
                 </Row>
-                <NotesDrawer notesStore = {this.notesStore} />
+
+                <NotesDrawer notesStore={this.notesStore} />
             </div>
         )
     }

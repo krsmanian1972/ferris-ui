@@ -1,21 +1,20 @@
 import React, { Component } from 'react';
 import { Button, Row, Col, Tabs, Tooltip, Space } from 'antd';
-import { message } from 'antd';
 import { EditOutlined, ItalicOutlined, UndoOutlined, RedoOutlined, ScissorOutlined } from '@ant-design/icons';
 import socket from '../stores/socket';
 
 const { TabPane } = Tabs;
 
-const POINTER = 'Pointer';
+
 const PEN = 'PEN';
 const ERASER = 'ERASER';
 const TEXTBOX = 'TEXTBOX';
-const DEFAULT = '';
+
 
 const cursorColour = '#FFFFFF';
 const cursorBlinkSpeed = 1 * 1000;
 const backgroundColour = '#646464';
-const cursorSize = { width: 1, height: 15 };
+const cursorSize = { width: 1, height: 18 };
 
 const selected = { background: "white", color: "black", borderColor: "black" };
 const unselected = {};
@@ -30,16 +29,14 @@ class Board extends Component {
 
         this.x = 0;
         this.y = 0;
+
         this.sentence = "";
         this.textWidth = 0;
+
         this.cursorPos = { x: 0, y: 0 };
+        this.cursorSize = 10;
 
-        this.mode = DEFAULT;
-
-        this.gridPixelSize = 10;
-        this.majorGrid = this.gridPixelSize * 10
-        this.majorGridLineWidth = 1
-        this.minorGridLineWidth = 0.5
+        this.mode = PEN;
 
         this.redoList = [];
         this.undoList = [];
@@ -52,12 +49,12 @@ class Board extends Component {
         this.newTabIndex = 3;
 
         this.state = {
-            penShape: unselected,
-            textBoxShape: unselected,
+            selectedButton: PEN,
             activeKey: initialPanes[0].key,
             panes: initialPanes,
         };
 
+        this.hasCursor = false;
     }
 
     componentDidMount() {
@@ -67,7 +64,6 @@ class Board extends Component {
         this.cursorPos = { x: 0, y: 0 };
 
         this.ctx = this.canvas.getContext("2d");
-        this.bGctx = this.canvasBG.getContext("2d");
         this.ctx.font = "16px Courier";
         this.ctx.fillStyle = "white";
 
@@ -75,30 +71,32 @@ class Board extends Component {
         this.yOffset = temp.actualBoundingBoxAscent;
         this.textWidth = temp.width;
 
-        this.drawGrid();
-
-        this.canvas.addEventListener("dblclick", this.toggleWriting);
 
         //In mouse down start drawing
         this.canvas.addEventListener('mousedown', (e) => {
-            //save board on every mouse down in a stack
-            this.pushUndoList();
+
+            // Reset current path if any...
             this.ctx.beginPath();
 
-            if (this.mode === TEXTBOX) {
-                if (e.buttons === 1) {
-                    this.textBox(e);
-                }
+            //save board on every mouse down in a stack
+            this.pushUndoList();
+
+            //Place the textBox only if the user has selected the TextBox
+            if (this.mode === TEXTBOX && e.buttons === 1) {
+                this.textBox(e);
             }
 
         });
 
         this.canvas.addEventListener('mousemove', (e) => {
+
             if (this.mode === PEN || this.mode === ERASER) {
+
                 // Check whether we're holding the left click down while moving the mouse
                 if (e.buttons === 1) {
                     this.paint(e);
                 }
+
             }
         });
 
@@ -106,87 +104,62 @@ class Board extends Component {
 
     }
 
-    // unregister the event listerns
+    // unregister the event listeners
     componentWillUnmount() {
 
 
     }
 
-    drawGrid = () => {
-        this.bGctx.lineWidth = 0.1;
-        this.bGctx.strokeStyle = 'rgb(110,110,110)';
-
-        // horizontal grid lines
-        for (var i = 0; i <= this.canvasBG.height; i = i + this.gridPixelSize) {
-            this.bGctx.beginPath();
-            this.bGctx.moveTo(0, i);
-            this.bGctx.lineTo(this.canvasBG.width, i);
-            if (i % parseInt(this.majorGrid) == 0) {
-                this.bGctx.lineWidth = this.majorGridLineWidth;
-            } else {
-                this.bGctx.lineWidth = this.minorGridLineWidth;
-            }
-            this.bGctx.closePath();
-            this.bGctx.stroke();
-        }
-
-        // // vertical grid lines
-        for (var j = 0; j <= this.canvasBG.width; j = j + this.gridPixelSize) {
-            this.bGctx.beginPath();
-            this.bGctx.moveTo(j, 0);
-            this.bGctx.lineTo(j, this.canvasBG.height);
-            if (j % parseInt(this.majorGrid) == 0) {
-                this.bGctx.lineWidth = this.majorGridLineWidth;
-            } else {
-                this.bGctx.lineWidth = this.minorGridLineWidth;
-            }
-            this.bGctx.closePath();
-            this.bGctx.stroke();
-        }
-    }
-
     pushUndoList = () => {
         const screenShot = this.canvas.toDataURL();
         this.undoTabList[this.currentTab].push(screenShot);
-        const fileName = this.props.fileName + "_" + this.currentTab;
-        socket.emit('canvasupstream', { content: screenShot, name: fileName });
+
+        const name = `Board_${this.currentTab}`;
+        socket.emit('canvasupstream', { content: screenShot, sessionUserFuzzyId: this.props.sessionUserFuzzyId, name: name });
     }
 
     textBox = (event) => {
-        if (this.mode === TEXTBOX) {
-            if (!this.canvas) {
-                return;
-            }
-            this.sentence = '';
-            clearInterval(this.cursorBlinkFunc);
-            this.ctx.beginPath();
-            this.ctx.clearRect(this.cursorPos.x, this.cursorPos.y - 5, 8, 8);
-
-            // Place Cursor at the double clicked Position
-            var rect = this.canvas.getBoundingClientRect();
-            this.x = Math.round((event.clientX - rect.left) / this.gridPixelSize * this.gridPixelSize);
-            this.y = Math.round((event.clientY - rect.top) / this.gridPixelSize * this.gridPixelSize);
-
-            this.cursorPos = { x: this.x, y: this.y - 10 };
-            this.cursorBlinkFunc = setInterval(this.cursorBlink, cursorBlinkSpeed);
-
+        if (!this.canvas) {
+            return;
         }
-    }
-    newLine = () => {
+
+        if (this.mode !== TEXTBOX) {
+            return;
+        }
 
         this.sentence = '';
+
         clearInterval(this.cursorBlinkFunc);
-        this.eraseCursor();
         this.ctx.beginPath();
         this.ctx.clearRect(this.cursorPos.x, this.cursorPos.y - 5, 8, 8);
 
+        // Place Cursor at the double clicked Position
         var rect = this.canvas.getBoundingClientRect();
+        this.x = Math.round((event.clientX - rect.left) / this.cursorSize * this.cursorSize);
+        this.y = Math.round((event.clientY - rect.top) / this.cursorSize * this.cursorSize);
+
+        this.cursorPos = { x: this.x, y: this.y - 10 };
+        this.cursorBlinkFunc = setInterval(this.cursorBlink, cursorBlinkSpeed);
+        this.hasCursor = true;
+    }
+
+    newLine = () => {
+
+        this.sentence = '';
+
+        clearInterval(this.cursorBlinkFunc);
+        this.eraseCursor();
+        this.ctx.beginPath();
+        this.ctx.clearRect(this.cursorPos.x, this.cursorPos.y - 5, 8, 12);
+
+        var rect = this.canvas.getBoundingClientRect();
+
         //move the cursor to a new line
         this.y = this.y + 15;
         this.cursorPos = { x: this.x, y: this.y - 10 };
         this.cursorBlinkFunc = setInterval(this.cursorBlink, cursorBlinkSpeed);
-        this.pushUndoList();
 
+        this.pushUndoList();
     }
 
     cursorBlink = () => {
@@ -219,6 +192,10 @@ class Board extends Component {
 
     write = (event) => {
 
+        if(this.mode !== TEXTBOX) {
+            return;
+        }
+
         var c = String.fromCharCode(event.keyCode);
 
         if (event.keyCode === 13) {
@@ -247,6 +224,7 @@ class Board extends Component {
         const rect = this.canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
+
         if (this.mode === ERASER) {
             this.ctx.strokeStyle = backgroundColour;
             this.ctx.lineWidth = (cursorSize.width + 10);
@@ -262,31 +240,41 @@ class Board extends Component {
     }
 
     stopCursorBlink = () => {
-        if (this.mode === TEXTBOX) {
-            clearInterval(this.cursorBlinkFunc);
-            this.eraseCursor();
-            this.ctx.beginPath();
-            this.ctx.clearRect(this.cursorPos.x, this.cursorPos.y - 5, 8, 8);
+        if (!this.hasCursor) {
+            return;
         }
+
+        clearInterval(this.cursorBlinkFunc);
+        this.eraseCursor();
+        this.ctx.beginPath();
+        this.ctx.clearRect(this.cursorPos.x, this.cursorPos.y - 5, 8, 0);
+        this.hasCursor = false;
+        this.sentence = '';
     }
 
     freeDrawing = () => {
-        this.mode = PEN;
         this.stopCursorBlink();
-        this.setState({ penShape: selected, textBoxShape: unselected });
+        this.mode = PEN;
+        this.setState({ selectedButton: this.mode });
     }
 
     textWrite = () => {
         this.mode = TEXTBOX;
-        this.setState({ penShape: unselected, textBoxShape: selected });
+        this.setState({ selectedButton: this.mode });
+    }
+
+    erase = () => {
+        this.stopCursorBlink();
+        this.mode = ERASER;
+        this.setState({ selectedButton: this.mode });
     }
 
     undoTab = (samePane) => {
         if (this.undoTabList[this.currentTab].length === 0) {
-            this.ctx.clearRect(0, 0, screen.height, screen.height);
+            this.ctx.clearRect(0, 0, screen.width, screen.height);
             return;
         }
-        
+
         var me = this;
 
         var img = new Image();
@@ -302,19 +290,19 @@ class Board extends Component {
         }
     }
 
-    erase = () => {
-        this.mode = ERASER;
-    }
-
     onTabClick = (activeTab, mouseEvent) => {
-        if(currentTab === activeTab) {
+
+        if (this.currentTab === activeTab) {
             return;
         }
 
         this.stopCursorBlink();
         this.pushUndoList();
+
         this.currentTab = activeTab;
+        
         this.undoTab(false);
+        this.freeDrawing();
     }
 
     onEdit = (targetKey, action) => {
@@ -326,17 +314,28 @@ class Board extends Component {
     }
 
     add = () => {
-        const { panes } = this.state;
+
         const activeKey = `${this.newTabIndex}`;
+
         this.undoTabList[this.newTabIndex] = [];
+
+        const { panes } = this.state;
         const newPanes = [...panes];
         newPanes.push({ title: `Board - ${this.newTabIndex}`, key: activeKey, closable: false, });
         this.setState({
             panes: newPanes,
             activeKey,
         });
+
         this.newTabIndex++;
     };
+
+    getStyle = (compKey) => {
+        if (this.mode === compKey) {
+            return selected;
+        }
+        return unselected;
+    }
 
     render() {
         const { panes } = this.state;
@@ -347,7 +346,7 @@ class Board extends Component {
                     <Col span={10}>
                         <Tabs type="editable-card"
                             defaultActiveKey="1" tabPosition="top" style={{ maxHeight: 30 }}
-                            onTabClick={this.onTabClick} onChange={this.tabOnChange} onEdit={this.onEdit}>
+                            onTabClick={this.onTabClick} onEdit={this.onEdit}>
                             {panes.map(pane => (
                                 <TabPane tab={pane.title} key={pane.key} closable={pane.closable}>
                                 </TabPane>
@@ -358,10 +357,10 @@ class Board extends Component {
                         <div style={{ float: "right", textAlign: "left", paddingRight: "10px" }}>
                             <Space>
                                 <Tooltip title="Pen">
-                                    <Button onClick={this.freeDrawing} id="pen" style={this.state.penShape} type="primary" icon={<EditOutlined />} shape={"circle"} />
+                                    <Button onClick={this.freeDrawing} id="pen" style={this.getStyle(PEN)} type="primary" icon={<EditOutlined />} shape={"circle"} />
                                 </Tooltip>
                                 <Tooltip title="TextBox">
-                                    <Button onClick={this.textWrite} id="pen" style={this.state.textBoxShape} type="primary" icon={<ItalicOutlined />} shape={"circle"} />
+                                    <Button onClick={this.textWrite} id="textBox" style={this.getStyle(TEXTBOX)} type="primary" icon={<ItalicOutlined />} shape={"circle"} />
                                 </Tooltip>
                                 <Tooltip title="Undo">
                                     <Button onClick={this.undoEvent} id="undo" style={this.state.undoShape} type="primary" icon={<UndoOutlined />} shape={"circle"} />
@@ -370,14 +369,14 @@ class Board extends Component {
                                     <Button onClick={this.redo} id="redo" style={this.state.redoShape} type="primary" icon={<RedoOutlined />} shape={"circle"} />
                                 </Tooltip>
                                 <Tooltip title="Erase">
-                                    <Button onClick={this.erase} id="redo" style={this.state.eraseShape} type="primary" icon={<ScissorOutlined />} shape={"circle"} />
+                                    <Button onClick={this.erase} id="erase" style={this.getStyle(ERASER)} type="primary" icon={<ScissorOutlined />} shape={"circle"} />
                                 </Tooltip>
                             </Space>
                         </div>
                     </Col>
                 </Row>
-                <canvas height={screen.height} width={screen.width} className="activeBoard" key={boardKey} ref={ref => (this.canvas = ref)} />
-              </div>
+                <canvas height={screen.height} width={screen.width} className="activeBoard" key="canvas" ref={ref => (this.canvas = ref)} />
+            </div>
         )
     }
 }

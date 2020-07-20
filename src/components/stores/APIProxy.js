@@ -47,7 +47,7 @@ export default class APIProxy {
       });
   }
 
-  query(url, queryString,variables) {
+  query(url, queryString, variables) {
     return fetch(url, {
       method: 'POST',
       headers: {
@@ -56,11 +56,11 @@ export default class APIProxy {
         'access-control-allow-origin': '*',
         ...this.authHeaders
       },
-      body: JSON.stringify({query: queryString,variables})
+      body: JSON.stringify({ query: queryString, variables })
     });
   }
 
-  mutate(url, mutationQueryString,variables) {
+  mutate(url, mutationQueryString, variables) {
     return fetch(url, {
       method: 'POST',
       headers: {
@@ -69,7 +69,7 @@ export default class APIProxy {
         'access-control-allow-origin': '*',
         ...this.authHeaders
       },
-      body: JSON.stringify({query: mutationQueryString,variables})
+      body: JSON.stringify({ query: mutationQueryString, variables })
     });
   }
 

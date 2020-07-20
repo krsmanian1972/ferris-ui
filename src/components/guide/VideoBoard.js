@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import MiniBoard from './MiniBoard';
 
 const standardStyle = {
     height: "100%",
@@ -10,25 +9,25 @@ const standardStyle = {
     overflow: "hidden",
 };
 var peerVideoContainer = {
-  position: "absolute",
-  bottom: "0",
-  left: "0",
-  width: "45%",
-  height: "15%",
-  display: "flex",
+    position: "absolute",
+    bottom: "0",
+    left: "0",
+    width: "45%",
+    height: "15%",
+    display: "flex",
 };
 
 var myVideoContainer = {
-  position: "absolute",
-  bottom: "0",
-  right: "0",
-  width: "45%",
-  height: "15%",
-  display: "flex",
-  }
- ;
+    position: "absolute",
+    bottom: "0",
+    right: "0",
+    width: "45%",
+    height: "15%",
+    display: "flex",
+}
+    ;
 
-function VideoBoard({ localSrc, peerSrc, screenSrc, myBoards, getBoardData, backGround, minmizeMiniBoard }) {
+function VideoBoard({ localSrc, peerSrc, screenSrc, myBoards,  minmizeMiniBoard }) {
 
     const [peerKey, setPeerKey] = useState('none');
     const [myKey, setMyKey] = useState('none');
@@ -88,18 +87,14 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, myBoards, getBoardData, back
         }
 
         if (myKey === "none") {
-            return { width: "33.3%" };
+            return { width: "50%" };
         }
 
-        return { width: "50%" };
-    }
-    const getContainerHeight = () =>{
-        return {height: "0%"};
+        return { width: "100%" };
     }
 
     const getSuspendedItems = (widgets, activeKey) => {
         let toSuspend = [];
-        console.log("get suspended items called");
         for (const [key, value] of widgets) {
             if (key !== activeKey) {
                 toSuspend.push(value);
@@ -107,13 +102,14 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, myBoards, getBoardData, back
         }
         return toSuspend;
     }
-    const getminiBoardheight= () =>  {
-	if(minmizeMiniBoard === true){
+
+    const getminiBoardheight = () => {
+        if (minmizeMiniBoard === true) {
             return { height: "0%" };
-            }
-	else {
+        }
+        else {
             return { height: "15%" };
-	}
+        }
     }
 
 
@@ -122,20 +118,12 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, myBoards, getBoardData, back
     peerWidgets.set("peerScreen", <video key="peerScreen" className="videoItem" style={getPeerStyle("peerScreen")} poster="peerScreen.png" ref={peerScreen} autoPlay onClick={() => setSelected("peerScreen", "peer")} />);
     peerWidgets.set("peerBoard", <video key="peerBoard" className="videoItem" style={getPeerStyle("peerBoard")} poster="peerBoard.png" ref={peerBoard} autoPlay onClick={() => setSelected("peerBoard", "peer")} />);
 
+    
+    const boardKey = 'myBoard';
+    const el = <div key="myMiniBoard" className="videoItem" style={getMyStyle(boardKey)} onClick={() => setSelected(boardKey, "self")} >My Board</div>
     const myWidgets = new Map();
-    for (var i = 1; i < 3; i++) {
-        const boardKey = `Board - ${i}`;
-       
-        const el = <div
-            key={boardKey}
-            className="videoItem"
-            style={getMyStyle(boardKey)}
-            onClick={() => setSelected(boardKey, "self")} >
-            <MiniBoard key={boardKey} boardId={boardKey} getBoardData={getBoardData}/>
-        </div>
+    myWidgets.set(boardKey, el);
 
-        myWidgets.set(boardKey, el);
-    }
 
     const getActiveItem = () => {
         if (myKey === "none" && peerKey === "none") {
@@ -156,11 +144,11 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, myBoards, getBoardData, back
                 {getActiveItem()}
             </div>
 
-            <div className="peerVideoContainer" style= {getminiBoardheight()}>
+            <div className="peerVideoContainer" style={getminiBoardheight()}>
                 {getSuspendedItems(peerWidgets, peerKey).map(value => value)}
             </div>
 
-            <div className="myVideoContainer" style= {getminiBoardheight()}>
+            <div className="myVideoContainer" style={getminiBoardheight()}>
                 {getSuspendedItems(myWidgets, myKey).map(value => value)}
                 <video key="myVideo" className="videoItem" style={getMyStyle("myVideo")} poster="videoSelf.png" onClick={() => minimizeAll()} ref={localVideo} autoPlay muted />
             </div>
@@ -174,7 +162,6 @@ VideoBoard.propTypes = {
     peerSrc: PropTypes.object,
     screenSrc: PropTypes.object,
     myBoards: PropTypes.object,
-    getBoardData: PropTypes.func,
     minimizeMiniBoard: PropTypes.object,
 };
 
