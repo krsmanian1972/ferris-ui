@@ -11,6 +11,10 @@ const stageStyle = {
 @inject("appStore")
 class BookPage extends Component {
 
+    constructor(props) {
+        super(props);
+    }
+
     getCode = () => {
 
         var code = String.raw`
@@ -39,6 +43,8 @@ class BookPage extends Component {
     render() {
         return (
             <div style={stageStyle}>
+                <p>{this.props.params.programFuzzyId}</p>
+                <p>{this.props.params.parentKey}</p>
                 <p>A trait is a language feature that tells the Rust compiler about functionality a type must provide.</p>
                 {this.getCode()}
             </div>

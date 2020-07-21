@@ -1,7 +1,11 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
-import { List, Avatar, Spin, Result } from 'antd';
+import { List, Card, Spin, Result } from 'antd';
+
+import {assetHost} from '../stores/APIEndpoints';
+
+const { Meta } = Card;
 
 @observer
 class ProgramList extends Component {
@@ -41,21 +45,27 @@ class ProgramList extends Component {
         return (<></>)
     }
 
+    getCover = (program) => {
+        return `${assetHost}/programs/${program.fuzzyId}/cover/cover.png`;
+    }
+
     render() {
         const store = this.props.programListStore;
         const programs = store.programs;
-
+        
         return (
             <List
+                grid={{ gutter: [16, 16], column: 4}}
                 dataSource={programs}
                 renderItem={item => (
-                    <List.Item key={item.program.fuzzyId}>
-                        <List.Item.Meta
-                            avatar={<Avatar src={item.program.avatar} />}
-                            title={<a href="#">{item.program.name}</a>}
-                            description={item.program.description}
-                        />
-                        <div>{this.getActive(item.program.active)}</div>
+                    <List.Item> 
+                        <Card title={item.program.name} 
+                            style={{height:400}}
+                            onClick={() => this.props.showProgramDetail(item.program.fuzzyId)}
+                            cover={<img alt="cover" style={{height:180}} src={this.getCover(item.program)}/>}
+                        >
+                            <Meta description={item.program.description}/>
+                        </Card>
                     </List.Item>
                 )}>
                 {this.displayMessage()}

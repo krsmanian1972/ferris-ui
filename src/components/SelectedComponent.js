@@ -7,6 +7,7 @@ import WorkflowUI from './guide/WorkflowUI';
 import ProgramUI from './guide/ProgramUI';
 import HomeUI from './guide/HomeUI';
 import Broadcast from './guide/Broadcast';
+import BookPage from './guide/BookPage';
 
 
 @inject("appStore")
@@ -34,6 +35,9 @@ class SelectedComponent extends Component {
             }
             case 'broadcast' : {
                 return <Broadcast />
+            }
+            case 'programDetail' : {
+                return <BookPage params={currentComponent.params}/>
             }
             case 'about': {
                 return <About />;

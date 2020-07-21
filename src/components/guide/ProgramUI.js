@@ -27,6 +27,11 @@ class ProgramUI extends Component {
        this.store.showDrawer=true; 
     }
 
+    showProgramDetail = (programFuzzyId) => {
+        const params = {programFuzzyId:programFuzzyId,parentKey:"programs"};
+        this.props.appStore.currentComponent = { label:"Details", key: "programDetail",params:params};
+    }
+
     /**
      * Provide the count Tag only if the store is in Done State
      */
@@ -56,7 +61,7 @@ class ProgramUI extends Component {
                     ]}>
                 </PageHeader>
 
-                <ProgramList programListStore = {this.listStore}/>
+                <ProgramList programListStore = {this.listStore} showProgramDetail = {this.showProgramDetail}/>
                 
                 <ProgramDrawer programStore = {this.store}/>    
                 

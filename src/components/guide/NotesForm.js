@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import moment from 'moment';
 import { DatePicker, Button, Form, Input, Upload, notification, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
+import {assetHost} from '../stores/APIEndpoints';
 
 const { TextArea } = Input;
 
@@ -97,7 +98,7 @@ class NotesForm extends Component {
                     valuePropName="fileList"
                     getValueFromEvent={this.normFile}
                 >
-                    <Upload name={fuzzyId} action="http://localhost:8088/upload" listType="picture" >
+                    <Upload name={fuzzyId} action={`${assetHost}/upload`} listType="picture" >
                         <Button>
                             <UploadOutlined /> Click to upload
                         </Button>
