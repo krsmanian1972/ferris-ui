@@ -5,6 +5,7 @@ import Login from './LoginScreen';
 import About from './About';
 import WorkflowUI from './guide/WorkflowUI';
 import ProgramUI from './guide/ProgramUI';
+import ProgramDetailUI from './guide/ProgramDetailUI';
 import HomeUI from './guide/HomeUI';
 import Broadcast from './guide/Broadcast';
 import BookPage from './guide/BookPage';
@@ -27,6 +28,9 @@ class SelectedComponent extends Component {
             case 'programs': {
                 return <ProgramUI />;
             }
+            case 'programDetail' : {
+                return <ProgramDetailUI params={currentComponent.params}/>
+            }
             case 'planning': {
                 return <WorkflowUI />;
             }
@@ -35,9 +39,6 @@ class SelectedComponent extends Component {
             }
             case 'broadcast' : {
                 return <Broadcast />
-            }
-            case 'programDetail' : {
-                return <BookPage params={currentComponent.params}/>
             }
             case 'about': {
                 return <About />;

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {inject, observer } from 'mobx-react';
-import { PageHeader, Tabs, Button, Tooltip } from 'antd';
+import { PageHeader, Tabs, Typography, Button, Tooltip } from 'antd';
 import { ThunderboltOutlined, CalendarOutlined, HourglassOutlined, PlusCircleOutlined } from '@ant-design/icons';
 
 import SessionDetail from './SessionDetail';
@@ -13,6 +13,7 @@ import ScheduleDrawer from './ScheduleDrawer';
 import ProgramListStore from '../stores/ProgramListStore';
 import EnrollmentListStore from '../stores/EnrollmentListStore';
 
+const { Title, Paragraph, Text } = Typography;
 const { TabPane } = Tabs;
 
 @inject("appStore")
@@ -48,7 +49,7 @@ class HomeUI extends Component {
     render() {
         return (
             <>
-                <PageHeader title="Your Sessions"
+                <PageHeader title={<Title level={3}>Your sessions</Title>}
                     extra={[
                         this.newScheduleButton()
                     ]}>

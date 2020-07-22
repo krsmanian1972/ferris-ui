@@ -45,7 +45,7 @@ class ProgramList extends Component {
         return (<></>)
     }
 
-    getCover = (program) => {
+    getCoverUrl = (program) => {
         return `${assetHost}/programs/${program.fuzzyId}/cover/cover.png`;
     }
 
@@ -55,14 +55,14 @@ class ProgramList extends Component {
         
         return (
             <List
-                grid={{ gutter: [16, 16], column: 4}}
+                grid={{column: 3}}
                 dataSource={programs}
                 renderItem={item => (
                     <List.Item> 
                         <Card title={item.program.name} 
-                            style={{height:400}}
+                            style={{height:527,width:326,border:'1px solid lightgray'}}
                             onClick={() => this.props.showProgramDetail(item.program.fuzzyId)}
-                            cover={<img alt="cover" style={{height:180}} src={this.getCover(item.program)}/>}
+                            cover={<img alt="cover" style={{border:"1px solid lightgray", height:180,width:326}} src={this.getCoverUrl(item.program)}/>}
                         >
                             <Meta description={item.program.description}/>
                         </Card>

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { inject,observer } from 'mobx-react';
 
-import {PageHeader, Tooltip, Button,Tag} from 'antd';
+import {PageHeader, Typography, Tooltip, Button,Tag} from 'antd';
 import { PlusCircleOutlined} from '@ant-design/icons';
 
 import ProgramListStore from '../stores/ProgramListStore';
@@ -10,6 +10,7 @@ import ProgramStore from '../stores/ProgramStore';
 import ProgramList from './ProgramList';
 import ProgramDrawer from './ProgramDrawer';
 
+const { Title} = Typography;
 
 @inject("appStore")
 @observer
@@ -29,7 +30,7 @@ class ProgramUI extends Component {
 
     showProgramDetail = (programFuzzyId) => {
         const params = {programFuzzyId:programFuzzyId,parentKey:"programs"};
-        this.props.appStore.currentComponent = { label:"Details", key: "programDetail",params:params};
+        this.props.appStore.currentComponent = { label:"Program Detail", key: "programDetail", params:params};
     }
 
     /**
@@ -52,7 +53,7 @@ class ProgramUI extends Component {
     render() {
         return (
             <>
-                <PageHeader title="Your Programs"
+                <PageHeader title={<Title level={3}>Your Programs</Title>}
                     tags={this.countTag()}
                     extra={[
                         <Tooltip key="new_program_tip" title="Create Program">

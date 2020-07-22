@@ -17,7 +17,9 @@ export default class ProgramStore {
     message = EMPTY_MESSAGE;
 
     showDrawer = false;
-    programId = 0;
+    programFuzzyId = null;
+
+    program = null;
 
     constructor(props) {
         this.apiProxy = props.apiProxy;
@@ -34,6 +36,10 @@ export default class ProgramStore {
 
     get isError() {
         return this.state === ERROR;
+    }
+
+    load = async(programFuzzyId) => {
+
     }
 
     /**
@@ -82,9 +88,12 @@ decorate(ProgramStore, {
     message: observable,
     programId: observable,
 
+    program: observable,
+
     isLoading: computed,
     isDone: computed,
     isError: computed,
 
     createProgram: action,
+    load: action,
 });

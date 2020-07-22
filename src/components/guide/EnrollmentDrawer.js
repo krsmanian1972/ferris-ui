@@ -2,10 +2,9 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Drawer } from 'antd';
 
-import ProgramForm from './ProgramForm';
 
 @observer
-class ProgramDrawer extends Component {
+class EnrollmentDrawer extends Component {
 
     close = () => {
         const store = this.props.programStore;
@@ -15,13 +14,13 @@ class ProgramDrawer extends Component {
    
     render() {
         const store = this.props.programStore;
-        const title = "Basic Information about the Program"; 
+        const title = "Enroll a Member Here"; 
 
         return (
             <Drawer title={title} width={"45%"} closable={true} onClose={this.close} visible={store.showDrawer} destroyOnClose>
-                <ProgramForm programStore = {store}/>
+                
             </Drawer>
         );
     }
 }
-export default ProgramDrawer
+export default EnrollmentDrawer
