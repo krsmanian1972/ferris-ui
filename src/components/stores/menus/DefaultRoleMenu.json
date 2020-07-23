@@ -5,6 +5,11 @@
         "isLandingPage": true
     },
     {
+        "label": "Programs",
+        "key": "programs",
+        "isLandingPage": false
+    },
+    {
         "label": "Reports",
         "key": "about",
         "isLandingPage": false

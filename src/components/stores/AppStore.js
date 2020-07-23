@@ -18,14 +18,9 @@ const INVALID = 'invalid';
 const DONE = 'done';
 const ERROR = 'error';
 
-const IN_PROGRESS_MESSAGE = 'Authenticating...';
-const SUCCESS = 'Authentication is successful.';
-const INVALID_CREDENTIAL = 'Invalid Login Information';
-
 class AppStore {
 
     state = INIT;
-    validationMessage = '';
 
     credentials = blankCredentials;
 
@@ -34,8 +29,6 @@ class AppStore {
     apiProxy = new APIProxy();
     loginStore = new LoginStore({ apiProxy: this.apiProxy });
     menus = [];
-
-    isEditable = true;
 
     sessionId = null;
     socketToken = null;
@@ -72,48 +65,31 @@ class AppStore {
 
     authenticate = async (values) => {
 
-        this.notifyProgress();
+        this.state = PENDING;
 
         this.credentials = blankCredentials;
 
-        const data = await this.loginStore.authenticate(values);
+        const result = await this.loginStore.authenticate(values);
 
-        if (data == null || data.token == null) {
-            this.notifyError(INVALID_CREDENTIAL);
+        this.state = result.state;
+
+        if (result.state !== DONE) {
             return;
         }
+        
+        const data = result.data;
 
         this.credentials.email = data.email;
-        this.credentials.token = data.token;
-        this.credentials.role = data.role;
-        this.credentials.username = data.username;
+        this.credentials.token = data.fuzzyId;
+        this.credentials.role = data.userType;
+        this.credentials.username = data.name;
         this.credentials.userFuzzyId = data.fuzzyId;
 
         this.apiProxy.updateCredentialHeaders(this.credentials);
 
         this.updateContext();
         this.persistCredentials();
-        this.notifySuccess();
     }
-
-    notifyError = (errorMessage) => {
-        this.state = ERROR;
-        this.isEditable = true;
-        this.validationMessage = errorMessage;
-    }
-
-    notifyProgress = () => {
-        this.state = PENDING;
-        this.isEditable = false;
-        this.validationMessage = IN_PROGRESS_MESSAGE;
-    }
-
-    notifySuccess = () => {
-        this.state = DONE;
-        this.isEditable = false;
-        this.validationMessage = SUCCESS;
-    }
-
 
     persistCredentials = () => {
         localStorage.setItem('credentials', JSON.stringify(this.credentials));
@@ -133,7 +109,7 @@ class AppStore {
         }
 
         switch (this.credentials.role) {
-            case 'guide':
+            case 'coach':
                 {
                     this.menus = require('./menus/GuideMenu.json');
                     break;
@@ -163,7 +139,7 @@ class AppStore {
             .on('token', ({ id }) => {
                 this.socketToken = id;
             })
-            .emit('init', ({ fuzzyId: this.credentials.userFuzzyId, name:this.credentials.username}));
+            .emit('init', ({ fuzzyId: this.credentials.userFuzzyId, name: this.credentials.username }));
     }
 
     navigateTo(index) {
@@ -199,12 +175,14 @@ class AppStore {
         }
     }
 
+    get isCoach() {
+        return this.credentials.role==="coach";
+    }
+
 }
 
 decorate(AppStore, {
     state: observable,
-    validationMessage: observable,
-    isEditable: observable,
     menus: observable,
 
     currentComponent: observable,
@@ -220,6 +198,7 @@ decorate(AppStore, {
     isLoading: computed,
     isError: computed,
     isInvalid: computed,
+    isCoach: computed,
 
     sessionId: observable,
     socketToken: observable,

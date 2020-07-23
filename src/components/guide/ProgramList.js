@@ -14,9 +14,6 @@ class ProgramList extends Component {
         super(props);
     }
 
-    componentDidMount() {
-        this.props.programListStore.fetchPrograms();
-    }
 
     getActive = (flag) => {
         if (flag) {
@@ -55,16 +52,17 @@ class ProgramList extends Component {
         
         return (
             <List
+                style={{marginTop:10}}
                 grid={{column: 3}}
                 dataSource={programs}
                 renderItem={item => (
                     <List.Item> 
-                        <Card title={item.program.name} 
+                        <Card title={item.name} 
                             style={{height:527,width:326,border:'1px solid lightgray'}}
-                            onClick={() => this.props.showProgramDetail(item.program.fuzzyId)}
-                            cover={<img alt="cover" style={{border:"1px solid lightgray", height:180,width:326}} src={this.getCoverUrl(item.program)}/>}
+                            onClick={() => this.props.showProgramDetail(item.fuzzyId)}
+                            cover={<img alt="cover" style={{border:"1px solid lightgray", height:180,width:326}} src={this.getCoverUrl(item)}/>}
                         >
-                            <Meta description={item.program.description}/>
+                            <Meta description={item.description}/>
                         </Card>
                     </List.Item>
                 )}>

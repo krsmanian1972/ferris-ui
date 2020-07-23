@@ -1,12 +1,24 @@
-import React, { Component, Fragment } from 'react';
-import {Button, Form, Input,Card,Typography } from 'antd';
+import React, { Component } from 'react';
+import { Button, Form, Input, Card, Typography, notification, message } from 'antd';
 import { observer, inject } from 'mobx-react';
 
-const {Title} = Typography;
+const { Title } = Typography;
+
 const loginCard = {
-    marginLeft:"33.33%",
-    width:"33.33%",
+    marginLeft: "25%",
+    width: "50%",
     backgroundColor: 'lightgray',
+};
+
+const failureNotification = () => {
+    const args = {
+        message: 'Service Unavailable',
+        description:
+            'We are very sorry that we are unable to serve you at this moment. Please try after some time.',
+        duration: 0,
+        type: 'error',
+    };
+    notification.open(args);
 };
 
 @inject('appStore')
@@ -17,28 +29,28 @@ export default class LoginScreen extends Component {
 
         return (
             <>
-            <Card style={loginCard} title={<Title level={4}>Login</Title>}>
+                <Card style={loginCard} title={<Title level={4}>Login</Title>}>
                     <Form layout="vertical" ref={this.formRef} onFinish={this.onFinish} >
-                        <Form.Item name="email" 
+                        <Form.Item name="email"
                             rules={[{ required: true, message: 'Please enter your registered email id.' }]}
                             label="EMAIL">
                             <Input />
                         </Form.Item>
-                    
-                        <Form.Item name="password"  
+
+                        <Form.Item name="password"
                             rules={[{ required: true, message: 'Please provide your password.' }]}
                             label="PASSWORD">
-                            <Input.Password/>
+                            <Input.Password />
                         </Form.Item>
 
                         <Form.Item>
                             <Button type="primary" htmlType="submit" disabled={store.isLoading}>LOGIN</Button>
                         </Form.Item>
-                    
+
                     </Form>
                 </Card>
 
-                <div style={{textAlign:'center', marginTop:30}}>
+                <div style={{ textAlign: 'center', marginTop: 30 }}>
                     <Button type="link" disabled={store.isLoading}>DON'T HAVE AN ACCOUNT? REGISTER HERE</Button>
                 </div>
             </>
@@ -49,8 +61,12 @@ export default class LoginScreen extends Component {
         const store = this.props.appStore;
         await store.authenticate(values);
 
-        if(store.isError) {
-            failureNotification();    
+        if (store.isError) {
+            failureNotification();
+        }
+
+        if (store.isInvalid) {
+            message.warning('Invalid Login Details.');
         }
     };
 }

@@ -39,8 +39,10 @@ export default class ProgramListStore {
      * Obtain the List of programs from the Ferris API
      *
      */
-    fetchPrograms = async () => {
+    fetchPrograms = async (desire) => {
 
+        console.log(desire);
+        
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
@@ -48,7 +50,8 @@ export default class ProgramListStore {
 
         const variables = {
             criteria: {
-                userFuzzyId: userFuzzyId
+                userFuzzyId: userFuzzyId,
+                desire:desire
             }
         }
 

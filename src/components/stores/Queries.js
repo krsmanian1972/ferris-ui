@@ -1,11 +1,19 @@
+export const authenticationQuery = `query ($request: LoginRequest!) {
+  authenticate(request:$request) {
+    fuzzyId,
+    email,
+    name,
+    userType
+  }
+}`
+
 export const programsQuery = `query ($criteria: ProgramCriteria!) {
     getPrograms(criteria: $criteria) {
-          program {
         fuzzyId
         active
         name
         description
-          }
+        coachName
     }
 }`;
 
