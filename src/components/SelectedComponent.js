@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 
-import Login from './LoginScreen';
+import Login from './LoginUI';
 import About from './About';
 import WorkflowUI from './guide/WorkflowUI';
 import ProgramUI from './guide/ProgramUI';

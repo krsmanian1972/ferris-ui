@@ -14,6 +14,7 @@ const blankCredentials = {
 
 const INIT = 'init';
 const PENDING = 'pending';
+const INVALID = 'invalid';
 const DONE = 'done';
 const ERROR = 'error';
 
@@ -23,6 +24,9 @@ const INVALID_CREDENTIAL = 'Invalid Login Information';
 
 class AppStore {
 
+    state = INIT;
+    validationMessage = '';
+
     credentials = blankCredentials;
 
     currentComponent = null;
@@ -31,15 +35,25 @@ class AppStore {
     loginStore = new LoginStore({ apiProxy: this.apiProxy });
     menus = [];
 
-    validationMessage = '';
     isEditable = true;
-    state = INIT;
 
     sessionId = null;
     socketToken = null;
 
     constructor() {
         this.setSessionFromStorage();
+    }
+
+    get isLoading() {
+        return this.state === PENDING;
+    }
+
+    get isError() {
+        return this.state === ERROR;
+    }
+
+    get isInvalid() {
+        return this.state === INVALID;
     }
 
     setSessionFromStorage = () => {
@@ -56,13 +70,13 @@ class AppStore {
     }
 
 
-    authenticate = async () => {
+    authenticate = async (values) => {
 
         this.notifyProgress();
 
         this.credentials = blankCredentials;
 
-        const data = await this.loginStore.authenticate();
+        const data = await this.loginStore.authenticate(values);
 
         if (data == null || data.token == null) {
             this.notifyError(INVALID_CREDENTIAL);
@@ -202,6 +216,10 @@ decorate(AppStore, {
     authenticate: action,
     transitionTo: action,
     navigateTo: action,
+
+    isLoading: computed,
+    isError: computed,
+    isInvalid: computed,
 
     sessionId: observable,
     socketToken: observable,

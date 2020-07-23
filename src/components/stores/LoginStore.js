@@ -46,7 +46,10 @@ export default class LoginStore {
         this.appStore = props.appStore
     }
 
-    authenticate = async () => {
+    test_authenticate = async (values) => {
+        this.loginCredentials.email = values.email;
+        this.loginCredentials.password = values.password;
+        
         if (this.isEmptyCredentials()) {
             return null;
         }
@@ -67,25 +70,30 @@ export default class LoginStore {
         return null;
     }
 
-    actual_authenticate = async () => {
+    authenticate = async (values) => {
+
+        this.loginCredentials.email = values.email;
+        this.loginCredentials.password = values.password;
+
         if (this.isEmptyCredentials()) {
-            return null;
+            return {state:"invalid", data:null};
         }
 
         try {
             const response = await this.apiProxy.asyncPost(loginUrl, this.loginCredentials);
             const data = await response.json();
-            return data;
+            return {state:"done", data:data};
         }
         catch (e) {
             console.log(e);
-            return null;
+            return {state:"error", data:null};
         }
     }
 
     isEmptyCredentials = () => {
         return isBlank(this.loginCredentials.email) || isBlank(this.loginCredentials.password)
     }
+
 }
 
 decorate(LoginStore, {
