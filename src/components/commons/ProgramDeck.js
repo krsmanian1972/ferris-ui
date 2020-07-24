@@ -4,6 +4,8 @@ import { inject, observer } from 'mobx-react';
 
 import { Carousel } from 'antd';
 
+import { assetHost } from '../stores/APIEndpoints';
+
 import ProgramListStore from '../stores/ProgramListStore';
 import ProgramStore from '../stores/ProgramStore';
 
@@ -25,24 +27,30 @@ class ProgramDeck extends Component {
         this.props.appStore.currentComponent = { label: "Program Detail", key: "programDetail", params: params };
     }
 
-   
-    render() {
+    getProgramPoster = (program) => {
+        const url = `${assetHost}/programs/${program.fuzzyId}/poster/poster.png`;
         return (
+            <div style={{ textAlign: "center" }}>
+                <img style={{ maxWidth: "100%",background:"black" }} src={url} onClick={() => this.props.showProgramDetail(program.fuzzyId)} />
+            </div>
+        )
+    }
 
-            <Carousel effect="fade">
-                <div>
-                    <h3>1</h3>
-                </div>
-                <div>
-                    <h3>2</h3>
-                </div>
-                <div>
-                    <h3>3</h3>
-                </div>
-                <div>
-                    <h3>4</h3>
-                </div>
-            </Carousel>
+    render() {
+
+        const store = this.props.programListStore;
+        const programs = store.programs;
+
+        return (
+                <Carousel autoplay>
+                    {programs && programs.map(item => {
+                        return (
+                            <div key={item.fuzzyId}>
+                                {this.getProgramPoster(item)}
+                            </div>
+                        )
+                    })}
+                </Carousel>   
         )
     }
 }

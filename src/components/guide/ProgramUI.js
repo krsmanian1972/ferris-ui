@@ -12,26 +12,37 @@ import ProgramList from './ProgramList';
 import ProgramDrawer from './ProgramDrawer';
 
 const { TabPane } = Tabs;
-const { Title } = Typography;
+const { Title,Text } = Typography;
 
-const DESIRE_YOURS = "YOURS";
-const DESIRE_EXPLORE = "EXPLORE";
-const DESIRE_ENROLLED = "ENROLLED";
+const DECK = "EXPLORE";
+const YOURS = "YOURS";
+const ENROLLED = "ENROLLED";
+const EXPLORE = "EXPLORE";
 
 @inject("appStore")
 @observer
 class ProgramUI extends Component {
     constructor(props) {
         super(props);
-        this.listStore = new ProgramListStore({ apiProxy: props.appStore.apiProxy });
+        
+        this.deckListStore = new ProgramListStore({ apiProxy: props.appStore.apiProxy });
+        this.yourListStore = new ProgramListStore({ apiProxy: props.appStore.apiProxy });
+        this.enrolledListStore = new ProgramListStore({ apiProxy: props.appStore.apiProxy });
+        this.exploreListStore = new ProgramListStore({ apiProxy: props.appStore.apiProxy });
+        
+        this.refreshListStores();
+
         this.store = new ProgramStore({
             apiProxy: props.appStore.apiProxy,
-            programListStore: this.listStore
-        })
+        });
     }
 
-    componentDidMount() {
-        this.listStore.fetchPrograms(DESIRE_EXPLORE);  
+
+    refreshListStores = () => {
+        this.deckListStore.fetchPrograms(DECK);
+        this.yourListStore.fetchPrograms(YOURS);
+        this.enrolledListStore.fetchPrograms(ENROLLED);
+        this.exploreListStore.fetchPrograms(EXPLORE);
     }
 
     new = () => {
@@ -46,61 +57,52 @@ class ProgramUI extends Component {
     /**
      * Provide the count Tag only if the store is in Done State
      */
-    countTag = () => {
-        if (this.listStore.isDone) {
-            return <Tag color="#108ee9">{this.listStore.rowCount} Total</Tag>
+    countTag = (listStore) => {
+        if (listStore.isDone) {
+            return <Tag color="#108ee9">{listStore.rowCount} Total</Tag>
         }
 
-        if (this.listStore.isError) {
+        if (listStore.isError) {
             return <Tag color="red">...</Tag>
         }
 
-        if (this.listStore.isLoading) {
+        if (listStore.isLoading) {
             return <Tag color="blue">...</Tag>
         }
     }
 
-    refreshList = (desire) => {
-        this.listStore.fetchPrograms(desire);
-    }
     addProgramButton = () => {
         if (this.props.appStore.isCoach) {
             return (
-                <Tooltip key="new_program_tip" title="Create Program">
-                    <Button key="add" onClick={this.new} type="primary" icon={<PlusCircleOutlined />}>New</Button>
+                <Tooltip key="new_program_tip" title="Create New Program">
+                    <Button key="add" onClick={this.new} type="primary" icon={<PlusCircleOutlined />} shape="circle"></Button>
                 </Tooltip>
             );
         }
     }
 
     render() {
+
         return (
             <>
-                <ProgramDeck programListStore={this.listStore} showProgramDetail={this.showProgramDetail} />
+                <ProgramDeck programListStore={this.deckListStore} showProgramDetail={this.showProgramDetail} />
+                
+                {this.props.appStore.isCoach && (
+                    <>
+                        <Title style={{marginTop:10}} level={4}>Yours {this.countTag(this.yourListStore)} {this.addProgramButton()}</Title>
+                        <ProgramList programListStore={this.yourListStore} showProgramDetail={this.showProgramDetail} />
+                    </> 
+                )}
 
-                <Tabs
-                    defaultActiveKey={DESIRE_EXPLORE}
-                    onChange={this.refreshList}
-                    tabPosition="top"
-                    style={{ minHeight: 450 }}
-                    tabBarExtraContent={this.addProgramButton()}>
+                {this.enrolledListStore.rowCount > 0 && (
+                    <>   
+                        <Title style={{marginTop:10}} level={4}>Enrolled {this.countTag(this.enrolledListStore)} </Title>
+                        <ProgramList programListStore={this.enrolledListStore} showProgramDetail={this.showProgramDetail} />
+                    </>    
+                )}
 
-                    {this.props.appStore.isCoach && (
-                        <TabPane key={DESIRE_YOURS} tab={<span><BookOutlined />Yours</span>} style={{ maxHeight: 450, overflow: "auto" }}>
-                            <ProgramList programListStore={this.listStore} showProgramDetail={this.showProgramDetail} desire={DESIRE_YOURS} />
-                        </TabPane>
-                    )}
-
-                    <TabPane key={DESIRE_ENROLLED} tab={<span><ThunderboltOutlined />Enrolled</span>} style={{ maxHeight: 450, overflow: "auto" }}>
-                        <ProgramList programListStore={this.listStore} showProgramDetail={this.showProgramDetail} desire={DESIRE_ENROLLED} />
-                    </TabPane>
-
-                    <TabPane key={DESIRE_EXPLORE} tab={<span><SearchOutlined />Explore</span>} style={{ maxHeight: 450, overflow: "auto" }}>
-                        <ProgramList programListStore={this.listStore} showProgramDetail={this.showProgramDetail} desire={DESIRE_EXPLORE} />
-                    </TabPane>
-                </Tabs>
-
-
+                <Title style={{marginTop:10}} level={4}>Explore</Title>
+                <ProgramList programListStore={this.exploreListStore} showProgramDetail={this.showProgramDetail} />
 
                 <ProgramDrawer programStore={this.store} />
 

@@ -41,8 +41,6 @@ export default class ProgramListStore {
      */
     fetchPrograms = async (desire) => {
 
-        console.log(desire);
-        
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
