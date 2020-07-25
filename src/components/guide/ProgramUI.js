@@ -2,17 +2,16 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
 import { Tabs, Typography, Tooltip, Button, Tag } from 'antd';
-import { PlusCircleOutlined, ThunderboltOutlined, SearchOutlined, BookOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined } from '@ant-design/icons';
 
 import ProgramListStore from '../stores/ProgramListStore';
 import ProgramStore from '../stores/ProgramStore';
 
-import ProgramDeck from '../commons/ProgramDeck';
+import ProgramBanner from '../commons/ProgramBanner';
 import ProgramList from './ProgramList';
 import ProgramDrawer from './ProgramDrawer';
 
-const { TabPane } = Tabs;
-const { Title,Text } = Typography;
+const { Title } = Typography;
 
 const DECK = "EXPLORE";
 const YOURS = "YOURS";
@@ -24,12 +23,12 @@ const EXPLORE = "EXPLORE";
 class ProgramUI extends Component {
     constructor(props) {
         super(props);
-        
+
         this.deckListStore = new ProgramListStore({ apiProxy: props.appStore.apiProxy });
         this.yourListStore = new ProgramListStore({ apiProxy: props.appStore.apiProxy });
         this.enrolledListStore = new ProgramListStore({ apiProxy: props.appStore.apiProxy });
         this.exploreListStore = new ProgramListStore({ apiProxy: props.appStore.apiProxy });
-        
+
         this.refreshListStores();
 
         this.store = new ProgramStore({
@@ -75,7 +74,7 @@ class ProgramUI extends Component {
         if (this.props.appStore.isCoach) {
             return (
                 <Tooltip key="new_program_tip" title="Create New Program">
-                    <Button key="add" onClick={this.new} type="primary" icon={<PlusCircleOutlined />} shape="circle"></Button>
+                    <Button style={{float:"right"}} key="add" onClick={this.new} type="primary" icon={<PlusCircleOutlined />}>New</Button>
                 </Tooltip>
             );
         }
@@ -85,23 +84,23 @@ class ProgramUI extends Component {
 
         return (
             <>
-                <ProgramDeck programListStore={this.deckListStore} showProgramDetail={this.showProgramDetail} />
-                
+                <ProgramBanner programListStore={this.deckListStore} showProgramDetail={this.showProgramDetail} />
+
                 {this.props.appStore.isCoach && (
                     <>
-                        <Title style={{marginTop:10}} level={4}>Yours {this.countTag(this.yourListStore)} {this.addProgramButton()}</Title>
+                        <Title style={{ marginTop: 10 }} level={4}>Yours {this.countTag(this.yourListStore)} {this.addProgramButton()}</Title>
                         <ProgramList programListStore={this.yourListStore} showProgramDetail={this.showProgramDetail} />
-                    </> 
+                    </>
                 )}
 
                 {this.enrolledListStore.rowCount > 0 && (
-                    <>   
-                        <Title style={{marginTop:10}} level={4}>Enrolled {this.countTag(this.enrolledListStore)} </Title>
+                    <>
+                        <Title style={{ marginTop: 10 }} level={4}>Enrolled {this.countTag(this.enrolledListStore)} </Title>
                         <ProgramList programListStore={this.enrolledListStore} showProgramDetail={this.showProgramDetail} />
-                    </>    
+                    </>
                 )}
 
-                <Title style={{marginTop:10}} level={4}>Explore</Title>
+                <Title style={{ marginTop: 10 }} level={4}>Explore</Title>
                 <ProgramList programListStore={this.exploreListStore} showProgramDetail={this.showProgramDetail} />
 
                 <ProgramDrawer programStore={this.store} />

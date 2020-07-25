@@ -12,7 +12,7 @@ import ProgramStore from '../stores/ProgramStore';
 
 @inject("appStore")
 @observer
-class ProgramDeck extends Component {
+class ProgramBanner extends Component {
     constructor(props) {
         super(props);
         this.listStore = new ProgramListStore({ apiProxy: props.appStore.apiProxy });
@@ -30,8 +30,9 @@ class ProgramDeck extends Component {
     getProgramPoster = (program) => {
         const url = `${assetHost}/programs/${program.fuzzyId}/poster/poster.png`;
         return (
-            <div style={{ textAlign: "center" }}>
-                <img style={{ maxWidth: "100%",background:"black" }} src={url} onClick={() => this.props.showProgramDetail(program.fuzzyId)} />
+            <div style={{ textAlign: "center"}}>
+                <div style={{display:"inline-block",verticalAlign:"middle"}}></div>
+                <img style={{ maxWidth: "100%",maxHeight: "100%",verticalAlign:"middle", display:"inline-block" }} src={url} onClick={() => this.props.showProgramDetail(program.fuzzyId)} />
             </div>
         )
     }
@@ -42,7 +43,7 @@ class ProgramDeck extends Component {
         const programs = store.programs;
 
         return (
-                <Carousel autoplay>
+                <Carousel dotPosition={"top"}>
                     {programs && programs.map(item => {
                         return (
                             <div key={item.fuzzyId}>
@@ -54,4 +55,4 @@ class ProgramDeck extends Component {
         )
     }
 }
-export default ProgramDeck;
+export default ProgramBanner;

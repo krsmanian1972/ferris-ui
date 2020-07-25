@@ -41,6 +41,10 @@ code {
   background: #fff;
 }
 
+.ant-carousel .slick-dots li {
+  background: gray;
+}
+
 
 .steps {
   height: 250px;

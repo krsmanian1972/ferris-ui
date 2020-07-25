@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
-import { Card, Spin, Result, Carousel } from 'antd';
+import { Card, Spin, Result, Carousel,Button } from 'antd';
 
 import { assetHost } from '../stores/APIEndpoints';
-import { LeftCircleFilled,RightCircleFilled } from '@ant-design/icons';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 
 const { Meta } = Card;
 
@@ -65,14 +65,14 @@ class ProgramList extends Component {
 
         return (
             <div style={{display: "flex", flexDirection: "row", justifyContent:"center", textAlign:"center", alignItems:"center"}}>
-                <LeftCircleFilled style={{width: "5%"}} onClick={this.previous} />
-                <div style={{ width: "90%" }}>
+                <Button key="back" onClick={this.previous} icon={<LeftOutlined />} shape="square"></Button>
+                <div style={{ width: "95%" }}>
                     <Carousel ref={ref => (this.carousel = ref)} {...props}>
                         {programs && programs.map(item => {
                             return (
                                 <div key={item.fuzzyId} style={{display:"flex", flexDirection:"column"}}>
-                                    <div style={{textAlign:"center",height:150}} onClick={() => this.props.showProgramDetail(item.fuzzyId)}>
-                                        <div style={{display:"inline-block",verticalAlign:"middle",height:150}}></div>
+                                    <div style={{textAlign:"center",height:175,marginRight:10, marginLeft:10,}} onClick={() => this.props.showProgramDetail(item.fuzzyId)}>
+                                        <div style={{display:"inline-block",verticalAlign:"middle",height:175}}></div>
                                         <img style={{maxHeight:"100%",maxWidth:"100%", verticalAlign:"middle", display:"inline-block"}} src={this.getCoverUrl(item)} />
                                     </div>
                                     <p style={{textAlign:"center"}}>{item.name}</p>  
@@ -81,7 +81,7 @@ class ProgramList extends Component {
                         })}
                     </Carousel>
                 </div>
-                <RightCircleFilled style={{width: "5%"}} onClick={this.previous} />
+                <Button key="back" onClick={this.next} icon={<RightOutlined />} shape="square"></Button>
                 {this.displayMessage()}
             </div>
         )
