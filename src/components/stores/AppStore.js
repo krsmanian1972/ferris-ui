@@ -179,6 +179,10 @@ class AppStore {
         return this.credentials.role==="coach";
     }
 
+    get isMember() {
+        return this.credentials.role==="member";
+    }
+
 }
 
 decorate(AppStore, {
@@ -199,6 +203,7 @@ decorate(AppStore, {
     isError: computed,
     isInvalid: computed,
     isCoach: computed,
+    isMember: computed,
 
     sessionId: observable,
     socketToken: observable,

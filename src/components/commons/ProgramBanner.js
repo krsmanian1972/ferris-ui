@@ -44,10 +44,10 @@ class ProgramBanner extends Component {
 
         return (
                 <Carousel dotPosition={"top"}>
-                    {programs && programs.map(item => {
+                    {programs && programs.map(({program}) => {
                         return (
-                            <div key={item.fuzzyId}>
-                                {this.getProgramPoster(item)}
+                            <div key={program.fuzzyId}>
+                                {this.getProgramPoster(program)}
                             </div>
                         )
                     })}

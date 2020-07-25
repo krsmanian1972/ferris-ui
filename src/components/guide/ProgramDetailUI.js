@@ -48,8 +48,35 @@ class ProgramDetailUI extends Component {
        this.store.showDrawer=true; 
     }
 
+    getActivationButton = () => {
+        if(!this.store.canActivate) {
+            return;
+        }
+        
+        return (
+            <Tooltip key="new_activation_tip" title="Activate this program, as you are the Coach.">
+                <Button key="activateProgram" onClick={this.activate} type="primary" icon={<RocketOutlined/>}>Activate</Button>
+            </Tooltip>
+        );
+    }
+
+    getEnrollmentButton = () => {
+        if(!this.store.isOwner) {
+            return;
+        }
+        return (
+            <Tooltip key="new_program_tip" title="Enoll into this program">
+                <Button key="add" onClick={this.enroll} type="primary" icon={<PlusCircleOutlined />}>Enroll</Button>
+            </Tooltip>
+        );
+    }
+
     activate = () => {
 
+    }
+
+    enroll = () => {
+        
     }
     
     getTrailerUrl = () => {
@@ -58,18 +85,14 @@ class ProgramDetailUI extends Component {
     }
 
     render() {
+
         return (
             <>
                 <PageHeader title={<Title level={3}>Be Happy</Title>}
                     extra={[
-                        <Tooltip key="new_enrollment_tip" title="To enroll a member into this program.">
-                            <Button key="newEnrollment" onClick={this.newEnrollment} type="primary" icon={<PlusCircleOutlined/>}>Enroll</Button>
-                        </Tooltip>,
-
-                        <Tooltip key="new_activation_tip" title="To activate this program, if you are the Coach.">
-                            <Button key="activateProgram" onClick={this.activate} type="primary" icon={<RocketOutlined/>}>Activate</Button>
-                        </Tooltip>,
-
+                        this.getEnrollmentButton(),
+                        
+                       
                     ]}>
                 </PageHeader>
 
@@ -106,8 +129,8 @@ class ProgramDetailUI extends Component {
                 <Card>
                     <Card.Meta description="Trailers from coach" style={{ marginBottom: 10 }} />
                     <Card 
-                            style={{height:180,width:326,border:'1px solid lightgray'}}
-                            cover={<img alt="cover" style={{border:"1px solid lightgray", height:180,width:326}} src={this.getTrailerUrl()}/>}>
+                            style={{border:'1px solid lightgray'}}
+                            cover={<img alt="cover" style={{border:"1px solid lightgray"}} src={this.getTrailerUrl()}/>}>
                     </Card>
                 </Card>
 

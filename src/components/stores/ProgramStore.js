@@ -1,7 +1,7 @@
 import { decorate, observable, computed, action } from 'mobx';
 
 import { apiHost } from './APIEndpoints';
-import {createProgramQuery} from './Queries';
+import {createProgramQuery, findProgramQuery} from './Queries';
 
 const INIT = "init";
 const PENDING = 'pending';
@@ -38,7 +38,34 @@ export default class ProgramStore {
     }
 
     load = async(programFuzzyId) => {
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+        
+        const variables = {
+            input: {
+                fuzzyId: programFuzzyId
+            }
+        }
 
+        try {
+            const response = await this.apiProxy.query(apiHost, findProgramQuery, variables);
+            const data = await response.json();
+
+            if (data.error == true) {
+                this.state = ERROR;
+                this.message = ERROR_MESSAGE;
+                return;
+            }
+
+            this.program = data;
+            this.state = DONE;
+        }
+
+        catch (e) {
+            this.state = ERROR;
+            this.message = ERROR_MESSAGE;
+            console.log(e);
+        }
     }
 
     /**

@@ -63,7 +63,7 @@ export default class ProgramListStore {
                 return;
             }
 
-            const result = data.data.getPrograms;
+            const result = data.data.getPrograms.programs;
             this.programs = result;
             this.rowCount = result.length;
             this.state = DONE;

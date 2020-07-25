@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
-import { Card, Spin, Result, Carousel,Button } from 'antd';
+import { Spin, Result, Carousel,Button } from 'antd';
 
 import { assetHost } from '../stores/APIEndpoints';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 
-const { Meta } = Card;
 
 @observer
 class ProgramList extends Component {
@@ -68,20 +67,20 @@ class ProgramList extends Component {
                 <Button key="back" onClick={this.previous} icon={<LeftOutlined />} shape="square"></Button>
                 <div style={{ width: "95%" }}>
                     <Carousel ref={ref => (this.carousel = ref)} {...props}>
-                        {programs && programs.map(item => {
+                        {programs && programs.map(({program}) => {
                             return (
-                                <div key={item.fuzzyId} style={{display:"flex", flexDirection:"column"}}>
-                                    <div style={{textAlign:"center",height:175,marginRight:10, marginLeft:10,}} onClick={() => this.props.showProgramDetail(item.fuzzyId)}>
+                                <div key={program.fuzzyId} style={{display:"flex", flexDirection:"column"}}>
+                                    <div style={{textAlign:"center",height:175,marginRight:10, marginLeft:10,}} onClick={() => this.props.showProgramDetail(program.fuzzyId)}>
                                         <div style={{display:"inline-block",verticalAlign:"middle",height:175}}></div>
-                                        <img style={{maxHeight:"100%",maxWidth:"100%", verticalAlign:"middle", display:"inline-block"}} src={this.getCoverUrl(item)} />
+                                        <img style={{maxHeight:"100%",maxWidth:"100%", verticalAlign:"middle", display:"inline-block"}} src={this.getCoverUrl(program)} />
                                     </div>
-                                    <p style={{textAlign:"center"}}>{item.name}</p>  
+                                    <p style={{textAlign:"center"}}>{program.name}</p>  
                                 </div>
                             )
                         })}
                     </Carousel>
                 </div>
-                <Button key="back" onClick={this.next} icon={<RightOutlined />} shape="square"></Button>
+                <Button key="forward" onClick={this.next} icon={<RightOutlined />} shape="square"></Button>
                 {this.displayMessage()}
             </div>
         )
