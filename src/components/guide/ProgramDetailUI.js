@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { inject,observer } from 'mobx-react';
+import { inject, observer } from 'mobx-react';
 
-import {PageHeader, Tooltip, Card, Button,Statistic} from 'antd';
-import { PlusCircleOutlined,RocketOutlined,MailOutlined,PhoneOutlined} from '@ant-design/icons';
-import { Typography} from 'antd';
+import { Spin, Result, PageHeader, Tooltip, Card, Button, Statistic } from 'antd';
+import { PlusCircleOutlined, RocketOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
+import { Typography } from 'antd';
 import CurrentSessionPlan from './CurrentSessionPlan';
 
 const { Title, Paragraph, Text } = Typography;
@@ -12,7 +12,7 @@ import ProgramStore from '../stores/ProgramStore';
 
 import EnrollmentDrawer from './EnrollmentDrawer';
 
-import {assetHost} from '../stores/APIEndpoints';
+import { assetHost } from '../stores/APIEndpoints';
 
 @inject("appStore")
 @observer
@@ -23,8 +23,14 @@ class ProgramDetailUI extends Component {
         this.store = new ProgramStore({
             apiProxy: props.appStore.apiProxy,
         })
+    }
 
-        this.store.load(props.params.programFuzzyId);
+    componentDidMount() {
+        this.load(this.props.params.programFuzzyId);
+    }
+
+    load = async(programFuzzyId) => {
+        await this.store.load(programFuzzyId);
     }
 
     getCoverUrl = (programFuzzyId) => {
@@ -34,34 +40,34 @@ class ProgramDetailUI extends Component {
     getProgramPoster = () => {
         const programFuzzyId = this.props.params.programFuzzyId;
         const posterUrl = `url(${this.getCoverUrl(programFuzzyId)})`
-        const style= {
+        const style = {
             backgroundImage: posterUrl,
-            backgroundRepeat:"no-repeat",
+            backgroundRepeat: "no-repeat",
             backgroundSize: "contain",
             backgroundPosition: "center",
-            height:450,
+            height: 450,
         }
         return style;
     }
 
     newEnrollment = () => {
-       this.store.showDrawer=true; 
+        this.store.showDrawer = true;
     }
 
     getActivationButton = () => {
-        if(!this.store.canActivate) {
+        if (!this.store.canActivate) {
             return;
         }
-        
+
         return (
             <Tooltip key="new_activation_tip" title="Activate this program, as you are the Coach.">
-                <Button key="activateProgram" onClick={this.activate} type="primary" icon={<RocketOutlined/>}>Activate</Button>
+                <Button key="activateProgram" onClick={this.activate} type="primary" icon={<RocketOutlined />}>Activate</Button>
             </Tooltip>
         );
     }
 
     getEnrollmentButton = () => {
-        if(!this.store.isOwner) {
+        if (!this.store.canEnroll) {
             return;
         }
         return (
@@ -76,9 +82,9 @@ class ProgramDetailUI extends Component {
     }
 
     enroll = () => {
-        
+
     }
-    
+
     getTrailerUrl = () => {
         const programFuzzyId = this.props.params.programFuzzyId;
         return `${assetHost}/programs/${programFuzzyId}/cover/cover.png`;
@@ -86,56 +92,72 @@ class ProgramDetailUI extends Component {
 
     render() {
 
+        if (this.store.isLoading) {
+            return (
+                <div className="loading-container">
+                    <Spin />
+                </div>
+            )
+        }
+
+        if (this.store.isError) {
+            return <Result status="warning" title={this.store.message.help} />
+        }
+
+        return this.renderProgramModel();
+    }
+
+    renderProgramModel = () => {
+
+        const { program, coach } = this.store.programModel;
+
         return (
             <>
-                <PageHeader title={<Title level={3}>Be Happy</Title>}
+                <PageHeader title={<Title level={3}>{program.name}</Title>}
                     extra={[
                         this.getEnrollmentButton(),
-                        
-                       
+                        this.getActivationButton(),
                     ]}>
                 </PageHeader>
 
                 <Card>
                     <Card.Meta description="About" style={{ marginBottom: 10 }} />
-                    <Paragraph>
-                        Rust is proving to be a productive tool for collaborating among large teams of developers with varying levels of systems programming knowledge. Low-level code is prone to a variety of subtle bugs, which in most other languages can be caught only through extensive testing and careful code review by experienced developers. 
-                    </Paragraph>    
+                    <Paragraph>{program.description}</Paragraph>
                 </Card>
 
-                <div key="programPoster" style={this.getProgramPoster()}></div> 
+                <div key="programPoster" style={this.getProgramPoster()}></div>
 
                 <Card>
-                    <Statistic title="Coach" value="Gopal Sankaran" valueStyle={{ color: '#3f8600' }} />
-                    <Paragraph><MailOutlined /> gopals@pmpowerxx.com</Paragraph>
+                    <Statistic title="Coach" value={coach.name} valueStyle={{ color: '#3f8600' }} />
+                    <Paragraph><MailOutlined />{coach.email}</Paragraph>
                     <Paragraph><PhoneOutlined /> (91)99999 99999</Paragraph>
                 </Card>
- 
+
                 <Card>
                     <Card.Meta description="Outcome" style={{ marginBottom: 10 }} />
                     <Paragraph>
                         Rust is for people who crave speed and stability in a language. By speed, we mean the speed of the programs that you can create with Rust and the speed at which Rust lets you write them. The Rust compiler’s checks ensure stability through feature additions and refactoring. This is in contrast to the brittle legacy code in languages without these checks, which developers are often afraid to modify. By striving for zero-cost abstractions, higher-level features that compile to lower-level code as fast as code written manually, Rust endeavors to make safe code be fast code as well.
                     </Paragraph>
-                    <Paragraph>    
+                    <Paragraph>
                         The Rust language hopes to support many other users as well; those mentioned here are merely some of the biggest stakeholders. Overall, Rust’s greatest ambition is to eliminate the trade-offs that programmers have accepted for decades by providing safety and productivity, speed and ergonomics. Give Rust a try and see if its choices work for you.
-                    </Paragraph>    
+                    </Paragraph>
                 </Card>
 
                 <Card>
                     <Card.Meta description="Milestones" style={{ marginBottom: 10, paddingBottom: 10 }} />
-                    <CurrentSessionPlan/>   
+                    <CurrentSessionPlan />
                 </Card>
-               
+
                 <Card>
                     <Card.Meta description="Trailers from coach" style={{ marginBottom: 10 }} />
-                    <Card 
-                            style={{border:'1px solid lightgray'}}
-                            cover={<img alt="cover" style={{border:"1px solid lightgray"}} src={this.getTrailerUrl()}/>}>
+                    <Card
+                        style={{ border: '1px solid lightgray' }}
+                        cover={<img alt="cover" style={{ border: "1px solid lightgray" }} src={this.getTrailerUrl()} />}>
                     </Card>
                 </Card>
 
-                <EnrollmentDrawer programStore = {this.store}/>    
-            </>    
+                <EnrollmentDrawer programStore={this.store} />
+            </>
         )
     }
 }

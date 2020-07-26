@@ -7,7 +7,6 @@ export const authenticationQuery = `query ($request: LoginRequest!) {
   }
 }`
 
-
 export const programsQuery = `query ($criteria: ProgramCriteria!) {
   getPrograms(criteria: $criteria) {
     programs {
@@ -44,17 +43,6 @@ export const createProgramQuery = `mutation ($input: NewProgramRequest!) {
     }
   }
 }`;
-
-export const findProgramQuery = `query (query($criteria: Criteria!) {
-  findProgram(criteria: $criteria) {
-    fuzzyId,
-    name,
-    description,
-    active,
-    coachName
-  }
-}`;
-
 
 export const createSessionQuery = `mutation($input: NewSessionRequest!) {
   createSession(newSessionRequest:$input){

@@ -49,6 +49,7 @@ export default class ProgramListStore {
         const variables = {
             criteria: {
                 userFuzzyId: userFuzzyId,
+                programFuzzyId:"",
                 desire:desire
             }
         }
