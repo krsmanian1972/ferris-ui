@@ -39,12 +39,13 @@ class HomeUI extends Component {
     }
 
     newScheduleButton = () => {
-        
-        return (
-            <Tooltip key="new_session_tip" title="Create Session">
-                <Button type="primary" icon={<PlusCircleOutlined />} onClick={()=>this.showNewSchedule()}>New</Button>
-            </Tooltip>
-        )
+        if(this.props.appStore.isCoach) {
+            return (
+                <Tooltip key="new_session_tip" title="Create Session">
+                    <Button type="primary" icon={<PlusCircleOutlined />} onClick={()=>this.showNewSchedule()}>New</Button>
+                </Tooltip>
+            )
+        }
     }
 
     render() {

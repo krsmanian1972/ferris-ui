@@ -36,6 +36,14 @@ export default class ProgramListStore {
     }
 
     /**
+     * To be used only by the Coach User.
+     * Let us indicate the inactive programs in the UI
+     */
+    fetchCoachPrograms = () => {
+        const desire = "YOURS";
+        this.fetchPrograms(desire);
+    }
+    /**
      * Obtain the List of programs from the Ferris API
      *
      */

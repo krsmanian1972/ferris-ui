@@ -10,9 +10,10 @@ const { Title, Paragraph, Text } = Typography;
 
 import ProgramStore from '../stores/ProgramStore';
 
-import EnrollmentDrawer from './EnrollmentDrawer';
+import EnrollmentModal from './EnrollmentModal';
 
 import { assetHost } from '../stores/APIEndpoints';
+import EnrollmentStore from '../stores/EnrollmentStore';
 
 @inject("appStore")
 @observer
@@ -20,9 +21,8 @@ class ProgramDetailUI extends Component {
 
     constructor(props) {
         super(props);
-        this.store = new ProgramStore({
-            apiProxy: props.appStore.apiProxy,
-        })
+        this.store = new ProgramStore({apiProxy: props.appStore.apiProxy})
+        this.enrollmentStore = new EnrollmentStore({apiProxy: props.appStore.apiProxy});
     }
 
     componentDidMount() {
@@ -50,9 +50,6 @@ class ProgramDetailUI extends Component {
         return style;
     }
 
-    newEnrollment = () => {
-        this.store.showDrawer = true;
-    }
 
     getActivationButton = () => {
         if (!this.store.canActivate) {
@@ -61,7 +58,7 @@ class ProgramDetailUI extends Component {
 
         return (
             <Tooltip key="new_activation_tip" title="Activate this program, as you are the Coach.">
-                <Button key="activateProgram" onClick={this.activate} type="primary" icon={<RocketOutlined />}>Activate</Button>
+                <Button key="activateProgram" onClick={this.onActivate} type="primary" icon={<RocketOutlined />}>Activate</Button>
             </Tooltip>
         );
     }
@@ -71,20 +68,21 @@ class ProgramDetailUI extends Component {
             return;
         }
         return (
-            <Tooltip key="new_program_tip" title="Enoll into this program">
-                <Button key="add" onClick={this.enroll} type="primary" icon={<PlusCircleOutlined />}>Enroll</Button>
+            <Tooltip key="new_program_tip" title="Enroll into this program">
+                <Button key="add" onClick={this.onEnroll} type="primary" icon={<PlusCircleOutlined />}>Enroll</Button>
             </Tooltip>
         );
     }
 
-    activate = () => {
-
+    onActivate = () => {
+        this.store.showActivationModal = true;
     }
 
-    enroll = () => {
-
+    onEnroll = async() => {
+        this.enrollmentStore.showEnrollmentModal = true;
     }
 
+    
     getTrailerUrl = () => {
         const programFuzzyId = this.props.params.programFuzzyId;
         return `${assetHost}/programs/${programFuzzyId}/cover/cover.png`;
@@ -92,7 +90,7 @@ class ProgramDetailUI extends Component {
 
     render() {
 
-        if (this.store.isLoading) {
+        if (this.store.isLoading || this.store.state === "init") {
             return (
                 <div className="loading-container">
                     <Spin />
@@ -156,7 +154,7 @@ class ProgramDetailUI extends Component {
                     </Card>
                 </Card>
 
-                <EnrollmentDrawer programStore={this.store} />
+                <EnrollmentModal programStore={this.store} enrollmentStore={this.enrollmentStore}/>
             </>
         )
     }

@@ -22,6 +22,7 @@ export const programsQuery = `query ($criteria: ProgramCriteria!) {
         email
         name
       }
+      enrollmentStatus
     }
     error {
       message

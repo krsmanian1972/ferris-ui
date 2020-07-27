@@ -40,7 +40,7 @@ class ScheduleForm extends Component {
 
     componentDidMount() {
         const store = this.props.sessionStore;
-        store.programListStore.fetchPrograms();
+        store.programListStore.fetchCoachPrograms();
     }
 
     disabledDate = (current) => {
@@ -84,7 +84,7 @@ class ScheduleForm extends Component {
         return (
             <span>
                 Program Name&nbsp;
-                <Tooltip title="This session will be attached to the selected program.">
+                <Tooltip title="This session will be attached to the selected program. We display only the active programs.">
                     <QuestionCircleOutlined />
                 </Tooltip>
             </span>
@@ -123,11 +123,13 @@ class ScheduleForm extends Component {
                         filterOption={(input, option) =>
                             option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
                         }
-                        placeholder="Select a Program"
+                        placeholder="Select an active Program"
                         onChange={this.onProgramChange}>
-                        {programs.map(item => (
-                            <Option key={item.program.fuzzyId}>{item.program.name}</Option>
-                        ))}
+                        {programs.map(item => {
+                            if (item.program.active) {
+                                return <Option key={item.program.fuzzyId}>{item.program.name}</Option>
+                            }
+                        })}
                     </Select>
                 </Form.Item>
 
