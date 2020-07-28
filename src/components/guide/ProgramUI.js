@@ -33,6 +33,7 @@ class ProgramUI extends Component {
 
         this.store = new ProgramStore({
             apiProxy: props.appStore.apiProxy,
+            programListStore: this.yourListStore,
         });
     }
 
@@ -104,7 +105,6 @@ class ProgramUI extends Component {
                 <ProgramList programListStore={this.exploreListStore} showProgramDetail={this.showProgramDetail} />
 
                 <ProgramDrawer programStore={this.store} />
-
             </>
         )
     }

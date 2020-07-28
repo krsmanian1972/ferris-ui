@@ -2,10 +2,10 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Carousel } from 'antd';
+import { Carousel, Button } from 'antd';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 
 import { assetHost } from '../stores/APIEndpoints';
-
 import ProgramListStore from '../stores/ProgramListStore';
 import ProgramStore from '../stores/ProgramStore';
 
@@ -30,9 +30,46 @@ class ProgramBanner extends Component {
     getProgramPoster = (program) => {
         const url = `${assetHost}/programs/${program.fuzzyId}/poster/poster.png`;
         return (
-            <div style={{ textAlign: "center"}}>
-                <div style={{display:"inline-block",verticalAlign:"middle"}}></div>
-                <img style={{ maxWidth: "100%",maxHeight: "100%",verticalAlign:"middle", display:"inline-block" }} src={url} onClick={() => this.props.showProgramDetail(program.fuzzyId)} />
+            <div style={{ textAlign: "center" }}>
+                <div style={{ display: "inline-block", verticalAlign: "middle" }}></div>
+                <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block" }} src={url} onClick={() => this.props.showProgramDetail(program.fuzzyId)} />
+            </div>
+        )
+    }
+    next = () => {
+        this.carousel.next();
+    }
+    previous = () => {
+        this.carousel.prev();
+    }
+
+    renderSlider = (programs, rowCount) => {
+        if (rowCount == 0) {
+            return <></>
+        }
+
+        const props = {
+            dots: false,
+            infinite: true,
+            slidesToShow: 1,
+            slidesToScroll: 1,
+        };
+
+        return (
+            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", textAlign: "center", alignItems: "center" }}>
+                <Button key="back" onClick={this.previous} icon={<LeftOutlined />} shape="square"></Button>
+                <div style={{ width: "94%" }}>
+                    <Carousel ref={ref => (this.carousel = ref)} {...props}>
+                        {programs && programs.map(({ program }) => {
+                            return (
+                                <div key={program.fuzzyId}>
+                                    {this.getProgramPoster(program)}
+                                </div>
+                            )
+                        })}
+                    </Carousel>
+                </div>
+                <Button key="forward" onClick={this.next} icon={<RightOutlined />} shape="square"></Button>
             </div>
         )
     }
@@ -43,15 +80,9 @@ class ProgramBanner extends Component {
         const programs = store.programs;
 
         return (
-                <Carousel dotPosition={"top"}>
-                    {programs && programs.map(({program}) => {
-                        return (
-                            <div key={program.fuzzyId}>
-                                {this.getProgramPoster(program)}
-                            </div>
-                        )
-                    })}
-                </Carousel>   
+            <>
+                {this.renderSlider(programs, store.rowCount)}
+            </>
         )
     }
 }

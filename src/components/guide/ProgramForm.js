@@ -53,7 +53,7 @@ class ProgramForm extends Component {
         }
 
         if (store.isDone) {
-            message.success('Program is created.')
+            message.success('Draft Program is Created.')
         }
     }
    
@@ -77,7 +77,7 @@ class ProgramForm extends Component {
                 </Form.Item>
 
                 <Form.Item>
-                    <Button type="primary" htmlType="submit" disabled={store.isLoading} icon={<PlusCircleOutlined/>}>Create Program</Button>
+                    <Button type="primary" htmlType="submit" disabled={store.isLoading} icon={<PlusCircleOutlined/>}>Create Draft Program</Button>
                 </Form.Item>
             </Form>
         );

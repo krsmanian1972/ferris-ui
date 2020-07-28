@@ -27,6 +27,7 @@ export default class ProgramStore {
 
     constructor(props) {
         this.apiProxy = props.apiProxy;
+        this.programListStore = props.programListStore;
     }
 
     get isLoading() {
@@ -149,6 +150,7 @@ export default class ProgramStore {
             this.showDrawer = false;
             this.programModel = data;
             this.state = DONE;
+            this.programListStore.fetchCoachPrograms();
         }
         catch (e) {
             this.state = ERROR;

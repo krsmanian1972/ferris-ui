@@ -15,11 +15,11 @@ class ProgramDrawer extends Component {
    
     render() {
         const store = this.props.programStore;
-        const title = "Basic Information about the Program"; 
+        const title = "Preliminary Information about the Program"; 
 
         return (
             <Drawer title={title} width={"45%"} closable={true} onClose={this.close} visible={store.showDrawer} destroyOnClose>
-                <ProgramForm programStore = {store}/>
+                <ProgramForm programStore = {store} />
             </Drawer>
         );
     }
