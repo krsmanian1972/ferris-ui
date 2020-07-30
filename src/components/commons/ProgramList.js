@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
-import { Spin, Result, Carousel, Typography, Button,Tag,Space } from 'antd';
+import { Spin, Result, Carousel, Typography, Button } from 'antd';
 
 import { assetHost } from '../stores/APIEndpoints';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
@@ -13,27 +13,11 @@ class ProgramList extends Component {
 
     constructor(props) {
         super(props);
+        this.state = {imageBorder:"none"}
     }
-
 
     getName = (program) => {
-        if(program.active) {
-            return <Text style={{ textAlign: "center" }}>{program.name}</Text>
-        }
-
-        return (
-            <Space>
-                <Text style={{ textAlign: "center" }}>{program.name}</Text>
-                <Tag color="geekblue">Draft</Tag>
-            </Space>
-        )    
-            
-    }
-    getActive = (flag) => {
-        if (flag) {
-            return 'Active';
-        }
-        return 'Inactive';
+        return <Text style={{ textAlign: "center" }}>{program.name}</Text>
     }
 
     displayMessage = () => {
@@ -59,13 +43,16 @@ class ProgramList extends Component {
     next = () => {
         this.carousel.next();
     }
+
     previous = () => {
         this.carousel.prev();
     }
 
     getCoverUrl = (program) => {
-        return `${assetHost}/programs/${program.fuzzyId}/cover/cover.png`;
+        const url = `${assetHost}/programs/${program.fuzzyId}/cover/cover.png`;
+        return url;
     }
+
     
     renderSlider = (programs,rowCount) => {
         if(rowCount == 0){
@@ -77,6 +64,7 @@ class ProgramList extends Component {
             infinite: true,
             slidesToShow: Math.min(3, rowCount),
             slidesToScroll: 1,
+            swipeToSlide: true,
         };
 
         return (
@@ -87,9 +75,9 @@ class ProgramList extends Component {
                         {programs && programs.map(({ program }) => {
                             return (
                                 <div key={program.fuzzyId} style={{ display: "flex", flexDirection: "column" }}>
-                                    <div style={{ textAlign: "center", height: 175, marginRight: 10, marginLeft: 10, }} onClick={() => this.props.showProgramDetail(program.fuzzyId)}>
+                                     <div style={{ textAlign: "center", height: 175, marginRight: 10, marginLeft: 10, border:this.state.imageBorder}}  onClick={() => this.props.showProgramDetail(program.fuzzyId)}>
                                         <div style={{ display: "inline-block", verticalAlign: "middle", height: 175 }}></div>
-                                        <img style={{ maxHeight: "100%", maxWidth: "100%", verticalAlign: "middle", display: "inline-block" }} src={this.getCoverUrl(program)} />
+                                        <img style={{ maxHeight: "100%", maxWidth: "100%", verticalAlign: "middle", display: "inline-block", border:this.state.imageBorder}} src={this.getCoverUrl(program)} />
                                     </div>
                                     {this.getName(program)}
                                 </div>
@@ -105,6 +93,7 @@ class ProgramList extends Component {
     render() {
         const store = this.props.programListStore;
         const programs = store.programs;
+        const change = store.change;
 
         return (
             <div>

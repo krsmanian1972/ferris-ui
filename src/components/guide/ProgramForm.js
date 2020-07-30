@@ -71,9 +71,9 @@ class ProgramForm extends Component {
 
                 <Form.Item
                     name="description"
-                    rules={[{ required: true, message: 'The Program Description will be very useful, for a person, to enroll in this program. Please do not leave it blank.' }]}
-                    label="Description">
-                    <TextArea rows={5} />
+                    rules={[{ required: true, message: 'Start with a short description. Of course, you can elaborate this later, before activating this program.' }]}
+                    label="Short Description">
+                    <TextArea rows={4} />
                 </Form.Item>
 
                 <Form.Item>

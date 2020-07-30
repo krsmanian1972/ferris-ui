@@ -14,6 +14,7 @@ export default class ProgramListStore {
 
     state = PENDING;
     message = EMPTY_MESSAGE;
+    change = null;
 
     programs = [];
     members = [];
@@ -90,6 +91,7 @@ decorate(ProgramListStore, {
     message: observable,
     programs: observable,
     rowCount: observable,
+    change:observable,
 
     isLoading: computed,
     isDone: computed,

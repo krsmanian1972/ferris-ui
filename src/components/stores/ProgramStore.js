@@ -1,12 +1,13 @@
 import { decorate, observable, computed, action } from 'mobx';
 
-import { apiHost } from './APIEndpoints';
+import { apiHost,assetHost } from './APIEndpoints';
 import { createProgramQuery, programsQuery, createEnrollmentQuery } from './Queries';
 
 const INIT = "init";
 const PENDING = 'pending';
 const DONE = 'done';
 const ERROR = 'error';
+
 
 const EMPTY_MESSAGE = { status: "", help: "" };
 const CREATION_ERROR = { status: "error", help: "Unable to create the program." };
@@ -21,9 +22,13 @@ export default class ProgramStore {
 
     showDrawer=false;
     showActivationModal = false;
+    showContentDrawer = false;
+    change = null;
 
     programFuzzyId = null;
     programModel = null;
+
+    editMode = false;
 
     constructor(props) {
         this.apiProxy = props.apiProxy;
@@ -50,6 +55,13 @@ export default class ProgramStore {
         return this.programModel && this.programModel.enrollmentStatus === "YES";
     }
 
+    get isReadOnly() {
+        if (!this.isOwner) {
+            return true;
+        }
+        return !this.editMode
+    }
+
     /**
      * Allow only the coach to activate this program
      */
@@ -58,6 +70,17 @@ export default class ProgramStore {
             return false;
         }
         return this.isOwner && !this.programModel.program.active;
+    }
+
+     /**
+     * Allow only the coach to edit this program. 
+     * Editing the content should be allowed even after the activation.
+     */
+    get canEdit() {
+        if (this.state !== DONE) {
+            return false;
+        }
+        return this.isOwner;
     }
 
     /**
@@ -76,6 +99,21 @@ export default class ProgramStore {
 
     reload = () => {
         this.load(this.programFuzzyId)
+    }
+
+    populateDescription = async (programModel) => {
+
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+        
+        const url = `${assetHost}/programs/${this.programFuzzyId}/about/about.html`;
+        const response = await this.apiProxy.getAsync(url);
+        const data = await response.text();
+
+        if (response.status == 200) {
+            programModel.program.description = data;
+        }
+        this.programModel = programModel
     }
 
     load = async (programFuzzyId) => {
@@ -110,8 +148,8 @@ export default class ProgramStore {
                 this.message = NO_MATCHING_RECORD;
                 return;
             }
-
-            this.programModel = result[0]
+            
+            await this.populateDescription(result[0]);
             this.state = DONE;
         }
 
@@ -164,10 +202,13 @@ export default class ProgramStore {
 
 decorate(ProgramStore, {
     state: observable,
+    editMode: observable,
     message: observable,
+    change:observable,
 
     showDrawer:observable,
     showActivationModal: observable,
+    showContentDrawer: observable,
     
     programModel: observable,
 
@@ -179,6 +220,10 @@ decorate(ProgramStore, {
     isEnrolled: computed,
     canActivate: computed,
     canEnroll: computed,
+    
+    isReadOnly: computed,
+    canEdit: computed,
+
 
     createProgram: action,
     load: action,

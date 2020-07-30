@@ -8,7 +8,8 @@ import ProgramListStore from '../stores/ProgramListStore';
 import ProgramStore from '../stores/ProgramStore';
 
 import ProgramBanner from '../commons/ProgramBanner';
-import ProgramList from './ProgramList';
+import ProgramList from '../commons/ProgramList';
+import CoachProgramList from './CoachProgramList';
 import ProgramDrawer from './ProgramDrawer';
 
 const { Title } = Typography;
@@ -90,7 +91,7 @@ class ProgramUI extends Component {
                 {this.props.appStore.isCoach && (
                     <>
                         <Title style={{ marginTop: 10 }} level={4}>Yours {this.countTag(this.yourListStore)} {this.addProgramButton()}</Title>
-                        <ProgramList programListStore={this.yourListStore} showProgramDetail={this.showProgramDetail} />
+                        <CoachProgramList programListStore={this.yourListStore} showProgramDetail={this.showProgramDetail} />
                     </>
                 )}
 
