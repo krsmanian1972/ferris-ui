@@ -7,7 +7,7 @@ import Editor from "../commons/Editor";
 import { Tooltip, Card, Switch } from 'antd';
 
 @observer
-export default class ProgramDescription extends Component {
+export default class EditableProgramDescription extends Component {
 
     constructor(props) {
         super(props);

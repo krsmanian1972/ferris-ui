@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Tabs, Typography, Tooltip, Button, Tag } from 'antd';
+import { Typography, Tooltip, Button, Tag } from 'antd';
 import { PlusCircleOutlined } from '@ant-design/icons';
 
 import ProgramListStore from '../stores/ProgramListStore';
@@ -55,6 +55,11 @@ class ProgramUI extends Component {
         this.props.appStore.currentComponent = { label: "Program Detail", key: "programDetail", params: params };
     }
 
+    showEditableProgramDetail = (programFuzzyId) => {
+        const params = { programFuzzyId: programFuzzyId, parentKey: "programs" };
+        this.props.appStore.currentComponent = { label: "Program Detail", key: "editableProgramDetail", params: params };
+    }
+
     /**
      * Provide the count Tag only if the store is in Done State
      */
@@ -76,7 +81,7 @@ class ProgramUI extends Component {
         if (this.props.appStore.isCoach) {
             return (
                 <Tooltip key="new_program_tip" title="Create New Program">
-                    <Button style={{float:"right"}} key="add" onClick={this.new} type="primary" icon={<PlusCircleOutlined />}>New</Button>
+                    <Button style={{ float: "right" }} key="add" onClick={this.new} type="primary" icon={<PlusCircleOutlined />}>New</Button>
                 </Tooltip>
             );
         }
@@ -91,7 +96,7 @@ class ProgramUI extends Component {
                 {this.props.appStore.isCoach && (
                     <>
                         <Title style={{ marginTop: 10 }} level={4}>Yours {this.countTag(this.yourListStore)} {this.addProgramButton()}</Title>
-                        <CoachProgramList programListStore={this.yourListStore} showProgramDetail={this.showProgramDetail} />
+                        <CoachProgramList programListStore={this.yourListStore} showProgramDetail={this.showEditableProgramDetail} />
                     </>
                 )}
 

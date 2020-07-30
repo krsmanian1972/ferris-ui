@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Spin, Result, PageHeader, Tooltip, Card, Button, Statistic,Upload } from 'antd';
-import { PlusCircleOutlined, RocketOutlined, MailOutlined, PhoneOutlined, BuildOutlined } from '@ant-design/icons';
+import { Spin, Result, PageHeader, Tooltip, Card, Button, Statistic } from 'antd';
+import { PlusCircleOutlined, MailOutlined, PhoneOutlined} from '@ant-design/icons';
 import { Typography } from 'antd';
 
 const { Title, Paragraph } = Typography;
@@ -10,8 +10,9 @@ const { Title, Paragraph } = Typography;
 import { assetHost } from '../stores/APIEndpoints';
 
 import ProgramDescription from './ProgramDescription';
-import CurrentSessionPlan from './CurrentSessionPlan';
 import EnrollmentModal from './EnrollmentModal';
+
+import CurrentSessionPlan from '../guide/CurrentSessionPlan';
 
 import ProgramStore from '../stores/ProgramStore';
 import EnrollmentStore from '../stores/EnrollmentStore';
@@ -44,17 +45,6 @@ class ProgramDetailUI extends Component {
         return `${assetHost}/programs/${programFuzzyId}/cover/cover.png`;
     }
     
-    getActivationButton = () => {
-        if (!this.store.canActivate) {
-            return;
-        }
-        return (
-            <Tooltip key="new_activation_tip" title="By activating this program, it will be visible to the world.">
-                <Button key="activateProgram" onClick={this.onActivate} type="primary" icon={<RocketOutlined />}>Activate</Button>
-            </Tooltip>
-        );
-    }
-
     getEnrollmentButton = () => {
         if (!this.store.canEnroll) {
             return;
@@ -65,45 +55,10 @@ class ProgramDetailUI extends Component {
             </Tooltip>
         );
     }
-
-    /**
-     * Let the coach to upload the Poster image. 
-     * @param {*} program 
-    */
-    getContentButton = (program) => {
-        if (!this.store.canEdit) {
-            return;
-        }
-
-        const action = `${assetHost}/programs/${program.fuzzyId}/poster`
-        const props = {
-            name: 'poster.png',
-            action: action,
-            accept: ".png",
-            showUploadList: false
-        };
-
-        return (
-            <Upload key="poster_uplod" {...props} onChange={this.onContentChange}>
-                <Tooltip key="poster_tp" title="To Upload or Change the Poster of this Program.">
-                    <Button key="poster_button" type="primary" icon={<BuildOutlined />}>Poster</Button>
-                </Tooltip>
-            </Upload>
-        )
-    }
-
-    onActivate = () => {
-        this.store.showActivationModal = true;
-    }
-
+   
     onEnroll = () => {
         this.enrollmentStore.showEnrollmentModal = true;
     }
-
-    onContentChange = (info) => {
-        this.store.change = new Date().getTime();
-    }
-
 
     render() {
 
@@ -123,8 +78,7 @@ class ProgramDetailUI extends Component {
     }
 
     getProgramPoster = (program, change) => {
-        const ver = new Date().getTime();
-        const url = `${assetHost}/programs/${program.fuzzyId}/poster/poster.png?nocache=${ver}`;
+        const url = `${assetHost}/programs/${program.fuzzyId}/poster/poster.png`;
         return (
             <div style={{ textAlign: "center", height: 450 }}>
                 <div style={{ display: "inline-block", verticalAlign: "middle", height: 450 }}></div>
@@ -143,8 +97,6 @@ class ProgramDetailUI extends Component {
                 <PageHeader title={<Title level={3}>{program.name}</Title>}
                     extra={[
                         this.getEnrollmentButton(),
-                        this.getActivationButton(),
-                        this.getContentButton(program)
                     ]}>
                 </PageHeader>
 
@@ -158,12 +110,12 @@ class ProgramDetailUI extends Component {
 
                 <ProgramDescription program={program} programStore={this.store} />
 
-                <Card title="Milestones" extra={<a href="#">Edit</a>}>
+                <Card title="Milestones">
                     <Card.Meta description="The milestones represent the high-level overview of the program. The actual coaching plan will be customized, based on the context of the enrolled member of this program. Of course, the coaching plan will be aligned continuously." style={{ marginBottom: 10, paddingBottom: 10 }} />
                     <CurrentSessionPlan />
                 </Card>
 
-                <Card title="Trailers" extra={<a href="#">Edit</a>}>
+                <Card title="Trailers">
                     <Card
                         style={{ border: '1px solid lightgray' }}
                         cover={<img alt="cover" style={{ border: "1px solid lightgray" }} src={this.getTrailerUrl()} />}>

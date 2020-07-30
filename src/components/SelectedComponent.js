@@ -5,10 +5,11 @@ import Login from './LoginUI';
 import About from './About';
 import WorkflowUI from './guide/WorkflowUI';
 import ProgramUI from './guide/ProgramUI';
-import ProgramDetailUI from './guide/ProgramDetailUI';
+import ProgramDetailUI from './commons/ProgramDetailUI';
+import EditableProgramDetailUI from './guide/EditableProgramDetailUI';
 import HomeUI from './guide/HomeUI';
 import Broadcast from './guide/Broadcast';
-import BookPage from './guide/BookPage';
+
 
 
 @inject("appStore")
@@ -30,6 +31,9 @@ class SelectedComponent extends Component {
             }
             case 'programDetail' : {
                 return <ProgramDetailUI params={currentComponent.params}/>
+            }
+            case 'editableProgramDetail' : {
+                return <EditableProgramDetailUI params={currentComponent.params}/>
             }
             case 'planning': {
                 return <WorkflowUI />;
