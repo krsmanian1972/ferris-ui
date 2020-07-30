@@ -45,6 +45,17 @@ export const createProgramQuery = `mutation ($input: NewProgramRequest!) {
   }
 }`;
 
+export const alterProgramStateQuery = `mutation($input: ChangeProgramStateRequest!) {
+  alterProgramState(request: $input) {
+    rows,
+    error {
+      field
+      message
+    }
+  }
+}`
+
+
 export const createSessionQuery = `mutation($input: NewSessionRequest!) {
   createSession(newSessionRequest:$input){
     session {

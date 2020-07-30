@@ -1,7 +1,7 @@
 import { decorate, observable, computed, action } from 'mobx';
 
 import { apiHost,assetHost } from './APIEndpoints';
-import { createProgramQuery, programsQuery, createEnrollmentQuery } from './Queries';
+import { createProgramQuery, programsQuery, alterProgramStateQuery} from './Queries';
 
 const INIT = "init";
 const PENDING = 'pending';
@@ -11,6 +11,7 @@ const ERROR = 'error';
 
 const EMPTY_MESSAGE = { status: "", help: "" };
 const CREATION_ERROR = { status: "error", help: "Unable to create the program." };
+const ACTIVATION_ERROR = { status: "error", help: "Unable to activate the program." };
 const LOADING_ERROR = { status: "error", help: "Unable to load the program." };
 const NO_MATCHING_RECORD = { status: "error", help: "Unable to find a matching program" };
 
@@ -22,7 +23,8 @@ export default class ProgramStore {
 
     showDrawer=false;
     showActivationModal = false;
-    showContentDrawer = false;
+    showActivationResultModal = false;
+
     change = null;
 
     programFuzzyId = null;
@@ -195,8 +197,46 @@ export default class ProgramStore {
             this.message = CREATION_ERROR;
             console.log(e);
         }
-
     }
+
+
+    /**
+     * Activate The Currently Loaded Program
+     */
+    activate = async () => {
+
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+
+        const variables = {
+            input: {
+                fuzzyId: this.programFuzzyId,
+                targetState: "ACTIVATE",
+            }
+        }
+
+        try {
+            const response = await this.apiProxy.mutate(apiHost, alterProgramStateQuery, variables);
+            const data = await response.json();
+
+            if (data.error == true) {
+                this.state = ERROR;
+                this.message = ACTIVATION_ERROR;
+                return;
+            }
+            this.showActivationModal = false;
+            this.showActivationResultModal = true;
+            this.state = DONE;
+            this.reload();
+        }
+        catch (e) {
+            this.state = ERROR;
+            this.message = ACTIVATION_ERROR;
+            console.log(e);
+        }
+    }
+
+
 
 }
 
@@ -208,7 +248,7 @@ decorate(ProgramStore, {
 
     showDrawer:observable,
     showActivationModal: observable,
-    showContentDrawer: observable,
+    showActivationResultModal: observable,
     
     programModel: observable,
 
@@ -228,4 +268,5 @@ decorate(ProgramStore, {
     createProgram: action,
     load: action,
     reload: action,
+    activate: action,
 });

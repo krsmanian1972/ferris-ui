@@ -9,6 +9,7 @@ import { assetHost } from '../stores/APIEndpoints';
 import ProgramStore from '../stores/ProgramStore';
 
 import ProgramDescription from './EditableProgramDescription';
+import ActivationModal from './ActivationModal';
 import CurrentSessionPlan from './CurrentSessionPlan';
 
 const { Title, Paragraph } = Typography;
@@ -148,6 +149,8 @@ class EditableProgramDetailUI extends Component {
                         cover={<img alt="cover" style={{ border: "1px solid lightgray" }} src={this.getTrailerUrl()} />}>
                     </Card>
                 </Card>
+
+                <ActivationModal programStore={this.store}  />
           </>
         )
     }
