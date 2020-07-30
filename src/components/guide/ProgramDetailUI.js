@@ -1,18 +1,17 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Spin, Result, PageHeader, Tooltip, Card, Button, Statistic,message } from 'antd';
-import { PlusCircleOutlined, RocketOutlined, MailOutlined, PhoneOutlined, BuildOutlined} from '@ant-design/icons';
+import { Spin, Result, PageHeader, Tooltip, Card, Button, Statistic,Upload } from 'antd';
+import { PlusCircleOutlined, RocketOutlined, MailOutlined, PhoneOutlined, BuildOutlined } from '@ant-design/icons';
 import { Typography } from 'antd';
 
-const { Title, Paragraph} = Typography;
+const { Title, Paragraph } = Typography;
 
 import { assetHost } from '../stores/APIEndpoints';
 
 import ProgramDescription from './ProgramDescription';
 import CurrentSessionPlan from './CurrentSessionPlan';
 import EnrollmentModal from './EnrollmentModal';
-import ProgramContentDrawer from './ProgramContentDrawer';
 
 import ProgramStore from '../stores/ProgramStore';
 import EnrollmentStore from '../stores/EnrollmentStore';
@@ -44,37 +43,11 @@ class ProgramDetailUI extends Component {
         const programFuzzyId = this.props.params.programFuzzyId;
         return `${assetHost}/programs/${programFuzzyId}/cover/cover.png`;
     }
-
-    getProgramPoster = (program) => {
-        const programFuzzyId = program.fuzzyId;
-        const posterUrl = `url(${this.getPosterUrl(programFuzzyId)})`
-        const style = {
-            backgroundImage: posterUrl,
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            height: 450,
-        }
-        return style;
-    }
-
-    getContentButton = () => {
-        if (!this.store.canEdit) {
-            return;
-        }
-
-        return (
-            <Tooltip key="new_cms_tip" title="To Upload or Change The Poster of this Program">
-                <Button key="manageContents" onClick={this.onManageContent} type="primary" icon={<BuildOutlined />}>Poster</Button>
-            </Tooltip>
-        );
-    }
-
+    
     getActivationButton = () => {
         if (!this.store.canActivate) {
             return;
         }
-
         return (
             <Tooltip key="new_activation_tip" title="By activating this program, it will be visible to the world.">
                 <Button key="activateProgram" onClick={this.onActivate} type="primary" icon={<RocketOutlined />}>Activate</Button>
@@ -93,6 +66,32 @@ class ProgramDetailUI extends Component {
         );
     }
 
+    /**
+     * Let the coach to upload the Poster image. 
+     * @param {*} program 
+    */
+    getContentButton = (program) => {
+        if (!this.store.canEdit) {
+            return;
+        }
+
+        const action = `${assetHost}/programs/${program.fuzzyId}/poster`
+        const props = {
+            name: 'poster.png',
+            action: action,
+            accept: ".png",
+            showUploadList: false
+        };
+
+        return (
+            <Upload key="poster_uplod" {...props} onChange={this.onContentChange}>
+                <Tooltip key="poster_tp" title="To Upload or Change the Poster of this Program.">
+                    <Button key="poster_button" type="primary" icon={<BuildOutlined />}>Poster</Button>
+                </Tooltip>
+            </Upload>
+        )
+    }
+
     onActivate = () => {
         this.store.showActivationModal = true;
     }
@@ -101,18 +100,8 @@ class ProgramDetailUI extends Component {
         this.enrollmentStore.showEnrollmentModal = true;
     }
 
-    onManageContent = () => {
-        this.store.showContentDrawer = true;
-    }
-
     onContentChange = (info) => {
-
-        if (info.file.status === 'done') {
-            message.success(`${info.file.name} file uploaded successfully`);
-            this.store.change=info.file.name;
-        } else if (info.file.status === 'error') {
-            message.error(`${info.file.name} file upload failed.`);
-        }
+        this.store.change = new Date().getTime();
     }
 
 
@@ -132,14 +121,14 @@ class ProgramDetailUI extends Component {
 
         return this.renderProgramModel();
     }
-    
-    getProgramPoster = (program,change) => {
+
+    getProgramPoster = (program, change) => {
         const ver = new Date().getTime();
         const url = `${assetHost}/programs/${program.fuzzyId}/poster/poster.png?nocache=${ver}`;
         return (
-            <div style={{ textAlign: "center",height: 450 }}>
-                <div style={{ display: "inline-block", verticalAlign: "middle",height: 450 }}></div>
-                <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block" }} src={url}/>
+            <div style={{ textAlign: "center", height: 450 }}>
+                <div style={{ display: "inline-block", verticalAlign: "middle", height: 450 }}></div>
+                <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block" }} src={url} />
             </div>
         )
     }
@@ -155,11 +144,11 @@ class ProgramDetailUI extends Component {
                     extra={[
                         this.getEnrollmentButton(),
                         this.getActivationButton(),
-                        this.getContentButton()
+                        this.getContentButton(program)
                     ]}>
                 </PageHeader>
 
-                {this.getProgramPoster(program,change)}
+                {this.getProgramPoster(program, change)}
 
                 <Card bordered={false} title="Coach" extra={<a href="#">More</a>}>
                     <Statistic value={coach.name} valueStyle={{ color: '#3f8600' }} />
@@ -167,7 +156,7 @@ class ProgramDetailUI extends Component {
                     <Paragraph><PhoneOutlined /> (91)99999 99999</Paragraph>
                 </Card>
 
-                <ProgramDescription program = {program} programStore = {this.store} />
+                <ProgramDescription program={program} programStore={this.store} />
 
                 <Card title="Milestones" extra={<a href="#">Edit</a>}>
                     <Card.Meta description="The milestones represent the high-level overview of the program. The actual coaching plan will be customized, based on the context of the enrolled member of this program. Of course, the coaching plan will be aligned continuously." style={{ marginBottom: 10, paddingBottom: 10 }} />
@@ -182,9 +171,7 @@ class ProgramDetailUI extends Component {
                 </Card>
 
                 <EnrollmentModal programStore={this.store} enrollmentStore={this.enrollmentStore} />
-
-                <ProgramContentDrawer programStore={this.store} onContentChange = {this.onContentChange} />
-            </>
+           </>
         )
     }
 }
