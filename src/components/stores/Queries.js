@@ -33,7 +33,7 @@ export const programsQuery = `query ($criteria: ProgramCriteria!) {
 
 export const createProgramQuery = `mutation ($input: NewProgramRequest!) {
   createProgram(newProgramRequest: $input) {
-    error {
+    errors {
       field,
       message
     }
@@ -48,7 +48,7 @@ export const createProgramQuery = `mutation ($input: NewProgramRequest!) {
 export const alterProgramStateQuery = `mutation($input: ChangeProgramStateRequest!) {
   alterProgramState(request: $input) {
     rows,
-    error {
+    errors {
       field
       message
     }
@@ -56,22 +56,9 @@ export const alterProgramStateQuery = `mutation($input: ChangeProgramStateReques
 }`
 
 
-export const createSessionQuery = `mutation($input: NewSessionRequest!) {
-  createSession(newSessionRequest:$input){
-    session {
-      fuzzyId,
-      name
-    }
-    error {
-      field,
-      message
-    } 
-  }
-}`;
-
 export const createEnrollmentQuery = `mutation ($input: NewEnrollmentRequest!) {
   createEnrollment(newEnrollmentRequest: $input) {
-    error {
+    errors {
       field,
       message
     }
@@ -90,6 +77,29 @@ export const enrollmentsQuery = `query ($criteria: EnrollmentCriteria!) {
   }
 }`;
 
+export const createSessionQuery = `mutation($input: NewSessionRequest!) {
+  createSession(newSessionRequest:$input){
+    session {
+      fuzzyId,
+      name
+    }
+    errors {
+      field,
+      message
+    } 
+  }
+}`;
+
+export const alterSessionStateQuery = `mutation($input: ChangeSessionStateRequest!) {
+  alterSessionState(request: $input) {
+    rows,
+    errors {
+      field
+      message
+    }
+  }
+}`
+
 export const eventsQuery = `query ($criteria: EventCriteria!) {
   getSessions(criteria: $criteria) {
     session {
@@ -100,7 +110,8 @@ export const eventsQuery = `query ($criteria: EventCriteria!) {
       duration,
       scheduleStart,
       scheduleEnd,
-      status
+      status,
+      isClosed
     }
     program {
       name
@@ -119,7 +130,7 @@ export const createNotesQuery = `mutation ($input: NewNoteRequest!) {
       description,
       fuzzyId
     }
-    error {
+    errors {
       field,
       message
     }

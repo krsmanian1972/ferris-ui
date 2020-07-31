@@ -13,14 +13,14 @@ const canvasStyle = {
     display: 'none'
 }
 
-const fov = 40;
+const fov = 35;
 const near = 0.1;
 const far = 1000;
 
 const pointLightColor = 0xffffff;
 const pointLightPosition = 1;
 
-const taskBarColor = "#6d91b2";
+const taskBarColor = "#2A4B7C";
 
 const barWidth = 3;
 const barHeight = 1;
@@ -46,7 +46,7 @@ class WorkflowUI extends Component {
         super(props);
         this.taskBarGeo = new THREE.BoxGeometry(barWidth, barHeight, barDepth);
 
-        this.gridLineMaterial = new THREE.LineBasicMaterial({ color: 0x808080 });
+        this.gridLineMaterial = new THREE.LineBasicMaterial({ color: 0x1d1d1d });
 
         this.connectorGeo = new THREE.SphereGeometry(connectorRadius);
 

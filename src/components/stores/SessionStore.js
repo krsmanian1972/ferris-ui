@@ -1,10 +1,10 @@
 import { decorate, observable, computed, action } from 'mobx';
 import moment from 'moment';
 
-import {isBlank} from './Util';
+import { isBlank } from './Util';
 
 import { apiHost } from './APIEndpoints';
-import {createSessionQuery} from './Queries';
+import { createSessionQuery, alterSessionStateQuery } from './Queries';
 
 const INIT = "init";
 const PENDING = 'pending';
@@ -13,7 +13,7 @@ const INVALID = "invalid";
 const ERROR = 'error';
 
 const EMPTY_MESSAGE = { status: "", help: "" };
-const ERROR_MESSAGE = { status: ERROR, help: "Unable to create session" };
+const ERROR_MESSAGE = { status: ERROR, help: "We are very sorry, the service is unavailable at this moment. Please try again after some time." };
 
 export default class SessionStore {
 
@@ -52,7 +52,7 @@ export default class SessionStore {
 
     /**
      * Creating a New Session. 
-     * Carefull to convert the given time to utc format.
+     * Remember to convert the given time to utc format.
      */
     createSchedule = async (sessionRequest) => {
 
@@ -84,7 +84,7 @@ export default class SessionStore {
                 this.message = ERROR_MESSAGE;
                 return;
             }
-            
+
             this.showDrawer = false;
             this.session = data;
             this.state = DONE;
@@ -102,13 +102,13 @@ export default class SessionStore {
 
         this.programMsg = EMPTY_MESSAGE;
         this.memberMsg = EMPTY_MESSAGE;
-    
-        if(isBlank(sessionRequest.programFuzzyId)) {
-            this.programMsg = {status:ERROR,help:"Please Select a Program"};
+
+        if (isBlank(sessionRequest.programFuzzyId)) {
+            this.programMsg = { status: ERROR, help: "Please Select a Program" };
         }
 
-        if(isBlank(sessionRequest.memberFuzzyId)) {
-            this.memberMsg = {status:ERROR,help:"Please Select an enrolled member"};
+        if (isBlank(sessionRequest.memberFuzzyId)) {
+            this.memberMsg = { status: ERROR, help: "Please Select an enrolled member" };
         }
 
         this.validateDate(sessionRequest.startTime);
@@ -120,14 +120,46 @@ export default class SessionStore {
 
         this.startTimeMsg = EMPTY_MESSAGE;
 
-        const boundary = moment().add(1,'hour');
+        const boundary = moment().add(1, 'hour');
         const flag = value && value > boundary;
 
-        if(!flag) {
-            this.startTimeMsg = {status:ERROR,help:"Provide a time at least one hour after from now."};
+        if (!flag) {
+            this.startTimeMsg = { status: ERROR, help: "Provide a time at least one hour after from now." };
         }
     }
 
+    alterSessionState = async (fuzzyId,targetState) => {
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+
+        const variables = {
+            input: {
+                fuzzyId: fuzzyId,
+                targetState: targetState
+            }
+        }
+
+        try {
+            const response = await this.apiProxy.mutate(apiHost, alterSessionStateQuery, variables);
+            const data = await response.json();
+            const result = data.data.alterSessionState;
+
+            if (result.errors != null && result.errors.length > 0 ) {
+                const help = result.errors[0].message;
+                this.message = {status: ERROR, help: help}
+                this.state = ERROR;
+                return;
+            }
+  
+            this.state = DONE;
+            this.sessionListStore.buildRoster();
+        }
+        catch (e) {
+            this.state = ERROR;
+            this.message = ERROR_MESSAGE;
+            console.log(e);
+        }
+    }
 }
 
 decorate(SessionStore, {
@@ -147,5 +179,6 @@ decorate(SessionStore, {
     isInvalid: computed,
 
     createSchedule: action,
-    validateDate:action,
+    validateDate: action,
+    alterSessionState:action,
 });

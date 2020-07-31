@@ -25,7 +25,7 @@ class HomeUI extends Component {
         this.programListStore = new ProgramListStore({apiProxy: props.appStore.apiProxy});
         this.enrollmentListStore = new EnrollmentListStore({apiProxy: props.appStore.apiProxy});
         this.sessionListStore = new SessionListStore({ apiProxy: props.appStore.apiProxy });
-        
+            
         this.sessionStore = new SessionStore({ 
             apiProxy: props.appStore.apiProxy,
             enrollmentListStore: this.enrollmentListStore,
@@ -57,13 +57,13 @@ class HomeUI extends Component {
                     ]}>
                 </PageHeader>
 
-                <Tabs defaultActiveKey="1" tabPosition="top" style={{ minHeight: 450 }}>
+                <Tabs defaultActiveKey="2" tabPosition="top" style={{ minHeight: 450 }}>
                     <TabPane key="1" tab={<span><ThunderboltOutlined />Current</span>} style={{ maxHeight: 450, overflow: "auto" }}>
                         <SessionDetail sessionId={24} sessionStore = {this.sessionStore}/>
                     </TabPane>
 
                     <TabPane key="2" tab={<span><HourglassOutlined />Today</span>} style={{ maxHeight: 450, overflow: "auto" }}>
-                        <TodaySessions sessionListStore = {this.sessionListStore}/>
+                        <TodaySessions sessionListStore = {this.sessionListStore} sessionStore = {this.sessionStore}/>
                     </TabPane>
 
                     <TabPane key="3" tab={<span><CalendarOutlined />Next</span>}>

@@ -4,7 +4,8 @@ import { observer } from 'mobx-react';
 import { Spin, Result, Carousel, Typography, Button } from 'antd';
 
 import { assetHost } from '../stores/APIEndpoints';
-import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+
+
 
 const { Text } = Typography;
 

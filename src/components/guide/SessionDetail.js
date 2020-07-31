@@ -53,14 +53,12 @@ class SessionDetail extends Component {
                     <Statistic title="Coach" value="Gopal Sankaran" valueStyle={{ color: '#3f8600' }} />
                     <p><Text><MailOutlined /> gopals@pmpowerxx.com</Text></p>
                     <p><Text><PhoneOutlined /> (91)99999 99999</Text></p>
-                    <PeerStatus fuzzyId={"1-1"} />
                 </Card>
 
                 <Card>
                     <Statistic title="Actor" value="Raja Subramanian K" />
                     <p><Text><MailOutlined /> raja@pmpowerxx.com</Text></p>
                     <p><Text><PhoneOutlined /> (91)99999 xxxx9</Text></p>
-                    <PeerStatus fuzzyId={"9-9"} />
                 </Card>
 
                 
