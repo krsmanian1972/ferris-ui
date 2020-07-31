@@ -35,19 +35,13 @@ class SessionDetail extends Component {
     render() {
         return (
             <Card title={<Title level={4}>Traits in Rust</Title>} extra={<Countdown title="Countdown" value={deadline} onFinish={this.onFinish}/>}>
-                <Card>
-                    <Meta
-                        description="This is the 1st of the series of sessions on Traits by Gopal."
-                    />
-                </Card>
-
+  
                 <Card>
                     <Meta description="Schedule" style={{ marginBottom: 10 }} />
                     <Moment format="llll" style={{fontWeight:"bold"}}>{deadline}</Moment>
                     <SessionLauncher title="Traits in Rust" sessionId="24" />
                 </Card>
 
-                <MiniBoard apiProxy={this.props.appStore.apiProxy} boardId="Board_1" sessionUserFuzzyId={SESSION_USER_FUZZY_ID}/>
                 
                 <Card>
                     <Statistic title="Coach" value="Gopal Sankaran" valueStyle={{ color: '#3f8600' }} />

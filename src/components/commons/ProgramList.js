@@ -2,10 +2,9 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
 import { Spin, Result, Carousel, Typography, Button } from 'antd';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 
 import { assetHost } from '../stores/APIEndpoints';
-
-
 
 const { Text } = Typography;
 
