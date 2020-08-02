@@ -9,7 +9,6 @@ import SelectedComponent from './components/SelectedComponent'
 import { appStore } from './components/stores/AppStore';
 import { drawerStore } from './components/stores/DrawerStore';
 
-
 const { Content, Footer } = Layout;
 
 export default class App extends Component {
@@ -23,15 +22,20 @@ export default class App extends Component {
     const search = window.location.search;
     const params = new URLSearchParams(search);
     const featureKey = params.get("featureKey");
-    const sessionId = params.get("sessionId");
 
-    if (featureKey && sessionId) { 
-      appStore.updatePreferredRoute(featureKey, sessionId);
+    const sessionFuzzyId = params.get("sessionFuzzyId");
+    const sessionUserFuzzyId = params.get("sessionUserFuzzyId");
+    const sessionUserType = params.get("sessionUserType");
+
+    const sessionInfo = { sessionFuzzyId: sessionFuzzyId, sessionUserFuzzyId: sessionUserFuzzyId, sessionUserType: sessionUserType };
+
+    if (featureKey && sessionUserFuzzyId) {
+      appStore.updatePreferredRoute(featureKey, sessionInfo);
     }
   }
 
   renderLayout = () => {
-    if (appStore.hasSessionId) {
+    if (appStore.hasSessionUserFuzzyId) {
       return this.renderSessionLayout();
     }
     return this.renderRegularLayout();
@@ -53,12 +57,12 @@ export default class App extends Component {
       </>
     )
   }
-  
+
   renderSessionLayout = () => {
     return (
       <>
         <Content className="site-layout">
-          <div className="site-layout-background" style={{ padding: 5}}>
+          <div className="site-layout-background" style={{ padding: 5 }}>
             <SelectedComponent />
           </div>
         </Content>

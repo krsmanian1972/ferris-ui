@@ -45,6 +45,8 @@ code {
   background: gray;
 }
 
+
+
 .ql-toolbar {
   background: #eaecec;
   border-top-left-radius: 0.5em;
@@ -182,6 +184,10 @@ code {
   font-weight: bold; 
 }
 
+.planned {
+  border-left: 3px solid blue;
+}
+
 .cancelled {
   border-left: 3px solid black;
 }
@@ -203,4 +209,10 @@ code {
   bottom: 40px;
   width: 100%;
   text-align: center;
+}
+
+
+.schedule {
+  display:flex;
+  flex-direction: column;
 }

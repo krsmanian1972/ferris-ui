@@ -115,6 +115,7 @@ export const eventsQuery = `query ($criteria: EventCriteria!) {
     }
     program {
       name
+      fuzzyId
     }
     sessionUser{
       fuzzyId
@@ -123,6 +124,26 @@ export const eventsQuery = `query ($criteria: EventCriteria!) {
     
   }
 }`;
+
+export const sessionUsersQuery =  `query ($criteria: SessionCriteria!) {
+  getSessionUsers(criteria: $criteria) {
+    users{
+      member {
+        fuzzyId
+        email
+        name
+      }
+      coach {
+        fuzzyId
+        email
+        name
+      }
+    },
+    error {
+      message
+    }
+  }
+}`
 
 export const createNotesQuery = `mutation ($input: NewNoteRequest!) {
   createNote(newNoteRequest: $input) {

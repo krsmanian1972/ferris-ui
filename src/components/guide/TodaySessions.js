@@ -33,30 +33,8 @@ class TodaySessions extends Component {
         clearInterval(this.interval);
     }
 
-    makeReady = async (fuzzyId) => {
-        const store = this.props.sessionStore;
-        await store.alterSessionState(fuzzyId, "READY");
-
-        if (store.isError) {
-            failureNotification(store.message.help);
-        }
-        else if (store.isDone) {
-            message.success('Now, the Session is Ready.');
-        }
-    }
-
-    cancelEvent = async (fuzzyId) => {
-        const store = this.props.sessionStore;
-        await store.alterSessionState(fuzzyId, "CANCEL");
-
-        if (store.isError) {
-            failureNotification(store.message.help);
-        }
-        else if (store.isDone) {
-            message.success('The session is cancelled.');
-        }
-    }
-
+    
+   
     render() {
         const listStore = this.props.sessionListStore;
 
@@ -81,7 +59,7 @@ class TodaySessions extends Component {
         if (roster) {
             var index = 0
             for (let [date, events] of roster) {
-                slots.push(<SessionSlot key={index++} date={date} sessions={events} makeReady={this.makeReady} cancelEvent={this.cancelEvent} />);
+                slots.push(<SessionSlot key={index++} date={date} sessions={events} showSessionDetail={this.props.showSessionDetail}/>);
             }
         }
 

@@ -3,7 +3,7 @@ import {inject, observer } from 'mobx-react';
 import { PageHeader, Tabs, Typography, Button, Tooltip } from 'antd';
 import { ThunderboltOutlined, CalendarOutlined, HourglassOutlined, PlusCircleOutlined } from '@ant-design/icons';
 
-import SessionDetail from './SessionDetail';
+import CurrentSession from './CurrentSession';
 import TodaySessions from './TodaySessions';
 
 import SessionListStore from '../stores/SessionListStore';
@@ -34,6 +34,11 @@ class HomeUI extends Component {
             });
     }
 
+    showSessionDetail = (event) => {
+        const params = {event:event, parentKey: "home" };
+        this.props.appStore.currentComponent = { label: "Session Detail", key: "sessionDetail", params: params };
+    }
+
     showNewSchedule = () => {
         this.sessionStore.showDrawer = true;
     }
@@ -59,11 +64,11 @@ class HomeUI extends Component {
 
                 <Tabs defaultActiveKey="2" tabPosition="top" style={{ minHeight: 450 }}>
                     <TabPane key="1" tab={<span><ThunderboltOutlined />Current</span>} style={{ maxHeight: 450, overflow: "auto" }}>
-                        <SessionDetail sessionId={24} sessionStore = {this.sessionStore}/>
+                        <CurrentSession sessionId={24} sessionStore = {this.sessionStore}/>
                     </TabPane>
 
                     <TabPane key="2" tab={<span><HourglassOutlined />Today</span>} style={{ maxHeight: 450, overflow: "auto" }}>
-                        <TodaySessions sessionListStore = {this.sessionListStore} sessionStore = {this.sessionStore}/>
+                        <TodaySessions sessionListStore = {this.sessionListStore} sessionStore = {this.sessionStore} showSessionDetail = {this.showSessionDetail}/>
                     </TabPane>
 
                     <TabPane key="3" tab={<span><CalendarOutlined />Next</span>}>

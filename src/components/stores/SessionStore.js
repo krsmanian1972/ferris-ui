@@ -4,7 +4,7 @@ import moment from 'moment';
 import { isBlank } from './Util';
 
 import { apiHost } from './APIEndpoints';
-import { createSessionQuery, alterSessionStateQuery } from './Queries';
+import { createSessionQuery, alterSessionStateQuery, sessionUsersQuery } from './Queries';
 
 const INIT = "init";
 const PENDING = 'pending';
@@ -21,11 +21,12 @@ export default class SessionStore {
     message = EMPTY_MESSAGE;
 
     showDrawer = false;
-    sessionId = 0;
 
     startTimeMsg = {};
     programMsg = {};
     memberMsg = {};
+
+    people = {};
 
     constructor(props) {
         this.apiProxy = props.apiProxy;
@@ -128,7 +129,33 @@ export default class SessionStore {
         }
     }
 
-    alterSessionState = async (fuzzyId,targetState) => {
+    loadPeople = async (sessionFuzzyId) => {
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+
+        const variables = {
+            criteria: {
+                fuzzyId: sessionFuzzyId,
+            }
+        }
+
+        try {
+            const response = await this.apiProxy.query(apiHost, sessionUsersQuery, variables);
+            const data = await response.json();
+
+            this.people = data.data.getSessionUsers.users;
+
+            this.state = DONE;
+        }
+
+        catch (e) {
+            this.state = ERROR;
+            this.message = LOADING_ERROR;
+            console.log(e);
+        }
+    }
+
+    alterSessionState = async (fuzzyId, targetState) => {
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
@@ -144,13 +171,13 @@ export default class SessionStore {
             const data = await response.json();
             const result = data.data.alterSessionState;
 
-            if (result.errors != null && result.errors.length > 0 ) {
+            if (result.errors != null && result.errors.length > 0) {
                 const help = result.errors[0].message;
-                this.message = {status: ERROR, help: help}
+                this.message = { status: ERROR, help: help }
                 this.state = ERROR;
                 return;
             }
-  
+
             this.state = DONE;
             this.sessionListStore.buildRoster();
         }
@@ -170,8 +197,7 @@ decorate(SessionStore, {
     programMsg: observable,
     memberMsg: observable,
     message: observable,
-
-    sessionId: observable,
+    people: observable,
 
     isLoading: computed,
     isDone: computed,
@@ -180,5 +206,5 @@ decorate(SessionStore, {
 
     createSchedule: action,
     validateDate: action,
-    alterSessionState:action,
+    alterSessionState: action,
 });

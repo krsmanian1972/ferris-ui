@@ -7,6 +7,7 @@ import WorkflowUI from './guide/WorkflowUI';
 import ProgramUI from './guide/ProgramUI';
 import ProgramDetailUI from './commons/ProgramDetailUI';
 import EditableProgramDetailUI from './guide/EditableProgramDetailUI';
+import SessionDetailUI from './guide/SessionDetailUI';
 import HomeUI from './guide/HomeUI';
 import Broadcast from './guide/Broadcast';
 
@@ -35,6 +36,9 @@ class SelectedComponent extends Component {
             case 'editableProgramDetail' : {
                 return <EditableProgramDetailUI params={currentComponent.params}/>
             }
+            case 'sessionDetail' : {
+                return <SessionDetailUI params={currentComponent.params}/>
+            }
             case 'planning': {
                 return <WorkflowUI />;
             }
@@ -42,7 +46,7 @@ class SelectedComponent extends Component {
                 return <Login />;
             }
             case 'broadcast' : {
-                return <Broadcast />
+                return <Broadcast params={currentComponent.params}/>
             }
             case 'about': {
                 return <About />;

@@ -19,8 +19,6 @@ import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutl
 const CONNECTION_KEY_VIDEO_STREAM = "peerVideoStream";
 const CONNECTION_KEY_SCREEN_STREAM = "peerScreenStream";
 
-const SESSION_USER_FUZZY_ID = 'd91e5527-9cc3-4d56-9c69-d386c9cba535';
-
 const MY_BOARD_KEY = 'myBoard';
 
 @inject("appStore")
@@ -28,6 +26,7 @@ const MY_BOARD_KEY = 'myBoard';
 class Broadcast extends Component {
     constructor(props) {
         super(props);
+
         this.state = {
 
             screenStatus: '',
@@ -53,26 +52,29 @@ class Broadcast extends Component {
         this.endCallHandler = this.endCall.bind(this);
         this.rejectCallHandler = this.rejectCall.bind(this);
         
-        this.initializeNotesStore();
-        this.initializeBoards();
+        const sessionUserFuzzyId = this.props.params.sessionUserFuzzyId;
+
+        this.initializeNotesStore(sessionUserFuzzyId);
+        this.initializeBoards(sessionUserFuzzyId);
     }
 
-    initializeNotesStore = () => {
+    initializeNotesStore = (sessionUserFuzzyId) => {
+        
         this.notesListStore = new NotesListStore({
             apiProxy: this.props.appStore.apiProxy,
-            sessionUserFuzzyId: SESSION_USER_FUZZY_ID,
+            sessionUserFuzzyId: sessionUserFuzzyId,
         });
 
         this.notesStore = new NotesStore({
             apiProxy: this.props.appStore.apiProxy,
             notesListStore: this.notesListStore,
-            sessionUserFuzzyId: SESSION_USER_FUZZY_ID,
+            sessionUserFuzzyId: sessionUserFuzzyId,
         });
     }
 
-    initializeBoards = () => {
+    initializeBoards = (sessionUserFuzzyId) => {
         this.myBoards = new Map();
-        const el = <Board key={MY_BOARD_KEY} boardId={MY_BOARD_KEY} sessionUserFuzzyId={SESSION_USER_FUZZY_ID} />
+        const el = <Board key={MY_BOARD_KEY} boardId={MY_BOARD_KEY} sessionUserFuzzyId={sessionUserFuzzyId} />
         this.myBoards.set(MY_BOARD_KEY, el);
     }
 
@@ -138,9 +140,13 @@ class Broadcast extends Component {
         }
     }
 
+    /**
+     * Please note that the socket will treat the sessionFuzzyId 
+     * as sessionId. But we are sending sessionFuzzyId.
+     */
     getSessionData = () => {
-        const sessionId = this.props.appStore.sessionId;
-        const role = this.props.appStore.credentials.role;
+        const sessionId = this.props.params.sessionFuzzyId;
+        const role = this.props.params.sessionUserType;
         const fuzzyId = this.props.appStore.credentials.userFuzzyId;
 
         return { sessionId: sessionId, fuzzyId: fuzzyId, role: role };

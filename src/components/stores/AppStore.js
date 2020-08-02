@@ -30,7 +30,7 @@ class AppStore {
     loginStore = new LoginStore({ apiProxy: this.apiProxy });
     menus = [];
 
-    sessionId = null;
+    sessionInfo = null;
     socketToken = null;
 
     constructor() {
@@ -164,14 +164,14 @@ class AppStore {
         this.apiProxy = apiProxy;
     }
 
-    get hasSessionId() {
-        return !isBlank(this.sessionId)
+    get hasSessionUserFuzzyId() {
+        return this.sessionInfo && !isBlank(this.sessionInfo.sessionUserFuzzyId)
     }
 
-    updatePreferredRoute = (featureKey, sessionId) => {
-        if (featureKey && sessionId && this.isLoggedIn()) {
-            this.sessionId = sessionId;
-            this.currentComponent = { "label": "window", "key": featureKey };
+    updatePreferredRoute = (featureKey, sessionInfo) => {
+        if (featureKey && sessionInfo && this.isLoggedIn()) {
+            this.sessionInfo = sessionInfo;
+            this.currentComponent = {label:"window", key: featureKey, params:sessionInfo };
         }
     }
 
@@ -205,9 +205,9 @@ decorate(AppStore, {
     isCoach: computed,
     isMember: computed,
 
-    sessionId: observable,
+    sessionInfo: observable,
     socketToken: observable,
-    hasSessionId: computed,
+    hasSessionUserFuzzyId: computed,
     updatePreferredRoute: action,
 });
 
