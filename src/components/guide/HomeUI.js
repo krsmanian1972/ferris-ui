@@ -3,7 +3,6 @@ import {inject, observer } from 'mobx-react';
 import { PageHeader, Tabs, Typography, Button, Tooltip } from 'antd';
 import { ThunderboltOutlined, CalendarOutlined, HourglassOutlined, PlusCircleOutlined } from '@ant-design/icons';
 
-import CurrentSession from './CurrentSession';
 import TodaySessions from './TodaySessions';
 
 import SessionListStore from '../stores/SessionListStore';
@@ -13,7 +12,7 @@ import ScheduleDrawer from './ScheduleDrawer';
 import ProgramListStore from '../stores/ProgramListStore';
 import EnrollmentListStore from '../stores/EnrollmentListStore';
 
-const { Title, Paragraph, Text } = Typography;
+const { Title } = Typography;
 const { TabPane } = Tabs;
 
 @inject("appStore")
@@ -64,7 +63,7 @@ class HomeUI extends Component {
 
                 <Tabs defaultActiveKey="2" tabPosition="top" style={{ minHeight: 450 }}>
                     <TabPane key="1" tab={<span><ThunderboltOutlined />Current</span>} style={{ maxHeight: 450, overflow: "auto" }}>
-                        <CurrentSession sessionId={24} sessionStore = {this.sessionStore}/>
+                
                     </TabPane>
 
                     <TabPane key="2" tab={<span><HourglassOutlined />Today</span>} style={{ maxHeight: 450, overflow: "auto" }}>

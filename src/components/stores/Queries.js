@@ -92,7 +92,17 @@ export const createSessionQuery = `mutation($input: NewSessionRequest!) {
 
 export const alterSessionStateQuery = `mutation($input: ChangeSessionStateRequest!) {
   alterSessionState(request: $input) {
-    rows,
+    session{
+      people,
+      name,
+      fuzzyId,
+      description,
+      duration,
+      scheduleStart,
+      scheduleEnd,
+      status,
+      isClosed
+    }
     errors {
       field
       message

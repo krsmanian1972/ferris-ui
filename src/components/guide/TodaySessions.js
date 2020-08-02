@@ -1,19 +1,10 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
-import { notification, message, Result, Spin } from 'antd';
+import { Result, Spin } from 'antd';
 
 import SessionSlot from './SessionSlot';
 
-const failureNotification = (help) => {
-    const args = {
-        message: 'Unable to Complete your request',
-        description: help,
-        duration: 0,
-        type: 'error',
-    };
-    notification.open(args);
-};
 
 @observer
 class TodaySessions extends Component {

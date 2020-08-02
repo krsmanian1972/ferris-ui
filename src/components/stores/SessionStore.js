@@ -26,7 +26,9 @@ export default class SessionStore {
     programMsg = {};
     memberMsg = {};
 
+    event = {};
     people = {};
+    change = null;
 
     constructor(props) {
         this.apiProxy = props.apiProxy;
@@ -87,7 +89,6 @@ export default class SessionStore {
             }
 
             this.showDrawer = false;
-            this.session = data;
             this.state = DONE;
             this.sessionListStore.buildRoster();
         }
@@ -129,7 +130,10 @@ export default class SessionStore {
         }
     }
 
-    loadPeople = async (sessionFuzzyId) => {
+    loadPeople = async () => {
+
+        const sessionFuzzyId = this.event.session.fuzzyId;
+
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
@@ -155,13 +159,58 @@ export default class SessionStore {
         }
     }
 
-    alterSessionState = async (fuzzyId, targetState) => {
+    get isCoach() {
+        return this.event && this.event.sessionUser && this.event.sessionUser.userType === "coach";
+    }
+
+    get canMakeReady() {
+        return this.isCoach
+            && this.event.session
+            && !this.event.session.isClosed
+            && (this.event.session.status === "PLANNED" || this.event.session.status === "OVERDUE")
+
+    }
+
+    get canCancelEvent() {
+        return this.isCoach
+            && this.event.session
+            && !this.event.session.isClosed
+
+    }
+
+    get canBroadcast() {
+        return this.event.session
+            && !this.event.session.isClosed
+            && (this.event.session.status === "READY" || this.event.session.status === "PROGRESS")
+    }
+
+    get broadcastHelp() {
+
+        if (this.event && this.event.session && (this.event.session.status === "PLANNED" || this.event.session.status === "OVERDUE")) {
+            return "Coach to Ready the Session";
+        }
+
+        return "";
+    }
+
+    updateSessionProgress = async() => {
+        if(!this.isCoach) {
+            return;
+        }
+        if(this.event.session.status === "READY") {
+            await this.alterSessionState("START");
+        }
+    }
+
+    alterSessionState = async (targetState) => {
+
+        const sessionFuzzyId = this.event.session.fuzzyId;
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
         const variables = {
             input: {
-                fuzzyId: fuzzyId,
+                fuzzyId: sessionFuzzyId,
                 targetState: targetState
             }
         }
@@ -178,8 +227,9 @@ export default class SessionStore {
                 return;
             }
 
+            this.event.session = result.session;
+            this.change = result.session.status;
             this.state = DONE;
-            this.sessionListStore.buildRoster();
         }
         catch (e) {
             this.state = ERROR;
@@ -197,14 +247,24 @@ decorate(SessionStore, {
     programMsg: observable,
     memberMsg: observable,
     message: observable,
+
+    event: observable,
     people: observable,
+    change: observable,
 
     isLoading: computed,
     isDone: computed,
     isError: computed,
     isInvalid: computed,
+    isCoach: computed,
+
+    canMakeReady: computed,
+    canCancelEvent: computed,
+    canBroadcast: computed,
+    broadcastHelp: computed,
 
     createSchedule: action,
     validateDate: action,
     alterSessionState: action,
+    updateSessionProgress: action,
 });

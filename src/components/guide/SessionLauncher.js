@@ -3,9 +3,8 @@ import { inject, observer } from 'mobx-react';
 import { Button } from 'antd';
 import { baseUrl } from '../stores/APIEndpoints';
 
-const FEATURE_KEY ="broadcast";
+const FEATURE_KEY = "broadcast";
 
-@inject("appStore")
 @observer
 class SessionLauncher extends Component {
     constructor(props) {
@@ -27,7 +26,9 @@ class SessionLauncher extends Component {
         window.removeEventListener('beforeunload', this.closeWindowPortal);
     }
 
-    toggleWindowPortal = () => {
+    toggleWindowPortal = async() => {
+        const store = this.props.store
+        await store.updateSessionProgress();
         this.setState({ showWindowPortal: !this.state.showWindowPortal });
     }
 
@@ -37,7 +38,7 @@ class SessionLauncher extends Component {
 
 
     openWindow() {
-        
+
         const title = this.props.session.name;
         const sessionFuzzyId = this.props.session.fuzzyId;
         const sessionUserFuzzyId = this.props.sessionUser.fuzzyId;
@@ -50,33 +51,45 @@ class SessionLauncher extends Component {
 
         const url = `${baseUrl}?featureKey=${FEATURE_KEY}&sessionFuzzyId=${sessionFuzzyId}&sessionUserFuzzyId=${sessionUserFuzzyId}&sessionUserType=${sessionUserType}`;
         const specs = `'toolbar=yes ,location=0, status=no,titlebar=no,menubar=yes,width=${w},height=${h},left=${l},top=${t}`;
-        
+
         this.externalWindow = window.open(url, title, specs);
     }
 
     getButtonLabel = () => {
-        const role = this.props.sessionUser.userType;
-
-        if (role === 'coach') {
-            if (!this.state.showWindowPortal) {
-                return "Start Session";
-            }
-            return "End Session";
+   
+        if (this.state.showWindowPortal) {
+            return "Intermission";
         }
 
-        if (!this.state.showWindowPortal) {
-            return "Join Session";
+        const store = this.props.store
+        if (store.isCoach && store.event.session.status === "READY") {
+            return "Launch Session";
         }
-        return "Exit Session";
+
+        return "Join Session";
+    }
+
+    renderButton = () => {
+        const store = this.props.store;
+
+        if (store.canBroadcast) {
+            return (
+                <Button disabled={store.isLoading} type="primary" onClick={this.toggleWindowPortal}>
+                    {this.getButtonLabel()}
+                </Button>
+            )
+        }
+        else {
+            return (
+                <p>{store.broadcastHelp}</p>
+            )
+        }
     }
 
     render() {
         return (
-            <div style={{ paddingTop: 10 }}>
-                <Button type="primary" onClick={this.toggleWindowPortal}>
-                    {this.getButtonLabel()}
-                </Button>
-
+            <div>
+                {this.renderButton()}
                 {this.state.showWindowPortal && (
                     this.openWindow()
                 )}

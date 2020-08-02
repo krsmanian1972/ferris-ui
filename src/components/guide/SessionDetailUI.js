@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { assetHost } from '../stores/APIEndpoints';
 
-import { Card, Typography, Statistic, PageHeader } from 'antd';
-import { MailOutlined, PhoneOutlined } from '@ant-design/icons';
+import { Card, Typography, Statistic, PageHeader, Button, Tag,Popconfirm,notification,message } from 'antd';
+import { MailOutlined, PhoneOutlined, CaretRightOutlined, CloseOutlined } from '@ant-design/icons';
+
 import Moment from 'react-moment';
 import moment from 'moment';
 import 'moment-timezone';
@@ -14,26 +15,32 @@ import Editor from "../commons/Editor";
 import SessionLauncher from './SessionLauncher';
 import MiniBoard from './MiniBoard';
 
-
-const { Meta } = Card;
-const { Title, Text, Paragraph } = Typography;
+const { Title, Paragraph } = Typography;
 
 const { Countdown } = Statistic;
 
-
-const SESSION_USER_FUZZY_ID = 'd91e5527-9cc3-4d56-9c69-d386c9cba535';
+const failureNotification = (help) => {
+    const args = {
+        message: 'Unable to Complete your request',
+        description: help,
+        duration: 0,
+        type: 'error',
+    };
+    notification.open(args);
+};
 
 @inject("appStore")
 @observer
 class SessionDetailUI extends Component {
+
     constructor(props) {
         super(props);
-        this.store = new SessionStore({ apiProxy: props.appStore.apiProxy })
+        this.store = new SessionStore({ apiProxy: props.appStore.apiProxy });
+        this.store.event = this.props.params.event;
     }
 
     componentDidMount() {
-        const { session } = this.props.params.event;
-        this.store.loadPeople(session.fuzzyId);
+        this.store.loadPeople();
     }
 
 
@@ -41,17 +48,12 @@ class SessionDetailUI extends Component {
         console.log("Finished");
     }
 
-    getPosterUrl = (program) => {
-        const url = `${assetHost}/programs/${program.fuzzyId}/poster/poster.png`;
-        return url;
-    }
-
     renderTopSegment = (program, session, sessionUser) => {
         return (
             <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", textAlign: "center", alignItems: "center" }}>
                 {this.renderProgramImage(program)}
                 {this.renderSchedule(session)}
-                <SessionLauncher session={session} sessionUser={sessionUser} />
+                <SessionLauncher store={this.store} session={session} sessionUser={sessionUser} />
             </div>
         )
     }
@@ -65,6 +67,11 @@ class SessionDetailUI extends Component {
                 </div>
             </div>
         )
+    }
+
+    getPosterUrl = (program) => {
+        const url = `${assetHost}/programs/${program.fuzzyId}/poster/poster.png`;
+        return url;
     }
 
     renderSchedule = (session) => {
@@ -111,15 +118,82 @@ class SessionDetailUI extends Component {
         )
     }
 
+    makeReady = async () => {
+
+        await this.store.alterSessionState("READY");
+
+        if (this.store.isError) {
+            failureNotification(this.store.message.help);
+        }
+        else if (this.store.isDone) {
+            message.success('Now, the Session is Ready.');
+        }
+    }
+
+    cancelEvent = async () => {
+
+        await this.store.alterSessionState("CANCEL");
+
+        if (this.store.isError) {
+            failureNotification(store.message.help);
+        }
+        else if (this.store.isDone) {
+            message.success('The session is cancelled.');
+        }
+    }
+
+    renderStatus = (session) => {
+        return <Tag key="status" color="#108ee9">{session.status}</Tag>
+    }
+
+    makeReadyButton = () => {
+        if (!this.store.canMakeReady) {
+            return <></>
+        }
+    
+        return (
+            <Popconfirm placement="left" title="Mark this session as Ready?" okText="Yes" cancelText="No"
+                onConfirm={() => this.makeReady()}
+            >
+                <Button key="ready" style={{ border: "1px solid green", color: "green" }} icon={<CaretRightOutlined />} shape="circle"></Button>
+            </Popconfirm>
+        )
+        
+    }
+
+    cancelEventButton = () => {
+        if(!this.store.canCancelEvent) {
+            return <></>
+        }
+
+        return (
+            <Popconfirm placement="left" title="Mark this session as Cancelled?" okText="Yes" cancelText="No"
+                onConfirm={() => this.cancelEvent()}
+            >
+                <Button key="cancel" danger icon={<CloseOutlined />} shape="circle"></Button>
+            </Popconfirm>
+        )
+    }
+
+  
 
     render() {
 
-        const { program, session, sessionUser } = this.props.params.event;
+        const { program, session, sessionUser } = this.store.event;
         const people = this.store.people;
+        const change = this.store.change;
 
         return (
             <>
-                <PageHeader title={<Title level={4}>{session.name}</Title>} subTitle={program.name}>
+                <PageHeader
+                    title={<Title level={4}>{session.name}</Title>}
+                    subTitle={program.name}
+                    extra={[
+                        this.renderStatus(session),
+                        this.makeReadyButton(),
+                        this.cancelEventButton(),
+                    ]}
+                >
                     {this.renderTopSegment(program, session, sessionUser)}
                     <Editor value={session.description} readOnly={true} />
                 </PageHeader>
