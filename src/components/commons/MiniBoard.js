@@ -25,7 +25,6 @@ class MiniBoard extends Component {
         var img = new Image();
         var me = this;
         img.onload = function () {
-            console.log("onload of miniboard");
             me.ctx.drawImage(img, 0, 0, img.width, img.height);
         }
         img.src = data;

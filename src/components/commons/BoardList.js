@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import { inject,observer } from 'mobx-react';
 
-import { Spin, Result, Carousel, Button } from 'antd';
-import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import { Spin, Result, Carousel, Button,Typography,Tag } from 'antd';
+import { LeftOutlined, RightOutlined,SmileOutlined } from '@ant-design/icons';
 
 import BoardListStore from "../stores/BoardListStore";
 import MiniBoard from "./MiniBoard";
+
+const { Title } = Typography;
 
 @inject("appStore")
 @observer
@@ -45,8 +47,12 @@ class BoardList extends Component {
     }
 
     renderSlider = (boards, boardCount) => {
-        if (boardCount == 0) {
+        if(this.store.isError) {
             return <></>
+        }
+        
+        if (boardCount == 0) {
+            return <Result icon={<SmileOutlined />}  subTitle="Waiting for your boards."/>
         }
 
         const settings = {
@@ -73,13 +79,26 @@ class BoardList extends Component {
             </div>
         )
     }
+    /**
+     * Provide the count Tag only if the store is in Done State
+     */
+    countTag = () => {
+        if (this.store.isDone) {
+            return <Tag color="#108ee9">{this.store.boardCount} Total</Tag>
+        }
+
+        if (this.store.isError) {
+            return <Tag color="red">...</Tag>
+        }
+    }
 
     render() {
         const boards = this.store.boards;
         const boardCount = this.store.boardCount;
 
         return (
-            <div>
+            <div style={{ marginTop: 20 }} >
+                <Title level={4}>{this.props.title} {this.countTag()}</Title>
                 {this.renderSlider(boards, boardCount)}
                 {this.displayMessage()}
             </div>

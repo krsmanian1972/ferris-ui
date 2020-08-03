@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { assetHost } from '../stores/APIEndpoints';
 
-import { Card, Typography, Statistic, PageHeader, Button, Tag,Popconfirm,notification,message } from 'antd';
+import { Card, Typography, Statistic, PageHeader, Button, Tag, Popconfirm, notification, message } from 'antd';
 import { MailOutlined, PhoneOutlined, CaretRightOutlined, CloseOutlined } from '@ant-design/icons';
 
 import Moment from 'react-moment';
@@ -104,13 +104,13 @@ class SessionDetailUI extends Component {
 
         return (
             <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
-                <Card style={{width:"50%"}}>
+                <Card style={{ width: "50%" }}>
                     <Statistic title="Coach" value={coach.user.name} valueStyle={{ color: '#3f8600' }} />
                     <Paragraph><MailOutlined /> {coach.user.email}</Paragraph>
                     <Paragraph><PhoneOutlined /> (91)99999 XXXXX</Paragraph>
                 </Card>
 
-                <Card style={{width:"50%"}}>
+                <Card style={{ width: "50%" }}>
                     <Statistic title="Actor" value={member.user.name} />
                     <Paragraph><MailOutlined /> {member.user.email}</Paragraph>
                     <Paragraph><PhoneOutlined /> (91)99999 xxxx</Paragraph>
@@ -151,7 +151,7 @@ class SessionDetailUI extends Component {
         if (!this.store.canMakeReady) {
             return <></>
         }
-    
+
         return (
             <Popconfirm key="ready_pop" placement="left" title="Mark this session as Ready?" okText="Yes" cancelText="No"
                 onConfirm={() => this.makeReady()}
@@ -159,11 +159,11 @@ class SessionDetailUI extends Component {
                 <Button key="ready" style={{ border: "1px solid green", color: "green" }} icon={<CaretRightOutlined />} shape="circle"></Button>
             </Popconfirm>
         )
-        
+
     }
 
     cancelEventButton = () => {
-        if(!this.store.canCancelEvent) {
+        if (!this.store.canCancelEvent) {
             return <></>
         }
 
@@ -176,7 +176,7 @@ class SessionDetailUI extends Component {
         )
     }
 
-  
+
 
     render() {
 
@@ -185,32 +185,29 @@ class SessionDetailUI extends Component {
         const change = this.store.change;
 
         return (
-            <>
-                <PageHeader
-                    title={<Title level={3}>{session.name}</Title>}
-                    subTitle={program.name}
-                    extra={[
-                        this.renderStatus(session),
-                        this.makeReadyButton(),
-                        this.cancelEventButton(),
-                    ]}
-                >
-                    {this.renderTopSegment(program, session, sessionUser)}
-                    <Editor value={session.description} readOnly={true} />
-                </PageHeader>
+
+            <PageHeader
+                title={<Title level={3}>{session.name}</Title>}
+                subTitle={program.name}
+                extra={[
+                    this.renderStatus(session),
+                    this.makeReadyButton(),
+                    this.cancelEventButton(),
+                ]}
+            >
+                {this.renderTopSegment(program, session, sessionUser)}
+                <Editor value={session.description} readOnly={true} />
+
 
                 {this.renderPeople(people)}
 
                 {people.coach && (
-                    <>   
-                        <Title style={{ marginTop: 10 }} level={4}>Coach Board</Title>
-                        <BoardList sessionUserFuzzyId={people.coach.sessionUser.fuzzyId}/>
-
-                        <Title style={{ marginTop: 10 }} level={4}>Actor Board</Title>
-                        <BoardList sessionUserFuzzyId={people.member.sessionUser.fuzzyId}/>
+                    <>
+                        <BoardList title="Coach Boards" sessionUserFuzzyId={people.coach.sessionUser.fuzzyId} />
+                        <BoardList title="Actor Boards" sessionUserFuzzyId={people.member.sessionUser.fuzzyId} />
                     </>
                 )}
-            </>
+            </PageHeader>
         )
     }
 }

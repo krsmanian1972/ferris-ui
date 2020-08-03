@@ -25,6 +25,10 @@ export default class BoardListStore {
         return this.state === PENDING;
     }
 
+    get isDone() {
+        return this.state === DONE;
+    }
+
     get isError() {
         return this.state === ERROR;
     }
@@ -42,16 +46,19 @@ export default class BoardListStore {
 
             const url = `${assetHost}/boards/${sessionUserFuzzyId}`;
             const response = await this.apiProxy.getAsync(url);
+            if(response.status === 404) {
+                this.state = DONE;
+                this.boards = [];
+                this.boardCount = 0;
+                return;
+            }
             const data = await response.json();
-
             this.boards = data;
             this.boardCount = data.length;
             this.state = DONE;
         }
         catch (e) {
             this.state = ERROR;
-            this.message = ERROR_MESSAGE
-            console.log(e);
         }
     }
 
@@ -66,6 +73,7 @@ decorate(BoardListStore,{
 
     isLoading:computed,
     isError:computed,
+    isDone:computed,
     
     load:action,
 });

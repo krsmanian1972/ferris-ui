@@ -14,7 +14,7 @@ const ERROR = 'error';
 
 const EMPTY_MESSAGE = { status: "", help: "" };
 const ERROR_MESSAGE = { status: ERROR, help: "We are very sorry, the service is unavailable at this moment. Please try again after some time." };
-
+const LOADING_ERROR = { status: "error", help: "Unable to load the people." };
 const COACH_LAUNCH_HELP = "You may mark this session as Ready 5 minutes ahead of the session.";
 const ACTOR_LAUNCH_HELP = "Waiting for the coach to mark this session as Ready.";
 
