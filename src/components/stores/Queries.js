@@ -137,18 +137,18 @@ export const eventsQuery = `query ($criteria: EventCriteria!) {
 
 export const sessionUsersQuery =  `query ($criteria: SessionCriteria!) {
   getSessionUsers(criteria: $criteria) {
-    users{
-      member {
+    users {
+      sessionUser {
+        fuzzyId
+        userType
+      }
+      user {
         fuzzyId
         email
         name
+        userType
       }
-      coach {
-        fuzzyId
-        email
-        name
-      }
-    },
+    }
     error {
       message
     }

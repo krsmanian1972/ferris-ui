@@ -158,8 +158,15 @@ export default class SessionStore {
             const response = await this.apiProxy.query(apiHost, sessionUsersQuery, variables);
             const data = await response.json();
 
-            this.people = data.data.getSessionUsers.users;
+            const users = data.data.getSessionUsers.users;
 
+            if (users[0].sessionUser.userType===COACH) {
+                this.people = {coach:users[0],member:users[1]}
+            }
+            else {
+                this.people = {coach:users[1],member:users[0]}
+            }
+ 
             this.state = DONE;
         }
 

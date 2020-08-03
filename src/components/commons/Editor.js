@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
 import ReactQuill from 'react-quill';
+import katex from "katex";
+import "katex/dist/katex.min.css";
+
+window.katex = katex;
 
 export default class Editor extends Component {
     render() {
@@ -39,6 +43,9 @@ Editor.formats = [
     'header',
     'bold', 'italic', 'underline',
     'list', 'indent', 'align',
+    'link','image','video',
+    'code-block',
+    'formula',
 ]
 
 /* 
@@ -52,6 +59,7 @@ const CustomToolbar = () => (
             <option value="3" />
             <option value="" />
         </select>
+        
         <span className="ql-formats">
             <button className="ql-list" value="ordered" />
             <button className="ql-list" value="bullet" />
@@ -61,10 +69,15 @@ const CustomToolbar = () => (
             <button className="ql-align" value="center"></button>
             <button className="ql-align" value="right"></button>
         </span>
+
         <button className="ql-bold" />
         <button className="ql-italic" />
         <button className="ql-underline" />  
-
-       
+        
+        <button className="ql-link" />
+        <button className="ql-image" />
+        <button className="ql-video" />
+        <button className="ql-formula" />
+        <button className="ql-code-block" />
     </div>
 )

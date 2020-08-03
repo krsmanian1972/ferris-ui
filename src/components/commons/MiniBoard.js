@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-
-const SESSION_USER_FUZZY_ID = 'd91e5527-9cc3-4d56-9c69-d386c9cba535';
+import { assetHost } from '../stores/APIEndpoints';
 
 class MiniBoard extends Component {
     constructor(props) {
@@ -12,9 +11,13 @@ class MiniBoard extends Component {
         this.restore();
     }
 
-    restore = async() => {
+    getName = () => {
+        return <p style={{ textAlign: "center" }}>{this.props.boardId}</p>
+    }
 
-        const url = "http://localhost:8088/board_file";
+    restore = async () => {
+
+        const url = `${assetHost}/boards/${this.props.sessionUserFuzzyId}/${this.props.boardId}`;
 
         const response = await this.props.apiProxy.getAsync(url);
         const data = await response.text();
@@ -23,7 +26,7 @@ class MiniBoard extends Component {
         var me = this;
         img.onload = function () {
             console.log("onload of miniboard");
-            me.ctx.drawImage(img,0,0,img.width,img.height);
+            me.ctx.drawImage(img, 0, 0, img.width, img.height);
         }
         img.src = data;
     }
@@ -32,12 +35,10 @@ class MiniBoard extends Component {
         const boardKey = `mini-canvas-${this.props.boardId}`;
 
         return (
-            <>
-                {this.props.boardId}
-                <div className="miniBoardFrame">
-                    <canvas height={screen.height*0.80} width={screen.width*0.94} className="miniBoard" key={boardKey} ref={ref => (this.canvas = ref)} />
-                </div>    
-            </>
+            <div className="miniBoardFrame">
+                {this.getName()}
+                <canvas height={screen.height * 0.80} width={screen.width * 0.94} className="miniBoard" key={boardKey} ref={ref => (this.canvas = ref)} />
+            </div>
         )
     }
 }

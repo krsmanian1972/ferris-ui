@@ -12,8 +12,9 @@ import 'moment-timezone';
 import SessionStore from '../stores/SessionStore';
 
 import Editor from "../commons/Editor";
+import BoardList from "../commons/BoardList";
 import SessionLauncher from './SessionLauncher';
-import MiniBoard from './MiniBoard';
+
 
 const { Title, Paragraph } = Typography;
 
@@ -104,14 +105,14 @@ class SessionDetailUI extends Component {
         return (
             <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
                 <Card style={{width:"50%"}}>
-                    <Statistic title="Coach" value={coach.name} valueStyle={{ color: '#3f8600' }} />
-                    <Paragraph><MailOutlined /> {coach.email}</Paragraph>
+                    <Statistic title="Coach" value={coach.user.name} valueStyle={{ color: '#3f8600' }} />
+                    <Paragraph><MailOutlined /> {coach.user.email}</Paragraph>
                     <Paragraph><PhoneOutlined /> (91)99999 XXXXX</Paragraph>
                 </Card>
 
                 <Card style={{width:"50%"}}>
-                    <Statistic title="Actor" value={member.name} />
-                    <Paragraph><MailOutlined /> {member.email}</Paragraph>
+                    <Statistic title="Actor" value={member.user.name} />
+                    <Paragraph><MailOutlined /> {member.user.email}</Paragraph>
                     <Paragraph><PhoneOutlined /> (91)99999 xxxx</Paragraph>
                 </Card>
             </div>
@@ -152,7 +153,7 @@ class SessionDetailUI extends Component {
         }
     
         return (
-            <Popconfirm placement="left" title="Mark this session as Ready?" okText="Yes" cancelText="No"
+            <Popconfirm key="ready_pop" placement="left" title="Mark this session as Ready?" okText="Yes" cancelText="No"
                 onConfirm={() => this.makeReady()}
             >
                 <Button key="ready" style={{ border: "1px solid green", color: "green" }} icon={<CaretRightOutlined />} shape="circle"></Button>
@@ -167,7 +168,7 @@ class SessionDetailUI extends Component {
         }
 
         return (
-            <Popconfirm placement="left" title="Mark this session as Cancelled?" okText="Yes" cancelText="No"
+            <Popconfirm key="cancel_pop" placement="left" title="Mark this session as Cancelled?" okText="Yes" cancelText="No"
                 onConfirm={() => this.cancelEvent()}
             >
                 <Button key="cancel" danger icon={<CloseOutlined />} shape="circle"></Button>
@@ -186,7 +187,7 @@ class SessionDetailUI extends Component {
         return (
             <>
                 <PageHeader
-                    title={<Title level={4}>{session.name}</Title>}
+                    title={<Title level={3}>{session.name}</Title>}
                     subTitle={program.name}
                     extra={[
                         this.renderStatus(session),
@@ -199,6 +200,16 @@ class SessionDetailUI extends Component {
                 </PageHeader>
 
                 {this.renderPeople(people)}
+
+                {people.coach && (
+                    <>   
+                        <Title style={{ marginTop: 10 }} level={4}>Coach Board</Title>
+                        <BoardList sessionUserFuzzyId={people.coach.sessionUser.fuzzyId}/>
+
+                        <Title style={{ marginTop: 10 }} level={4}>Actor Board</Title>
+                        <BoardList sessionUserFuzzyId={people.member.sessionUser.fuzzyId}/>
+                    </>
+                )}
             </>
         )
     }
