@@ -88,7 +88,7 @@ class SessionLauncher extends Component {
 
     render() {
         return (
-            <div>
+            <div style={{wordWrap:"break-word",width:"20%"}}>
                 {this.renderButton()}
                 {this.state.showWindowPortal && (
                     this.openWindow()

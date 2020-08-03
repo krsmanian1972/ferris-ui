@@ -15,6 +15,17 @@ const ERROR = 'error';
 const EMPTY_MESSAGE = { status: "", help: "" };
 const ERROR_MESSAGE = { status: ERROR, help: "We are very sorry, the service is unavailable at this moment. Please try again after some time." };
 
+const COACH_LAUNCH_HELP = "You may mark this session as Ready 5 minutes ahead of the session.";
+const ACTOR_LAUNCH_HELP = "Waiting for the coach to mark this session as Ready.";
+
+const READY = "READY";
+const OVERDUE = "OVERDUE";
+const PLANNED = "PLANNED";
+const PROGRESS = "PROGRESS";
+const START = "START";
+
+const COACH = "coach";
+
 export default class SessionStore {
 
     state = INIT;
@@ -160,14 +171,14 @@ export default class SessionStore {
     }
 
     get isCoach() {
-        return this.event && this.event.sessionUser && this.event.sessionUser.userType === "coach";
+        return this.event && this.event.sessionUser && this.event.sessionUser.userType === COACH;
     }
 
     get canMakeReady() {
         return this.isCoach
             && this.event.session
             && !this.event.session.isClosed
-            && (this.event.session.status === "PLANNED" || this.event.session.status === "OVERDUE")
+            && (this.event.session.status === PLANNED || this.event.session.status === OVERDUE)
 
     }
 
@@ -181,13 +192,16 @@ export default class SessionStore {
     get canBroadcast() {
         return this.event.session
             && !this.event.session.isClosed
-            && (this.event.session.status === "READY" || this.event.session.status === "PROGRESS")
+            && (this.event.session.status === READY || this.event.session.status === PROGRESS)
     }
 
     get broadcastHelp() {
 
-        if (this.event && this.event.session && (this.event.session.status === "PLANNED" || this.event.session.status === "OVERDUE")) {
-            return "Coach to Ready the Session";
+        if (this.event && this.event.session && (this.event.session.status === PLANNED || this.event.session.status === OVERDUE)) {
+            if(this.isCoach) {
+                return COACH_LAUNCH_HELP;
+            }
+            return ACTOR_LAUNCH_HELP;
         }
 
         return "";
@@ -197,8 +211,8 @@ export default class SessionStore {
         if(!this.isCoach) {
             return;
         }
-        if(this.event.session.status === "READY") {
-            await this.alterSessionState("START");
+        if(this.event.session.status === READY) {
+            await this.alterSessionState(START);
         }
     }
 

@@ -102,19 +102,19 @@ class SessionDetailUI extends Component {
         const member = people.member;
 
         return (
-            <>
-                <Card>
+            <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
+                <Card style={{width:"50%"}}>
                     <Statistic title="Coach" value={coach.name} valueStyle={{ color: '#3f8600' }} />
                     <Paragraph><MailOutlined /> {coach.email}</Paragraph>
                     <Paragraph><PhoneOutlined /> (91)99999 XXXXX</Paragraph>
                 </Card>
 
-                <Card>
+                <Card style={{width:"50%"}}>
                     <Statistic title="Actor" value={member.name} />
                     <Paragraph><MailOutlined /> {member.email}</Paragraph>
                     <Paragraph><PhoneOutlined /> (91)99999 xxxx</Paragraph>
                 </Card>
-            </>
+            </div>
         )
     }
 
