@@ -1,8 +1,13 @@
 import React, { Component } from 'react';
 import { Button, Row, Col, Tabs, Tooltip, Space } from 'antd';
 import { EditOutlined, ItalicOutlined, UndoOutlined, RedoOutlined, ScissorOutlined } from '@ant-design/icons';
-import socket from '../stores/socket';
+import { Spin, Result } from 'antd';
+import {SmileOutlined } from '@ant-design/icons';
 
+import socket from '../stores/socket';
+import BoardListStore from "../stores/BoardListStore";
+import { assetHost } from '../stores/APIEndpoints';
+import { inject, observer } from 'mobx-react';
 const { TabPane } = Tabs;
 
 
@@ -23,10 +28,15 @@ const initialPanes = [
     { title: 'Board 2', key: '2', closable: false, },
 ];
 
+@inject("appStore")
+@observer
 class Board extends Component {
     constructor(props) {
         super(props);
-
+        this.store = new BoardListStore({ apiProxy: props.appStore.apiProxy });
+        this.store.load(props.sessionUserFuzzyId);
+        this.sessionUserFuzzyId = this.props.sessionUserFuzzyId;
+        this.apiProxy = this.props.appStore.apiProxy;
         this.x = 0;
         this.y = 0;
 
@@ -47,14 +57,36 @@ class Board extends Component {
 
         this.currentTab = 1;
         this.newTabIndex = 3;
+        this.boardsRestored = false;
 
         this.state = {
             selectedButton: PEN,
             activeKey: initialPanes[0].key,
             panes: initialPanes,
+
         };
 
         this.hasCursor = false;
+    }
+
+    restoreBoardsFromPreviousSession = async (boardId, index) => {
+
+        const url = `${assetHost}/boards/${this.props.sessionUserFuzzyId}/${boardId}`;
+
+        const response = await this.apiProxy.getAsync(url);
+        const data = await response.text();
+       if(index <= 2) {
+           // console.log(`less than newTabIndex ${index}`);
+        }
+
+        else{
+           this.add();
+        }
+        
+        console.log(`index is ${index}`);
+        console.log(`newTabIndex is ${this.newTabIndex}`);
+        this.undoTabList[index].push(data);
+
     }
 
     componentDidMount() {
@@ -103,6 +135,8 @@ class Board extends Component {
         window.addEventListener("keypress", this.write);
 
     }
+    
+    
 
     // unregister the event listeners
     componentWillUnmount() {
@@ -270,6 +304,7 @@ class Board extends Component {
     }
 
     undoTab = (samePane) => {
+        console.log(`Undoing tab : ${this.currentTab}`);
         if (this.undoTabList[this.currentTab].length === 0) {
             this.ctx.clearRect(0, 0, screen.width, screen.height);
             return;
@@ -336,11 +371,37 @@ class Board extends Component {
         }
         return unselected;
     }
+    loadPrevBoards = (boards,boardCount) =>{
+        console.log(boards);
+        console.log(boardCount);
+        var index = 1;
+        if(boardCount === 0){
+           return;
+        }
+        if(this.boardsRestored === false){
+            boards.map(item => {
+                console.log(`${item.Ok}`);
+                this.restoreBoardsFromPreviousSession(item.Ok, index);
+                index = index + 1;
+                if(index === boardCount){
+                     this.boardsRestored = true;
+                }
+            });
+        }
+        
+    }
+    renderMethod = (panes, boards, boardCount) => {
 
-    render() {
-        const { panes } = this.state;
-
-        return (
+        if (boardCount === 0 && !(this.isDone)) {
+            return (
+            <div style={{ padding: 0, height: screen.height }}>
+//            <canvas height={screen.height} width={screen.width} className="activeBoard" key="canvas" ref={ref => (this.canvas = ref)} />
+            <Result icon={<SmileOutlined />}  subTitle="Waiting for your boards."/>
+            </div>
+            )
+        }
+        else {
+            return (
             <div style={{ padding: 0, height: screen.height }}>
                 <Row>
                     <Col span={10}>
@@ -370,6 +431,8 @@ class Board extends Component {
                                 </Tooltip>
                                 <Tooltip title="Erase">
                                     <Button onClick={this.erase} id="erase" style={this.getStyle(ERASER)} type="primary" icon={<ScissorOutlined />} shape={"circle"} />
+                                   <Button onClick={this.loadPrevBoards(boards,boardCount)} id="erase" style={this.getStyle(ERASER)} type="primary" icon={<ScissorOutlined />} shape={"circle"} />
+
                                 </Tooltip>
                             </Space>
                         </div>
@@ -378,6 +441,21 @@ class Board extends Component {
                 <canvas height={screen.height} width={screen.width} className="activeBoard" key="canvas" ref={ref => (this.canvas = ref)} />
             </div>
         )
+
+        
+        }
+
+    }
+    render() {
+        const { panes } = this.state;
+        const boards = this.store.boards;
+        const boardCount = this.store.boardCount;
+        return(
+    		<>
+		        {this.renderMethod(panes, boards, boardCount)}
+	        </>
+        )
+
     }
 }
 export default Board;
