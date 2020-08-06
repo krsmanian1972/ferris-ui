@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Tooltip, Switch } from 'antd';
+import { Tooltip, Switch, Button, Space, Tag } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 
 import socket from '../stores/socket';
 import Editor from "../commons/Editor";
@@ -20,11 +21,11 @@ export default class EditableDescription extends Component {
     constructor(props) {
         super(props);
 
-        this.description="";
+        this.description = "";
 
         this.state = {
             editMode: false,
-            state:INIT,
+            state: INIT,
         }
     }
 
@@ -32,14 +33,14 @@ export default class EditableDescription extends Component {
         this.load()
     }
 
-    load = async() => {
-        
+    load = async () => {
+
         this.setState({ state: PENDING });
 
         try {
             const url = `${assetHost}/contents/${this.props.sessionUserFuzzyId}/${this.props.boardId}`;
             const response = await this.props.apiProxy.getAsync(url);
-            if(response.status === 404) {
+            if (response.status === 404) {
                 this.setState({ state: DONE });
                 return;
             }
@@ -71,25 +72,36 @@ export default class EditableDescription extends Component {
         }
 
         if (!this.state.editMode) {
-            return <Editor id={this.props.title} value={this.description} readOnly={true} />
+            return <Editor id={this.props.title} value={this.description} readOnly={true} height={350} />
         }
         return (
-            <Editor id={this.props.title} value={this.description} onChange={this.handleDescription} />
+            <Editor id={this.props.title} value={this.description} onChange={this.handleDescription} height={350} />
         )
     }
 
     getTitle = () => {
         return (
-            <p style={{marginTop:5,marginLeft:10,fontWeight:"bold"}}>{this.props.title}</p>
+            <div style={{ display: "flex", alignItems: "center", paddingLeft: 10, fontWeight: "bold" }}> {this.props.title} </div>
         )
     }
-    getEditButton = () => {
+    getControls = () => {
         return (
-            <Tooltip key="ed_tip" title="To elaborate this section">
-                <Switch key="ed_switch" style={{marginTop:5,marginRight:10}} onClick={this.onEdit} checkedChildren="Save" unCheckedChildren="Edit" defaultChecked={false} />
-            </Tooltip>
+            <div style={{ display: "flex", flexWrap: "wrap", flexDirection: "row", alignItems: "center", paddingRight: 10 }}>
+                {this.props.type === "action" && (
+                    <Tag color="blue">10-Sep-2020</Tag>
+                )}
+                <Space>
+                    <Tooltip key="ed_tip" title="To elaborate this section">
+                        <Switch key="ed_switch" onClick={this.onEdit} checkedChildren="Save" unCheckedChildren="Edit" defaultChecked={false} />
+                    </Tooltip>
+                    <Tooltip key="add_tip" title="To Add New Item">
+                        <Button key="add_tip" icon={<PlusOutlined />} shape="circle"></Button>
+                    </Tooltip>
+                </Space>
+            </div>
         );
     }
+
 
     onEdit = (mode) => {
 
@@ -109,10 +121,10 @@ export default class EditableDescription extends Component {
 
     render() {
         return (
-            <div style={{border:"1px solid lightgray",minHeight:250,width:"50%",marginRight:2,marginBottom:4}}>
-                <div style={{display:"flex",flexDirection:"row",justifyContent: "space-between",background:"lightgray"}}>
+            <div style={{ border: "1px solid lightgray", marginRight: 4, marginBottom: 4, width: "100%",borderRadius:"4%" }}>
+                <div style={{ display: "flex", flexWrap: "wrap", height: 50, flexDirection: "row", justifyContent: "space-between" }}>
                     {this.getTitle()}
-                    {this.getEditButton()}
+                    {this.getControls()}
                 </div>
                 {this.renderDescription()}
             </div>

@@ -115,7 +115,7 @@ class SessionDetailUI extends Component {
                         <Paragraph><PhoneOutlined /> (91)99999 XXXXX</Paragraph>
                     </div>
 
-                    <div style={{ width: "50%", borderLeft: "1px solid gray", paddingLeft: 20 }}>
+                    <div style={{ width: "50%", borderLeft: "1px solid lightgray", paddingLeft: 20 }}>
                         <Statistic title="Actor" value={member.user.name} />
                         <Paragraph><MailOutlined /> {member.user.email}</Paragraph>
                         <Paragraph><PhoneOutlined /> (91)99999 xxxx</Paragraph>
