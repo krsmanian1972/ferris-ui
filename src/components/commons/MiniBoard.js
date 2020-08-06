@@ -15,6 +15,9 @@ class MiniBoard extends Component {
         return <p style={{ textAlign: "center" }}>{this.props.boardId}</p>
     }
 
+    /**
+     * Introduce a timestamp to avoid caching
+     */
     restore = async () => {
 
         const url = `${assetHost}/boards/${this.props.sessionUserFuzzyId}/${this.props.boardId}`;

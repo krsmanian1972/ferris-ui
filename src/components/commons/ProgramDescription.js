@@ -14,7 +14,7 @@ export default class ProgramDescription extends Component {
 
     renderDescription = () => {
         const program = this.props.program;
-        return <Editor value={program.description} readOnly={true} />
+        return <Editor id="about" value={program.description} readOnly={true} />
     }
 
     render() {

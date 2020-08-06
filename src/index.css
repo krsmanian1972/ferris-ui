@@ -209,8 +209,15 @@ code {
   text-align: center;
 }
 
-
 .schedule {
   display:flex;
   flex-direction: column;
+}
+
+.ql-container.ql-snow {
+  border: none;
+}
+
+.ql-toolbar.ql-snow .ql-formats {
+  margin-right: 5px;
 }

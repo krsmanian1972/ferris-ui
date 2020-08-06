@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { assetHost } from '../stores/APIEndpoints';
 
-import { Card, Typography, Statistic, PageHeader, Button, Tag, Popconfirm, notification, message } from 'antd';
+import { Typography, Statistic, PageHeader, Button, Tag, Popconfirm, notification, message } from 'antd';
 import { MailOutlined, PhoneOutlined, CaretRightOutlined, CloseOutlined } from '@ant-design/icons';
 
 import Moment from 'react-moment';
@@ -11,9 +11,9 @@ import 'moment-timezone';
 
 import SessionStore from '../stores/SessionStore';
 
-import Editor from "../commons/Editor";
 import BoardList from "../commons/BoardList";
 import SessionLauncher from './SessionLauncher';
+import GoldenTemplate from './GoldenTemplate';
 
 
 const { Title, Paragraph } = Typography;
@@ -51,11 +51,14 @@ class SessionDetailUI extends Component {
 
     renderTopSegment = (program, session, sessionUser) => {
         return (
-            <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", textAlign: "center", alignItems: "center" }}>
-                {this.renderProgramImage(program)}
-                {this.renderSchedule(session)}
-                <SessionLauncher store={this.store} session={session} sessionUser={sessionUser} />
-            </div>
+            <>
+                <Title style={{ marginTop: 10 }} level={4}>Schedule</Title>
+                <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", textAlign: "center", alignItems: "center" }}>
+                    {this.renderProgramImage(program)}
+                    {this.renderSchedule(session)}
+                    <SessionLauncher store={this.store} session={session} sessionUser={sessionUser} />
+                </div>
+            </>
         )
     }
 
@@ -103,19 +106,22 @@ class SessionDetailUI extends Component {
         const member = people.member;
 
         return (
-            <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
-                <Card style={{ width: "50%" }}>
-                    <Statistic title="Coach" value={coach.user.name} valueStyle={{ color: '#3f8600' }} />
-                    <Paragraph><MailOutlined /> {coach.user.email}</Paragraph>
-                    <Paragraph><PhoneOutlined /> (91)99999 XXXXX</Paragraph>
-                </Card>
+            <>
+                <Title style={{ marginTop: 30 }} level={4}>People</Title>
+                <div style={{ display: "flex", marginTop: 10, flexDirection: "row", justifyContent: "space-between" }}>
+                    <div style={{ width: "50%" }}>
+                        <Statistic title="Coach" value={coach.user.name} valueStyle={{ color: '#3f8600' }} />
+                        <Paragraph><MailOutlined /> {coach.user.email}</Paragraph>
+                        <Paragraph><PhoneOutlined /> (91)99999 XXXXX</Paragraph>
+                    </div>
 
-                <Card style={{ width: "50%" }}>
-                    <Statistic title="Actor" value={member.user.name} />
-                    <Paragraph><MailOutlined /> {member.user.email}</Paragraph>
-                    <Paragraph><PhoneOutlined /> (91)99999 xxxx</Paragraph>
-                </Card>
-            </div>
+                    <div style={{ width: "50%", borderLeft: "1px solid lightgray", paddingLeft: 20 }}>
+                        <Statistic title="Actor" value={member.user.name} />
+                        <Paragraph><MailOutlined /> {member.user.email}</Paragraph>
+                        <Paragraph><PhoneOutlined /> (91)99999 xxxx</Paragraph>
+                    </div>
+                </div>
+            </>
         )
     }
 
@@ -153,7 +159,7 @@ class SessionDetailUI extends Component {
         }
 
         return (
-            <Popconfirm key="ready_pop" placement="left" title="Mark this session as Ready?" okText="Yes" cancelText="No"
+            <Popconfirm key="ready_pop" placement="left" title="Activate this session as Ready?" okText="Yes" cancelText="No"
                 onConfirm={() => this.makeReady()}
             >
                 <Button key="ready" style={{ border: "1px solid green", color: "green" }} icon={<CaretRightOutlined />} shape="circle"></Button>
@@ -185,7 +191,6 @@ class SessionDetailUI extends Component {
         const change = this.store.change;
 
         return (
-
             <PageHeader
                 title={<Title level={3}>{session.name}</Title>}
                 subTitle={program.name}
@@ -196,17 +201,14 @@ class SessionDetailUI extends Component {
                 ]}
             >
                 {this.renderTopSegment(program, session, sessionUser)}
-                <Editor value={session.description} readOnly={true} />
-
-
-                {this.renderPeople(people)}
-
                 {people.coach && (
                     <>
+                        <GoldenTemplate sessionUserFuzzyId={people.coach.sessionUser.fuzzyId} apiProxy={this.props.appStore.apiProxy} />
                         <BoardList title="Coach Boards" sessionUserFuzzyId={people.coach.sessionUser.fuzzyId} />
                         <BoardList title="Actor Boards" sessionUserFuzzyId={people.member.sessionUser.fuzzyId} />
                     </>
                 )}
+                {this.renderPeople(people)}
             </PageHeader>
         )
     }

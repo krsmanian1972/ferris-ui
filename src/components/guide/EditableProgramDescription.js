@@ -22,11 +22,11 @@ export default class EditableProgramDescription extends Component {
         const program = this.props.program;
 
         if (this.props.programStore.isReadOnly) {
-            return <Editor value={program.description} readOnly={true} />
+            return <Editor id="about" value={program.description} readOnly={true} />
         }
 
         return (
-            <Editor value={program.description} onChange={this.handleDescription} />
+            <Editor id="about" value={program.description} onChange={this.handleDescription} />
         )
     }
 
