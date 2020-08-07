@@ -84,19 +84,32 @@ export default class EditableDescription extends Component {
             <div style={{ display: "flex", alignItems: "center", paddingLeft: 10, fontWeight: "bold" }}> {this.props.title} </div>
         )
     }
+
+    getFooter = () => {
+        if(this.props.type !== "action") {
+            return <></>
+        }
+        return (
+            <>
+                <Tag color="blue">10-Sep-2020</Tag>
+                <Tag color="blue">10-Sep-2020</Tag>
+                <Tag color="blue">Progress</Tag>
+            </>
+        )
+    }
     getControls = () => {
         return (
             <div style={{ display: "flex", flexWrap: "wrap", flexDirection: "row", alignItems: "center", paddingRight: 10 }}>
-                {this.props.type === "action" && (
-                    <Tag color="blue">10-Sep-2020</Tag>
-                )}
                 <Space>
                     <Tooltip key="ed_tip" title="To elaborate this section">
                         <Switch key="ed_switch" onClick={this.onEdit} checkedChildren="Save" unCheckedChildren="Edit" defaultChecked={false} />
                     </Tooltip>
-                    <Tooltip key="add_tip" title="To Add New Item">
-                        <Button key="add_tip" icon={<PlusOutlined />} shape="circle"></Button>
-                    </Tooltip>
+
+                    {this.props.type === "action" && (
+                        <Tooltip key="add_tip" title="To Add New Item">
+                            <Button key="add_tip" icon={<PlusOutlined />} shape="circle"></Button>
+                        </Tooltip>
+                    )}
                 </Space>
             </div>
         );
@@ -121,12 +134,15 @@ export default class EditableDescription extends Component {
 
     render() {
         return (
-            <div style={{ border: "1px solid lightgray", marginRight: 4, marginBottom: 4, width: "100%",borderRadius:"4%" }}>
+            <div style={{ border: "1px solid lightgray", marginRight: 4, marginBottom: 4, width: "100%", borderRadius: "4%" }}>
                 <div style={{ display: "flex", flexWrap: "wrap", height: 50, flexDirection: "row", justifyContent: "space-between" }}>
                     {this.getTitle()}
                     {this.getControls()}
                 </div>
                 {this.renderDescription()}
+                <div style={{ display: "flex", flexWrap: "wrap", height: 40, flexDirection: "row", alignItems: "center", justifyContent: "space-between",padding:10 }}>
+                    {this.getFooter()}
+                </div>
             </div>
         );
     }

@@ -4,6 +4,7 @@ import { observer, inject } from 'mobx-react';
 import Login from './LoginUI';
 import About from './About';
 import WorkflowUI from './guide/WorkflowUI';
+import ConnectorUI from './guide/ConnectorUI';
 import ProgramUI from './guide/ProgramUI';
 import ProgramDetailUI from './commons/ProgramDetailUI';
 import EditableProgramDetailUI from './guide/EditableProgramDetailUI';
@@ -40,7 +41,7 @@ class SelectedComponent extends Component {
                 return <SessionDetailUI params={currentComponent.params}/>
             }
             case 'planning': {
-                return <WorkflowUI />;
+                return <ConnectorUI />;
             }
             case 'login': {
                 return <Login />;

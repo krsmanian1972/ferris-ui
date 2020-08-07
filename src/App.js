@@ -52,7 +52,6 @@ export default class App extends Component {
           </div>
         </Content>
         <Footer style={{ padding: '0 0px' }}>
-          <About />
         </Footer>
       </>
     )

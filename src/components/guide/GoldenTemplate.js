@@ -12,7 +12,7 @@ export default class GoldenTemplate extends Component {
                 
                 <div style={{ display: "flex", flexDirection: "row",justifyContent:"space-between"}}>
                     <EditableDescription key="onward" type="action" title="Onward" fileName="future.html" sessionUserFuzzyId={this.props.sessionUserFuzzyId} apiProxy={this.props.apiProxy}/>
-                    <EditableDescription key="objectives" type="action" title="Objectives" fileName="goal.html" sessionUserFuzzyId={this.props.sessionUserFuzzyId} apiProxy={this.props.apiProxy}/>
+                    <EditableDescription key="objective" type="action" title="Objective" fileName="goal.html" sessionUserFuzzyId={this.props.sessionUserFuzzyId} apiProxy={this.props.apiProxy}/>
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "row",justifyContent:"space-between"}}>
