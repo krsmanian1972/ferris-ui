@@ -13,7 +13,7 @@ const DONE = 'done';
 const ERROR = 'error';
 
 /**
- * props: sessionUserFuzzyId,sectionTitle and title
+ * props: sessionUserId,sectionTitle and title
  * 
  */
 export default class EditableDescription extends Component {
@@ -38,7 +38,7 @@ export default class EditableDescription extends Component {
         this.setState({ state: PENDING });
 
         try {
-            const url = `${assetHost}/contents/${this.props.sessionUserFuzzyId}/${this.props.boardId}`;
+            const url = `${assetHost}/contents/${this.props.sessionUserId}/${this.props.boardId}`;
             const response = await this.props.apiProxy.getAsync(url);
             if (response.status === 404) {
                 this.setState({ state: DONE });
@@ -127,7 +127,7 @@ export default class EditableDescription extends Component {
         socket.emit(
             'sessionContent', {
             content: this.description,
-            sessionUserFuzzyId: this.props.sessionUserFuzzyId,
+            sessionUserFuzzyId: this.props.sessionUserId,
             fileName: this.props.fileName
         });
     }

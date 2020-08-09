@@ -52,29 +52,29 @@ class Broadcast extends Component {
         this.endCallHandler = this.endCall.bind(this);
         this.rejectCallHandler = this.rejectCall.bind(this);
         
-        const sessionUserFuzzyId = this.props.params.sessionUserFuzzyId;
+        const sessionUserId = this.props.params.sessionUserId;
 
-        this.initializeNotesStore(sessionUserFuzzyId);
-        this.initializeBoards(sessionUserFuzzyId);
+        this.initializeNotesStore(sessionUserId);
+        this.initializeBoards(sessionUserId);
     }
 
-    initializeNotesStore = (sessionUserFuzzyId) => {
+    initializeNotesStore = (sessionUserId) => {
         
         this.notesListStore = new NotesListStore({
             apiProxy: this.props.appStore.apiProxy,
-            sessionUserFuzzyId: sessionUserFuzzyId,
+            sessionUserId: sessionUserId,
         });
 
         this.notesStore = new NotesStore({
             apiProxy: this.props.appStore.apiProxy,
             notesListStore: this.notesListStore,
-            sessionUserFuzzyId: sessionUserFuzzyId,
+            sessionUserId: sessionUserId,
         });
     }
 
-    initializeBoards = (sessionUserFuzzyId) => {
+    initializeBoards = (sessionUserId) => {
         this.myBoards = new Map();
-        const el = <Board key={MY_BOARD_KEY} boardId={MY_BOARD_KEY} sessionUserFuzzyId={sessionUserFuzzyId} />
+        const el = <Board key={MY_BOARD_KEY} boardId={MY_BOARD_KEY} sessionUserId={sessionUserId} />
         this.myBoards.set(MY_BOARD_KEY, el);
     }
 
@@ -140,14 +140,10 @@ class Broadcast extends Component {
         }
     }
 
-    /**
-     * Please note that the socket will treat the sessionFuzzyId 
-     * as sessionId. But we are sending sessionFuzzyId.
-     */
     getSessionData = () => {
-        const sessionId = this.props.params.sessionFuzzyId;
+        const sessionId = this.props.params.sessionId;
         const role = this.props.params.sessionUserType;
-        const fuzzyId = this.props.appStore.credentials.userFuzzyId;
+        const fuzzyId = this.props.appStore.credentials.id;
 
         return { sessionId: sessionId, fuzzyId: fuzzyId, role: role };
     }

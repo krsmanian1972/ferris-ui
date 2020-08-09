@@ -27,7 +27,7 @@ export default class ProgramStore {
 
     change = null;
 
-    programFuzzyId = null;
+    programId = null;
     programModel = null;
 
     editMode = false;
@@ -50,7 +50,7 @@ export default class ProgramStore {
     }
 
     get isOwner() {
-        return this.programModel && this.programModel.coach.fuzzyId === this.apiProxy.getUserFuzzyId();
+        return this.programModel && this.programModel.coach.id === this.apiProxy.getUserFuzzyId();
     }
 
     get isEnrolled() {
@@ -100,7 +100,7 @@ export default class ProgramStore {
 
 
     reload = () => {
-        this.load(this.programFuzzyId)
+        this.load(this.programId)
     }
 
     populateDescription = async (programModel) => {
@@ -108,7 +108,7 @@ export default class ProgramStore {
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
         
-        const url = `${assetHost}/programs/${this.programFuzzyId}/about/about.html`;
+        const url = `${assetHost}/programs/${this.programId}/about/about.html`;
         const response = await this.apiProxy.getAsync(url);
         const data = await response.text();
 
@@ -118,18 +118,18 @@ export default class ProgramStore {
         this.programModel = programModel
     }
 
-    load = async (programFuzzyId) => {
+    load = async (programId) => {
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
         this.programModel = null;
-        this.programFuzzyId = programFuzzyId;
+        this.programId = programId;
 
-        const userFuzzyId = this.apiProxy.getUserFuzzyId();
+        const userId = this.apiProxy.getUserFuzzyId();
 
         const variables = {
             criteria: {
-                userFuzzyId: userFuzzyId,
-                programFuzzyId: programFuzzyId,
+                userId: userId,
+                programId: programId,
                 desire: "SINGLE"
             }
         }
@@ -174,7 +174,7 @@ export default class ProgramStore {
             input: {
                 name: programRequest.name,
                 description: programRequest.description,
-                coachFuzzyId: this.apiProxy.getUserFuzzyId()
+                coachId: this.apiProxy.getUserFuzzyId()
             }
         }
 
@@ -210,7 +210,7 @@ export default class ProgramStore {
 
         const variables = {
             input: {
-                fuzzyId: this.programFuzzyId,
+                id: this.programId,
                 targetState: "ACTIVATE",
             }
         }
@@ -235,9 +235,6 @@ export default class ProgramStore {
             console.log(e);
         }
     }
-
-
-
 }
 
 decorate(ProgramStore, {
@@ -263,7 +260,6 @@ decorate(ProgramStore, {
     
     isReadOnly: computed,
     canEdit: computed,
-
 
     createProgram: action,
     load: action,

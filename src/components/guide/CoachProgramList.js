@@ -30,7 +30,7 @@ class CoachProgramList extends ProgramList {
      * @param {*} program 
      */
     uploadCover = (program) => {
-        const action = `${assetHost}/programs/${program.fuzzyId}/cover`
+        const action = `${assetHost}/programs/${program.id}/cover`
         const props = {
             name: 'cover.png',
             action: action,
@@ -59,7 +59,7 @@ class CoachProgramList extends ProgramList {
         return (
             <Space>
                 <Tooltip title="This is a Draft Program, pending activation.">
-                    <Tag onClick={() => this.props.showProgramDetail(program.fuzzyId)} color="geekblue" style={{ textAlign: "center" }}>{program.name}</Tag>
+                    <Tag onClick={() => this.props.showProgramDetail(program.id)} color="geekblue" style={{ textAlign: "center" }}>{program.name}</Tag>
                 </Tooltip>     
                 {this.uploadCover(program)}
                 {this.guide()}
@@ -94,7 +94,7 @@ class CoachProgramList extends ProgramList {
      */
     getCoverUrl = (program) => {
         const ver = new Date().getTime();
-        const url = `${assetHost}/programs/${program.fuzzyId}/cover/cover.png?nocache=${ver}`;
+        const url = `${assetHost}/programs/${program.id}/cover/cover.png?nocache=${ver}`;
         return url;
     }
     

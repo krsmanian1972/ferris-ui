@@ -23,7 +23,7 @@ export default class NotesStore {
     constructor(props) {
         this.apiProxy = props.apiProxy;
         this.notesListStore = props.notesListStore;
-        this.sessionUserFuzzyId = props.sessionUserFuzzyId;
+        this.sessionUserId = props.sessionUserId;
     }
 
     get isLoading() {
@@ -136,7 +136,7 @@ export default class NotesStore {
 
         const variables = {
             input: {
-                sessionUserFuzzyId: this.sessionUserFuzzyId,
+                sessionUserId: this.sessionUserId,
                 description: newNotes.description,
                 remindAt: remindAt,
                 files: files,
@@ -168,7 +168,7 @@ export default class NotesStore {
 decorate(NotesStore, {
     state: observable,
     showDrawer: observable,
-    sessionUserFuzzyId: observable,
+    sessionUserId: observable,
     message: observable,
 
     isLoading: computed,

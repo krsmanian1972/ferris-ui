@@ -50,13 +50,13 @@ class ProgramUI extends Component {
         this.store.showDrawer = true;
     }
 
-    showProgramDetail = (programFuzzyId) => {
-        const params = { programFuzzyId: programFuzzyId, parentKey: "programs" };
+    showProgramDetail = (programId) => {
+        const params = { programId: programId, parentKey: "programs" };
         this.props.appStore.currentComponent = { label: "Program Detail", key: "programDetail", params: params };
     }
 
-    showEditableProgramDetail = (programFuzzyId) => {
-        const params = { programFuzzyId: programFuzzyId, parentKey: "programs" };
+    showEditableProgramDetail = (programId) => {
+        const params = { programId: programId, parentKey: "programs" };
         this.props.appStore.currentComponent = { label: "Program Detail", key: "editableProgramDetail", params: params };
     }
 

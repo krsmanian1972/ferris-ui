@@ -6,17 +6,6 @@ import { PlusCircleOutlined} from '@ant-design/icons';
 
 const { TextArea } = Input;
 
-const formItemLayout = {
-    labelCol: {
-        xs: { span: 24 },
-        sm: { span: 8 },
-    },
-    wrapperCol: {
-        xs: { span: 24 },
-        sm: { span: 16 },
-    },
-};
-
 const failureNotification = () => {
     const args = {
       message: 'Unable to Create Program',
@@ -33,10 +22,6 @@ const failureNotification = () => {
 class ProgramForm extends Component {
 
     formRef = React.createRef();
-
-    componentDidMount() {
-        //this.formRef.current.setFieldsValue({programName:'Rust the future'});
-    }
 
     /**
      * 

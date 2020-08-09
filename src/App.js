@@ -3,7 +3,6 @@ import { Provider } from 'mobx-react';
 import { Layout } from 'antd';
 
 import ToolBar from './components/ToolBar';
-import About from './components/About';
 import SelectedComponent from './components/SelectedComponent'
 
 import { appStore } from './components/stores/AppStore';
@@ -23,19 +22,19 @@ export default class App extends Component {
     const params = new URLSearchParams(search);
     const featureKey = params.get("featureKey");
 
-    const sessionFuzzyId = params.get("sessionFuzzyId");
-    const sessionUserFuzzyId = params.get("sessionUserFuzzyId");
+    const sessionId = params.get("sessionId");
+    const sessionUserId = params.get("sessionUserId");
     const sessionUserType = params.get("sessionUserType");
 
-    const sessionInfo = { sessionFuzzyId: sessionFuzzyId, sessionUserFuzzyId: sessionUserFuzzyId, sessionUserType: sessionUserType };
+    const sessionInfo = { sessionId: sessionId, sessionUserId: sessionUserId, sessionUserType: sessionUserType };
 
-    if (featureKey && sessionUserFuzzyId) {
+    if (featureKey && sessionUserId) {
       appStore.updatePreferredRoute(featureKey, sessionInfo);
     }
   }
 
   renderLayout = () => {
-    if (appStore.hasSessionUserFuzzyId) {
+    if (appStore.hasSessionUserId) {
       return this.renderSessionLayout();
     }
     return this.renderRegularLayout();

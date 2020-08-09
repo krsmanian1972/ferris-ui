@@ -1,20 +1,19 @@
 import React, { Component } from 'react';
-import { Button, Row, Col, Tabs, Tooltip, Space } from 'antd';
+import { inject, observer } from 'mobx-react';
+
+import { Button, Row, Col, Tabs, Tooltip, Space,Spin } from 'antd';
+
 import { EditOutlined, ItalicOutlined, UndoOutlined, RedoOutlined, ScissorOutlined } from '@ant-design/icons';
-import { Spin, Result } from 'antd';
-import {SmileOutlined } from '@ant-design/icons';
 
 import socket from '../stores/socket';
 import BoardListStore from "../stores/BoardListStore";
 import { assetHost } from '../stores/APIEndpoints';
-import { inject, observer } from 'mobx-react';
-const { TabPane } = Tabs;
 
+const { TabPane } = Tabs;
 
 const PEN = 'PEN';
 const ERASER = 'ERASER';
 const TEXTBOX = 'TEXTBOX';
-
 
 const cursorColour = '#FFFFFF';
 const cursorBlinkSpeed = 1 * 1000;
@@ -24,8 +23,8 @@ const cursorSize = { width: 1, height: 18 };
 const selected = { background: "white", color: "black", borderColor: "black" };
 const unselected = {};
 const initialPanes = [
-    { title: 'Board 1', key: '1', closable: false, },
-    { title: 'Board 2', key: '2', closable: false, },
+    { title: 'Board 1', key: '1', closable: false, isLoaded: true },
+    { title: 'Board 2', key: '2', closable: false, isLoaded: true },
 ];
 
 @inject("appStore")
@@ -33,10 +32,7 @@ const initialPanes = [
 class Board extends Component {
     constructor(props) {
         super(props);
-        this.store = new BoardListStore({ apiProxy: props.appStore.apiProxy });
-        this.store.load(props.sessionUserFuzzyId);
-        this.sessionUserFuzzyId = this.props.sessionUserFuzzyId;
-        this.apiProxy = this.props.appStore.apiProxy;
+
         this.x = 0;
         this.y = 0;
 
@@ -57,39 +53,101 @@ class Board extends Component {
 
         this.currentTab = 1;
         this.newTabIndex = 3;
-        this.boardsRestored = false;
+
+        this.hasCursor = false;
 
         this.state = {
             selectedButton: PEN,
             activeKey: initialPanes[0].key,
             panes: initialPanes,
-
+            isLoading: true
         };
 
-        this.hasCursor = false;
+        this.provisionPriorBoards();
     }
 
-    restoreBoardsFromPreviousSession = async (boardId, index) => {
+    /**
+     * Let us lazily load the boards. We need to check if there is any
+     * prior boards for this session. If Yes, Load the first and mark the
+     * rest of the panes as to be loaded.
+     */
+    provisionPriorBoards = async () => {
+        
+        const listStore = new BoardListStore({ apiProxy: this.props.appStore.apiProxy });
+        await listStore.load(this.props.sessionUserId);
 
-        const url = `${assetHost}/boards/${this.props.sessionUserFuzzyId}/${boardId}`;
-
-        const response = await this.apiProxy.getAsync(url);
-        const data = await response.text();
-       if(index <= 2) {
-           // console.log(`less than newTabIndex ${index}`);
+        if (listStore.boardCount === 0) {
+            this.setState({ isLoading: false });
+            return;
         }
 
-        else{
-           this.add();
+        const { panes } = this.state;
+        
+        this.expandInitialPanes(panes,listStore.boardCount);
+        await this.forceLoad(panes,1);
+        this.undoTab(false);
+
+        this.setState({ panes: panes, isLoading: false })
+    }
+
+    expandInitialPanes = (panes,capacity) => {
+
+        for (var i = 0; i < panes.length; i++) {
+            panes[i].isLoaded = false;
+        }
+
+        const diff = capacity - panes.length;
+        var boardIndex = panes.length + 1;
+
+        for (var i = 0; i < diff; i++) {
+            this.undoTabList[boardIndex] = [];
+
+            const tab = { title: `Board ${boardIndex}`, key: `${boardIndex}`, closable: false, isLoaded: false };
+            panes.push(tab);
+            
+            boardIndex++;
+        }
+
+        this.newTabIndex = boardIndex;
+    }
+
+    /**
+     * Load the Board if not loaded already
+     * @param {*} boardKey 
+     */
+    salvage = async (boardKey) => {
+
+        const { panes } = this.state;
+
+        if (panes[boardKey - 1].isLoaded) {
+            return;
         }
         
-        console.log(`index is ${index}`);
-        console.log(`newTabIndex is ${this.newTabIndex}`);
-        this.undoTabList[index].push(data);
+        await this.forceLoad(panes,boardKey);
+    }
 
+    /**
+     * Loading the board forcefully from the content repository.
+     * 
+     * May be useful for the first time when the react-state is yet to commit
+     * the reality.
+     * 
+     * @param {*} panes 
+     * @param {*} boardKey 
+     */
+    forceLoad = async(panes,boardKey) => {
+        const boardFileName = `Board_${boardKey}`;
+
+        const url = `${assetHost}/boards/${this.props.sessionUserId}/${boardFileName}`;
+        const response = await this.props.appStore.apiProxy.getAsync(url);
+        const data = await response.text();
+
+        this.undoTabList[boardKey].push(data);
+        panes[boardKey - 1].isLoaded = true;
     }
 
     componentDidMount() {
+
         this.x = 0;
         this.y = 0;
         this.sentence = "";
@@ -133,10 +191,9 @@ class Board extends Component {
         });
 
         window.addEventListener("keypress", this.write);
-
     }
-    
-    
+
+
 
     // unregister the event listeners
     componentWillUnmount() {
@@ -149,7 +206,7 @@ class Board extends Component {
         this.undoTabList[this.currentTab].push(screenShot);
 
         const name = `Board_${this.currentTab}`;
-        socket.emit('canvasupstream', { content: screenShot, sessionUserFuzzyId: this.props.sessionUserFuzzyId, name: name });
+        socket.emit('canvasupstream', { content: screenShot, sessionUserFuzzyId: this.props.sessionUserId, name: name });
     }
 
     textBox = (event) => {
@@ -226,7 +283,7 @@ class Board extends Component {
 
     write = (event) => {
 
-        if(this.mode !== TEXTBOX) {
+        if (this.mode !== TEXTBOX) {
             return;
         }
 
@@ -304,7 +361,7 @@ class Board extends Component {
     }
 
     undoTab = (samePane) => {
-        console.log(`Undoing tab : ${this.currentTab}`);
+
         if (this.undoTabList[this.currentTab].length === 0) {
             this.ctx.clearRect(0, 0, screen.width, screen.height);
             return;
@@ -325,7 +382,7 @@ class Board extends Component {
         }
     }
 
-    onTabClick = (activeTab, mouseEvent) => {
+    onTabClick = async (activeTab, mouseEvent) => {
 
         if (this.currentTab === activeTab) {
             return;
@@ -334,8 +391,9 @@ class Board extends Component {
         this.stopCursorBlink();
         this.pushUndoList();
 
+        await this.salvage(activeTab);
+
         this.currentTab = activeTab;
-        
         this.undoTab(false);
         this.freeDrawing();
     }
@@ -344,10 +402,6 @@ class Board extends Component {
         this[action](targetKey);
     };
 
-    undoEvent = () => {
-        this.undoTab(true);
-    }
-
     add = () => {
 
         const activeKey = `${this.newTabIndex}`;
@@ -355,15 +409,16 @@ class Board extends Component {
         this.undoTabList[this.newTabIndex] = [];
 
         const { panes } = this.state;
-        const newPanes = [...panes];
-        newPanes.push({ title: `Board - ${this.newTabIndex}`, key: activeKey, closable: false, });
-        this.setState({
-            panes: newPanes,
-            activeKey,
-        });
+        panes.push({ title: `Board - ${this.newTabIndex}`, key: activeKey, closable: false, isLoaded: true });
+
+        this.setState({panes: panes,activeKey});
 
         this.newTabIndex++;
     };
+
+    undoEvent = () => {
+        this.undoTab(true);
+    }
 
     getStyle = (compKey) => {
         if (this.mode === compKey) {
@@ -371,91 +426,61 @@ class Board extends Component {
         }
         return unselected;
     }
-    loadPrevBoards = (boards,boardCount) =>{
-        console.log(boards);
-        console.log(boardCount);
-        var index = 1;
-        if(boardCount === 0){
-           return;
+
+    renderControls = (isLoading) => {
+    
+        if(isLoading) {
+            return <Spin/>
         }
-        if(this.boardsRestored === false){
-            boards.map(item => {
-                console.log(`${item.Ok}`);
-                this.restoreBoardsFromPreviousSession(item.Ok, index);
-                index = index + 1;
-                if(index === boardCount){
-                     this.boardsRestored = true;
-                }
-            });
-        }
-        
+
+        const {panes} = this.state;
+
+        return (
+            <Row>
+                <Col span={10}>
+                    <Tabs type="editable-card"
+                        defaultActiveKey="1" tabPosition="top" style={{ maxHeight: 30 }}
+                        onTabClick={this.onTabClick} onEdit={this.onEdit}>
+                        {panes.map(pane => (
+                            <TabPane tab={pane.title} key={pane.key} closable={pane.closable}>
+                            </TabPane>
+                        ))}
+                    </Tabs>
+                </Col>
+                <Col span={12}>
+                    <div style={{ float: "right", textAlign: "left", paddingRight: "10px" }}>
+                        <Space>
+                            <Tooltip title="Pen">
+                                <Button onClick={this.freeDrawing} id="pen" style={this.getStyle(PEN)} type="primary" icon={<EditOutlined />} shape={"circle"} />
+                            </Tooltip>
+                            <Tooltip title="TextBox">
+                                <Button onClick={this.textWrite} id="textBox" style={this.getStyle(TEXTBOX)} type="primary" icon={<ItalicOutlined />} shape={"circle"} />
+                            </Tooltip>
+                            <Tooltip title="Undo">
+                                <Button onClick={this.undoEvent} id="undo" style={this.state.undoShape} type="primary" icon={<UndoOutlined />} shape={"circle"} />
+                            </Tooltip>
+                            <Tooltip title="Redo">
+                                <Button onClick={this.redo} id="redo" style={this.state.redoShape} type="primary" icon={<RedoOutlined />} shape={"circle"} />
+                            </Tooltip>
+                            <Tooltip title="Erase">
+                                <Button onClick={this.erase} id="erase" style={this.getStyle(ERASER)} type="primary" icon={<ScissorOutlined />} shape={"circle"} />
+                            </Tooltip>
+                        </Space>
+                    </div>
+                </Col>
+            </Row>
+        )
     }
-    renderMethod = (panes, boards, boardCount) => {
 
-        if (boardCount === 0 && !(this.isDone)) {
-            return (
-            <div style={{ padding: 0, height: screen.height }}>
-//            <canvas height={screen.height} width={screen.width} className="activeBoard" key="canvas" ref={ref => (this.canvas = ref)} />
-            <Result icon={<SmileOutlined />}  subTitle="Waiting for your boards."/>
-            </div>
-            )
-        }
-        else {
-            return (
-            <div style={{ padding: 0, height: screen.height }}>
-                <Row>
-                    <Col span={10}>
-                        <Tabs type="editable-card"
-                            defaultActiveKey="1" tabPosition="top" style={{ maxHeight: 30 }}
-                            onTabClick={this.onTabClick} onEdit={this.onEdit}>
-                            {panes.map(pane => (
-                                <TabPane tab={pane.title} key={pane.key} closable={pane.closable}>
-                                </TabPane>
-                            ))}
-                        </Tabs>
-                    </Col>
-                    <Col span={12}>
-                        <div style={{ float: "right", textAlign: "left", paddingRight: "10px" }}>
-                            <Space>
-                                <Tooltip title="Pen">
-                                    <Button onClick={this.freeDrawing} id="pen" style={this.getStyle(PEN)} type="primary" icon={<EditOutlined />} shape={"circle"} />
-                                </Tooltip>
-                                <Tooltip title="TextBox">
-                                    <Button onClick={this.textWrite} id="textBox" style={this.getStyle(TEXTBOX)} type="primary" icon={<ItalicOutlined />} shape={"circle"} />
-                                </Tooltip>
-                                <Tooltip title="Undo">
-                                    <Button onClick={this.undoEvent} id="undo" style={this.state.undoShape} type="primary" icon={<UndoOutlined />} shape={"circle"} />
-                                </Tooltip>
-                                <Tooltip title="Redo">
-                                    <Button onClick={this.redo} id="redo" style={this.state.redoShape} type="primary" icon={<RedoOutlined />} shape={"circle"} />
-                                </Tooltip>
-                                <Tooltip title="Erase">
-                                    <Button onClick={this.erase} id="erase" style={this.getStyle(ERASER)} type="primary" icon={<ScissorOutlined />} shape={"circle"} />
-                                   <Button onClick={this.loadPrevBoards(boards,boardCount)} id="erase" style={this.getStyle(ERASER)} type="primary" icon={<ScissorOutlined />} shape={"circle"} />
+    render() {
+        const {isLoading} = this.state;
 
-                                </Tooltip>
-                            </Space>
-                        </div>
-                    </Col>
-                </Row>
+        return (
+            <div style={{ padding: 0, height: screen.height }}>
+                {this.renderControls(isLoading)}
                 <canvas height={screen.height} width={screen.width} className="activeBoard" key="canvas" ref={ref => (this.canvas = ref)} />
             </div>
         )
-
-        
-        }
-
-    }
-    render() {
-        const { panes } = this.state;
-        const boards = this.store.boards;
-        const boardCount = this.store.boardCount;
-        return(
-    		<>
-		        {this.renderMethod(panes, boards, boardCount)}
-	        </>
-        )
-
     }
 }
 export default Board;

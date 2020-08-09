@@ -37,14 +37,14 @@ export default class BoardListStore {
      * Obtain the List of Boards for the given sessionUserFuzzyId
      *
      */
-    load = async(sessionUserFuzzyId) => {
+    load = async(sessionUserId) => {
         
         this.state  = PENDING;
         this.message = EMPTY_MESSAGE;
 
         try {
 
-            const url = `${assetHost}/boards/${sessionUserFuzzyId}`;
+            const url = `${assetHost}/boards/${sessionUserId}`;
             const response = await this.apiProxy.getAsync(url);
             if(response.status === 404) {
                 this.state = DONE;

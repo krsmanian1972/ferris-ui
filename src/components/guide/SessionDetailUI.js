@@ -15,7 +15,6 @@ import BoardList from "../commons/BoardList";
 import SessionLauncher from './SessionLauncher';
 import GoldenTemplate from './GoldenTemplate';
 
-
 const { Title, Paragraph } = Typography;
 
 const { Countdown } = Statistic;
@@ -64,7 +63,7 @@ class SessionDetailUI extends Component {
 
     renderProgramImage = (program) => {
         return (
-            <div key={program.fuzzyId} style={{ display: "flex", flexDirection: "column" }}>
+            <div key={program.id} style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ textAlign: "center", height: 175, marginRight: 10, marginLeft: 10 }}>
                     <div style={{ display: "inline-block", verticalAlign: "middle", height: 175 }}></div>
                     <img style={{ maxHeight: "100%", maxWidth: "100%", minWidth: "100%", verticalAlign: "middle", display: "inline-block" }} src={this.getPosterUrl(program)} />
@@ -74,7 +73,7 @@ class SessionDetailUI extends Component {
     }
 
     getPosterUrl = (program) => {
-        const url = `${assetHost}/programs/${program.fuzzyId}/poster/poster.png`;
+        const url = `${assetHost}/programs/${program.id}/poster/poster.png`;
         return url;
     }
 
@@ -203,9 +202,9 @@ class SessionDetailUI extends Component {
                 {this.renderTopSegment(program, session, sessionUser)}
                 {people.coach && (
                     <>
-                        <GoldenTemplate sessionUserFuzzyId={people.coach.sessionUser.fuzzyId} apiProxy={this.props.appStore.apiProxy} />
-                        <BoardList title="Coach Boards" sessionUserFuzzyId={people.coach.sessionUser.fuzzyId} />
-                        <BoardList title="Actor Boards" sessionUserFuzzyId={people.member.sessionUser.fuzzyId} />
+                        <GoldenTemplate sessionUserId={people.coach.sessionUser.id} apiProxy={this.props.appStore.apiProxy} />
+                        <BoardList title="Coach Boards" sessionUserId={people.coach.sessionUser.id} />
+                        <BoardList title="Actor Boards" sessionUserId={people.member.sessionUser.id} />
                     </>
                 )}
                 {this.renderPeople(people)}

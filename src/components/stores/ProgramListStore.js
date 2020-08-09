@@ -57,8 +57,8 @@ export default class ProgramListStore {
 
         const variables = {
             criteria: {
-                userFuzzyId: userFuzzyId,
-                programFuzzyId:"",
+                userId: userFuzzyId,
+                programId:"",
                 desire:desire
             }
         }
@@ -67,7 +67,7 @@ export default class ProgramListStore {
             const response = await this.apiProxy.query(apiHost, programsQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.data.getPrograms == undefined) {
                 this.state = ERROR;
                 this.message = ERROR_MESSAGE;
                 return;

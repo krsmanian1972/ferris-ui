@@ -15,7 +15,7 @@ export default class APIProxy {
     this.authHeaders = {
       'token': credentials.token,
       'email': credentials.email,
-      'userFuzzyId': credentials.userFuzzyId
+      'userFuzzyId': credentials.id,
     }
   }
 

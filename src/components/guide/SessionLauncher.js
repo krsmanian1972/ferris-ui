@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { inject, observer } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { Button } from 'antd';
 import { baseUrl } from '../stores/APIEndpoints';
 
@@ -40,8 +40,8 @@ class SessionLauncher extends Component {
     openWindow() {
 
         const title = this.props.session.name;
-        const sessionFuzzyId = this.props.session.fuzzyId;
-        const sessionUserFuzzyId = this.props.sessionUser.fuzzyId;
+        const sessionId = this.props.session.id;
+        const sessionUserId = this.props.sessionUser.id;
         const sessionUserType = this.props.sessionUser.userType;
 
         const h = screen.height * 0.75;
@@ -49,7 +49,7 @@ class SessionLauncher extends Component {
         const l = (screen.width - w) / 2;
         const t = (screen.height - h) / 2;
 
-        const url = `${baseUrl}?featureKey=${FEATURE_KEY}&sessionFuzzyId=${sessionFuzzyId}&sessionUserFuzzyId=${sessionUserFuzzyId}&sessionUserType=${sessionUserType}`;
+        const url = `${baseUrl}?featureKey=${FEATURE_KEY}&sessionId=${sessionId}&sessionUserId=${sessionUserId}&sessionUserType=${sessionUserType}`;
         const specs = `'toolbar=yes ,location=0, status=no,titlebar=no,menubar=yes,width=${w},height=${h},left=${l},top=${t}`;
 
         this.externalWindow = window.open(url, title, specs);

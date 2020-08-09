@@ -49,7 +49,7 @@ class ProgramList extends Component {
     }
 
     getCoverUrl = (program) => {
-        const url = `${assetHost}/programs/${program.fuzzyId}/cover/cover.png`;
+        const url = `${assetHost}/programs/${program.id}/cover/cover.png`;
         return url;
     }
 
@@ -74,8 +74,8 @@ class ProgramList extends Component {
                     <Carousel ref={ref => (this.carousel = ref)} {...props}>
                         {programs && programs.map(({ program }) => {
                             return (
-                                <div key={program.fuzzyId} style={{ display: "flex", flexDirection: "column" }}>
-                                     <div style={{ textAlign: "center", height: 175, marginRight: 10, marginLeft: 10, border:this.state.imageBorder}}  onClick={() => this.props.showProgramDetail(program.fuzzyId)}>
+                                <div key={program.id} style={{ display: "flex", flexDirection: "column" }}>
+                                     <div style={{ textAlign: "center", height: 175, marginRight: 10, marginLeft: 10, border:this.state.imageBorder}}  onClick={() => this.props.showProgramDetail(program.id)}>
                                         <div style={{ display: "inline-block", verticalAlign: "middle", height: 175 }}></div>
                                         <img style={{ maxHeight: "100%", maxWidth: "100%", verticalAlign: "middle", display: "inline-block", border:this.state.imageBorder}} src={this.getCoverUrl(program)} />
                                     </div>

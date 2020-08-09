@@ -24,10 +24,6 @@ class NotesForm extends Component {
 
     formRef = React.createRef();
 
-    componentDidMount() {
-        //this.formRef.current.setFieldsValue({programName:'Rust the future'});
-    }
-
     disabledDate = (current) => {
         return current && current < moment().startOf('day');
     }
@@ -77,7 +73,7 @@ class NotesForm extends Component {
 
     render() {
 
-        const fuzzyId = this.props.notesStore.sessionUserFuzzyId;
+        const sessionUserId = this.props.notesStore.sessionUserId;
 
         return (
             <Form layout="vertical" ref={this.formRef} onFinish={this.onFinish} >
@@ -98,7 +94,7 @@ class NotesForm extends Component {
                     valuePropName="fileList"
                     getValueFromEvent={this.normFile}
                 >
-                    <Upload name={fuzzyId} action={`${assetHost}/upload`} listType="picture" >
+                    <Upload name={sessionUserId} action={`${assetHost}/upload`} listType="picture" >
                         <Button>
                             <UploadOutlined /> Click to upload
                         </Button>

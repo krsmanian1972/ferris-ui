@@ -17,7 +17,7 @@ class NotesDrawer extends Component {
 
     render() {
         const store = this.props.notesStore;
-        const title = store.notesId === 0 ? "New Notes" : "Unknown";
+        const title =  "New Notes";
 
         return (
             <Drawer height="50%" placement="bottom" closable={true} onClose={this.close} visible={store.showDrawer} >

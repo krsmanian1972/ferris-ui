@@ -1,6 +1,6 @@
 export const authenticationQuery = `query ($request: LoginRequest!) {
   authenticate(request:$request) {
-    fuzzyId,
+    id,
     email,
     name,
     userType
@@ -11,14 +11,14 @@ export const programsQuery = `query ($criteria: ProgramCriteria!) {
   getPrograms(criteria: $criteria) {
     programs {
       program {
-        fuzzyId
+        id
         active
         name
         description
         coachName
       }
       coach {
-        fuzzyId
+        id
         email
         name
       }
@@ -39,7 +39,7 @@ export const createProgramQuery = `mutation ($input: NewProgramRequest!) {
     }
    
     program{
-      fuzzyId,
+      id,
       name
     }
   }
@@ -71,7 +71,7 @@ export const createEnrollmentQuery = `mutation ($input: NewEnrollmentRequest!) {
 
 export const enrollmentsQuery = `query ($criteria: EnrollmentCriteria!) {
   getEnrollments(criteria: $criteria) {
-    fuzzyId,
+    id,
     email,
     name
   }
@@ -80,7 +80,7 @@ export const enrollmentsQuery = `query ($criteria: EnrollmentCriteria!) {
 export const createSessionQuery = `mutation($input: NewSessionRequest!) {
   createSession(newSessionRequest:$input){
     session {
-      fuzzyId,
+      id,
       name
     }
     errors {
@@ -93,9 +93,9 @@ export const createSessionQuery = `mutation($input: NewSessionRequest!) {
 export const alterSessionStateQuery = `mutation($input: ChangeSessionStateRequest!) {
   alterSessionState(request: $input) {
     session{
+      id,
       people,
       name,
-      fuzzyId,
       description,
       duration,
       scheduleStart,
@@ -113,9 +113,9 @@ export const alterSessionStateQuery = `mutation($input: ChangeSessionStateReques
 export const eventsQuery = `query ($criteria: EventCriteria!) {
   getSessions(criteria: $criteria) {
     session {
+      id,
       people,
       name,
-      fuzzyId,
       description,
       duration,
       scheduleStart,
@@ -125,10 +125,10 @@ export const eventsQuery = `query ($criteria: EventCriteria!) {
     }
     program {
       name
-      fuzzyId
+      id
     }
     sessionUser{
-      fuzzyId
+      id
       userType
     }
     
@@ -139,11 +139,11 @@ export const sessionUsersQuery =  `query ($criteria: SessionCriteria!) {
   getSessionUsers(criteria: $criteria) {
     users {
       sessionUser {
-        fuzzyId
+        id
         userType
       }
       user {
-        fuzzyId
+        id
         email
         name
         userType
@@ -159,7 +159,7 @@ export const createNotesQuery = `mutation ($input: NewNoteRequest!) {
   createNote(newNoteRequest: $input) {
     note {
       description,
-      fuzzyId
+      id
     }
     errors {
       field,

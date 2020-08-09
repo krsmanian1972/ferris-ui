@@ -54,7 +54,7 @@ export default class SessionListStore {
 
         const variables = {
             criteria: {
-                userFuzzyId: userFuzzyId
+                userId: userFuzzyId
             }
         }
 

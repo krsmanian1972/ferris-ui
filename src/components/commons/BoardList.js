@@ -16,7 +16,7 @@ class BoardList extends Component {
     constructor(props) {
         super(props);
         this.store = new BoardListStore({ apiProxy: props.appStore.apiProxy });
-        this.store.load(props.sessionUserFuzzyId);
+        this.store.load(props.sessionUserId);
     }
 
     displayMessage = () => {
@@ -70,7 +70,7 @@ class BoardList extends Component {
                     <Carousel ref={ref => (this.carousel = ref)} {...settings}>
                         {boards && boards.map(item => {
                             return (
-                                <MiniBoard key={item.Ok} apiProxy={this.props.appStore.apiProxy} boardId={item.Ok} sessionUserFuzzyId={this.props.sessionUserFuzzyId} />
+                                <MiniBoard key={item.Ok} apiProxy={this.props.appStore.apiProxy} boardId={item.Ok} sessionUserId={this.props.sessionUserId} />
                             )
                         })}
                     </Carousel>

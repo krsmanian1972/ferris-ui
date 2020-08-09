@@ -9,7 +9,7 @@ const blankCredentials = {
     token: '',
     role: '',
     username: '',
-    userFuzzyId: '',
+    id: '',
 }
 
 const INIT = 'init';
@@ -80,10 +80,10 @@ class AppStore {
         const data = result.data;
 
         this.credentials.email = data.email;
-        this.credentials.token = data.fuzzyId;
+        this.credentials.token = data.id;
         this.credentials.role = data.userType;
         this.credentials.username = data.name;
-        this.credentials.userFuzzyId = data.fuzzyId;
+        this.credentials.id = data.id;
 
         this.apiProxy.updateCredentialHeaders(this.credentials);
 
@@ -139,7 +139,7 @@ class AppStore {
             .on('token', ({ id }) => {
                 this.socketToken = id;
             })
-            .emit('init', ({ fuzzyId: this.credentials.userFuzzyId, name: this.credentials.username }));
+            .emit('init', ({ fuzzyId: this.credentials.id, name: this.credentials.username }));
     }
 
     navigateTo(index) {
@@ -164,8 +164,8 @@ class AppStore {
         this.apiProxy = apiProxy;
     }
 
-    get hasSessionUserFuzzyId() {
-        return this.sessionInfo && !isBlank(this.sessionInfo.sessionUserFuzzyId)
+    get hasSessionUserId() {
+        return this.sessionInfo && !isBlank(this.sessionInfo.sessionUserId)
     }
 
     updatePreferredRoute = (featureKey, sessionInfo) => {
@@ -207,7 +207,7 @@ decorate(AppStore, {
 
     sessionInfo: observable,
     socketToken: observable,
-    hasSessionUserFuzzyId: computed,
+    hasSessionUserId: computed,
     updatePreferredRoute: action,
 });
 

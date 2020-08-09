@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
 import { Spin, Result, PageHeader, Tooltip, Card, Button, Statistic } from 'antd';
-import { PlusCircleOutlined, MailOutlined, PhoneOutlined} from '@ant-design/icons';
+import { PlusCircleOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
 import { Typography } from 'antd';
 
 const { Title, Paragraph } = Typography;
@@ -29,22 +29,22 @@ class ProgramDetailUI extends Component {
     }
 
     componentDidMount() {
-        this.load(this.props.params.programFuzzyId);
+        this.load(this.props.params.programId);
     }
 
-    load = async (programFuzzyId) => {
-        await this.store.load(programFuzzyId);
+    load = async (programId) => {
+        await this.store.load(programId);
     }
 
-    getPosterUrl = (programFuzzyId) => {
-        return `${assetHost}/programs/${programFuzzyId}/poster/poster.png`;
+    getPosterUrl = (programId) => {
+        return `${assetHost}/programs/${programId}/poster/poster.png`;
     }
 
     getTrailerUrl = () => {
-        const programFuzzyId = this.props.params.programFuzzyId;
-        return `${assetHost}/programs/${programFuzzyId}/cover/cover.png`;
+        const programId = this.props.params.programId;
+        return `${assetHost}/programs/${programId}/cover/cover.png`;
     }
-    
+
     getEnrollmentButton = () => {
         if (!this.store.canEnroll) {
             return;
@@ -55,7 +55,7 @@ class ProgramDetailUI extends Component {
             </Tooltip>
         );
     }
-   
+
     onEnroll = () => {
         this.enrollmentStore.showEnrollmentModal = true;
     }
@@ -78,7 +78,7 @@ class ProgramDetailUI extends Component {
     }
 
     getProgramPoster = (program, change) => {
-        const url = `${assetHost}/programs/${program.fuzzyId}/poster/poster.png`;
+        const url = `${assetHost}/programs/${program.id}/poster/poster.png`;
         return (
             <div style={{ textAlign: "center", height: 450 }}>
                 <div style={{ display: "inline-block", verticalAlign: "middle", height: 450 }}></div>
@@ -98,32 +98,32 @@ class ProgramDetailUI extends Component {
                     extra={[
                         this.getEnrollmentButton(),
                     ]}>
-                </PageHeader>
 
-                {this.getProgramPoster(program, change)}
 
-                <Card bordered={false} title="Coach" extra={<a href="#">More</a>}>
-                    <Statistic value={coach.name} valueStyle={{ color: '#3f8600' }} />
-                    <Paragraph><MailOutlined /> {coach.email}</Paragraph>
-                    <Paragraph><PhoneOutlined /> (91)99999 99999</Paragraph>
-                </Card>
+                    {this.getProgramPoster(program, change)}
 
-                <ProgramDescription program={program} programStore={this.store} />
-
-                <Card title="Milestones">
-                    <Card.Meta description="The milestones represent the high-level overview of the program. The actual coaching plan will be customized, based on the context of the enrolled member of this program. Of course, the coaching plan will be aligned continuously." style={{ marginBottom: 10, paddingBottom: 10 }} />
-                    <CurrentSessionPlan />
-                </Card>
-
-                <Card title="Trailers">
-                    <Card
-                        style={{ border: '1px solid lightgray' }}
-                        cover={<img alt="cover" style={{ border: "1px solid lightgray" }} src={this.getTrailerUrl()} />}>
+                    <Card bordered={false} title="Coach" extra={<a href="#">More</a>}>
+                        <Statistic value={coach.name} valueStyle={{ color: '#3f8600' }} />
+                        <Paragraph><MailOutlined /> {coach.email}</Paragraph>
+                        <Paragraph><PhoneOutlined /> (91)99999 99999</Paragraph>
                     </Card>
-                </Card>
 
+                    <ProgramDescription program={program} programStore={this.store} />
+
+                    <Card title="Milestones">
+                        <Card.Meta description="The milestones represent the high-level overview of the program. The actual coaching plan will be customized, based on the context of the enrolled member of this program. Of course, the coaching plan will be aligned continuously." style={{ marginBottom: 10, paddingBottom: 10 }} />
+                        <CurrentSessionPlan />
+                    </Card>
+
+                    <Card title="Trailers">
+                        <Card
+                            style={{ border: '1px solid lightgray' }}
+                            cover={<img alt="cover" style={{ border: "1px solid lightgray" }} src={this.getTrailerUrl()} />}>
+                        </Card>
+                    </Card>
+                </PageHeader>
                 <EnrollmentModal programStore={this.store} enrollmentStore={this.enrollmentStore} />
-           </>
+            </>
         )
     }
 }

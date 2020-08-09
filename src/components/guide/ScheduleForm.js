@@ -32,7 +32,6 @@ const failureNotification = () => {
 };
 
 
-
 @observer
 class ScheduleForm extends Component {
 
@@ -74,10 +73,10 @@ class ScheduleForm extends Component {
         }
     }
 
-    onProgramChange = (programFuzzyId) => {
+    onProgramChange = (programId) => {
         const store = this.props.sessionStore;
-        this.formRef.current.setFieldsValue({ memberFuzzyId: '' });
-        store.enrollmentListStore.fetchEnrollments(programFuzzyId);
+        this.formRef.current.setFieldsValue({ memberId: '' });
+        store.enrollmentListStore.fetchEnrollments(programId);
     }
 
     getProgramLabel = () => {
@@ -112,7 +111,7 @@ class ScheduleForm extends Component {
 
         return (
             <Form {...formItemLayout} ref={this.formRef} onFinish={this.onFinish} >
-                <Form.Item name="programFuzzyId"
+                <Form.Item name="programId"
                     rules={[{ required: true, message: 'Please select a Program' }]}
                     label={this.getProgramLabel()}
                     validateStatus={programMsg.status}
@@ -127,13 +126,13 @@ class ScheduleForm extends Component {
                         onChange={this.onProgramChange}>
                         {programs.map(item => {
                             if (item.program.active) {
-                                return <Option key={item.program.fuzzyId}>{item.program.name}</Option>
+                                return <Option key={item.program.id}>{item.program.name}</Option>
                             }
                         })}
                     </Select>
                 </Form.Item>
 
-                <Form.Item name="memberFuzzyId"
+                <Form.Item name="memberId"
                     rules={[{ required: true, message: 'Please select an enrolled member for the Program' }]}
                     label="Enrolled Member"
                     validateStatus={memberMsg.status}
@@ -146,7 +145,7 @@ class ScheduleForm extends Component {
                         }
                         placeholder="Select an enrolled Member">
                         {members.map(item => (
-                            <Option key={item.fuzzyId}>{item.searchable}</Option>
+                            <Option key={item.id}>{item.searchable}</Option>
                         ))}
                     </Select>
                 </Form.Item>

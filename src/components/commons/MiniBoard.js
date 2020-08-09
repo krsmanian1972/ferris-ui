@@ -20,7 +20,7 @@ class MiniBoard extends Component {
      */
     restore = async () => {
 
-        const url = `${assetHost}/boards/${this.props.sessionUserFuzzyId}/${this.props.boardId}`;
+        const url = `${assetHost}/boards/${this.props.sessionUserId}/${this.props.boardId}`;
 
         const response = await this.props.apiProxy.getAsync(url);
         const data = await response.text();

@@ -44,14 +44,14 @@ export default class EnrollmentListStore {
      * Obtain the List of members who are enrolled into a Program
      *
      */
-    fetchEnrollments = async(programFuzzyId) => {
+    fetchEnrollments = async(programId) => {
         
         this.state  = PENDING;
         this.message = EMPTY_MESSAGE;
 
         const variables = {
             criteria: {
-                programFuzzyId:programFuzzyId
+                programId:programId
             }
         }
 

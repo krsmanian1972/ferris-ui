@@ -35,7 +35,7 @@ export default class Editor extends Component {
                     <button className="ql-indent" value="+1" />
                 </span>
 
-                <span class="ql-formats">
+                <span className="ql-formats">
                     <select className="ql-align" defaultValue="">
                         <option value="center" />
                         <option value="right" />
@@ -43,19 +43,19 @@ export default class Editor extends Component {
                     </select>
                 </span>
 
-                <span class="ql-formats">
+                <span className="ql-formats">
                     <button className="ql-bold" />
                     <button className="ql-italic" />
                     <button className="ql-underline" />
                     <button className="ql-strike" />
                 </span>
 
-                <span class="ql-formats">
+                <span className="ql-formats">
                     <button className="ql-formula" />
                     <button className="ql-code-block" />
                 </span>
 
-                <span class="ql-formats">
+                <span className="ql-formats">
                     <button className="ql-link" />
                     <button className="ql-image" />
                     <button className="ql-video" />

@@ -15,7 +15,7 @@ class ScheduleDrawer extends Component {
    
     render() {
         const store = this.props.sessionStore;
-        const title = store.sessionId === 0 ? "New Session Scheduling" : "Unknown";
+        const title = "New Session Scheduling";
 
         return (
             <Drawer title={title} width={"45%"} closable={true} onClose={this.close} visible={store.showDrawer} destroyOnClose>

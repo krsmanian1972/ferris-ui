@@ -80,8 +80,8 @@ export default class SessionStore {
 
         const variables = {
             input: {
-                programFuzzyId: sessionRequest.programFuzzyId,
-                memberFuzzyId: sessionRequest.memberFuzzyId,
+                programId: sessionRequest.programId,
+                memberId: sessionRequest.memberId,
                 name: sessionRequest.name,
                 description: sessionRequest.description,
                 duration: sessionRequest.duration,
@@ -116,11 +116,11 @@ export default class SessionStore {
         this.programMsg = EMPTY_MESSAGE;
         this.memberMsg = EMPTY_MESSAGE;
 
-        if (isBlank(sessionRequest.programFuzzyId)) {
+        if (isBlank(sessionRequest.programId)) {
             this.programMsg = { status: ERROR, help: "Please Select a Program" };
         }
 
-        if (isBlank(sessionRequest.memberFuzzyId)) {
+        if (isBlank(sessionRequest.memberId)) {
             this.memberMsg = { status: ERROR, help: "Please Select an enrolled member" };
         }
 
@@ -143,14 +143,14 @@ export default class SessionStore {
 
     loadPeople = async () => {
 
-        const sessionFuzzyId = this.event.session.fuzzyId;
+        const sessionId = this.event.session.id;
 
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
         const variables = {
             criteria: {
-                fuzzyId: sessionFuzzyId,
+                id: sessionId,
             }
         }
 
@@ -225,13 +225,13 @@ export default class SessionStore {
 
     alterSessionState = async (targetState) => {
 
-        const sessionFuzzyId = this.event.session.fuzzyId;
+        const sessionId = this.event.session.id;
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
         const variables = {
             input: {
-                fuzzyId: sessionFuzzyId,
+                id: sessionId,
                 targetState: targetState
             }
         }

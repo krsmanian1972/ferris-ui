@@ -34,14 +34,14 @@ export default class EnrollmentStore {
         return this.state === ERROR;
     }
 
-    createEnrollment = async (programFuzzyId) => {
+    createEnrollment = async (programId) => {
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
         const variables = {
             input: {
-                programFuzzyId: programFuzzyId,
-                userFuzzyId: this.apiProxy.getUserFuzzyId(),
+                programId: programId,
+                userId: this.apiProxy.getUserFuzzyId(),
             }
         }
 

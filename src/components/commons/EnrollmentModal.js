@@ -28,9 +28,9 @@ class EnrollmentModal extends Component {
     enroll = async () => {
         const store = this.props.enrollmentStore;
         const programStore = this.props.programStore;
-        const programFuzzyId = programStore.programFuzzyId;
+        const programId = programStore.programId;
 
-        await store.createEnrollment(programFuzzyId);
+        await store.createEnrollment(programId);
 
         if (store.isError) {
             failureNotification(store.message);
