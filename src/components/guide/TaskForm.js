@@ -12,18 +12,19 @@ const { TextArea } = Input;
 
 const failureNotification = () => {
     const args = {
-        message: 'Unable to Create Objective',
+        message: 'Unable to Create Task',
         description:
-            'We are very sorry. We are unable to create the objective. Please try again after some time',
+            'We are very sorry. We are unable to create the task. Please try again after some time',
         duration: 0,
         type: 'error',
     };
     notification.open(args);
 };
 
+
 @observer
-class ObjectiveForm extends Component {
-    
+class TaskForm extends Component {
+
     formRef = React.createRef();
     description = "";
 
@@ -37,21 +38,21 @@ class ObjectiveForm extends Component {
     }
 
     onFinish = async (values) => {
-        const store = this.props.objectiveStore;
-        await store.createObjective(values);
+        const store = this.props.taskStore;
+        await store.createTask(values);
 
         if (store.isError) {
             failureNotification();
         }
 
         if (store.isDone) {
-            message.success('Objective is Created.')
+            message.success('Task is Created.')
         }
     }
 
     render() {
 
-        const store = this.props.objectiveStore;
+        const store = this.props.taskStore;
 
         const startTimeMsg = store.startTimeMsg;
         const endTimeMsg = store.endTimeMsg;
@@ -90,10 +91,12 @@ class ObjectiveForm extends Component {
                 </Form.Item>
 
                 <Form.Item>
-                    <Button type="primary" disabled={store.isLoading} htmlType="submit" icon={<PlusCircleOutlined />}>Create Objective</Button>
+                    <Button type="primary" disabled={store.isLoading} htmlType="submit" icon={<PlusCircleOutlined />}>Create Task</Button>
                 </Form.Item>
             </Form>
         );
     }
+
 }
-export default ObjectiveForm;
+
+export default TaskForm;

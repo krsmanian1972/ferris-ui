@@ -4,6 +4,8 @@ import { inject, observer } from 'mobx-react';
 import EditableDescription from './EditableSessionDescription';
 import ObjectiveList from './ObjectiveList';
 import ObjectiveStore from '../stores/ObjectiveStore';
+import TaskList from './TaskList';
+import TaskStore from '../stores/TaskStore';
 
 import {Typography } from 'antd';
 
@@ -16,6 +18,9 @@ export default class GoldenTemplate extends Component {
         super(props);
         this.objectiveStore = new ObjectiveStore({apiProxy: props.appStore.apiProxy,enrollmentId:props.enrollmentId});
         this.objectiveStore.fetchObjectives();
+
+        this.taskStore = new TaskStore({apiProxy: props.appStore.apiProxy,enrollmentId:props.enrollmentId});
+        this.taskStore.fetchTasks();
     }
 
     render() {
@@ -24,7 +29,7 @@ export default class GoldenTemplate extends Component {
                 <Title style={{marginTop:30}} level={4}>Plan</Title>
                 
                 <div style={{ display: "flex", flexDirection: "row",justifyContent:"space-between"}}>
-                    <EditableDescription key="onward" type="action" title="Onward" fileName="onward.html" sessionUserId={this.props.sessionUserId} apiProxy={this.props.apiProxy}/>
+                    <TaskList key="onward" taskStore = {this.taskStore}/>
                     <ObjectiveList key="objectives" objectiveStore = {this.objectiveStore} />
                 </div>
 
