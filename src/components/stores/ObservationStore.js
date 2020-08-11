@@ -1,34 +1,48 @@
 import { decorate, observable, computed, action } from 'mobx';
 import { apiHost } from './APIEndpoints';
-import { createTaskQuery,tasksQuery } from './Queries';
-import moment from 'moment';
+import { createObservationQuery,observationsQuery } from './Queries';
 
 const INIT = "init";
 const PENDING = 'pending';
-const INVALID = "invalid";
 const DONE = 'done';
 const ERROR = 'error';
 
+
 const EMPTY_MESSAGE = { status: "", help: "" };
 const SAVING_ERROR = { status: "error", help: "We are very sorry. Unable to store the Planning Information." };
-const ERROR_MESSAGE = { status: ERROR, help: "Unable to fetch the onward activities" };
+const ERROR_MESSAGE = { status: ERROR, help: "Unable to fetch Observations." };
 
-export default class TaskStore {
+/**
+ * Every enrollment has a coaching Plan and is a composition of multiple sections. 
+ * 
+ * This store is responsible of one of the sections.
+ * 
+ * And every section may have a list of items. 
+ * Let this store manages the list, creation, modification and deletion of Objective.
+ * 
+ */
+export default class ObservationStore {
 
     state = INIT;
     message = EMPTY_MESSAGE;
 
     showDrawer = false;
-    startTimeMsg = {};
     change = null;
 
-    tasks = [];
+    observations = [];
     rowCount = 0;
+    
 
+    /**
+     * The section id can be any one of
+     * 
+     * objective, onward, observations and opportunities 
+     * 
+     * @param {*} props 
+     */
     constructor(props) {
         this.apiProxy = props.apiProxy;
         this.enrollmentId = props.enrollmentId;
-        this.memberId = props.memberId;
     }
 
     get isLoading() {
@@ -39,15 +53,11 @@ export default class TaskStore {
         return this.state === DONE;
     }
 
-    get isInvalid() {
-        return this.state === INVALID;
-    }
-
     get isError() {
         return this.state === ERROR;
     }
 
-    fetchTasks = async () => {
+    fetchObservations = async () => {
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
@@ -58,17 +68,17 @@ export default class TaskStore {
         }
 
         try {
-            const response = await this.apiProxy.query(apiHost, tasksQuery, variables);
+            const response = await this.apiProxy.query(apiHost, observationsQuery, variables);
             const data = await response.json();
 
-            if (data.data.getTasks.error != null) {
+            if (data.data.getObservations.error != null) {
                 this.state = ERROR;
                 this.message = ERROR_MESSAGE;
                 return;
             }
 
-            const result = data.data.getTasks.tasks;
-            this.tasks = result;
+            const result = data.data.getObservations.observations;
+            this.observations = result;
             this.rowCount = result.length;
             this.state = DONE;
         }
@@ -79,28 +89,25 @@ export default class TaskStore {
         }
     }
 
-    createTask = async (planRequest) => {
+    /**
+     * content,duration and startTime.
+     *  
+     * @param {*} planRequest 
+     */
+
+    createObservation = async (planRequest) => {
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
-        
-        if (!this.isValid(planRequest)) {
-            this.state = INVALID;
-            return;
-        }
 
         const variables = {
             input: {
-                name:planRequest.name,
                 description:planRequest.description,
                 enrollmentId: this.enrollmentId,
-                actorId:this.memberId,
-                startTime: planRequest.startTime.utc().format(),
-                duration: planRequest.duration
             }
         }
 
         try {
-            const response = await this.apiProxy.mutate(apiHost, createTaskQuery, variables);
+            const response = await this.apiProxy.mutate(apiHost, createObservationQuery, variables);
             const data = await response.json();
 
             if (data.error == true) {
@@ -110,7 +117,7 @@ export default class TaskStore {
             }
             this.state = DONE;
             this.showDrawer = false;
-            this.fetchTasks();
+            this.fetchObservations();
         }
         catch (e) {
             this.state = ERROR;
@@ -119,43 +126,19 @@ export default class TaskStore {
         }
     }
 
-    isValid = (request) => {
-
-        this.validateDate(request.startTime);
-   
-        return this.startTimeMsg.status !== ERROR
-    }
-
-    validateDate = (date) => {
-
-        this.startTimeMsg = EMPTY_MESSAGE;
-
-        const boundary = moment().add(1, 'hour');
-        const flag = date && date > boundary;
-
-        if (!flag) {
-            this.startTimeMsg = { status: ERROR, help: "Provide a time at least one hour after from now." };
-        }
-    }
-
 }
-
-decorate(TaskStore, {
+decorate(ObservationStore, {
     state: observable,
     message: observable,
     changed: observable,
     showDrawer: observable,
 
-    startTimeMsg: observable,
-
-    tasks: observable,
+    observations: observable,
 
     isLoading: computed,
     isDone: computed,
-    isInvalid: computed,
     isError: computed,
 
-    validateDate: action,
-    createTask: action,
-    fetchTasks: action,
+    createObservation: action,
+    fetchObservations: action,
 })

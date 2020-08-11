@@ -4,17 +4,18 @@ import { observer } from 'mobx-react';
 import { Spin, Result, Carousel, Button, Space, Tag, Tooltip, Switch } from 'antd';
 import { LeftOutlined, RightOutlined,PlusOutlined } from '@ant-design/icons';
 
-import TaskDrawer from './TaskDrawer';
+import ObservationDrawer from './ObservationDrawer';
 import Reader from "../commons/Reader";
 
 @observer
-class TaskList extends Component {
+class ObservationList extends Component {
+
     constructor(props) {
         super(props);
     }
 
     displayMessage = () => {
-        const store = this.props.taskStore;
+        const store = this.props.observationStore;
 
         if (store.isLoading) {
             return (
@@ -33,15 +34,11 @@ class TaskList extends Component {
         return (<></>)
     }
 
-    renderTask = (task) => {
+    renderObservation = (observation) => {
         return (
-            <div key={task.id}>
-                <Reader id={task.id} value={task.description} readOnly={true} height={350} />
-                <div style={{ display: "flex", flexWrap: "wrap", height: 40, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 10 }}>
-                    <Tag color="blue">10-Sep-2020</Tag>
-                    <Tag color="blue">10-Sep-2020</Tag>
-                    <Tag color="blue">Progress</Tag>
-                </div>
+            <div key={observation.id}>
+                <Reader value={observation.description} height={350} />
+                <div style={{ display: "flex", flexWrap: "wrap", height: 40, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 10 }}></div>
             </div>
         )
     }
@@ -57,8 +54,7 @@ class TaskList extends Component {
     onEdit = (mode) => {
     }
 
-
-    renderSlider = (tasks, rowCount) => {
+    renderSlider = (observations, rowCount) => {
         if (rowCount == 0) {
             return <></>
         }
@@ -72,13 +68,13 @@ class TaskList extends Component {
         };
 
         return (
-            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", textAlign: "center", alignItems: "center"}}>
+            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", textAlign: "center", alignItems: "center" }}>
                 <Button key="back" onClick={this.previous} icon={<LeftOutlined />} shape="square"></Button>
                 <div style={{ width: "94%" }}>
                     <Carousel ref={ref => (this.carousel = ref)} {...settings}>
-                        {tasks && tasks.map((task) => {
+                        {observations && observations.map((observation) => {
                             return (
-                                this.renderTask(task)
+                                this.renderObservation(observation)
                             )
                         })}
                     </Carousel>
@@ -90,15 +86,14 @@ class TaskList extends Component {
 
     getTitle = () => {
         return (
-            <div style={{ display: "flex", alignItems: "center", paddingLeft: 10, fontWeight: "bold" }}>Onwards</div>
+            <div style={{ display: "flex", alignItems: "center", paddingLeft: 10, fontWeight: "bold" }}>Observations</div>
         )
     }
 
-    showNewTask = () => {
-        const store = this.props.taskStore;
+    showNewObservation = () => {
+        const store = this.props.observationStore;
         store.showDrawer = true;
     }
-
 
     getControls = () => {
         return (
@@ -108,8 +103,8 @@ class TaskList extends Component {
                         <Switch key="ed_switch" onClick={this.onEdit} checkedChildren="Save" unCheckedChildren="Edit" defaultChecked={false} />
                     </Tooltip>
 
-                    <Tooltip key="add_objective_tip" title="To Add New Objective">
-                        <Button key="add_objective" icon={<PlusOutlined />} shape="circle" onClick={() => this.showNewTask()}></Button>
+                    <Tooltip key="add_observation_tip" title="To Add New Observation">
+                        <Button key="add_observation" icon={<PlusOutlined />} shape="circle" onClick={() => this.showNewObservation()}></Button>
                     </Tooltip>
 
                 </Space>
@@ -119,25 +114,23 @@ class TaskList extends Component {
 
 
     render() {
-        const store = this.props.taskStore;
-        const tasks = store.tasks;
+        const store = this.props.observationStore;
+        const observations = store.observations;
         const change = store.change;
 
         return (
             <>
-                <div style={{ border: "1px solid lightgray", marginRight: 4, marginBottom: 4, borderRadius: "4%",width: "50%"}}>
+                <div style={{ border: "1px solid lightgray", marginLeft: 4, marginBottom: 4, borderRadius: "4%", width: "50%"}}>
                     <div style={{ display: "flex", flexWrap: "wrap", height: 50, flexDirection: "row", justifyContent: "space-between" }}>
                         {this.getTitle()}
                         {this.getControls()}
                     </div>
-                    {this.renderSlider(tasks, store.rowCount)}
+                    {this.renderSlider(observations, store.rowCount)}
                     {this.displayMessage()}
                 </div>
-                <TaskDrawer taskStore={store} />
+                <ObservationDrawer observationStore={store} />
             </>
         )
     }
-
 }
-
-export default TaskList;
+export default ObservationList;
