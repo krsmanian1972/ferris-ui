@@ -202,7 +202,7 @@ class SessionDetailUI extends Component {
                 {this.renderTopSegment(program, session, sessionUser)}
                 {people.coach && (
                     <>
-                        <GoldenTemplate sessionUserId={people.coach.sessionUser.id} apiProxy={this.props.appStore.apiProxy} />
+                        <GoldenTemplate enrollmentId = {session.enrollmentId} sessionUserId={people.coach.sessionUser.id} apiProxy={this.props.appStore.apiProxy} />
                         <BoardList title="Coach Boards" sessionUserId={people.coach.sessionUser.id} />
                         <BoardList title="Actor Boards" sessionUserId={people.member.sessionUser.id} />
                     </>

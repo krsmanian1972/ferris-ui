@@ -114,6 +114,7 @@ export const eventsQuery = `query ($criteria: EventCriteria!) {
   getSessions(criteria: $criteria) {
     session {
       id,
+      enrollmentId,
       people,
       name,
       description,
@@ -163,6 +164,40 @@ export const createNotesQuery = `mutation ($input: NewNoteRequest!) {
     }
     errors {
       field,
+      message
+    }
+  }
+}`
+
+export const createObjectiveQuery = `mutation($input: NewObjectiveRequest!) {
+  createObjective(newObjectiveRequest:$input){
+    objective {
+      id,
+      scheduleStart,
+      scheduleEnd,
+      createdAt,
+      status
+    }
+    errors {
+      field,
+      message
+    } 
+  }
+}`;
+
+export const objectivesQuery = `query ($criteria: PlanCriteria!) {
+  getObjectives(criteria: $criteria) {
+    objectives {
+        id,
+        enrollmentId,
+        description,
+        duration,
+        scheduleStart,
+        scheduleEnd,
+        status,
+        createdAt
+    }
+    error{
       message
     }
   }
