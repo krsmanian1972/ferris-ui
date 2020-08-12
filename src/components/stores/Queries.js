@@ -264,3 +264,30 @@ export const observationsQuery = `query ($criteria: PlanCriteria!) {
     }
   }
 }`;
+
+export const createConstraintQuery = `mutation($input: NewOptionRequest!) {
+  createOption(newOptionRequest:$input){
+    option {
+      id,
+      createdAt,
+    }
+    errors {
+      field,
+      message
+    } 
+  }
+}`;
+
+export const constraintsQuery = `query ($criteria: PlanCriteria!) {
+  getOptions(criteria: $criteria) {
+    options {
+        id,
+        enrollmentId,
+        description,
+        createdAt
+    }
+    error{
+      message
+    }
+  }
+}`;

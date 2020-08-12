@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import EditableDescription from './EditableSessionDescription';
-
 import ObjectiveList from './ObjectiveList';
 import ObjectiveStore from '../stores/ObjectiveStore';
 
@@ -11,6 +9,9 @@ import TaskStore from '../stores/TaskStore';
 
 import ObservationList from './ObservationList';
 import ObservationStore from '../stores/ObservationStore';
+
+import ConstraintList from './ConstraintList';
+import ConstraintStore from '../stores/ConstraintStore';
 
 import { Typography } from 'antd';
 
@@ -30,6 +31,9 @@ export default class GoldenTemplate extends Component {
 
         this.observationStore = new ObservationStore({ apiProxy: props.appStore.apiProxy, enrollmentId: props.enrollmentId });
         this.observationStore.fetchObservations();
+
+        this.constraintStore = new ConstraintStore({ apiProxy: props.appStore.apiProxy, enrollmentId: props.enrollmentId });
+        this.constraintStore.fetchOptions();
     }
 
     render() {
@@ -43,7 +47,7 @@ export default class GoldenTemplate extends Component {
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
-                    <EditableDescription key="opportunities" title="Opportunities" fileName="options.html" sessionUserId={this.props.sessionUserId} apiProxy={this.props.apiProxy} />
+                    <ConstraintList key="options" constraintStore={this.constraintStore} />
                     <ObservationList key="observations" observationStore={this.observationStore} />
                 </div>
 
