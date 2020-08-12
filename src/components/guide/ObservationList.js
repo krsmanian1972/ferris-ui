@@ -120,7 +120,7 @@ class ObservationList extends Component {
 
         return (
             <>
-                <div style={{ border: "1px solid lightgray", marginLeft: 4, marginBottom: 4, borderRadius: "4%", width: "50%"}}>
+                <div style={{ border: "1px solid lightgray", width: "50%"}}>
                     <div style={{ display: "flex", flexWrap: "wrap", height: 50, flexDirection: "row", justifyContent: "space-between" }}>
                         {this.getTitle()}
                         {this.getControls()}

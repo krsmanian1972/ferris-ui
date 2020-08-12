@@ -267,7 +267,7 @@ export const observationsQuery = `query ($criteria: PlanCriteria!) {
 
 export const createConstraintQuery = `mutation($input: NewOptionRequest!) {
   createOption(newOptionRequest:$input){
-    option {
+    constraint {
       id,
       createdAt,
     }
@@ -280,7 +280,7 @@ export const createConstraintQuery = `mutation($input: NewOptionRequest!) {
 
 export const constraintsQuery = `query ($criteria: PlanCriteria!) {
   getOptions(criteria: $criteria) {
-    options {
+    constraints {
         id,
         enrollmentId,
         description,

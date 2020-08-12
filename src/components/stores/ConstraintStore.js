@@ -77,7 +77,7 @@ export default class ConstraintStore {
                 return;
             }
 
-            const result = data.data.getOptions.options;
+            const result = data.data.getOptions.constraints;
             this.options = result;
             this.rowCount = result.length;
             this.state = DONE;
@@ -98,7 +98,7 @@ export default class ConstraintStore {
     createOption = async (planRequest) => {
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
-
+        
         const variables = {
             input: {
                 description:planRequest.description,
@@ -117,7 +117,7 @@ export default class ConstraintStore {
             }
             this.state = DONE;
             this.showDrawer = false;
-            this.fetchOptions();
+            await this.fetchOptions();
         }
         catch (e) {
             this.state = ERROR;

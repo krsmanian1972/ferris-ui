@@ -10,7 +10,7 @@ import ProgramStore from '../stores/ProgramStore';
 
 import ProgramDescription from './EditableProgramDescription';
 import ActivationModal from './ActivationModal';
-import CurrentSessionPlan from './CurrentSessionPlan';
+import Milestones from './Milestones';
 
 const { Title, Paragraph } = Typography;
 
@@ -138,10 +138,7 @@ class EditableProgramDetailUI extends Component {
 
                     <ProgramDescription program={program} programStore={this.store} />
 
-                    <Card title="Milestones" extra={<a href="#">Edit</a>}>
-                        <Card.Meta description="The milestones represent the high-level overview of the program. The actual coaching plan will be customized, based on the context of the enrolled member of this program. Of course, the coaching plan will be aligned continuously." style={{ marginBottom: 10, paddingBottom: 10 }} />
-                        <CurrentSessionPlan />
-                    </Card>
+                    <Milestones program={program} programStore={this.store}/>
 
                     <Card title="Trailers" extra={<a href="#">Edit</a>}>
                         <Card

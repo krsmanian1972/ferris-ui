@@ -52,8 +52,8 @@ class ConstraintForm extends Component {
 
                 <Form.Item
                     name="description"
-                    rules={[{ required: true, message: 'Please describe the option.' }]}
-                    label="Option">
+                    rules={[{ required: true, message: 'Please capture the constraints and options.' }]}
+                    label="Constraints And Option">
                     <div style={{ display: "none" }}><TextArea rows={1} /></div>
                     <div style={{ border: "1px solid lightgray" }}>
                         <Editor id="option_desc" value={this.description} onChange={this.handleDescription} height={300} />

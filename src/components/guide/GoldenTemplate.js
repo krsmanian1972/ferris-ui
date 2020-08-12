@@ -38,20 +38,20 @@ export default class GoldenTemplate extends Component {
 
     render() {
         return (
-            <div>
+            <>
                 <Title style={{ marginTop: 30 }} level={4}>Plan</Title>
 
-                <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
+                <div style={{ display: "flex", flexDirection: "row"}}>
                     <TaskList key="onward" taskStore={this.taskStore} />
                     <ObjectiveList key="objectives" objectiveStore={this.objectiveStore} />
                 </div>
 
-                <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
+                <div style={{ display: "flex", flexDirection: "row"}}>
                     <ConstraintList key="options" constraintStore={this.constraintStore} />
                     <ObservationList key="observations" observationStore={this.observationStore} />
                 </div>
 
-            </div>
+            </>
         )
     }
 }

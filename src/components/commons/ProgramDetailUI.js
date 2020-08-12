@@ -12,7 +12,7 @@ import { assetHost } from '../stores/APIEndpoints';
 import ProgramDescription from './ProgramDescription';
 import EnrollmentModal from './EnrollmentModal';
 
-import CurrentSessionPlan from '../guide/CurrentSessionPlan';
+import Milestones from '../guide/Milestones';
 
 import ProgramStore from '../stores/ProgramStore';
 import EnrollmentStore from '../stores/EnrollmentStore';
@@ -99,7 +99,6 @@ class ProgramDetailUI extends Component {
                         this.getEnrollmentButton(),
                     ]}>
 
-
                     {this.getProgramPoster(program, change)}
 
                     <Card bordered={false} title="Coach" extra={<a href="#">More</a>}>
@@ -109,12 +108,9 @@ class ProgramDetailUI extends Component {
                     </Card>
 
                     <ProgramDescription program={program} programStore={this.store} />
-
-                    <Card title="Milestones">
-                        <Card.Meta description="The milestones represent the high-level overview of the program. The actual coaching plan will be customized, based on the context of the enrolled member of this program. Of course, the coaching plan will be aligned continuously." style={{ marginBottom: 10, paddingBottom: 10 }} />
-                        <CurrentSessionPlan />
-                    </Card>
-
+                    
+                    <Milestones program={program} programStore={this.store}/>
+                    
                     <Card title="Trailers">
                         <Card
                             style={{ border: '1px solid lightgray' }}
@@ -122,6 +118,7 @@ class ProgramDetailUI extends Component {
                         </Card>
                     </Card>
                 </PageHeader>
+
                 <EnrollmentModal programStore={this.store} enrollmentStore={this.enrollmentStore} />
             </>
         )

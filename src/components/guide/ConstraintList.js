@@ -86,8 +86,26 @@ class ConstraintList extends Component {
 
     getTitle = () => {
         return (
-            <div style={{ display: "flex", alignItems: "center", paddingLeft: 10, fontWeight: "bold" }}>Options</div>
+            <div style={{ display: "flex", alignItems: "center", paddingLeft: 10, fontWeight: "bold" }}>
+                Opportunities&nbsp;{this.countTag()}
+            </div>
         )
+    }
+
+    countTag = () => {
+        const store = this.props.constraintStore;
+
+        if (store.isDone) {
+            return <Tag color="#108ee9">{store.rowCount} Total</Tag>
+        }
+
+        if (store.isError) {
+            return <Tag color="red">...</Tag>
+        }
+
+        if (store.isLoading) {
+            return <Tag color="blue">...</Tag>
+        }
     }
 
     showNewOption = () => {
@@ -120,7 +138,7 @@ class ConstraintList extends Component {
 
         return (
             <>
-                <div style={{ border: "1px solid lightgray", marginLeft: 4, marginBottom: 4, borderRadius: "4%", width: "50%"}}>
+                <div style={{ border: "1px solid lightgray", width: "50%"}}>
                     <div style={{ display: "flex", flexWrap: "wrap", height: 50, flexDirection: "row", justifyContent: "space-between" }}>
                         {this.getTitle()}
                         {this.getControls()}

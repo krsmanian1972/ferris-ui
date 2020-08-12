@@ -1,11 +1,17 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
-import { Spin, Result, Carousel, Button, Space, Tag, Tooltip, Switch } from 'antd';
-import { LeftOutlined, RightOutlined,PlusOutlined } from '@ant-design/icons';
+import Moment from 'react-moment';
+import moment from 'moment';
+import 'moment-timezone';
+
+import { Spin, Result, Carousel, Button, Space, Steps, Tooltip, Switch } from 'antd';
+import { LeftOutlined, RightOutlined, PlusOutlined } from '@ant-design/icons';
 
 import TaskDrawer from './TaskDrawer';
 import Reader from "../commons/Reader";
+
+const { Step } = Steps;
 
 @observer
 class TaskList extends Component {
@@ -34,13 +40,20 @@ class TaskList extends Component {
     }
 
     renderTask = (task) => {
+        const localeStart = moment(task.scheduleStart*1000);
+        const localeEnd = moment(task.scheduleEnd*1000);
+
+        const startEl = <Moment format="llll" style={{ fontWeight: "bold" }}>{localeStart}</Moment>
+        const endEl = <Moment format="llll" style={{ fontWeight: "bold" }}>{localeEnd}</Moment>
+
         return (
             <div key={task.id}>
                 <Reader id={task.id} value={task.description} readOnly={true} height={350} />
-                <div style={{ display: "flex", flexWrap: "wrap", height: 40, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 10 }}>
-                    <Tag color="blue">10-Sep-2020</Tag>
-                    <Tag color="blue">10-Sep-2020</Tag>
-                    <Tag color="blue">Progress</Tag>
+                <div style={{ paddingBottom: 10 }}>
+                    <Steps progressDot current={0} size="small">
+                        <Step title={startEl} description="Start" />
+                        <Step title={endEl} description="End" />
+                    </Steps>
                 </div>
             </div>
         )
@@ -72,7 +85,7 @@ class TaskList extends Component {
         };
 
         return (
-            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", textAlign: "center", alignItems: "center"}}>
+            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", textAlign: "center", alignItems: "center" }}>
                 <Button key="back" onClick={this.previous} icon={<LeftOutlined />} shape="square"></Button>
                 <div style={{ width: "94%" }}>
                     <Carousel ref={ref => (this.carousel = ref)} {...settings}>
@@ -108,8 +121,8 @@ class TaskList extends Component {
                         <Switch key="ed_switch" onClick={this.onEdit} checkedChildren="Save" unCheckedChildren="Edit" defaultChecked={false} />
                     </Tooltip>
 
-                    <Tooltip key="add_objective_tip" title="To Add New Objective">
-                        <Button key="add_objective" icon={<PlusOutlined />} shape="circle" onClick={() => this.showNewTask()}></Button>
+                    <Tooltip key="add_task_tip" title="To Add New Activity">
+                        <Button key="add_task" icon={<PlusOutlined />} shape="circle" onClick={() => this.showNewTask()}></Button>
                     </Tooltip>
 
                 </Space>
@@ -125,7 +138,7 @@ class TaskList extends Component {
 
         return (
             <>
-                <div style={{ border: "1px solid lightgray", marginRight: 4, marginBottom: 4, borderRadius: "4%",width: "50%"}}>
+                <div style={{ border: "1px solid lightgray", width: "50%" }}>
                     <div style={{ display: "flex", flexWrap: "wrap", height: 50, flexDirection: "row", justifyContent: "space-between" }}>
                         {this.getTitle()}
                         {this.getControls()}

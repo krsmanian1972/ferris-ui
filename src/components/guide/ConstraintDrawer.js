@@ -14,7 +14,7 @@ class ConstraintDrawer extends Component {
    
     render() {
         const store = this.props.constraintStore;
-        const title = "New Option";
+        const title = "New Constraints and Options";
 
         return (
             <Drawer title={title} width={"55%"} closable={true} onClose={this.close} visible={store.showDrawer} destroyOnClose>
