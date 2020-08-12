@@ -101,7 +101,7 @@ class ProgramDetailUI extends Component {
 
                     {this.getProgramPoster(program, change)}
 
-                    <Card bordered={false} title="Coach" extra={<a href="#">More</a>}>
+                    <Card title={<Title level={4}>Coach</Title>} extra={<a href="#">More</a>}>
                         <Statistic value={coach.name} valueStyle={{ color: '#3f8600' }} />
                         <Paragraph><MailOutlined /> {coach.email}</Paragraph>
                         <Paragraph><PhoneOutlined /> (91)99999 99999</Paragraph>
@@ -109,7 +109,7 @@ class ProgramDetailUI extends Component {
 
                     <ProgramDescription program={program} programStore={this.store} />
                     
-                    <Milestones program={program} programStore={this.store}/>
+                    <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy}/>
                     
                     <Card title="Trailers">
                         <Card

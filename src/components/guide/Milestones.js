@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { Tooltip, Card, Switch } from 'antd';
+import { Tooltip, Card, Switch,Typography } from 'antd';
 
 import socket from '../stores/socket';
 import Editor from "../commons/Editor";
 
 import { assetHost } from '../stores/APIEndpoints';
+
+const {Title} = Typography;
 
 const INIT = "init";
 const PENDING = 'pending';
@@ -22,7 +24,7 @@ export default class Milestones extends Component {
 
         this.state = {
             editMode: false,
-            state: INIT,
+            at: INIT,
         }
     }
 
@@ -32,21 +34,22 @@ export default class Milestones extends Component {
 
     load = async () => {
 
-        this.setState({ state: PENDING });
+        this.setState({ at: PENDING });
         const program = this.props.program;
+        const ver = new Date().getTime();
 
         try {
-            const url = `${assetHost}/programs/${program.id}/about/milestones.html`;
+            const url = `${assetHost}/programs/${program.id}/about/milestones.html?nocache=${ver}`;
             const response = await this.props.apiProxy.getAsync(url);
             if (response.status === 404) {
-                this.setState({ state: DONE });
+                this.setState({ at: DONE });
                 return;
             }
             this.milestones = await response.text();
-            this.setState({ state: DONE });
+            this.setState({ at: DONE });
         }
         catch (e) {
-            this.setState({ state: ERROR });
+            this.setState({ at: ERROR });
         }
     }
 
@@ -57,11 +60,11 @@ export default class Milestones extends Component {
     renderDescription = () => {
 
         if(this.state.editMode) {
-            <Editor id="milestones" value={this.milestones} onChange={this.handleText} />
+            return <Editor id="milestones" value={this.milestones} onChange={this.handleText} height={300}/>
         }
 
         return (
-             <Editor id="milestones" value={this.milestones} readOnly={true} />
+             <Editor id="milestones" value={this.milestones} readOnly={true} height={300}/>
         )
     }
 
@@ -91,7 +94,7 @@ export default class Milestones extends Component {
 
         socket.emit(
             'programContent', {
-            content: this.description,
+            content: this.milestones,
             fuzzyId: program.id,
             name: 'milestones.html'
             }
@@ -101,7 +104,7 @@ export default class Milestones extends Component {
     render() {
 
         return (
-            <Card title="Milestones" extra={this.getEditButton()}>
+            <Card title={<Title level={4}>Milestones</Title>} extra={this.getEditButton()}>
                 <Card.Meta description="The milestones represent the high-level overview of the program. The actual coaching plan will be customized, based on the context of the enrolled member of this program. Of course, the coaching plan will be aligned continuously." style={{ marginBottom: 10, paddingBottom: 10 }} />
                 {this.renderDescription()}
             </Card>

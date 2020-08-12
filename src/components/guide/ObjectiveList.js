@@ -6,7 +6,7 @@ import moment from 'moment';
 import 'moment-timezone';
 
 import { Spin, Result, Carousel, Button, Steps, Space, Tag, Tooltip, Switch } from 'antd';
-import { LeftOutlined, RightOutlined,PlusOutlined } from '@ant-design/icons';
+import { LeftOutlined, RightOutlined, PlusOutlined } from '@ant-design/icons';
 
 import ObjectiveDrawer from './ObjectiveDrawer';
 import Reader from "../commons/Reader";
@@ -42,16 +42,16 @@ class ObjectiveList extends Component {
 
     renderObjective = (objective) => {
 
-        const localeStart = moment(objective.scheduleStart*1000);
-        const localeEnd = moment(objective.scheduleEnd*1000);
+        const localeStart = moment(objective.scheduleStart * 1000);
+        const localeEnd = moment(objective.scheduleEnd * 1000);
 
-        const startEl = <Moment format="llll" style={{ fontWeight: "bold" }}>{localeStart}</Moment>
-        const endEl = <Moment format="llll" style={{ fontWeight: "bold" }}>{localeEnd}</Moment>
+        const startEl = <Moment format="ll" style={{ fontWeight: "bold" }}>{localeStart}</Moment>
+        const endEl = <Moment format="ll" style={{ fontWeight: "bold" }}>{localeEnd}</Moment>
 
         return (
             <div key={objective.id}>
                 <Reader value={objective.description} height={350} />
-                <div style={{ paddingBottom: 10 }}>
+                <div style={{ padding: 10,height:100 }}>
                     <Steps progressDot current={0} size="small">
                         <Step title={startEl} description="Start" />
                         <Step title={endEl} description="End" />
@@ -157,7 +157,7 @@ class ObjectiveList extends Component {
 
         return (
             <>
-                <div style={{ border: "1px solid lightgray", width: "50%"}}>
+                <div style={{ border: "1px solid lightgray", width: "50%" }}>
                     <div style={{ display: "flex", flexWrap: "wrap", height: 50, flexDirection: "row", justifyContent: "space-between" }}>
                         {this.getTitle()}
                         {this.getControls()}

@@ -4,7 +4,9 @@ import { observer } from 'mobx-react';
 import socket from '../stores/socket';
 import Editor from "../commons/Editor";
 
-import { Tooltip, Card, Switch } from 'antd';
+import { Tooltip, Card, Switch,Typography } from 'antd';
+
+const {Title} = Typography;
 
 @observer
 export default class EditableProgramDescription extends Component {
@@ -22,11 +24,11 @@ export default class EditableProgramDescription extends Component {
         const program = this.props.program;
 
         if (this.props.programStore.isReadOnly) {
-            return <Editor id="about" value={program.description} readOnly={true} />
+            return <Editor id="about" value={program.description} readOnly={true} height={300} />
         }
 
         return (
-            <Editor id="about" value={program.description} onChange={this.handleDescription} />
+            <Editor id="about" value={program.description} onChange={this.handleDescription} height={300}/>
         )
     }
 
@@ -66,7 +68,7 @@ export default class EditableProgramDescription extends Component {
     render() {
 
         return (
-            <Card title="About" extra={this.getEditButton()}>
+            <Card title={<Title level={4}>About</Title>} extra={this.getEditButton()}>
                 {this.renderDescription()}
             </Card>
         );

@@ -107,8 +107,9 @@ export default class ProgramStore {
 
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
+        const ver = new Date().getTime();
         
-        const url = `${assetHost}/programs/${this.programId}/about/about.html`;
+        const url = `${assetHost}/programs/${this.programId}/about/about.html?nocache=${ver}`;
         const response = await this.apiProxy.getAsync(url);
         const data = await response.text();
 

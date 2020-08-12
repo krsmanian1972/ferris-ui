@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
-import {Card } from 'antd';
+import {Card,Typography } from 'antd';
 
 import Editor from "./Editor";
+
+const {Title} = Typography;
 
 @observer
 export default class ProgramDescription extends Component {
@@ -14,12 +16,12 @@ export default class ProgramDescription extends Component {
 
     renderDescription = () => {
         const program = this.props.program;
-        return <Editor id="about" value={program.description} readOnly={true} />
+        return <Editor id="about" value={program.description} readOnly={true} height={300}/>
     }
 
     render() {
         return (
-            <Card title="About">
+            <Card title={<Title level={4}>About</Title>}>
                 {this.renderDescription()}
             </Card>
         );

@@ -5,7 +5,7 @@ import Moment from 'react-moment';
 import moment from 'moment';
 import 'moment-timezone';
 
-import { Spin, Result, Carousel, Button, Space, Steps, Tooltip, Switch } from 'antd';
+import { Spin, Result, Carousel, Button, Space, Steps, Tooltip, Tag, Switch } from 'antd';
 import { LeftOutlined, RightOutlined, PlusOutlined } from '@ant-design/icons';
 
 import TaskDrawer from './TaskDrawer';
@@ -49,7 +49,7 @@ class TaskList extends Component {
         return (
             <div key={task.id}>
                 <Reader id={task.id} value={task.description} readOnly={true} height={350} />
-                <div style={{ paddingBottom: 10 }}>
+                <div style={{ padding: 10,height:100 }}>
                     <Steps progressDot current={0} size="small">
                         <Step title={startEl} description="Start" />
                         <Step title={endEl} description="End" />

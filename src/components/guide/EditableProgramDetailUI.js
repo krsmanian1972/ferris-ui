@@ -127,10 +127,9 @@ class EditableProgramDetailUI extends Component {
                         this.getContentButton(program)
                     ]}>
 
-
                     {this.getProgramPoster(program, change)}
 
-                    <Card bordered={false} title="Coach" extra={<a href="#">More</a>}>
+                    <Card title={<Title level={4}>Coach</Title>} extra={<a href="#">More</a>}>
                         <Statistic value={coach.name} valueStyle={{ color: '#3f8600' }} />
                         <Paragraph><MailOutlined /> {coach.email}</Paragraph>
                         <Paragraph><PhoneOutlined /> (91)99999 99999</Paragraph>
@@ -138,14 +137,15 @@ class EditableProgramDetailUI extends Component {
 
                     <ProgramDescription program={program} programStore={this.store} />
 
-                    <Milestones program={program} programStore={this.store}/>
+                    <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy}/>
 
-                    <Card title="Trailers" extra={<a href="#">Edit</a>}>
+                    <Card title={<Title level={4}>Trailers</Title>} extra={<a href="#">Edit</a>}>
                         <Card
                             style={{ border: '1px solid lightgray' }}
                             cover={<img alt="cover" style={{ border: "1px solid lightgray" }} src={this.getTrailerUrl()} />}>
                         </Card>
                     </Card>
+
                 </PageHeader>
                 <ActivationModal programStore={this.store} />
             </>
