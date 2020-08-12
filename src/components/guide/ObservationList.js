@@ -86,8 +86,26 @@ class ObservationList extends Component {
 
     getTitle = () => {
         return (
-            <div style={{ display: "flex", alignItems: "center", paddingLeft: 10, fontWeight: "bold" }}>Observations</div>
+            <div style={{ display: "flex", alignItems: "center", paddingLeft: 10, fontWeight: "bold" }}>
+                Observations&nbsp;{this.countTag()}
+            </div>
         )
+    }
+
+    countTag = () => {
+        const store = this.props.observationStore;
+
+        if (store.isDone) {
+            return <Tag color="#108ee9">{store.rowCount} Total</Tag>
+        }
+
+        if (store.isError) {
+            return <Tag color="red">...</Tag>
+        }
+
+        if (store.isLoading) {
+            return <Tag color="blue">...</Tag>
+        }
     }
 
     showNewObservation = () => {

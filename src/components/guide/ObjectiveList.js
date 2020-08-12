@@ -1,11 +1,17 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
-import { Spin, Result, Carousel, Button, Space, Tag, Tooltip, Switch } from 'antd';
+import Moment from 'react-moment';
+import moment from 'moment';
+import 'moment-timezone';
+
+import { Spin, Result, Carousel, Button, Steps, Space, Tag, Tooltip, Switch } from 'antd';
 import { LeftOutlined, RightOutlined,PlusOutlined } from '@ant-design/icons';
 
 import ObjectiveDrawer from './ObjectiveDrawer';
 import Reader from "../commons/Reader";
+
+const { Step } = Steps;
 
 @observer
 class ObjectiveList extends Component {
@@ -35,9 +41,22 @@ class ObjectiveList extends Component {
     }
 
     renderObjective = (objective) => {
+
+        const localeStart = moment(objective.scheduleStart*1000);
+        const localeEnd = moment(objective.scheduleEnd*1000);
+
+        const startEl = <Moment format="llll" style={{ fontWeight: "bold" }}>{localeStart}</Moment>
+        const endEl = <Moment format="llll" style={{ fontWeight: "bold" }}>{localeEnd}</Moment>
+
         return (
             <div key={objective.id}>
                 <Reader value={objective.description} height={350} />
+                <div style={{ paddingBottom: 10 }}>
+                    <Steps progressDot current={0} size="small">
+                        <Step title={startEl} description="Start" />
+                        <Step title={endEl} description="End" />
+                    </Steps>
+                </div>
             </div>
         )
     }
@@ -85,9 +104,28 @@ class ObjectiveList extends Component {
 
     getTitle = () => {
         return (
-            <div style={{ display: "flex", alignItems: "center", paddingLeft: 10, fontWeight: "bold" }}>Objectives</div>
+            <div style={{ display: "flex", alignItems: "center", paddingLeft: 10, fontWeight: "bold" }}>
+                Objectives&nbsp;{this.countTag()}
+            </div>
         )
     }
+
+    countTag = () => {
+        const store = this.props.objectiveStore;
+
+        if (store.isDone) {
+            return <Tag color="#108ee9">{store.rowCount} Total</Tag>
+        }
+
+        if (store.isError) {
+            return <Tag color="red">...</Tag>
+        }
+
+        if (store.isLoading) {
+            return <Tag color="blue">...</Tag>
+        }
+    }
+
 
     showNewObjective = () => {
         const store = this.props.objectiveStore;
