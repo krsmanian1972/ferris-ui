@@ -111,32 +111,33 @@ export const alterSessionStateQuery = `mutation($input: ChangeSessionStateReques
 }`
 
 export const eventsQuery = `query ($criteria: EventCriteria!) {
-  getSessions(criteria: $criteria) {
-    session {
-      id,
-      enrollmentId,
-      people,
-      name,
-      description,
-      duration,
-      scheduleStart,
-      scheduleEnd,
-      status,
-      isClosed
+  getEvents(criteria: $criteria) {
+    sessions {
+      session {
+        id,
+        enrollmentId,
+        people,
+        name,
+        description,
+        duration,
+        scheduleStart,
+        scheduleEnd,
+        status,
+        isClosed
+      }
+      program {
+        name
+        id
+      }
+      sessionUser{
+        id
+        userType
+      }
     }
-    program {
-      name
-      id
-    }
-    sessionUser{
-      id
-      userType
-    }
-    
   }
 }`;
 
-export const sessionUsersQuery =  `query ($criteria: SessionCriteria!) {
+export const sessionUsersQuery = `query ($criteria: SessionCriteria!) {
   getSessionUsers(criteria: $criteria) {
     users {
       sessionUser {

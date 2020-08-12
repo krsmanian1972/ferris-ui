@@ -50,7 +50,7 @@ export default class App extends Component {
             <SelectedComponent />
           </div>
         </Content>
-        <Footer style={{ padding: '0 0px' }}>
+        <Footer style={{padding: '0 0px'}}>
         </Footer>
       </>
     )

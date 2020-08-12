@@ -63,7 +63,7 @@ export default class SessionListStore {
         try {
             const response = await this.apiProxy.query(apiHost, eventsQuery, variables);
             const data = await response.json();
-            events =  data.data.getSessions;
+            events =  data.data.getEvents.sessions;
             this.state = DONE;
         }
         catch (e) {
