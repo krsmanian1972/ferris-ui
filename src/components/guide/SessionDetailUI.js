@@ -14,6 +14,7 @@ import SessionStore from '../stores/SessionStore';
 import BoardList from "../commons/BoardList";
 import SessionLauncher from './SessionLauncher';
 import GoldenTemplate from './GoldenTemplate';
+import NoteList from '../commons/NoteList';
 
 const { Title, Paragraph } = Typography;
 
@@ -205,6 +206,9 @@ class SessionDetailUI extends Component {
                         <GoldenTemplate enrollmentId = {session.enrollmentId} memberId= {people.member.user.id} apiProxy={this.props.appStore.apiProxy} />
                         <BoardList title="Coach Boards" sessionUserId={people.coach.sessionUser.id} />
                         <BoardList title="Actor Boards" sessionUserId={people.member.sessionUser.id} />
+                        <NoteList title="Coach Notes" sessionUserId={people.coach.sessionUser.id} />
+                        <NoteList title="Actor Notes" sessionUserId={people.member.sessionUser.id} />
+
                     </>
                 )}
                 {this.renderPeople(people)}

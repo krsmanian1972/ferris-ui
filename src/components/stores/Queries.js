@@ -154,7 +154,7 @@ export const sessionUsersQuery =  `query ($criteria: SessionCriteria!) {
       message
     }
   }
-}`
+}`;
 
 export const createNotesQuery = `mutation ($input: NewNoteRequest!) {
   createNote(newNoteRequest: $input) {
@@ -167,7 +167,20 @@ export const createNotesQuery = `mutation ($input: NewNoteRequest!) {
       message
     }
   }
-}`
+}`;
+
+export const notesQuery = `query ($criteria: NoteCriteria!) {
+  getNotes(criteria: $criteria) {
+    notes {
+        id,
+        description,
+        remindAt
+    }
+    error{
+      message
+    }
+  }
+}`;
 
 export const createObjectiveQuery = `mutation($input: NewObjectiveRequest!) {
   createObjective(newObjectiveRequest:$input){
