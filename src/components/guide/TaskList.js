@@ -49,7 +49,7 @@ class TaskList extends Component {
         return (
             <div key={task.id}>
                 <Reader id={task.id} value={task.description} readOnly={true} height={350} />
-                <div style={{ padding: 10,height:100 }}>
+                <div style={{padding: 10,height:100 }}>
                     <Steps progressDot current={0} size="small">
                         <Step title={startEl} description="Start" />
                         <Step title={endEl} description="End" />
@@ -156,8 +156,8 @@ class TaskList extends Component {
 
         return (
             <>
-                <div style={{ border: "1px solid lightgray", width: "50%" }}>
-                    <div style={{ display: "flex", flexWrap: "wrap", height: 50, flexDirection: "row", justifyContent: "space-between" }}>
+                <div style={{ border: "1px solid #ECECEC", width: "50%" }}>
+                    <div style={{ background:"#F5F5F5", display: "flex", flexWrap: "wrap", height: 50, flexDirection: "row", justifyContent: "space-between" }}>
                         {this.getTitle()}
                         {this.getControls()}
                     </div>

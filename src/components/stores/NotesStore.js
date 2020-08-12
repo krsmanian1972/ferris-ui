@@ -22,7 +22,7 @@ export default class NotesStore {
 
     constructor(props) {
         this.apiProxy = props.apiProxy;
-        this.notesListStore = props.notesListStore;
+        this.noteListStore = props.noteListStore;
         this.sessionUserId = props.sessionUserId;
     }
 

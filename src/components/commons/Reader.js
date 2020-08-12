@@ -17,7 +17,7 @@ export default class Reader extends Component {
     render() {
         const height = this.props.height
         return (
-            <div style={{ height: height, overflow: "auto" }}>
+            <div style={{ height: height, overflow: "auto"}}>
                 <ReactQuill
                     theme={"snow"}
                     modules={this.modules}

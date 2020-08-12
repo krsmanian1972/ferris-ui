@@ -5,7 +5,7 @@ import _ from 'lodash';
 import socket from '../stores/socket';
 import VideoStreamTransceiver from '../webrtc/VideoStreamTransceiver';
 import ScreenStreamTransceiver from '../webrtc/ScreenStreamTransceiver';
-import NotesListStore from '../stores/NotesListStore';
+import NoteListStore from '../stores/NoteListStore';
 import NotesStore from '../stores/NotesStore';
 
 import NotesDrawer from './NotesDrawer';
@@ -60,14 +60,13 @@ class Broadcast extends Component {
 
     initializeNotesStore = (sessionUserId) => {
         
-        this.notesListStore = new NotesListStore({
+        this.noteListStore = new NoteListStore({
             apiProxy: this.props.appStore.apiProxy,
-            sessionUserId: sessionUserId,
         });
 
         this.notesStore = new NotesStore({
             apiProxy: this.props.appStore.apiProxy,
-            notesListStore: this.notesListStore,
+            noteListStore: this.noteListStore,
             sessionUserId: sessionUserId,
         });
     }

@@ -221,3 +221,7 @@ code {
 .ql-toolbar.ql-snow .ql-formats {
   margin-right: 5px;
 }
+
+.notes {
+  border:1px solid #ECECEC;
+}

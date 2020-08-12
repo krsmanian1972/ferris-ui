@@ -51,20 +51,20 @@ class SessionDetailUI extends Component {
 
     renderTopSegment = (program, session, sessionUser) => {
         return (
-            <>
+            <div key="top_segment">
                 <Title style={{ marginTop: 10 }} level={4}>Schedule</Title>
                 <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", textAlign: "center", alignItems: "center" }}>
                     {this.renderProgramImage(program)}
                     {this.renderSchedule(session)}
                     <SessionLauncher store={this.store} session={session} sessionUser={sessionUser} />
                 </div>
-            </>
+            </div>
         )
     }
 
     renderProgramImage = (program) => {
         return (
-            <div key={program.id} style={{ display: "flex", flexDirection: "column" }}>
+            <div key="programImage" style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ textAlign: "center", height: 175, marginRight: 10, marginLeft: 10 }}>
                     <div style={{ display: "inline-block", verticalAlign: "middle", height: 175 }}></div>
                     <img style={{ maxHeight: "100%", maxWidth: "100%", minWidth: "100%", verticalAlign: "middle", display: "inline-block" }} src={this.getPosterUrl(program)} />
@@ -83,7 +83,7 @@ class SessionDetailUI extends Component {
         const localeEnd = moment(session.scheduleEnd * 1000);
 
         return (
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <div key="schedule" style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ textAlign: "center", height: 175, marginRight: 10, marginLeft: 10 }}>
                     <div style={{ display: "inline-block", verticalAlign: "middle", height: 175 }}></div>
                     <div style={{ maxHeight: "100%", maxWidth: "100%", minWidth: "100%", verticalAlign: "middle", display: "inline-block" }}>
@@ -106,22 +106,22 @@ class SessionDetailUI extends Component {
         const member = people.member;
 
         return (
-            <>
+            <div key="people">
                 <Title style={{ marginTop: 30 }} level={4}>People</Title>
                 <div style={{ display: "flex", marginTop: 10, flexDirection: "row", justifyContent: "space-between" }}>
-                    <div style={{ width: "50%" }}>
+                    <div key="coachId" style={{ width: "50%" }}>
                         <Statistic title="Coach" value={coach.user.name} valueStyle={{ color: '#3f8600' }} />
                         <Paragraph><MailOutlined /> {coach.user.email}</Paragraph>
                         <Paragraph><PhoneOutlined /> (91)99999 XXXXX</Paragraph>
                     </div>
 
-                    <div style={{ width: "50%", borderLeft: "1px solid lightgray", paddingLeft: 20 }}>
+                    <div key="actorId" style={{ width: "50%", borderLeft: "1px solid lightgray", paddingLeft: 20 }}>
                         <Statistic title="Actor" value={member.user.name} />
                         <Paragraph><MailOutlined /> {member.user.email}</Paragraph>
                         <Paragraph><PhoneOutlined /> (91)99999 xxxx</Paragraph>
                     </div>
                 </div>
-            </>
+            </div>
         )
     }
 
@@ -154,32 +154,27 @@ class SessionDetailUI extends Component {
     }
 
     makeReadyButton = () => {
-        if (!this.store.canMakeReady) {
-            return <></>
+        if (this.store.canMakeReady) {
+            return (
+                <Popconfirm key="ready_pop" placement="left" title="Activate this session as Ready?" okText="Yes" cancelText="No"
+                    onConfirm={() => this.makeReady()}
+                >
+                    <Button key="ready" style={{ border: "1px solid green", color: "green" }} icon={<CaretRightOutlined />} shape="circle"></Button>
+                </Popconfirm>
+            )
         }
-
-        return (
-            <Popconfirm key="ready_pop" placement="left" title="Activate this session as Ready?" okText="Yes" cancelText="No"
-                onConfirm={() => this.makeReady()}
-            >
-                <Button key="ready" style={{ border: "1px solid green", color: "green" }} icon={<CaretRightOutlined />} shape="circle"></Button>
-            </Popconfirm>
-        )
-
     }
 
     cancelEventButton = () => {
-        if (!this.store.canCancelEvent) {
-            return <></>
+        if (this.store.canCancelEvent) {
+            return (
+                <Popconfirm key="cancel_pop" placement="left" title="Mark this session as Cancelled?" okText="Yes" cancelText="No"
+                    onConfirm={() => this.cancelEvent()}
+                >
+                    <Button key="cancel" danger icon={<CloseOutlined />} shape="circle"></Button>
+                </Popconfirm>
+            )
         }
-
-        return (
-            <Popconfirm key="cancel_pop" placement="left" title="Mark this session as Cancelled?" okText="Yes" cancelText="No"
-                onConfirm={() => this.cancelEvent()}
-            >
-                <Button key="cancel" danger icon={<CloseOutlined />} shape="circle"></Button>
-            </Popconfirm>
-        )
     }
 
 
@@ -191,7 +186,7 @@ class SessionDetailUI extends Component {
         const change = this.store.change;
 
         return (
-            <PageHeader
+            <PageHeader key="sessionDetail"
                 title={<Title level={3}>{session.name}</Title>}
                 subTitle={program.name}
                 extra={[
@@ -202,14 +197,13 @@ class SessionDetailUI extends Component {
             >
                 {this.renderTopSegment(program, session, sessionUser)}
                 {people.coach && (
-                    <>
-                        <GoldenTemplate enrollmentId = {session.enrollmentId} memberId= {people.member.user.id} apiProxy={this.props.appStore.apiProxy} />
-                        <BoardList title="Coach Boards" sessionUserId={people.coach.sessionUser.id} />
-                        <BoardList title="Actor Boards" sessionUserId={people.member.sessionUser.id} />
-                        <NoteList title="Coach Notes" sessionUserId={people.coach.sessionUser.id} />
-                        <NoteList title="Actor Notes" sessionUserId={people.member.sessionUser.id} />
-
-                    </>
+                    <div key="assets">
+                        <GoldenTemplate key="gt" enrollmentId={session.enrollmentId} memberId={people.member.user.id} apiProxy={this.props.appStore.apiProxy} />
+                        <BoardList key="cb" title="Coach Boards" sessionUserId={people.coach.sessionUser.id} />
+                        <BoardList key="ab" title="Actor Boards" sessionUserId={people.member.sessionUser.id} />
+                        <NoteList key="cn" title="Coach Notes" sessionUserId={people.coach.sessionUser.id} />
+                        <NoteList key="an" title="Actor Notes" sessionUserId={people.member.sessionUser.id} />
+                    </div>
                 )}
                 {this.renderPeople(people)}
             </PageHeader>
