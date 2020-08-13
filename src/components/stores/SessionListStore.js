@@ -25,6 +25,9 @@ export default class SessionListStore {
     end = null;
     roster = null;
 
+    sessions = new Map();
+    rowCount = 0;
+
     constructor(props) {
         this.apiProxy = props.apiProxy;
     }
@@ -39,6 +42,60 @@ export default class SessionListStore {
 
     get isError() {
         return this.state === ERROR;
+    }
+
+    /**
+     * The key of the map is Date.
+     * The value is an Array;
+     * 
+     * @param {*} result 
+     */
+    groupByDate = (result) => {
+        const groupedResult = new Map();
+
+        for(var i=0;i<result.length;i++) {
+
+            const event = result[i];
+            
+            const date = moment(event.scheduleStart*1000).format('DD-MMM-YYYY');
+
+            if(!groupedResult.has(date)){
+                groupedResult.set(date,[]);
+            }
+
+            groupedResult.get(date).push(event);
+        }
+
+        return groupedResult;
+    }
+    fetchProgramSessions = async(programId) => {
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+
+        const userFuzzyId = this.apiProxy.getUserFuzzyId();
+
+        const variables = {
+            criteria: {
+                programId: programId,
+                userId: userFuzzyId
+            }
+        }
+
+        try {
+            const response = await this.apiProxy.query(apiHost, eventsQuery, variables);
+            const data = await response.json();
+            const result =  data.data.getEvents.sessions;
+            this.sessions = this.groupByDate(result)
+            this.rowCount = result.length;
+            this.state = DONE;
+        }
+        catch (e) {
+            this.state = ERROR;
+            this.message = ERROR_MESSAGE;
+        }
+
+        return sessions;
+    
     }
 
     /**
@@ -162,10 +219,14 @@ decorate(SessionListStore, {
     start: observable,
     end: observable,
     roster: observable,
+
+    sessions:observable,
+    rowCount:observable,
     
     isDone:computed,
     isError:computed,
     isLoading:computed,
     
     buildRoster: action,
+    fetchProgramSessions: action,
 });

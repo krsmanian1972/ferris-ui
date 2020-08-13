@@ -126,11 +126,11 @@ export const eventsQuery = `query ($criteria: EventCriteria!) {
         isClosed
       }
       program {
-        name
+        name,
         id
       }
       sessionUser{
-        id
+        id,
         userType
       }
     }
