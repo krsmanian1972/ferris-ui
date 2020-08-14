@@ -13,7 +13,7 @@ import ProgramDescription from './ProgramDescription';
 import EnrollmentModal from './EnrollmentModal';
 
 import Milestones from '../guide/Milestones';
-
+import ProgramSessions from './ProgramSessions';
 import ProgramStore from '../stores/ProgramStore';
 import EnrollmentStore from '../stores/EnrollmentStore';
 
@@ -58,6 +58,11 @@ class ProgramDetailUI extends Component {
 
     onEnroll = () => {
         this.enrollmentStore.showEnrollmentModal = true;
+    }
+
+    showSessionDetail = (event) => {
+        const params = {event:event, parentKey: "programDetailUI" };
+        this.props.appStore.currentComponent = { label: "Session Detail", key: "sessionDetail", params: params };
     }
 
     render() {
@@ -111,12 +116,8 @@ class ProgramDetailUI extends Component {
                     
                     <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy}/>
                     
-                    <Card title="Trailers">
-                        <Card
-                            style={{ border: '1px solid lightgray' }}
-                            cover={<img alt="cover" style={{ border: "1px solid lightgray" }} src={this.getTrailerUrl()} />}>
-                        </Card>
-                    </Card>
+                    <ProgramSessions programId = {program.id} apiProxy={this.props.appStore.apiProxy} showSessionDetail = {this.showSessionDetail}/>
+                    
                 </PageHeader>
 
                 <EnrollmentModal programStore={this.store} enrollmentStore={this.enrollmentStore} />

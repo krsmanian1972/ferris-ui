@@ -5,7 +5,7 @@ import { isBlank } from './Util';
 import { apiHost } from './APIEndpoints';
 import { eventsQuery } from './Queries';
 
-const SLOT_SIZE = 36;
+const SLOT_SIZE = 35;
 
 const INIT = "init";
 const PENDING = 'pending';
@@ -57,7 +57,7 @@ export default class SessionListStore {
 
             const event = result[i];
             
-            const date = moment(event.scheduleStart*1000).format('DD-MMM-YYYY');
+            const date = moment(event.session.scheduleStart*1000).format('DD-MMM-YYYY');
 
             if(!groupedResult.has(date)){
                 groupedResult.set(date,[]);
@@ -68,7 +68,9 @@ export default class SessionListStore {
 
         return groupedResult;
     }
+
     fetchProgramSessions = async(programId) => {
+
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
@@ -93,9 +95,6 @@ export default class SessionListStore {
             this.state = ERROR;
             this.message = ERROR_MESSAGE;
         }
-
-        return sessions;
-    
     }
 
     /**

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Card, Typography, Row, Col } from 'antd';
-import { CopyrightOutlined, CaretRightOutlined } from '@ant-design/icons';
+import { CaretRightOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -29,15 +29,15 @@ class About extends Component {
                             <p>Ferris - The Coaching Assistant</p>
                             <p>Version 0.1</p>
                             <p>May-2020</p>
-                            <p><CopyrightOutlined />&nbsp;KRSCode.com</p>
+                            <p>Maintained by&nbsp;KRSCode.com</p>
                         </Card>
                     </Col>
                 </Row>
                 <Row>    
                     <Col className="gutter-row" span={24}>
-                        <Card style={commentsStyle} title="We aim:">
-                            <p><CaretRightOutlined />&nbsp;to aid; augumenting your collaboration </p>
-                            <p><CaretRightOutlined />&nbsp;to aid; managing your coaching plan</p>
+                        <Card style={commentsStyle} title="We aim to aid:">
+                            <p><CaretRightOutlined />&nbsp;augumenting your collaboration </p>
+                            <p><CaretRightOutlined />&nbsp;managing your coaching plan</p>
                         </Card>
                     </Col>
                 </Row>
@@ -48,13 +48,25 @@ class About extends Component {
                                 <Col>
                                     <p>Moz://a, Rust Lang</p>
                                     <p>Actix, Juniper, Diesel</p>
-                                    <p>React,MobX, Antd</p>
+                                    <p>React,MobX</p>
                                     <p>MySql</p>
                                     <p>And the Open-Source Community</p>
                                 </Col>    
                                 <Col>
                                     <div className="logo"/>
                                 </Col>
+                            </Row>
+                        </Card>
+                    </Col>
+                </Row>
+                <Row>   
+                    <Col className="gutter-row" span={24}>
+                        <Card style={commentsStyle} title="For Support">
+                            <Row>
+                                <Col>
+                                    <p>Raja Subramanian K</p>
+                                    <p>krsmanian1972@gmail.com</p>
+                                </Col>    
                             </Row>
                         </Card>
                     </Col>

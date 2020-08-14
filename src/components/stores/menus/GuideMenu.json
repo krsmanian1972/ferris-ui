@@ -1,12 +1,12 @@
 [
     {
-        "label": "Home",
-        "key": "home",
+        "label": "Programs",
+        "key": "programs",
         "isLandingPage": true
     },
     {
-        "label": "Programs",
-        "key": "programs",
+        "label": "Moment 36",
+        "key": "home",
         "isLandingPage": false
     },
     {
@@ -15,7 +15,7 @@
         "isLandingPage": false
     },
     {
-        "label": "Reports",
+        "label": "About",
         "key":  "about",
         "isLandingPage": false
     }

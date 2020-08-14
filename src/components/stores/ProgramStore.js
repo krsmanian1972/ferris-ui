@@ -116,7 +116,6 @@ export default class ProgramStore {
         if (response.status == 200) {
             programModel.program.description = data;
         }
-        this.programModel = programModel
     }
 
     load = async (programId) => {
@@ -152,7 +151,10 @@ export default class ProgramStore {
                 return;
             }
             
-            await this.populateDescription(result[0]);
+            const programModel = result[0]
+            await this.populateDescription(programModel);
+
+            this.programModel = programModel
             this.state = DONE;
         }
 

@@ -1,25 +1,6 @@
 import React from 'react';
-import moment from 'moment';
 
-function SessionSlot({ date, sessions, showSessionDetail }) {
-
-    const isCurrentHour = () => {
-        const now = moment();
-        const now_string = now.format("DD-MMM-YYYY")+"-"+now.format("HH");
-        const date_string = date.format("DD-MMM-YYYY")+"-"+date.format("HH");
-        if (now_string === date_string) {
-            return "current";
-        }
-        return "";
-    }
-
-    const dateOf = (date) => {
-        return date.format("DD-MMM");
-    }
-
-    const timeOf = (date) => {
-        return date.format("hh A");
-    }
+export default function ProgramSessionSlot({ date, sessions, showSessionDetail }) {
 
     const people = (event) => {
         return <p style={{ float: 'left' }}>{event.program.name}::{event.session.people}</p>
@@ -37,9 +18,8 @@ function SessionSlot({ date, sessions, showSessionDetail }) {
 
     return (
         <div className="slot">
-            <div className={"slot-hour " + isCurrentHour()} >
-                <p style={{ fontWeight: "bold", marginBottom: '3px' }}>{timeOf(date)}</p>
-                <p style={{ fontSize: "12px" }}>{dateOf(date)}</p>
+            <div className="slot-hour">
+                <p style={{ fontWeight: "bold", marginBottom: '3px' }}>{date}</p>
             </div>
             <div className="slot-detail">
                 {
@@ -47,7 +27,7 @@ function SessionSlot({ date, sessions, showSessionDetail }) {
                         <div key={index} className={"slot-item " + event.session.band} onClick = {()=>showSessionDetail(event)}>
                             <div className="slot-title">
                                 {people(event)}
-                                {bandText(event.session.band)}
+                                {bandText(event.session.status)}
                             </div>
                             <div>
                                 <p style={{ float: 'left' }}>{event.session.description}</p>
@@ -59,5 +39,3 @@ function SessionSlot({ date, sessions, showSessionDetail }) {
         </div>
     )
 }
-
-export default SessionSlot;

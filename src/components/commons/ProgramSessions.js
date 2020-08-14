@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
-import { Spin, Result, Typography, Tag } from 'antd';
+import { Spin, Card, Result, Typography, Tag } from 'antd';
 
 import SessionListStore from '../stores/SessionListStore';
 
-import SessionSlot from './SessionSlot';
+import ProgramSessionSlot from './ProgramSessionSlot';
 
 const { Title } = Typography;
 
@@ -15,7 +15,7 @@ class ProgramSession extends Component {
     constructor(props) {
         super(props);
         this.store = new SessionListStore({ apiProxy: props.apiProxy });
-        this.store.fetchProgramSession(props.programId);
+        this.store.fetchProgramSessions(props.programId);
     }
     countTag = () => {
         if (this.store.isDone) {
@@ -52,7 +52,7 @@ class ProgramSession extends Component {
         if (sessions) {
             var index = 0
             for (let [date, events] of sessions) {
-                slots.push(<SessionSlot key={index++} date={date} sessions={events} showSessionDetail={this.props.showSessionDetail}/>);
+                slots.push(<ProgramSessionSlot key={index++} date={date} sessions={events} showSessionDetail={this.props.showSessionDetail} />);
             }
         }
 
@@ -64,13 +64,12 @@ class ProgramSession extends Component {
     render() {
 
         const sessions = this.store.sessions;
-        
+
         return (
-            <div style={{ marginTop: 20 }}>
-                <Title level={4}>{this.props.title} {this.countTag()}</Title>
+            <Card title={<Title level={4}>Your Sessions {this.countTag()}</Title>}>
                 {this.displayMessage()}
                 {this.renderSlots(sessions)}
-            </div>
+            </Card>
         )
     }
 

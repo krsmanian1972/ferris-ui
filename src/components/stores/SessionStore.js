@@ -196,6 +196,12 @@ export default class SessionStore {
 
     }
 
+    get canCompleteEvent() {
+        return this.isCoach
+            && this.event.session
+            && this.event.session.status === PROGRESS
+    }
+
     get canBroadcast() {
         return this.event.session
             && !this.event.session.isClosed
@@ -282,6 +288,8 @@ decorate(SessionStore, {
     canMakeReady: computed,
     canCancelEvent: computed,
     canBroadcast: computed,
+    canCompleteEvent:computed,
+
     broadcastHelp: computed,
 
     createSchedule: action,

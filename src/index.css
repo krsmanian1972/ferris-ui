@@ -151,8 +151,8 @@ code {
   display:flex;
   flex-direction:column;
   width:20%;
-  background-color: rgb(42,75,124);
-  border: 1px ridge rgb(42,75,124);
+  background-color: #4060a1;
+  border: 1px ridge #4060a1;
   align-items: center;
   text-align: center;
   justify-content: center;
@@ -160,6 +160,10 @@ code {
   color:white;
 }
 
+.current {
+  background-color: #0b7261;
+  color:white;
+}
 
 .slot-detail {
   width:80%;

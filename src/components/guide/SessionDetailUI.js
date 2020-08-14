@@ -3,7 +3,7 @@ import { inject, observer } from 'mobx-react';
 import { assetHost } from '../stores/APIEndpoints';
 
 import { Typography, Statistic, PageHeader, Button, Tag, Popconfirm, notification, message } from 'antd';
-import { MailOutlined, PhoneOutlined, CaretRightOutlined, CloseOutlined } from '@ant-design/icons';
+import { MailOutlined, PhoneOutlined, CaretRightOutlined, CloseOutlined, CheckOutlined } from '@ant-design/icons';
 
 import Moment from 'react-moment';
 import moment from 'moment';
@@ -149,6 +149,18 @@ class SessionDetailUI extends Component {
         }
     }
 
+    completeEvent = async () => {
+
+        await this.store.alterSessionState("DONE");
+
+        if (this.store.isError) {
+            failureNotification(store.message.help);
+        }
+        else if (this.store.isDone) {
+            message.success('The session is marked as completed.');
+        }
+    }
+
     renderStatus = (session) => {
         return <Tag key="status" color="#108ee9">{session.status}</Tag>
     }
@@ -177,6 +189,17 @@ class SessionDetailUI extends Component {
         }
     }
 
+    completeEventButton = () => {
+        if (this.store.canCompleteEvent) {
+            return (
+                <Popconfirm key="complete_pop" placement="left" title="Mark this session as Completed?" okText="Yes" cancelText="No"
+                    onConfirm={() => this.completeEvent()}
+                >
+                    <Button key="complete" style={{ border: "1px solid green", color: "green" }} icon={<CheckOutlined />} shape="circle"></Button>
+                </Popconfirm>
+            )
+        }
+    }
 
 
     render() {
@@ -193,6 +216,7 @@ class SessionDetailUI extends Component {
                     this.renderStatus(session),
                     this.makeReadyButton(),
                     this.cancelEventButton(),
+                    this.completeEventButton(),
                 ]}
             >
                 {this.renderTopSegment(program, session, sessionUser)}
