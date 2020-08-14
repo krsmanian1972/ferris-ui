@@ -5,6 +5,8 @@ import { DatePicker, Button, Form, Input, Upload, notification, message } from '
 import { UploadOutlined } from '@ant-design/icons';
 import {assetHost} from '../stores/APIEndpoints';
 
+import Editor from "../commons/Editor";
+
 const { TextArea } = Input;
 
 const failureNotification = () => {
@@ -23,6 +25,12 @@ const failureNotification = () => {
 class NotesForm extends Component {
 
     formRef = React.createRef();
+    description = "";
+
+    handleDescription = (text) => {
+        this.description = text;
+        this.formRef.current.setFieldsValue({ description: this.description });
+    }
 
     disabledDate = (current) => {
         return current && current < moment().startOf('day');
@@ -81,7 +89,10 @@ class NotesForm extends Component {
                     name="description"
                     rules={[{ required: true, message: 'The Note is blank. It is not permitted to save.' }]}
                     label="Notes">
-                    <TextArea rows={5} />
+                    <div style={{ display: "none" }}><TextArea rows={1} /></div>
+                    <div style={{ border: "1px solid lightgray" }}>
+                        <Editor id="note_desc" value={this.description} onChange={this.handleDescription} height={300} />
+                    </div>
                 </Form.Item>
 
                 <Form.Item name="remindAt" label="Remind me at">
