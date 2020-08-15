@@ -59,6 +59,7 @@ class ObservationForm extends Component {
                         <Editor id="observation_desc" value={this.description} onChange={this.handleDescription} height={300} />
                     </div>
                 </Form.Item>
+                
 
                 <Form.Item>
                     <Button type="primary" disabled={store.isLoading} htmlType="submit" icon={<PlusCircleOutlined />}>Create Observation</Button>

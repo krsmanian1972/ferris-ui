@@ -235,6 +235,7 @@ class Broadcast extends Component {
         const { localSrc, peerSrc, screenSrc, portalSize,minimizeMiniBoard } = this.state;
         const viewHeight = portalSize.height * 0.94;
         const canShare = this.peerStreamStatus === "active";
+        const sessionUserId = this.props.params.sessionUserId;
 
         return (
             <div style={{ padding: 8, height: viewHeight }}>
@@ -268,7 +269,7 @@ class Broadcast extends Component {
                     </Col>
                 </Row>
 
-                <NotesDrawer notesStore={this.notesStore} />
+                <NotesDrawer notesStore={this.notesStore} sessionUserId = {sessionUserId} apiProxy={this.props.appStore.apiProxy}/>
             </div>
         )
     }
