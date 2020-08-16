@@ -23,7 +23,6 @@ const pointLightColor = 0xffffff;
 const pointLightPosition = 1;
 
 const taskBarColor = "#2A4B7C";
-//const taskBarColor = "0x000000";
 
 const barWidth = 3;
 const barHeight = 1;
@@ -65,6 +64,7 @@ class WorkflowUI extends Component {
         this.internalState = "";
         this.sourceConnectorPort = {};
         this.destConnectorPort = {};
+        this.lineSegment = [];
     }
 
     componentDidMount() {
@@ -104,7 +104,7 @@ class WorkflowUI extends Component {
         let sourceX, sourceY, clickX, clickY;
         clickX = point.x;
         clickY = point.y;
-//        console.log(task);      
+
         sourceX = this.connectorMap[task].connectorLeft.position.x;
         sourceY = this.connectorMap[task].connectorLeft.position.y;
 
@@ -122,26 +122,21 @@ class WorkflowUI extends Component {
         sourceY = this.connectorMap[task].connectorBottom.position.y;
         this.findDistanceAndSetPort(task, 4, sourceX, sourceY, clickX, clickY);                 
 
-        
-  //      console.log(this.sourceConnectorPort);
     }     
     
     findDistanceAndSetPort = (task, direction, sourceX, sourceY, clickX, clickY) => {
         let xDiff, yDiff;
         xDiff = sourceX - clickX;
         yDiff = sourceY - clickY;
-//        console.log(task);
-//        console.log(direction);
-//        console.log(xDiff);
-//        console.log(yDiff);
         if (Math.abs(xDiff) <= 0.5 && Math.abs(yDiff) <= 0.5){
-//           console.log("Found one");
            if(this.internalState === ""){
                 console.log("SOURCE PORT");
                 console.log(task);
                 console.log(direction);
                 this.sourceConnectorPort[0] = {x: sourceX ,
-                                               y :sourceY};
+                                               y :sourceY,
+                                               task: task,
+                                               direction:direction};
                 this.internalState = "FOUND_SOURCE_PORT";
            }
            else if(this.internalState === "FOUND_SOURCE_PORT"){
@@ -149,15 +144,54 @@ class WorkflowUI extends Component {
                 console.log(task);
                 console.log(direction);
                 this.destConnectorPort[0] = {x: sourceX ,
-                                  	      y :sourceY};
-                this.drawLine(this.sourceConnectorPort[0].x, this.sourceConnectorPort[0].y, this.destConnectorPort[0].x, this.destConnectorPort[0].y);
-                this.internalState = "";
+                                  	      y :sourceY,
+                                  	      task:task,
+                                  	      direction:direction};
+                var lineSegMap = {sourceTask:this.sourceConnectorPort[0].task, sourceDirection:this.sourceConnectorPort[0].direction,
+                                  sourceX:this.sourceConnectorPort[0].x, sourceY:this.sourceConnectorPort[0].y,
+	                          destTask:task, destDirection:direction,
+	                          destX:sourceX, destY: sourceY};
+                //this.lineSegement.push(lineSegMap);
+                
+                this.drawConnectingLine(lineSegMap);
+        	 this.internalState = "";
                 
            }
         }
     
     } 
 
+    
+    drawConnectingLine = (lineSegMap) => {
+        var material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
+        var points = [];
+        points.push( new THREE.Vector3( lineSegMap.sourceX, lineSegMap.sourceY, 0 ) );
+        points.push( new THREE.Vector3( lineSegMap.destX, lineSegMap.destY, 0 ) );
+        //points.push( new THREE.Vector3( 2, 0, 0 ) );
+        
+        var geometry = new THREE.BufferGeometry().setFromPoints( points );
+        lineSegMap.line = new THREE.Line( geometry, material );
+        
+        this.lineSegment.push(lineSegMap);
+        console.log(this.lineSegment);
+        this.scene.add(this.lineSegment[this.lineSegment.length-1].line);
+    }
+    
+    updateConnectingLine = (index) => {
+        this.scene.remove(this.lineSegment[index].line);
+        var material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
+        var points = [];
+        points.push( new THREE.Vector3( this.lineSegment[index].sourceX, this.lineSegment[index].sourceY, 0 ) );
+        points.push( new THREE.Vector3( this.lineSegment[index].destX, this.lineSegment[index].destY, 0 ) );
+        //points.push( new THREE.Vector3( 2, 0, 0 ) );
+
+        var geometry = new THREE.BufferGeometry().setFromPoints( points );
+        this.lineSegment[index].line = new THREE.Line( geometry, material );
+        console.log(this.lineSegment);
+        this.scene.add(this.lineSegment[index].line);
+    
+    }
+    
     getClickPoint = (event) => {
 
         const width = this.container.clientWidth;
@@ -190,6 +224,7 @@ class WorkflowUI extends Component {
         drawMode = false;
         this.selectedTaskBar = event.object;
         this.moveDots();
+     
     }
 
     dragEndCallback = (event) => {
@@ -218,11 +253,80 @@ class WorkflowUI extends Component {
         const right = this.connectorMap[taskName].connectorRight;
         const top = this.connectorMap[taskName].connectorTop;
         const bottom = this.connectorMap[taskName].connectorBottom;
+        const leftX = this.selectedTaskBar.position.x - barWidth / 2;
+        const leftY = this.selectedTaskBar.position.y;
+        const rightX = this.selectedTaskBar.position.x + barWidth / 2;
+        const rightY = this.selectedTaskBar.position.y;
+        const topX = this.selectedTaskBar.position.x;
+        const topY = this.selectedTaskBar.position.y + barHeight / 2;
+        const bottomX = this.selectedTaskBar.position.x;
+        const bottomY = this.selectedTaskBar.position.y - barHeight / 2;
+        left.position.set(leftX, leftY , 0);
+        right.position.set(rightX, rightY , 0);
+        top.position.set(topX, topY , 0);
+        bottom.position.set(bottomX, bottomY , 0);
 
-        left.position.set(this.selectedTaskBar.position.x - barWidth / 2, this.selectedTaskBar.position.y, 0);
-        right.position.set(this.selectedTaskBar.position.x + barWidth / 2, this.selectedTaskBar.position.y, 0);
-        top.position.set(this.selectedTaskBar.position.x, this.selectedTaskBar.position.y + barHeight / 2, 0);
-        bottom.position.set(this.selectedTaskBar.position.x, this.selectedTaskBar.position.y - barHeight / 2, 0);
+        //move the lines start point or end point as well
+        for (var i = 0; i < this.lineSegment.length; i++){
+            console.log(this.lineSegment);
+            console.log(taskName);
+            if(this.lineSegment[i].sourceTask === taskName){
+                console.log("Found out a moving line segment");
+                if(this.lineSegment[i].sourceDirection == 1){
+                   //left connector has a line
+                   this.lineSegment[i].sourceX = leftX;
+                   this.lineSegment[i].sourceY = leftY;
+                   this.updateConnectingLine(i);
+                }
+                if(this.lineSegment[i].sourceDirection == 2){
+                   //right connector has a line
+                   this.lineSegment[i].sourceX = rightX;
+                   this.lineSegment[i].sourceY = rightY;
+                   this.updateConnectingLine(i);
+                }
+                if(this.lineSegment[i].sourceDirection == 3){
+                   //Top connector has a line
+                   this.lineSegment[i].sourceX = topX;
+                   this.lineSegment[i].sourceY = topY;
+                   this.updateConnectingLine(i);
+                }
+                if(this.lineSegment[i].sourceDirection == 4){
+                   //bottom connector has a line
+                   console.log("Bottom moved");
+                   this.lineSegment[i].sourceX = bottomX;
+                   this.lineSegment[i].sourceY = bottomY;
+                   this.updateConnectingLine(i);
+                }
+            }
+            if(this.lineSegment[i].destTask === taskName){
+                console.log("Found out a moving line segment");
+                if(this.lineSegment[i].destDirection == 1){
+                   //left connector has a line
+                   this.lineSegment[i].destX = leftX;
+                   this.lineSegment[i].destY = leftY;
+                   this.updateConnectingLine(i);
+                }
+                if(this.lineSegment[i].destDirection == 2){
+                   //right connector has a line
+                   this.lineSegment[i].destX = rightX;
+                   this.lineSegment[i].destY = rightY;
+                   this.updateConnectingLine(i);
+                }
+                if(this.lineSegment[i].destDirection == 3){
+                   //Top connector has a line
+                   this.lineSegment[i].destX = topX;
+                   this.lineSegment[i].destY = topY;
+                   this.updateConnectingLine(i);
+                }
+                if(this.lineSegment[i].destDirection == 4){
+                   //bottom connector has a line
+                   console.log("Bottom moved");
+                   this.lineSegment[i].destX = bottomX;
+                   this.lineSegment[i].destY = bottomY;
+                   this.updateConnectingLine(i);
+                }
+            }
+        }
 
     }
 
