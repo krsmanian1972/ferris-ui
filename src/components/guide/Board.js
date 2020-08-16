@@ -437,9 +437,9 @@ class Board extends Component {
 
         return (
             <Row>
-                <Col span={10}>
+                <Col span={12}>
                     <Tabs type="editable-card"
-                        defaultActiveKey="1" tabPosition="top" style={{ maxHeight: 30 }}
+                        defaultActiveKey="1" tabPosition="top" style={{height:30}}
                         onTabClick={this.onTabClick} onEdit={this.onEdit}>
                         {panes.map(pane => (
                             <TabPane tab={pane.title} key={pane.key} closable={pane.closable}>
@@ -447,7 +447,7 @@ class Board extends Component {
                         ))}
                     </Tabs>
                 </Col>
-                <Col span={12}>
+                <Col span={10}>
                     <div style={{ float: "right", textAlign: "left", paddingRight: "10px" }}>
                         <Space>
                             <Tooltip title="Pen">

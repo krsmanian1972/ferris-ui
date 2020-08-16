@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Form, Input, Card, Typography, notification, message } from 'antd';
 import { observer, inject } from 'mobx-react';
+import About from './About';
 
 const { Title } = Typography;
 
@@ -51,7 +52,11 @@ export default class LoginScreen extends Component {
                 </Card>
 
                 <div style={{ textAlign: 'center', marginTop: 30 }}>
-                    <Button type="link" disabled={store.isLoading}>DON'T HAVE AN ACCOUNT? REGISTER HERE</Button>
+                    <Button type="link" disabled={store.isLoading}>DON'T HAVE AN ACCOUNT? WRITE TO US</Button>
+                </div>
+
+                <div>
+                    <About/>
                 </div>
             </>
         );

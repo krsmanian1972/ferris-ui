@@ -256,12 +256,19 @@ class Broadcast extends Component {
     }
 
     getAudioTooltip = () => {
-        if (this.state.videoDevice === 'On') {
+        if (this.state.audioDevice === 'On') {
             return "Mute the Microphone";
         }
         return "Unmute the Microphone";
     }
 
+    getMiniBoardTooltip = () => {
+        if (!this.state.minimizeMiniBoard) {
+            return "Hide the Mini-Boards";
+        }
+        return "Show the Mini-Boards";
+    }
+    
     toggleVideoDevice = () => {
         if(!this.transceivers[CONNECTION_KEY_VIDEO_STREAM]) {
             return;
@@ -317,10 +324,7 @@ class Broadcast extends Component {
                             <Tooltip title={this.getAudioTooltip()}>
                                 <Button disabled={!canShare} type="primary" icon={this.getAudioIcon()} shape="circle" onClick={this.toggleAudioDevice} />
                             </Tooltip>
-                            <Tooltip title="Close Activity">
-                                <Button disabled={true} type="primary" icon={<StopOutlined />} shape="circle" />
-                            </Tooltip>
-                            <Tooltip title="Minimize Mini Board">
+                            <Tooltip title={this.getMiniBoardTooltip()}>
                                 <Button onClick={this.minimizeMiniBoard} type="primary" icon={<StopOutlined />} shape="circle" />
                             </Tooltip>
                         </Space>

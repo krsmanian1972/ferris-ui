@@ -231,3 +231,9 @@ code {
 .notes {
   border:1px solid #ececec
 }
+
+.ant-tabs-nav-more {
+  background: white !important;
+  color:rgb(85,164,213);
+  font-weight: bold;
+}

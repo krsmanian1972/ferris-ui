@@ -8,24 +8,6 @@ const standardStyle = {
     position: "relative",
     overflow: "hidden",
 };
-var peerVideoContainer = {
-    position: "absolute",
-    bottom: "0",
-    left: "0",
-    width: "45%",
-    height: "15%",
-    display: "flex",
-};
-
-var myVideoContainer = {
-    position: "absolute",
-    bottom: "0",
-    right: "0",
-    width: "45%",
-    height: "15%",
-    display: "flex",
-}
-    ;
 
 function VideoBoard({ localSrc, peerSrc, screenSrc, myBoards,  minmizeMiniBoard }) {
 
