@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Tabs, Drawer } from 'antd';
-
+import NoteList from '../commons/NoteList';
 import NotesForm from './NotesForm';
 
 const { TabPane } = Tabs;
@@ -26,7 +26,7 @@ class NotesDrawer extends Component {
                         <NotesForm notesStore={store} />
                     </TabPane>
                     <TabPane key="2" tab="Earlier">
-
+                        <NoteList sessionUserId = {this.props.sessionUserId} apiProxy={this.props.apiProxy}/>
                     </TabPane>
                 </Tabs>
             </Drawer>

@@ -14,7 +14,8 @@ import Board from './Board';
 
 import { Button, Row, Col, Tooltip, Space } from 'antd';
 import { message } from 'antd';
-import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutlined } from '@ant-design/icons';
+import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutlined, AudioMutedOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+
 
 const CONNECTION_KEY_VIDEO_STREAM = "peerVideoStream";
 const CONNECTION_KEY_SCREEN_STREAM = "peerScreenStream";
@@ -39,8 +40,11 @@ class Broadcast extends Component {
             peerSrc: null,
             screenSrc: null,
 
+            videoDevice: 'On',
+            audioDevice: 'On',
+
             minimizeMiniBoard: false,
-            
+
             portalSize: { height: window.innerHeight, width: window.innerWidth }
         };
 
@@ -51,7 +55,7 @@ class Broadcast extends Component {
 
         this.endCallHandler = this.endCall.bind(this);
         this.rejectCallHandler = this.rejectCall.bind(this);
-        
+
         const sessionUserId = this.props.params.sessionUserId;
 
         this.initializeNotesStore(sessionUserId);
@@ -59,7 +63,7 @@ class Broadcast extends Component {
     }
 
     initializeNotesStore = (sessionUserId) => {
-        
+
         this.noteListStore = new NoteListStore({
             apiProxy: this.props.appStore.apiProxy,
         });
@@ -199,7 +203,6 @@ class Broadcast extends Component {
     }
 
     endCall(isStarter) {
-        console.log("end Call");
         this.setState({
             localStreamStatus: '',
             peerRequestStatus: '',
@@ -231,16 +234,72 @@ class Broadcast extends Component {
         }
     }
 
+    getAudioIcon = () => {
+        if (this.state.audioDevice === 'On') {
+            return <AudioOutlined/>;
+        }
+        return <AudioMutedOutlined/>
+    }
+
+    getVideoIcon = () => {
+        if (this.state.videoDevice === 'On') {
+            return <CameraOutlined/>
+        }
+        return <EyeInvisibleOutlined/>;
+    }
+
+    getVideoTooltip = () => {
+        if (this.state.videoDevice === 'On') {
+            return "Turn-off the Camera";
+        }
+        return "Turn-on the Camera";
+    }
+
+    getAudioTooltip = () => {
+        if (this.state.videoDevice === 'On') {
+            return "Mute the Microphone";
+        }
+        return "Unmute the Microphone";
+    }
+
+    toggleVideoDevice = () => {
+        if(!this.transceivers[CONNECTION_KEY_VIDEO_STREAM]) {
+            return;
+        }
+
+        this.transceivers[CONNECTION_KEY_VIDEO_STREAM].mediaDevice.toggle('Video');
+        if (this.state.videoDevice === 'On') {
+            this.setState({ videoDevice: 'Off' })
+        }
+        else {
+            this.setState({ videoDevice: 'On' })
+        }
+    }
+
+    toggleAudioDevice = () => {
+        if(!this.transceivers[CONNECTION_KEY_VIDEO_STREAM]) {
+            return;
+        }
+        this.transceivers[CONNECTION_KEY_VIDEO_STREAM].mediaDevice.toggle('Audio');
+        if (this.state.audioDevice === 'On') {
+            this.setState({ audioDevice: 'Off' })
+        }
+        else {
+            this.setState({ audioDevice: 'On' })
+        }
+    }
+
     render() {
-        const { localSrc, peerSrc, screenSrc, portalSize,minimizeMiniBoard } = this.state;
+        const { localSrc, peerSrc, screenSrc, portalSize, minimizeMiniBoard } = this.state;
         const viewHeight = portalSize.height * 0.94;
         const canShare = this.peerStreamStatus === "active";
+        const sessionUserId = this.props.params.sessionUserId;
 
         return (
             <div style={{ padding: 8, height: viewHeight }}>
-                
+
                 <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} myBoards={this.myBoards} minmizeMiniBoard={minimizeMiniBoard} />
-                
+
                 <Row style={{ marginTop: 2 }}>
                     <Col span={12}>
                     </Col>
@@ -252,11 +311,11 @@ class Broadcast extends Component {
                             <Tooltip title="Share Screen">
                                 <Button onClick={this.shareScreen} disabled={!canShare} id="screenShare" type="primary" icon={<ShareAltOutlined />} shape="circle" />
                             </Tooltip>
-                            <Tooltip title="Mute Camera">
-                                <Button disabled={true} type="primary" icon={<CameraOutlined />} shape="circle" />
+                            <Tooltip title={this.getVideoTooltip()}>
+                                <Button disabled={!canShare} type="primary" icon={this.getVideoIcon()} shape="circle" onClick={this.toggleVideoDevice} />
                             </Tooltip>
-                            <Tooltip title="Mute Audio">
-                                <Button disabled={true} type="primary" icon={<AudioOutlined />} shape="circle" />
+                            <Tooltip title={this.getAudioTooltip()}>
+                                <Button disabled={!canShare} type="primary" icon={this.getAudioIcon()} shape="circle" onClick={this.toggleAudioDevice} />
                             </Tooltip>
                             <Tooltip title="Close Activity">
                                 <Button disabled={true} type="primary" icon={<StopOutlined />} shape="circle" />
@@ -268,7 +327,7 @@ class Broadcast extends Component {
                     </Col>
                 </Row>
 
-                <NotesDrawer notesStore={this.notesStore} />
+                <NotesDrawer notesStore={this.notesStore} sessionUserId={sessionUserId} apiProxy={this.props.appStore.apiProxy} />
             </div>
         )
     }

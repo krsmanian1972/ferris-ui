@@ -1,5 +1,5 @@
 let uiUrl = 'https://krscode.com';
-let backendHost = 'https://krscode.com';
+let backendHost = 'https://krscode.com/ferris';
 let authLoginUrl = 'https://krscode.com/auth/';
 const hostname = window && window.location && window.location.hostname;
 
