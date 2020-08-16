@@ -145,6 +145,7 @@ code {
   display:flex;
   flex-direction:row;
   padding-bottom: 3px;
+  margin-bottom:5px;
 }
 
 .slot-hour {
@@ -170,7 +171,8 @@ code {
   display: flex;
   padding: 5px;
   flex-direction: column;
-  border: 1px ridge lightgray;
+  background: #F5F5F5;
+  border: 1px solid lightgray;
 }
 
 
@@ -227,5 +229,5 @@ code {
 }
 
 .notes {
-  border:1px solid #ECECEC;
+  border:1px solid #ececec
 }
