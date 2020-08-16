@@ -2,7 +2,15 @@ import React, { Component } from 'react';
 import { Button, Row, Col, Tabs, Tooltip, Space } from 'antd';
 import { EditOutlined, ItalicOutlined, UndoOutlined, RedoOutlined, ScissorOutlined } from '@ant-design/icons';
 
-import { inject } from 'mobx-react';
+import Moment from 'react-moment';
+import moment from 'moment';
+import 'moment-timezone';
+
+import ObjectiveList from './ObjectiveList';
+import ObjectiveStore from '../stores/ObjectiveStore';
+import ObjectiveDrawer from './ObjectiveDrawer';
+
+import { inject, observer } from 'mobx-react';
 import * as THREE from 'three';
 import DragControls from 'three-dragcontrols';
 
@@ -42,10 +50,14 @@ const mouse = new THREE.Vector2();
 var drawMode = false;
 
 @inject("appStore")
+@observer
 class WorkflowUI extends Component {
 
     constructor(props) {
         super(props);
+        this.objectiveStore = new ObjectiveStore({ apiProxy: props.appStore.apiProxy, enrollmentId: "4c7f668d-0a55-42d5-89d5-3efe73e41db7" });
+        this.objectiveStore.fetchObjectives();
+
         this.taskBarGeo = new THREE.BoxGeometry(barWidth, barHeight, barDepth);
 
         this.gridLineMaterial = new THREE.LineBasicMaterial({ color: 0x1d1d1d });
@@ -69,7 +81,7 @@ class WorkflowUI extends Component {
 
     componentDidMount() {
         this.init();
-
+        this.getObjectivesList();
         window.addEventListener("resize", this.handleWindowResize);
 
         this.dragControls.addEventListener('dragstart', this.dragStartCallback);
@@ -337,7 +349,7 @@ class WorkflowUI extends Component {
     init = () => {
         this.setupScene();
         this.setGraphPaper();
-        this.addTasks();
+        //this.addTasks();
         this.animate();
 //        this.drawLine();
     }
@@ -394,7 +406,7 @@ class WorkflowUI extends Component {
         const canvas = document.createElement('canvas');
         canvas.id = 'task_' + id;
         canvas.style = { canvasStyle };
-        canvas.width = 300;//256
+        canvas.width = 350;//256
         canvas.height = 128;
 
         document.getElementById("workflowContainer").appendChild(canvas);
@@ -499,7 +511,6 @@ class WorkflowUI extends Component {
         var points = [];
         points.push( new THREE.Vector3( x1, y1, 0 ) );
         points.push( new THREE.Vector3( x2, y2, 0 ) );
-        //points.push( new THREE.Vector3( 2, 0, 0 ) );
         
         var geometry = new THREE.BufferGeometry().setFromPoints( points );
         var line = new THREE.Line( geometry, material );
@@ -514,14 +525,52 @@ class WorkflowUI extends Component {
             this.mode = "";
         }
     }
+    getObjectivesList = () => {
+
+        var moment = require('moment-timezone');
+moment().tz("America/Los_Angeles").format();    
+//        while(this.objectiveStore.isDone === false);
+        
+        if(this.objectiveStore.isLoading){
+           console.log("Isloading");
+        }
+        if(this.objectiveStore.isError){
+           console.log("Error!!");
+        }
+        
+        if(this.objectiveStore.isDone){
+           console.log("Done");
+           // fetch all the objectives and add as task
+           var objectiveList = this.objectiveStore.objectives;
+           var count = this.objectiveStore.rowCount;
+           var counter = 2;
+           for (var i = 0; i < count; i++){
+               const localeStart = moment(objectiveList[i].scheduleStart * 1000);
+               const localeEnd = moment(objectiveList[i].scheduleEnd * 1000);
+	       const startEl = moment(localeStart).format('YYYY-MM-DD HH:mm');
+	       const endEl = moment(localeEnd).format('YYYY-MM-DD HH:mm');
+               
+               this.addTask(objectiveList[i].description,objectiveList[i].description,startEl, endEl, 0, 6 - counter*i);
+
+           }
+
+           
+        }
+           
+    }
+    
+    createObjective = () => {
+	this.objectiveStore.showDrawer = true;
+    }
 
     render() {
         return (
             <div style={containerStyle} id="paper" ref={ref => (this.container = ref)}>
             <Button onClick={this.connectTasks} id="connector" type="primary" icon={<EditOutlined />} shape={"circle"} />
-
+            <Button onClick={this.getObjectivesList} id="dummy" type="primary" icon={<EditOutlined />} shape={"square"} />
+            <Button onClick={this.createObjective} id="createobjective" type="primary" icon={<ItalicOutlined />} shape={"square"} />
             <div style={canvasStyle} id="workflowContainer" ref={ref => (this.workflowContainer = ref)} />
-            
+            <ObjectiveDrawer objectiveStore={this.objectiveStore} />
             </div>
         )
     }
