@@ -14,7 +14,8 @@ class ObservationDrawer extends Component {
    
     render() {
         const store = this.props.observationStore;
-        const title = "New Observation";
+
+        const title = store.isNewObservation ? "New Observation" : "Edit Observation";
 
         return (
             <Drawer title={title} width={"55%"} closable={true} onClose={this.close} visible={store.showDrawer} destroyOnClose>

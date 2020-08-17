@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
-import { Spin, Result, Carousel, Button, Space, Tag, Tooltip, Switch } from 'antd';
-import { LeftOutlined, RightOutlined,PlusOutlined } from '@ant-design/icons';
+import { Spin, Result, Carousel, Button, Tag, Tooltip } from 'antd';
+import { LeftOutlined, RightOutlined,PlusOutlined, EditOutlined } from '@ant-design/icons';
 
 import ObservationDrawer from './ObservationDrawer';
 import Reader from "../commons/Reader";
@@ -34,11 +34,14 @@ class ObservationList extends Component {
         return (<></>)
     }
 
-    renderObservation = (observation) => {
+    renderObservation = (observation,index) => {
         return (
             <div key={observation.id}>
                 <Reader value={observation.description} height={350} />
                 <div style={{ display: "flex", flexWrap: "wrap", height: 40, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 10 }}></div>
+                <Tooltip key="ed_tip" title="To edit this section">
+                    <Button key="edit_observation" icon={<EditOutlined />} shape="circle" onClick={() => this.showEditObservation(observation)}></Button>
+                </Tooltip>
             </div>
         )
     }
@@ -49,9 +52,6 @@ class ObservationList extends Component {
 
     previous = () => {
         this.carousel.prev();
-    }
-
-    onEdit = (mode) => {
     }
 
     renderSlider = (observations, rowCount) => {
@@ -110,22 +110,22 @@ class ObservationList extends Component {
 
     showNewObservation = () => {
         const store = this.props.observationStore;
+        store.setNewObservation();
+        store.showDrawer = true;
+    }
+
+    showEditObservation = (observation) => {
+        const store = this.props.observationStore;
+        store.setCurrentObservation(observation);
         store.showDrawer = true;
     }
 
     getControls = () => {
         return (
             <div style={{ display: "flex", flexWrap: "wrap", flexDirection: "row", alignItems: "center", paddingRight: 10 }}>
-                <Space>
-                    <Tooltip key="ed_tip" title="To elaborate this section">
-                        <Switch key="ed_switch" onClick={this.onEdit} checkedChildren="Save" unCheckedChildren="Edit" defaultChecked={false} />
-                    </Tooltip>
-
-                    <Tooltip key="add_observation_tip" title="To Add New Observation">
-                        <Button key="add_observation" icon={<PlusOutlined />} shape="circle" onClick={() => this.showNewObservation()}></Button>
-                    </Tooltip>
-
-                </Space>
+                <Tooltip key="add_observation_tip" title="To Add New Observation">
+                    <Button key="add_observation" icon={<PlusOutlined />} shape="circle" onClick={() => this.showNewObservation()}></Button>
+                </Tooltip>
             </div>
         );
     }
