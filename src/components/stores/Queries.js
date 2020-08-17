@@ -278,6 +278,19 @@ export const updateObservationQuery =`mutation ($input: UpdateObservationRequest
   }
 }`;
 
+export const updateOptionQuery = `mutation ($input: UpdateOptionRequest!) {
+  updateOption(updateOptionRequest:$input) {
+    constraint {
+      id
+      enrollmentId
+      description
+    }
+    errors {
+      message
+    }
+  }
+}`;
+
 export const observationsQuery = `query ($criteria: PlanCriteria!) {
   getObservations(criteria: $criteria) {
     observations {
