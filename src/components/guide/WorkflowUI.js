@@ -77,6 +77,9 @@ class WorkflowUI extends Component {
         this.sourceConnectorPort = {};
         this.destConnectorPort = {};
         this.lineSegment = [];
+        this.line = [];
+        this.lineSegmentArray = [];
+        this.lineSegmentArrayIndex = 0;
     }
 
     componentDidMount() {
@@ -91,6 +94,7 @@ class WorkflowUI extends Component {
         this.renderer.domElement.addEventListener("wheel", this.scroll);
 
         this.container.addEventListener("dblclick", this.toggleDrawMode);
+        this.container.addEventListener("click", this.mouseClick);
         
     }
 
@@ -111,7 +115,38 @@ class WorkflowUI extends Component {
         }
     }
 
-    
+    mouseClick = (event) => {
+        if(this.mode === "TASK_CONNECTOR"){
+            if(this.internalState === "FOUND_SOURCE_PORT"){
+               //draw projection of the line the previous points axis
+              var point = this.getClickPoint(event);
+              var clickX = point.x;
+              var clickY = point.y;
+              var index = this.lineSegmentArray[this.lineSegmentArrayIndex].path.length - 1;
+              var prevPoint = this.lineSegmentArray[this.lineSegmentArrayIndex].path[index];
+              var projectionX = Math.abs(point.x - prevPoint.x);
+              var projectionY = Math.abs(point.y - prevPoint.y);
+              
+              if(projectionX <= projectionY){
+                  clickX = prevPoint.x;
+              }
+              else{
+                 clickY = prevPoint.y;
+              }
+  
+              var points = [];
+              var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF } );
+              points.push( new THREE.Vector3(prevPoint.x , prevPoint.y, 0 ) );
+              points.push( new THREE.Vector3( clickX, clickY, 0 ) );
+                       
+ 	      var geometry = new THREE.BufferGeometry().setFromPoints( points );
+ 	      this.lineSegmentArray[this.lineSegmentArrayIndex].path.push({x: clickX, y:clickY});
+              this.lineSegmentArray[this.lineSegmentArrayIndex].line.push(new THREE.Line( geometry, material ));
+                  this.scene.add(this.lineSegmentArray[this.lineSegmentArrayIndex].line[this.lineSegmentArray[this.lineSegmentArrayIndex].line.length-1]);
+        
+    	    }
+	}
+    }
     process = (task, point) => {
         let sourceX, sourceY, clickX, clickY;
         clickX = point.x;
@@ -132,7 +167,7 @@ class WorkflowUI extends Component {
 
         sourceX = this.connectorMap[task].connectorBottom.position.x;
         sourceY = this.connectorMap[task].connectorBottom.position.y;
-        this.findDistanceAndSetPort(task, 4, sourceX, sourceY, clickX, clickY);                 
+        this.findDistanceAndSetPort(task, 4, sourceX, sourceY, clickX, clickY); 
 
     }     
     
@@ -149,6 +184,12 @@ class WorkflowUI extends Component {
                                                y :sourceY,
                                                task: task,
                                                direction:direction};
+                var line = {};
+                line.x = sourceX;
+                line.y = sourceY;
+                this.lineSegmentArray[this.lineSegmentArrayIndex] = {sourceDescription: this.sourceConnectorPort[0], path:[], destDescription:"", line : []};
+                this.lineSegmentArray[this.lineSegmentArrayIndex].path.push(line);
+                                                               
                 this.internalState = "FOUND_SOURCE_PORT";
            }
            else if(this.internalState === "FOUND_SOURCE_PORT"){
@@ -159,6 +200,7 @@ class WorkflowUI extends Component {
                                   	      y :sourceY,
                                   	      task:task,
                                   	      direction:direction};
+                this.lineSegmentArray[this.lineSegmentArrayIndex].destDescription=this.destConnectorPort[0];
                 var lineSegMap = {sourceTask:this.sourceConnectorPort[0].task, sourceDirection:this.sourceConnectorPort[0].direction,
                                   sourceX:this.sourceConnectorPort[0].x, sourceY:this.sourceConnectorPort[0].y,
 	                          destTask:task, destDirection:direction,
@@ -168,6 +210,12 @@ class WorkflowUI extends Component {
                 this.drawConnectingLine(lineSegMap);
         	 this.internalState = "";
                 
+           }
+        }
+        else {
+           if(this.internalState === "FOUND_SOURCE_PORT"){
+
+               
            }
         }
     
@@ -255,6 +303,37 @@ class WorkflowUI extends Component {
 
         }
         if(this.mode === "TASK_CONNECTOR"){
+            if(this.internalState === "FOUND_SOURCE_PORT"){
+               //draw projection of the line the previous points axis
+               var point = this.getClickPoint(event);
+              this.scene.remove(this.line[0]);
+              var clickX = point.x;
+              var clickY = point.y;
+              var index = (this.lineSegmentArray[this.lineSegmentArrayIndex].path.length)-1;
+              var prevPoint = this.lineSegmentArray[this.lineSegmentArrayIndex].path[index];
+              console.log(this.lineSegmentArray);
+              var projectionX = Math.abs(point.x - prevPoint.x);
+              var projectionY = Math.abs(point.y - prevPoint.y);
+              
+              if(projectionX <= projectionY){
+                  clickX = prevPoint.x;
+              }
+              else{
+                 clickY = prevPoint.y;
+              }
+  
+              var points = [];
+              var material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
+              points.push( new THREE.Vector3(prevPoint.x , prevPoint.y, 0 ) );
+              points.push( new THREE.Vector3( clickX, clickY, 0 ) );
+        
+ 	      var geometry = new THREE.BufferGeometry().setFromPoints( points );
+              this.line[0] = new THREE.Line( geometry, material );
+              this.scene.add(this.line[0]);
+                              
+               
+           }
+
         
         }
     }
