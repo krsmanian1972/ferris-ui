@@ -39,9 +39,11 @@ class ObservationList extends Component {
             <div key={observation.id}>
                 <Reader value={observation.description} height={350} />
                 <div style={{ display: "flex", flexWrap: "wrap", height: 40, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 10 }}></div>
-                <Tooltip key="ed_tip" title="To edit this section">
-                    <Button key="edit_observation" icon={<EditOutlined />} shape="circle" onClick={() => this.showEditObservation(observation)}></Button>
-                </Tooltip>
+                <div style={{float:"right",paddingLeft: 10}}>
+                   <Tooltip key="ed_tip" title="To edit this observation">
+                        <Button key="edit_observation" icon={<EditOutlined />} shape="circle" onClick={() => this.showEditObservation(observation)}></Button>
+                    </Tooltip>
+                </div>
             </div>
         )
     }

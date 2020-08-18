@@ -1,6 +1,7 @@
 import { decorate, observable, computed, action } from 'mobx';
 import { apiHost } from './APIEndpoints';
-import { createObjectiveQuery,objectivesQuery } from './Queries';
+import { createObjectiveQuery,objectivesQuery, updateObjectiveQuery } from './Queries';
+import {isBlank} from './Util';
 
 import moment from 'moment';
 
@@ -10,6 +11,7 @@ const INVALID = "invalid";
 const DONE = 'done';
 const ERROR = 'error';
 
+const EMPTY_OBJECTIVE = {id:"",description:"",scheduleStart:null,scheduleEnd:null};
 
 const EMPTY_MESSAGE = { status: "", help: "" };
 const SAVING_ERROR = { status: "error", help: "We are very sorry. Unable to store the Planning Information." };
@@ -36,6 +38,7 @@ export default class ObjectiveStore {
 
     objectives = [];
     rowCount = 0;
+    currentObjective = {};
     
 
     /**
@@ -64,6 +67,25 @@ export default class ObjectiveStore {
 
     get isError() {
         return this.state === ERROR;
+    }
+
+    get isNewObjective() {
+        const id = this.currentObjective.id;
+        return isBlank(id);
+    }
+
+    setNewObjective = () => {
+        this.currentObjective = EMPTY_OBJECTIVE;
+    }
+
+    asCurrent =(index) => {
+
+        if(index >= 0 && index < this.rowCount) {
+            this.currentObjective = this.objectives[index];
+            return true;
+        }
+
+        return false;
     }
 
     fetchObjectives = async () => {
@@ -98,6 +120,53 @@ export default class ObjectiveStore {
         }
     }
 
+    saveObjective = async(planRequest) => {
+        if(this.isNewObjective) {
+            await this.createObjective(planRequest);
+        }
+        else {
+            await this.updateObjective(planRequest);
+        }
+    }
+
+    updateObjective = async(planRequest) => {
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+        
+        if (!this.isValid(planRequest)) {
+            this.state = INVALID;
+            return;
+        }
+
+        const variables = {
+            input: {
+                id:this.currentObjective.id,
+                description:planRequest.description,
+                startTime: planRequest.startTime.utc().format(),
+                endTime: planRequest.endTime.utc().format()
+            }
+        }
+
+        try {
+            const response = await this.apiProxy.mutate(apiHost, updateObjectiveQuery, variables);
+            const data = await response.json();
+
+            if (data.error == true) {
+                this.state = ERROR;
+                this.message = SAVING_ERROR;
+                return;
+            }
+            this.state = DONE;
+            this.showDrawer = false;
+            this.fetchObjectives();
+        }
+        catch (e) {
+            this.state = ERROR;
+            this.message = ENROLLMENT_ERROR;
+            console.log(e);
+        }
+    }
+
     /**
      * content,duration and startTime.
      *  
@@ -118,7 +187,7 @@ export default class ObjectiveStore {
                 description:planRequest.description,
                 enrollmentId: this.enrollmentId,
                 startTime: planRequest.startTime.utc().format(),
-                endTime: planRequest.startTime.utc().format()
+                endTime: planRequest.endTime.utc().format()
             }
         }
 
@@ -178,19 +247,26 @@ export default class ObjectiveStore {
 decorate(ObjectiveStore, {
     state: observable,
     message: observable,
-    changed: observable,
+    change: observable,
     showDrawer: observable,
 
     startTimeMsg: observable,
     endTimeMsg: observable,
 
     objectives: observable,
+    currentObjective:observable,
+    rowCount:observable,
 
     isLoading: computed,
     isDone: computed,
     isInvalid: computed,
     isError: computed,
+    isNewObjective: computed,
 
-    createObjective: action,
+    saveObjective:action,
     fetchObjectives: action,
+    setNewObjective: action,
+    asCurrent: action,
+    validateStartDate: action,
+    validateEndDate: action,
 })

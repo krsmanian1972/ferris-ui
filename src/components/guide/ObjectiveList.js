@@ -6,7 +6,7 @@ import moment from 'moment';
 import 'moment-timezone';
 
 import { Spin, Result, Carousel, Button, Steps, Space, Tag, Tooltip, Switch } from 'antd';
-import { LeftOutlined, RightOutlined, PlusOutlined } from '@ant-design/icons';
+import { LeftOutlined, RightOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';
 
 import ObjectiveDrawer from './ObjectiveDrawer';
 import Reader from "../commons/Reader";
@@ -15,6 +15,8 @@ const { Step } = Steps;
 
 @observer
 class ObjectiveList extends Component {
+
+    index = 0;
 
     constructor(props) {
         super(props);
@@ -69,9 +71,6 @@ class ObjectiveList extends Component {
         this.carousel.prev();
     }
 
-    onEdit = (mode) => {
-    }
-
     renderSlider = (objectives, rowCount) => {
         if (rowCount == 0) {
             return <></>
@@ -83,6 +82,7 @@ class ObjectiveList extends Component {
             slidesToShow: 1,
             slidesToScroll: 1,
             swipeToSlide: true,
+            afterChange: (current) => {this.index = current},
         };
 
         return (
@@ -129,21 +129,29 @@ class ObjectiveList extends Component {
 
     showNewObjective = () => {
         const store = this.props.objectiveStore;
+        store.setNewObjective();
         store.showDrawer = true;
     }
 
+    showEditObjective = () => {
+        const store = this.props.objectiveStore;
+        const flag = store.asCurrent(this.index);
+        store.showDrawer = flag;
+    }
+
     getControls = () => {
+
+        const rowCount = this.props.objectiveStore.rowCount;
+
         return (
             <div style={{ display: "flex", flexWrap: "wrap", flexDirection: "row", alignItems: "center", paddingRight: 10 }}>
                 <Space>
-                    <Tooltip key="ed_tip" title="To elaborate this section">
-                        <Switch key="ed_switch" onClick={this.onEdit} checkedChildren="Save" unCheckedChildren="Edit" defaultChecked={false} />
+                    <Tooltip key="ed_tip" title="To edit this Objective">
+                        <Button key="edit_objective" icon={<EditOutlined />} disabled={rowCount === 0} shape="circle" onClick={() => this.showEditObjective()}></Button>
                     </Tooltip>
-
                     <Tooltip key="add_objective_tip" title="To Add New Objective">
                         <Button key="add_objective" icon={<PlusOutlined />} shape="circle" onClick={() => this.showNewObjective()}></Button>
                     </Tooltip>
-
                 </Space>
             </div>
         );

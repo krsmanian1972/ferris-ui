@@ -4,7 +4,7 @@ import { observer } from 'mobx-react';
 import moment from 'moment';
 
 import { DatePicker, Button, Form, Input, notification, message } from 'antd';
-import { PlusCircleOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, EditOutlined } from '@ant-design/icons';
 
 import Editor from "../commons/Editor";
 
@@ -33,12 +33,27 @@ class ObjectiveForm extends Component {
 
     handleDescription = (text) => {
         this.description = text;
-        this.formRef.current.setFieldsValue({ description: this.description });
+        this.formRef.current && this.formRef.current.setFieldsValue({ description: this.description });
+    }
+
+    componentDidMount() {
+        const store = this.props.objectiveStore;
+        if(store.isNewObjective){
+            return;
+        }
+
+        const {description, scheduleStart, scheduleEnd} = store.currentObjective;
+        const localeStart = moment(scheduleStart*1000);
+        const localeEnd = moment(scheduleEnd*1000);
+
+        this.formRef.current && this.formRef.current.setFieldsValue({description:description, startTime: localeStart, endTime: localeEnd});
+        this.description = description;
+        store.change=moment();
     }
 
     onFinish = async (values) => {
         const store = this.props.objectiveStore;
-        await store.createObjective(values);
+        await store.saveObjective(values);
 
         if (store.isError) {
             failureNotification();
@@ -49,12 +64,29 @@ class ObjectiveForm extends Component {
         }
     }
 
+    getSaveIcon = () => {
+        const store = this.props.objectiveStore;
+        if(store.isNewObjective) {
+            return <PlusCircleOutlined/>
+        }
+        return <EditOutlined/>
+    }
+
+    getSaveLabel = () => {
+        const store = this.props.objectiveStore;
+        if(store.isNewObjective) {
+            return "Create Objective"
+        }
+
+        return "Update Objective"
+    }
+
     render() {
 
         const store = this.props.objectiveStore;
-
         const startTimeMsg = store.startTimeMsg;
         const endTimeMsg = store.endTimeMsg;
+        const change = store.change;
 
         return (
             <Form layout="vertical" ref={this.formRef} onFinish={this.onFinish} >
@@ -90,7 +122,7 @@ class ObjectiveForm extends Component {
                 </Form.Item>
 
                 <Form.Item>
-                    <Button type="primary" disabled={store.isLoading} htmlType="submit" icon={<PlusCircleOutlined />}>Create Objective</Button>
+                    <Button type="primary" disabled={store.isLoading} htmlType="submit" icon={this.getSaveIcon()}>{this.getSaveLabel()}</Button>
                 </Form.Item>
             </Form>
         );

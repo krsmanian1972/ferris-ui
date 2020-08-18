@@ -187,6 +187,7 @@ export const createObjectiveQuery = `mutation($input: NewObjectiveRequest!) {
   createObjective(newObjectiveRequest:$input){
     objective {
       id,
+      description,
       scheduleStart,
       scheduleEnd,
       createdAt,
@@ -199,6 +200,21 @@ export const createObjectiveQuery = `mutation($input: NewObjectiveRequest!) {
   }
 }`;
 
+export const updateObjectiveQuery = `mutation ($input: UpdateObjectiveRequest!) {
+  updateObjective(updateObjectiveRequest:$input) {
+    objective {
+      id
+      description
+      scheduleStart
+      scheduleEnd
+      createdAt
+      status
+    }
+    errors {
+      message
+    }
+  }
+}`;
 
 export const objectivesQuery = `query ($criteria: PlanCriteria!) {
   getObjectives(criteria: $criteria) {
@@ -206,7 +222,6 @@ export const objectivesQuery = `query ($criteria: PlanCriteria!) {
         id,
         enrollmentId,
         description,
-        duration,
         scheduleStart,
         scheduleEnd,
         status,
@@ -238,6 +253,7 @@ export const tasksQuery = `query ($criteria: PlanCriteria!) {
   getTasks(criteria: $criteria) {
     tasks {
         id,
+        name,
         enrollmentId,
         description,
         duration,
@@ -284,6 +300,21 @@ export const updateOptionQuery = `mutation ($input: UpdateOptionRequest!) {
       id
       enrollmentId
       description
+    }
+    errors {
+      message
+    }
+  }
+}`;
+
+export const updateTaskQuery = `mutation ($input: UpdateTaskRequest!) {
+  updateTask(updateTaskRequest:$input) {
+    task {
+      id
+      name
+      description
+      duration
+      scheduleStart
     }
     errors {
       message

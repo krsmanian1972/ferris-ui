@@ -83,7 +83,7 @@ class ObservationForm extends Component {
                     <div style={{ display: "none" }}><TextArea rows={1} /></div>    
                     
                     <div style={{ border: "1px solid lightgray" }}>
-                        <Editor ref={this.editorRef} value={description} id="desc_editor" onChange={this.handleDescription} height={300} />
+                        <Editor value={description} id="desc_editor" onChange={this.handleDescription} height={300} />
                     </div>
                 </Form.Item>
 
