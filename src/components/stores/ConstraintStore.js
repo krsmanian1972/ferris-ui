@@ -1,12 +1,14 @@
 import { decorate, observable, computed, action } from 'mobx';
 import { apiHost } from './APIEndpoints';
-import { createConstraintQuery,constraintsQuery } from './Queries';
+import { createConstraintQuery,constraintsQuery, updateOptionQuery } from './Queries';
+import {isBlank} from './Util';
 
 const INIT = "init";
 const PENDING = 'pending';
 const DONE = 'done';
 const ERROR = 'error';
 
+const EMPTY_OPTION = {id:"",description:""};
 
 const EMPTY_MESSAGE = { status: "", help: "" };
 const SAVING_ERROR = { status: "error", help: "We are very sorry. Unable to store the Planning Information." };
@@ -31,6 +33,7 @@ export default class ConstraintStore {
 
     options = [];
     rowCount = 0;
+    currentOption = {};
     
 
     /**
@@ -55,6 +58,19 @@ export default class ConstraintStore {
 
     get isError() {
         return this.state === ERROR;
+    }
+
+    get isNewOption() {
+        const id = this.currentOption.id;
+        return isBlank(id);
+    }
+
+    setNewOption = () => {
+        this.currentOption = EMPTY_OPTION
+    }
+
+    setCurrentOption = (option) => {
+        this.currentOption = option;
     }
 
     fetchOptions = async () => {
@@ -85,6 +101,47 @@ export default class ConstraintStore {
         catch (e) {
             this.state = ERROR;
             this.message = ERROR_MESSAGE;
+            console.log(e);
+        }
+    }
+
+    saveOption = async(planRequest) => {
+        if(this.isNewOption) {
+            await this.createOption(planRequest);
+        }
+        else{
+            await this.updateOption(planRequest);
+        }
+    }
+
+    updateOption = async(planRequest) => {
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+
+        const variables = {
+            input: {
+                description:planRequest.description,
+                id: this.currentOption.id
+            }
+        }
+
+        try {
+            const response = await this.apiProxy.mutate(apiHost, updateOptionQuery, variables);
+            const data = await response.json();
+
+            if (data.error == true) {
+                this.state = ERROR;
+                this.message = SAVING_ERROR;
+                return;
+            }
+
+            this.state = DONE;
+            this.showDrawer = false;
+            this.fetchOptions();
+        }
+        catch (e) {
+            this.state = ERROR;
+            this.message = SAVING_ERROR;
             console.log(e);
         }
     }
@@ -134,11 +191,16 @@ decorate(ConstraintStore, {
     showDrawer: observable,
 
     options: observable,
+    currentOption: observable,
+    rowCount:observable,
 
     isLoading: computed,
     isDone: computed,
     isError: computed,
+    isNewOption:computed,
 
-    createOption: action,
+    saveOption:action,
     fetchOptions: action,
+    setNewOption:action,
+    setCurrentOption:action,
 })

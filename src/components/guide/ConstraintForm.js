@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
 import { Button, Form, Input, notification, message } from 'antd';
-import { PlusCircleOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined,EditOutlined } from '@ant-design/icons';
 
 import Editor from "../commons/Editor";
 
@@ -23,16 +23,22 @@ const failureNotification = () => {
 class ConstraintForm extends Component {
     
     formRef = React.createRef();
-    description = "";
 
     handleDescription = (text) => {
-        this.description = text;
-        this.formRef.current.setFieldsValue({ description: this.description });
+        this.formRef.current && this.formRef.current.setFieldsValue({ description: text });
+    }
+
+    componentDidMount() {
+        
+        const store = this.props.constraintStore;
+        const {description} = store.currentOption;
+
+        this.formRef.current && this.formRef.current.setFieldsValue({ description: description });
     }
 
     onFinish = async (values) => {
         const store = this.props.constraintStore;
-        await store.createOption(values);
+        await store.saveOption(values);
 
         if (store.isError) {
             failureNotification();
@@ -43,9 +49,27 @@ class ConstraintForm extends Component {
         }
     }
 
+    getSaveIcon = () => {
+        const store = this.props.constraintStore;
+        if(store.isNewOption) {
+            return <PlusCircleOutlined/>
+        }
+        return <EditOutlined/>
+    }
+
+    getSaveLabel = () => {
+        const store = this.props.constraintStore;
+        if(store.isNewOption) {
+            return "Create Constraints"
+        }
+
+        return "Update Constraints"
+    }
+
     render() {
 
         const store = this.props.constraintStore;
+        const {description} = store.currentOption;
 
         return (
             <Form layout="vertical" ref={this.formRef} onFinish={this.onFinish} >
@@ -54,14 +78,16 @@ class ConstraintForm extends Component {
                     name="description"
                     rules={[{ required: true, message: 'Please capture the constraints and options.' }]}
                     label="Constraints And Option">
+                    
                     <div style={{ display: "none" }}><TextArea rows={1} /></div>
+                    
                     <div style={{ border: "1px solid lightgray" }}>
-                        <Editor id="option_desc" value={this.description} onChange={this.handleDescription} height={300} />
+                        <Editor id="option_desc" value={description} onChange={this.handleDescription} height={300} />
                     </div>
                 </Form.Item>
 
                 <Form.Item>
-                    <Button type="primary" disabled={store.isLoading} htmlType="submit" icon={<PlusCircleOutlined />}>Create Option</Button>
+                    <Button type="primary" disabled={store.isLoading} htmlType="submit" icon={this.getSaveIcon()}>{this.getSaveLabel()}</Button>
                 </Form.Item>
             </Form>
         );

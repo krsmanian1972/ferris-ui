@@ -1,12 +1,14 @@
 import { decorate, observable, computed, action } from 'mobx';
 import { apiHost } from './APIEndpoints';
-import { createObservationQuery,observationsQuery } from './Queries';
+import { createObservationQuery,updateObservationQuery, observationsQuery } from './Queries';
+import {isBlank} from './Util';
 
 const INIT = "init";
 const PENDING = 'pending';
 const DONE = 'done';
 const ERROR = 'error';
 
+const EMPTY_OBSERVATION = {id:"",description:""};
 
 const EMPTY_MESSAGE = { status: "", help: "" };
 const SAVING_ERROR = { status: "error", help: "We are very sorry. Unable to store the Planning Information." };
@@ -31,7 +33,7 @@ export default class ObservationStore {
 
     observations = [];
     rowCount = 0;
-    
+    currentObservation = {};
 
     /**
      * The section id can be any one of
@@ -55,6 +57,19 @@ export default class ObservationStore {
 
     get isError() {
         return this.state === ERROR;
+    }
+
+    get isNewObservation() {
+        const id = this.currentObservation.id;
+        return isBlank(id);
+    }
+
+    setNewObservation = () => {
+        this.currentObservation = EMPTY_OBSERVATION;
+    }
+
+    setCurrentObservation = (observation) => {
+        this.currentObservation = observation;
     }
 
     fetchObservations = async () => {
@@ -89,6 +104,46 @@ export default class ObservationStore {
         }
     }
 
+    saveObservation = async(planRequest) => {
+        if(this.isNewObservation) {
+            await this.createObservation(planRequest);
+        }
+        else {
+            await this.updateObservation(planRequest);
+        }
+    }
+
+    updateObservation = async(planRequest) => {
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+
+        const variables = {
+            input: {
+                description:planRequest.description,
+                id: this.currentObservation.id
+            }
+        }
+
+        try {
+            const response = await this.apiProxy.mutate(apiHost, updateObservationQuery, variables);
+            const data = await response.json();
+
+            if (data.error == true) {
+                this.state = ERROR;
+                this.message = SAVING_ERROR;
+                return;
+            }
+
+            this.state = DONE;
+            this.showDrawer = false;
+            this.fetchObservations();
+        }
+        catch (e) {
+            this.state = ERROR;
+            this.message = SAVING_ERROR;
+            console.log(e);
+        }
+    }
     /**
      * content,duration and startTime.
      *  
@@ -121,7 +176,7 @@ export default class ObservationStore {
         }
         catch (e) {
             this.state = ERROR;
-            this.message = ENROLLMENT_ERROR;
+            this.message = SAVING_ERROR;
             console.log(e);
         }
     }
@@ -134,11 +189,16 @@ decorate(ObservationStore, {
     showDrawer: observable,
 
     observations: observable,
-
+    currentObservation: observable,
+    rowCount:observable,
+    
     isLoading: computed,
     isDone: computed,
     isError: computed,
+    isNewObservation: computed,
 
-    createObservation: action,
+    saveObservation: action,
     fetchObservations: action,
+    setNewObservation: action,
+    setCurrentObservation: action,
 })

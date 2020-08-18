@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
-import { Spin, Result, Carousel, Button, Space, Tag, Tooltip, Switch } from 'antd';
-import { LeftOutlined, RightOutlined,PlusOutlined } from '@ant-design/icons';
+import { Spin, Result, Carousel, Button, Tag, Tooltip } from 'antd';
+import { LeftOutlined, RightOutlined,PlusOutlined,EditOutlined } from '@ant-design/icons';
 
 import ConstraintDrawer from './ConstraintDrawer';
 import Reader from "../commons/Reader";
@@ -34,11 +34,14 @@ class ConstraintList extends Component {
         return (<></>)
     }
 
-    renderOption = (option) => {
+    renderOption = (option, index) => {
         return (
             <div key={option.id}>
                 <Reader value={option.description} height={350} />
                 <div style={{ display: "flex", flexWrap: "wrap", height: 40, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 10 }}></div>
+                <Tooltip key="ed_tip" title="To edit this section">
+                    <Button key="edit_option" icon={<EditOutlined />} shape="circle" onClick={() => this.showEditOption(option)}></Button>
+                </Tooltip>
             </div>
         )
     }
@@ -49,9 +52,6 @@ class ConstraintList extends Component {
 
     previous = () => {
         this.carousel.prev();
-    }
-
-    onEdit = (mode) => {
     }
 
     renderSlider = (options, rowCount) => {
@@ -110,22 +110,22 @@ class ConstraintList extends Component {
 
     showNewOption = () => {
         const store = this.props.constraintStore;
+        store.setNewOption();
+        store.showDrawer = true;
+    }
+
+    showEditOption = (option) => {
+        const store = this.props.constraintStore;
+        store.setCurrentOption(option);
         store.showDrawer = true;
     }
 
     getControls = () => {
         return (
             <div style={{ display: "flex", flexWrap: "wrap", flexDirection: "row", alignItems: "center", paddingRight: 10 }}>
-                <Space>
-                    <Tooltip key="ed_tip" title="To elaborate this section">
-                        <Switch key="ed_switch" onClick={this.onEdit} checkedChildren="Save" unCheckedChildren="Edit" defaultChecked={false} />
-                    </Tooltip>
-
                     <Tooltip key="add_option_tip" title="To Add New Option">
                         <Button key="add_option" icon={<PlusOutlined />} shape="circle" onClick={() => this.showNewOption()}></Button>
                     </Tooltip>
-
-                </Space>
             </div>
         );
     }

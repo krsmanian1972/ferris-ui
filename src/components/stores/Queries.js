@@ -265,6 +265,32 @@ export const createObservationQuery = `mutation($input: NewObservationRequest!) 
   }
 }`;
 
+export const updateObservationQuery =`mutation ($input: UpdateObservationRequest!) {
+  updateObservation(updateObservationRequest:$input) {
+    observation {
+      id
+      enrollmentId
+      description
+    }
+    errors {
+      message
+    }
+  }
+}`;
+
+export const updateOptionQuery = `mutation ($input: UpdateOptionRequest!) {
+  updateOption(updateOptionRequest:$input) {
+    constraint {
+      id
+      enrollmentId
+      description
+    }
+    errors {
+      message
+    }
+  }
+}`;
+
 export const observationsQuery = `query ($criteria: PlanCriteria!) {
   getObservations(criteria: $criteria) {
     observations {
