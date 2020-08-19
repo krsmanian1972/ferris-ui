@@ -23,7 +23,7 @@ const canvasStyle = {
     display: 'none'
 }
 
-const fov = 35;
+const fov = 30;
 const near = 0.1;
 const far = 1000;
 
@@ -32,9 +32,9 @@ const pointLightPosition = 1;
 
 const taskBarColor = "#2A4B7C";
 
-const barWidth = 3;
-const barHeight = 1;
-const barDepth = 0.20;
+const barWidth = 5.5;//3
+const barHeight = 1;//1
+const barDepth = 0;
 const connectorRadius = 0.10;//0.06
 
 const vGap = 20;
@@ -43,10 +43,10 @@ const boldFont = "bold 18px sans-serif";
 const regularFont = "18px sans-serif";
 
 const gridSize = 50;
-const gridStep = 0.5;
+const gridStep = 0.25;
 
 const mouse = new THREE.Vector2();
-
+const DEBUG = true;
 var drawMode = false;
 
 @inject("appStore")
@@ -76,10 +76,10 @@ class WorkflowUI extends Component {
         this.internalState = "";
         this.sourceConnectorPort = {};
         this.destConnectorPort = {};
-        this.lineSegment = [];
-        this.line = [];
         this.lineSegmentArray = [];
         this.lineSegmentArrayIndex = 0;
+        this.line = [];
+        this.lineSegment = [];
     }
 
     componentDidMount() {
@@ -128,12 +128,13 @@ class WorkflowUI extends Component {
               var projectionY = Math.abs(point.y - prevPoint.y);
               
               if(projectionX <= projectionY){
-                  clickX = prevPoint.x;
+                  clickX = Math.round(prevPoint.x*2)/2;
+                  clickY = Math.round(clickY*2)/2;
               }
               else{
-                 clickY = prevPoint.y;
+                 clickX = Math.round(clickX*2)/2;;
+                 clickY = Math.round(prevPoint.y*2)/2;
               }
-  
               var points = [];
               var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF } );
               points.push( new THREE.Vector3(prevPoint.x , prevPoint.y, 0 ) );
@@ -177,9 +178,11 @@ class WorkflowUI extends Component {
         yDiff = sourceY - clickY;
         if (Math.abs(xDiff) <= 0.5 && Math.abs(yDiff) <= 0.5){
            if(this.internalState === ""){
-                console.log("SOURCE PORT");
-                console.log(task);
-                console.log(direction);
+                if(DEBUG === true){
+                    console.log("SOURCE PORT");
+                    console.log(task);
+                    console.log(direction);
+                }
                 this.sourceConnectorPort[0] = {x: sourceX ,
                                                y :sourceY,
                                                task: task,
@@ -193,50 +196,23 @@ class WorkflowUI extends Component {
                 this.internalState = "FOUND_SOURCE_PORT";
            }
            else if(this.internalState === "FOUND_SOURCE_PORT"){
-                console.log("DEST PORT");
-                console.log(task);
-                console.log(direction);
+                if(DEBUG === true){
+                    console.log("DEST PORT");
+                    console.log(task);
+                    console.log(direction);
+                }
                 this.destConnectorPort[0] = {x: sourceX ,
                                   	      y :sourceY,
                                   	      task:task,
                                   	      direction:direction};
                 this.lineSegmentArray[this.lineSegmentArrayIndex].destDescription=this.destConnectorPort[0];
-                var lineSegMap = {sourceTask:this.sourceConnectorPort[0].task, sourceDirection:this.sourceConnectorPort[0].direction,
-                                  sourceX:this.sourceConnectorPort[0].x, sourceY:this.sourceConnectorPort[0].y,
-	                          destTask:task, destDirection:direction,
-	                          destX:sourceX, destY: sourceY};
-                //this.lineSegement.push(lineSegMap);
-                
-                this.drawConnectingLine(lineSegMap);
+                this.lineSegmentArrayIndex++;
         	 this.internalState = "";
                 
            }
         }
-        else {
-           if(this.internalState === "FOUND_SOURCE_PORT"){
-
-               
-           }
-        }
-    
     } 
 
-    
-    drawConnectingLine = (lineSegMap) => {
-        var material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
-        var points = [];
-        points.push( new THREE.Vector3( lineSegMap.sourceX, lineSegMap.sourceY, 0 ) );
-        points.push( new THREE.Vector3( lineSegMap.destX, lineSegMap.destY, 0 ) );
-        //points.push( new THREE.Vector3( 2, 0, 0 ) );
-        
-        var geometry = new THREE.BufferGeometry().setFromPoints( points );
-        lineSegMap.line = new THREE.Line( geometry, material );
-        
-        this.lineSegment.push(lineSegMap);
-        console.log(this.lineSegment);
-        this.scene.add(this.lineSegment[this.lineSegment.length-1].line);
-    }
-    
     updateConnectingLine = (index) => {
         this.scene.remove(this.lineSegment[index].line);
         var material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
@@ -247,7 +223,9 @@ class WorkflowUI extends Component {
 
         var geometry = new THREE.BufferGeometry().setFromPoints( points );
         this.lineSegment[index].line = new THREE.Line( geometry, material );
-        console.log(this.lineSegment);
+        if(DEBUG === true) {
+            console.log(this.lineSegment);
+         }
         this.scene.add(this.lineSegment[index].line);
     
     }
@@ -282,18 +260,26 @@ class WorkflowUI extends Component {
 
     dragStartCallback = (event) => {
         drawMode = false;
+
         this.selectedTaskBar = event.object;
+        
         this.moveDots();
      
     }
 
     dragEndCallback = (event) => {
         drawMode = false;
+        var point = this.getClickPoint(event);
+        //align to X and Y to grid
+        this.selectedTaskBar.position.y = Math.round(this.selectedTaskBar.position.y*2)/2;
+        this.selectedTaskBar.position.x = Math.round(this.selectedTaskBar.position.x*2)/2;
         this.moveDots();
         this.selectedTaskBar = null;
     }
 
     mouseMove = (event) => {
+        var point = this.getClickPoint(event);
+        console.log(point.x, point.y);
         if (this.selectedTaskBar) {
             this.moveDots();
             return;
@@ -311,7 +297,6 @@ class WorkflowUI extends Component {
               var clickY = point.y;
               var index = (this.lineSegmentArray[this.lineSegmentArrayIndex].path.length)-1;
               var prevPoint = this.lineSegmentArray[this.lineSegmentArrayIndex].path[index];
-              console.log(this.lineSegmentArray);
               var projectionX = Math.abs(point.x - prevPoint.x);
               var projectionY = Math.abs(point.y - prevPoint.y);
               
@@ -359,8 +344,6 @@ class WorkflowUI extends Component {
 
         //move the lines start point or end point as well
         for (var i = 0; i < this.lineSegment.length; i++){
-            console.log(this.lineSegment);
-            console.log(taskName);
             if(this.lineSegment[i].sourceTask === taskName){
                 console.log("Found out a moving line segment");
                 if(this.lineSegment[i].sourceDirection == 1){
@@ -470,10 +453,10 @@ class WorkflowUI extends Component {
         const geometry = new THREE.Geometry();
 
         for (var i = -gridSize; i <= gridSize; i += gridStep) {
-            geometry.vertices.push(new THREE.Vector3(-gridSize, i, -5));
-            geometry.vertices.push(new THREE.Vector3(gridSize, i, -5));
-            geometry.vertices.push(new THREE.Vector3(i, -gridSize, -5));
-            geometry.vertices.push(new THREE.Vector3(i, gridSize, -5));
+            geometry.vertices.push(new THREE.Vector3(-gridSize, i, 0));
+            geometry.vertices.push(new THREE.Vector3(gridSize, i, 0));
+            geometry.vertices.push(new THREE.Vector3(i, -gridSize, 0));
+            geometry.vertices.push(new THREE.Vector3(i, gridSize, 0));
         }
 
         const grid = new THREE.LineSegments(geometry, this.gridLineMaterial);
@@ -485,8 +468,8 @@ class WorkflowUI extends Component {
         const canvas = document.createElement('canvas');
         canvas.id = 'task_' + id;
         canvas.style = { canvasStyle };
-        canvas.width = 350;//256
-        canvas.height = 128;
+        canvas.width = 350;//350
+        canvas.height = 128;//128
 
         document.getElementById("workflowContainer").appendChild(canvas);
 
