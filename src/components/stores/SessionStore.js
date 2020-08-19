@@ -41,6 +41,9 @@ export default class SessionStore {
     people = {};
     change = null;
 
+    showClosureDrawer = false;
+    targetState="";
+
     constructor(props) {
         this.apiProxy = props.apiProxy;
         this.sessionListStore = props.sessionListStore;
@@ -278,6 +281,9 @@ decorate(SessionStore, {
     event: observable,
     people: observable,
     change: observable,
+
+    showClosureDrawer:observable,
+    targetState:observable,
 
     isLoading: computed,
     isDone: computed,

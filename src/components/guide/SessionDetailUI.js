@@ -137,28 +137,14 @@ class SessionDetailUI extends Component {
         }
     }
 
-    cancelEvent = async () => {
-
-        await this.store.alterSessionState("CANCEL");
-
-        if (this.store.isError) {
-            failureNotification(store.message.help);
-        }
-        else if (this.store.isDone) {
-            message.success('The session is cancelled.');
-        }
+    cancelEvent = () => {
+        this.store.targetState = "CANCEL";
+        this.store.showClosureDrawer=true;
     }
 
-    completeEvent = async () => {
-
-        await this.store.alterSessionState("DONE");
-
-        if (this.store.isError) {
-            failureNotification(store.message.help);
-        }
-        else if (this.store.isDone) {
-            message.success('The session is marked as completed.');
-        }
+    completeEvent = () => {
+        this.store.targetState = "DONE";
+        this.store.showClosureDrawer=true;
     }
 
     renderStatus = (session) => {
