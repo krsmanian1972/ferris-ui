@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
-import { Spin, Result, Carousel, Button, Tag, Tooltip } from 'antd';
+import { Spin, Result, Carousel, Button, Tag, Tooltip, Space } from 'antd';
 import { LeftOutlined, RightOutlined,PlusOutlined,EditOutlined } from '@ant-design/icons';
 
 import ConstraintDrawer from './ConstraintDrawer';
@@ -9,6 +9,8 @@ import Reader from "../commons/Reader";
 
 @observer
 class ConstraintList extends Component {
+
+    index = 0;
 
     constructor(props) {
         super(props);
@@ -34,14 +36,10 @@ class ConstraintList extends Component {
         return (<></>)
     }
 
-    renderOption = (option, index) => {
+    renderOption = (option) => {
         return (
             <div key={option.id}>
                 <Reader value={option.description} height={350} />
-                <div style={{ display: "flex", flexWrap: "wrap", height: 40, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 10 }}></div>
-                <Tooltip key="ed_tip" title="To edit this section">
-                    <Button key="edit_option" icon={<EditOutlined />} shape="circle" onClick={() => this.showEditOption(option)}></Button>
-                </Tooltip>
             </div>
         )
     }
@@ -65,6 +63,8 @@ class ConstraintList extends Component {
             slidesToShow: 1,
             slidesToScroll: 1,
             swipeToSlide: true,
+            afterChange: (current) => {this.index = current},
+
         };
 
         return (
@@ -114,18 +114,26 @@ class ConstraintList extends Component {
         store.showDrawer = true;
     }
 
-    showEditOption = (option) => {
+    showEditOption = () => {
         const store = this.props.constraintStore;
-        store.setCurrentOption(option);
-        store.showDrawer = true;
+        const flag = store.asCurrent(this.index);
+        store.showDrawer = flag;
     }
 
     getControls = () => {
+
+        const rowCount = this.props.constraintStore.rowCount;
+
         return (
             <div style={{ display: "flex", flexWrap: "wrap", flexDirection: "row", alignItems: "center", paddingRight: 10 }}>
+                <Space>
+                    <Tooltip key="ed_tip" title="To edit this Option">
+                        <Button key="edit_option" icon={<EditOutlined />} disabled={rowCount === 0} shape="circle" onClick={() => this.showEditOption()}></Button>
+                    </Tooltip>
                     <Tooltip key="add_option_tip" title="To Add New Option">
                         <Button key="add_option" icon={<PlusOutlined />} shape="circle" onClick={() => this.showNewOption()}></Button>
                     </Tooltip>
+                </Space>
             </div>
         );
     }

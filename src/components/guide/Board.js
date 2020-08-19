@@ -191,6 +191,10 @@ class Board extends Component {
         });
 
         window.addEventListener("keypress", this.write);
+
+        const stream = this.canvas.captureStream(25);
+        
+        this.props.onCanvasStream(stream);
     }
 
 

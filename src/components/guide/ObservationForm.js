@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
+import moment from 'moment';
 
 import { Button, Form, Input, notification, message } from 'antd';
 import { PlusCircleOutlined, EditOutlined } from '@ant-design/icons';
@@ -24,17 +25,25 @@ const failureNotification = () => {
 class ObservationForm extends Component {
     
     formRef = React.createRef();
+
+    description="";
     
     handleDescription = (text) => {
+        this.description = text;
         this.formRef.current && this.formRef.current.setFieldsValue({ description: text });
     }
 
     componentDidMount() {
         
         const store = this.props.observationStore;
+        if(store.isNewObservation) {
+            return;
+        }
         const {description} = store.currentObservation;
 
         this.formRef.current && this.formRef.current.setFieldsValue({ description: description });
+        this.description = description;
+        store.change=moment();
     }
 
     onFinish = async (values) => {
@@ -70,7 +79,7 @@ class ObservationForm extends Component {
     render() {
 
         const store = this.props.observationStore;
-        const {description} = store.currentObservation;
+        const change = store.change;
 
         return (
             <Form layout="vertical" ref={this.formRef} onFinish={this.onFinish} >
@@ -83,7 +92,7 @@ class ObservationForm extends Component {
                     <div style={{ display: "none" }}><TextArea rows={1} /></div>    
                     
                     <div style={{ border: "1px solid lightgray" }}>
-                        <Editor ref={this.editorRef} value={description} id="desc_editor" onChange={this.handleDescription} height={300} />
+                        <Editor value={this.description} id="desc_editor" onChange={this.handleDescription} height={300} />
                     </div>
                 </Form.Item>
 

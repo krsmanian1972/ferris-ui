@@ -68,8 +68,13 @@ export default class ObservationStore {
         this.currentObservation = EMPTY_OBSERVATION;
     }
 
-    setCurrentObservation = (observation) => {
-        this.currentObservation = observation;
+    asCurrent = (index) => {
+        if(index >= 0 && index < this.rowCount) {
+            this.currentObservation = this.observations[index];
+            return true;
+        }
+
+        return false;
     }
 
     fetchObservations = async () => {
@@ -185,7 +190,7 @@ export default class ObservationStore {
 decorate(ObservationStore, {
     state: observable,
     message: observable,
-    changed: observable,
+    change: observable,
     showDrawer: observable,
 
     observations: observable,
@@ -200,5 +205,5 @@ decorate(ObservationStore, {
     saveObservation: action,
     fetchObservations: action,
     setNewObservation: action,
-    setCurrentObservation: action,
+    asCurrent: action,
 })

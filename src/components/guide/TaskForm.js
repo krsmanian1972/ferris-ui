@@ -4,7 +4,7 @@ import { observer } from 'mobx-react';
 import moment from 'moment';
 
 import { DatePicker, Button, Form, Input, InputNumber, notification, message } from 'antd';
-import { PlusCircleOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, EditOutlined } from '@ant-design/icons';
 
 import Editor from "../commons/Editor";
 
@@ -26,6 +26,7 @@ const failureNotification = () => {
 class TaskForm extends Component {
 
     formRef = React.createRef();
+
     description = "";
 
     disabledDate = (current) => {
@@ -38,12 +39,27 @@ class TaskForm extends Component {
 
     handleDescription = (text) => {
         this.description = text;
-        this.formRef.current.setFieldsValue({ description: this.description });
+        this.formRef.current && this.formRef.current.setFieldsValue({ description: text });
+    }
+
+    componentDidMount() {
+
+        const store = this.props.taskStore;
+        if(store.isNewTask) {
+            return;
+        }
+
+        const {description, name, scheduleStart, duration} = store.currentTask;
+        const localeStart = moment(scheduleStart*1000);
+
+        this.formRef.current && this.formRef.current.setFieldsValue({ description: description, name:name, startTime: localeStart, duration: duration });
+        this.description = description;
+        store.change=moment();
     }
 
     onFinish = async (values) => {
         const store = this.props.taskStore;
-        await store.createTask(values);
+        await store.saveTask(values);
 
         if (store.isError) {
             failureNotification();
@@ -54,10 +70,28 @@ class TaskForm extends Component {
         }
     }
 
+    getSaveIcon = () => {
+        const store = this.props.taskStore;
+        if(store.isNewTask) {
+            return <PlusCircleOutlined/>
+        }
+        return <EditOutlined/>
+    }
+
+    getSaveLabel = () => {
+        const store = this.props.taskStore;
+        if(store.isNewTask) {
+            return "Create Activity"
+        }
+
+        return "Update Activity"
+    }
+
     render() {
 
         const store = this.props.taskStore;
         const startTimeMsg = store.startTimeMsg;
+        const change = store.change;
 
         return (
             <Form layout="vertical" ref={this.formRef} onFinish={this.onFinish} >
@@ -65,7 +99,7 @@ class TaskForm extends Component {
                     name="name"
                     rules={[{ required: true, message: 'This is the name of the activity to quickly identify.' }]}
                     label="Task Name">
-                    <Input />
+                    <Input/>
                 </Form.Item>
 
                 <Form.Item
@@ -96,7 +130,7 @@ class TaskForm extends Component {
                 </Form.Item>
 
                 <Form.Item>
-                    <Button type="primary" disabled={store.isLoading} htmlType="submit" icon={<PlusCircleOutlined />}>Create Task</Button>
+                    <Button type="primary" disabled={store.isLoading} htmlType="submit" icon={this.getSaveIcon()}>{this.getSaveLabel()}</Button>
                 </Form.Item>
             </Form>
         );

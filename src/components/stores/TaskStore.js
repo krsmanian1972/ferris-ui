@@ -1,13 +1,16 @@
 import { decorate, observable, computed, action } from 'mobx';
 import { apiHost } from './APIEndpoints';
-import { createTaskQuery,tasksQuery } from './Queries';
+import { createTaskQuery,tasksQuery,updateTaskQuery } from './Queries';
 import moment from 'moment';
+import {isBlank} from './Util';
 
 const INIT = "init";
 const PENDING = 'pending';
 const INVALID = "invalid";
 const DONE = 'done';
 const ERROR = 'error';
+
+const EMPTY_TASK = {id:"",description:"",scheduleStart:null,duration:0};
 
 const EMPTY_MESSAGE = { status: "", help: "" };
 const SAVING_ERROR = { status: "error", help: "We are very sorry. Unable to store the Planning Information." };
@@ -24,6 +27,7 @@ export default class TaskStore {
 
     tasks = [];
     rowCount = 0;
+    currentTask = {};
 
     constructor(props) {
         this.apiProxy = props.apiProxy;
@@ -45,6 +49,25 @@ export default class TaskStore {
 
     get isError() {
         return this.state === ERROR;
+    }
+
+    get isNewTask() {
+        const id = this.currentTask.id;
+        return isBlank(id);
+    }
+
+    setNewTask = () => {
+        this.currentTask = EMPTY_TASK;
+    }
+
+    asCurrent =(index) => {
+
+        if(index >= 0 && index < this.rowCount) {
+            this.currentTask = this.tasks[index];
+            return true;
+        }
+
+        return false;
     }
 
     fetchTasks = async () => {
@@ -75,6 +98,55 @@ export default class TaskStore {
         catch (e) {
             this.state = ERROR;
             this.message = ERROR_MESSAGE;
+            console.log(e);
+        }
+    }
+
+    saveTask = async(planRequest) => {
+        if(this.isNewTask) {
+            await this.createTask(planRequest);
+        }
+        else {
+            await this.updateTask(planRequest);
+        }
+    }
+
+    updateTask = async(planRequest) => {
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+
+        if (!this.isValid(planRequest)) {
+            this.state = INVALID;
+            return;
+        }
+        
+        const variables = {
+            input: {
+                id: this.currentTask.id,
+                name:planRequest.name,
+                description:planRequest.description,
+                startTime: planRequest.startTime.utc().format(),
+                duration:planRequest.duration,
+            }
+        }
+
+        try {
+            const response = await this.apiProxy.mutate(apiHost, updateTaskQuery, variables);
+            const data = await response.json();
+
+            if (data.error == true) {
+                this.state = ERROR;
+                this.message = SAVING_ERROR;
+                return;
+            }
+
+            this.state = DONE;
+            this.showDrawer = false;
+            this.fetchTasks();
+        }
+        catch (e) {
+            this.state = ERROR;
+            this.message = SAVING_ERROR;
             console.log(e);
         }
     }
@@ -143,19 +215,24 @@ export default class TaskStore {
 decorate(TaskStore, {
     state: observable,
     message: observable,
-    changed: observable,
+    change: observable,
     showDrawer: observable,
 
     startTimeMsg: observable,
 
     tasks: observable,
+    currentTask: observable,
+    rowCount: observable,
 
     isLoading: computed,
     isDone: computed,
     isInvalid: computed,
     isError: computed,
+    isNewTask: computed,
 
-    validateDate: action,
-    createTask: action,
+    saveTask:action,
     fetchTasks: action,
+    setNewTask:action,
+    asCurrent:action,
+    validateDate: action,
 })

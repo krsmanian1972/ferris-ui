@@ -14,7 +14,7 @@ class TaskDrawer extends Component {
    
     render() {
         const store = this.props.taskStore;
-        const title = "New Task";
+        const title = store.isNewTask ? "New Activity" : "Edit Activity";
 
         return (
             <Drawer title={title} width={"55%"} closable={true} onClose={this.close} visible={store.showDrawer} destroyOnClose>

@@ -5,8 +5,8 @@ import Moment from 'react-moment';
 import moment from 'moment';
 import 'moment-timezone';
 
-import { Spin, Result, Carousel, Button, Space, Steps, Tooltip, Tag, Switch } from 'antd';
-import { LeftOutlined, RightOutlined, PlusOutlined } from '@ant-design/icons';
+import { Spin, Result, Carousel, Button, Steps, Tooltip, Tag, Space } from 'antd';
+import { LeftOutlined, RightOutlined, PlusOutlined,EditOutlined } from '@ant-design/icons';
 
 import TaskDrawer from './TaskDrawer';
 import Reader from "../commons/Reader";
@@ -15,6 +15,9 @@ const { Step } = Steps;
 
 @observer
 class TaskList extends Component {
+    
+    index = 0;
+
     constructor(props) {
         super(props);
     }
@@ -48,6 +51,7 @@ class TaskList extends Component {
 
         return (
             <div key={task.id}>
+                <p style={{fontWeight:"bold"}}>{task.name}</p>
                 <Reader id={task.id} value={task.description} readOnly={true} height={350} />
                 <div style={{padding: 10,height:100 }}>
                     <Steps progressDot current={0} size="small">
@@ -66,22 +70,19 @@ class TaskList extends Component {
     previous = () => {
         this.carousel.prev();
     }
-
-    onEdit = (mode) => {
-    }
-
-
+    
     renderSlider = (tasks, rowCount) => {
         if (rowCount == 0) {
             return <></>
         }
-
+    
         const settings = {
             dots: false,
             infinite: true,
             slidesToShow: 1,
             slidesToScroll: 1,
             swipeToSlide: true,
+            afterChange: (current) => {this.index = current},
         };
 
         return (
@@ -127,22 +128,30 @@ class TaskList extends Component {
 
     showNewTask = () => {
         const store = this.props.taskStore;
+        store.setNewTask();
         store.showDrawer = true;
+    }
+
+    showEditTask = () => {
+        const store = this.props.taskStore;
+        const flag = store.asCurrent(this.index);
+        store.showDrawer = flag;
     }
 
 
     getControls = () => {
+        
+        const rowCount = this.props.taskStore.rowCount;
+
         return (
             <div style={{ display: "flex", flexWrap: "wrap", flexDirection: "row", alignItems: "center", paddingRight: 10 }}>
                 <Space>
-                    <Tooltip key="ed_tip" title="To elaborate this section">
-                        <Switch key="ed_switch" onClick={this.onEdit} checkedChildren="Save" unCheckedChildren="Edit" defaultChecked={false} />
+                    <Tooltip key="ed_tip" title="To edit this activity">
+                        <Button key="edit_objective" icon={<EditOutlined />} disabled={rowCount === 0} shape="circle" onClick={() => this.showEditTask()}></Button>
                     </Tooltip>
-
                     <Tooltip key="add_task_tip" title="To Add New Activity">
                         <Button key="add_task" icon={<PlusOutlined />} shape="circle" onClick={() => this.showNewTask()}></Button>
                     </Tooltip>
-
                 </Space>
             </div>
         );

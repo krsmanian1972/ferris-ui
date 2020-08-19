@@ -14,7 +14,7 @@ class ObjectiveDrawer extends Component {
    
     render() {
         const store = this.props.objectiveStore;
-        const title = "New Objective";
+        const title = store.isNewObjective ? "New Objective" : "Edit Objective";
 
         return (
             <Drawer title={title} width={"55%"} closable={true} onClose={this.close} visible={store.showDrawer} destroyOnClose>

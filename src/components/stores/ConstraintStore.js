@@ -69,8 +69,14 @@ export default class ConstraintStore {
         this.currentOption = EMPTY_OPTION
     }
 
-    setCurrentOption = (option) => {
-        this.currentOption = option;
+    asCurrent =(index) => {
+
+        if(index >= 0 && index < this.rowCount) {
+            this.currentOption = this.options[index];
+            return true;
+        }
+
+        return false;
     }
 
     fetchOptions = async () => {
@@ -187,7 +193,7 @@ export default class ConstraintStore {
 decorate(ConstraintStore, {
     state: observable,
     message: observable,
-    changed: observable,
+    change: observable,
     showDrawer: observable,
 
     options: observable,
@@ -202,5 +208,5 @@ decorate(ConstraintStore, {
     saveOption:action,
     fetchOptions: action,
     setNewOption:action,
-    setCurrentOption:action,
+    asCurrent:action,
 })
