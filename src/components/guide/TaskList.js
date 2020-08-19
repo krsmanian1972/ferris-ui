@@ -51,6 +51,7 @@ class TaskList extends Component {
 
         return (
             <div key={task.id}>
+                <p style={{fontWeight:"bold"}}>{task.name}</p>
                 <Reader id={task.id} value={task.description} readOnly={true} height={350} />
                 <div style={{padding: 10,height:100 }}>
                     <Steps progressDot current={0} size="small">

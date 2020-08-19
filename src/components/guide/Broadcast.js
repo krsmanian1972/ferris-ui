@@ -5,6 +5,8 @@ import _ from 'lodash';
 import socket from '../stores/socket';
 import VideoStreamTransceiver from '../webrtc/VideoStreamTransceiver';
 import ScreenStreamTransceiver from '../webrtc/ScreenStreamTransceiver';
+import BoardStreamTransceiver from '../webrtc/BoardStreamTransceiver';
+
 import NoteListStore from '../stores/NoteListStore';
 import NotesStore from '../stores/NotesStore';
 
@@ -19,6 +21,7 @@ import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutl
 
 const CONNECTION_KEY_VIDEO_STREAM = "peerVideoStream";
 const CONNECTION_KEY_SCREEN_STREAM = "peerScreenStream";
+const CONNECTION_KEY_BOARD_STREAM = "peerBoardStream";
 
 const MY_BOARD_KEY = 'myBoard';
 
@@ -31,6 +34,7 @@ class Broadcast extends Component {
         this.state = {
 
             screenStatus: '',
+            boardStatus: '',
 
             peerRequestStatus: '',
             invitationFrom: '',
@@ -39,6 +43,7 @@ class Broadcast extends Component {
             localSrc: null,
             peerSrc: null,
             screenSrc: null,
+            boardSrc: null,
 
             videoDevice: 'On',
             audioDevice: 'On',
@@ -48,6 +53,7 @@ class Broadcast extends Component {
             portalSize: { height: window.innerHeight, width: window.innerWidth }
         };
 
+        this.canvasStream = null;
         this.transceivers = {};
 
         this.isCaller = false;
@@ -75,15 +81,26 @@ class Broadcast extends Component {
         });
     }
 
+    onCanvasStream = (stream) => {
+        this.canvasStream = stream;
+
+        const boardTransceiver = this.transceivers[CONNECTION_KEY_BOARD_STREAM]
+        
+        if(boardTransceiver) {
+            boardTransceiver.start(this.canvasStream);
+        }
+    }
+
     initializeBoards = (sessionUserId) => {
         this.myBoards = new Map();
-        const el = <Board key={MY_BOARD_KEY} boardId={MY_BOARD_KEY} sessionUserId={sessionUserId} />
+        const el = <Board key={MY_BOARD_KEY} boardId={MY_BOARD_KEY} sessionUserId={sessionUserId} onCanvasStream={this.onCanvasStream}/>
         this.myBoards.set(MY_BOARD_KEY, el);
     }
 
     buildTransceivers = (peerId) => {
         this.transceivers[CONNECTION_KEY_VIDEO_STREAM] = this.buildVideoTransceiver(peerId);
         this.transceivers[CONNECTION_KEY_SCREEN_STREAM] = this.buildScreenTransceiver(peerId);
+        this.transceivers[CONNECTION_KEY_BOARD_STREAM] = this.buildBoardTransceiver(peerId);
     }
 
     buildVideoTransceiver = (peerId) => {
@@ -106,6 +123,14 @@ class Broadcast extends Component {
         return new ScreenStreamTransceiver(peerId, CONNECTION_KEY_SCREEN_STREAM)
             .on(CONNECTION_KEY_SCREEN_STREAM, (src) => {
                 const newState = { screenStatus: 'active', screenSrc: src };
+                this.setState(newState);
+            })
+    }
+
+    buildBoardTransceiver = (peerId) => {
+        return new BoardStreamTransceiver(peerId, CONNECTION_KEY_BOARD_STREAM)
+            .on(CONNECTION_KEY_BOARD_STREAM, (src) => {
+                const newState = { boardStatus: 'active', boardSrc: src };
                 this.setState(newState);
             })
     }
@@ -182,6 +207,7 @@ class Broadcast extends Component {
 
         if (peerId) {
             this.transceivers[CONNECTION_KEY_VIDEO_STREAM].start(true);
+            this.transceivers[CONNECTION_KEY_BOARD_STREAM].start(this.canvasStream);
         }
     }
 
@@ -190,6 +216,7 @@ class Broadcast extends Component {
         this.isCaller = false;
         this.buildTransceivers(peerId);
         this.transceivers[CONNECTION_KEY_VIDEO_STREAM].join(preference);
+        this.transceivers[CONNECTION_KEY_BOARD_STREAM].start(this.canvasStream);
     }
 
     shareScreen = () => {
@@ -297,7 +324,7 @@ class Broadcast extends Component {
     }
 
     render() {
-        const { localSrc, peerSrc, screenSrc, portalSize, minimizeMiniBoard } = this.state;
+        const { localSrc, peerSrc, screenSrc, boardSrc, portalSize, minimizeMiniBoard } = this.state;
         const viewHeight = portalSize.height * 0.94;
         const canShare = this.peerStreamStatus === "active";
         const sessionUserId = this.props.params.sessionUserId;
@@ -305,7 +332,7 @@ class Broadcast extends Component {
         return (
             <div style={{ padding: 8, height: viewHeight }}>
 
-                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} myBoards={this.myBoards} minmizeMiniBoard={minimizeMiniBoard} />
+                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} boardSrc={boardSrc} myBoards={this.myBoards} minmizeMiniBoard={minimizeMiniBoard} />
 
                 <Row style={{ marginTop: 2 }}>
                     <Col span={12}>

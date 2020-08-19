@@ -9,7 +9,7 @@ const standardStyle = {
     overflow: "hidden",
 };
 
-function VideoBoard({ localSrc, peerSrc, screenSrc, myBoards,  minmizeMiniBoard }) {
+function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoards,  minmizeMiniBoard }) {
 
     const [peerKey, setPeerKey] = useState('none');
     const [myKey, setMyKey] = useState('none');
@@ -21,12 +21,12 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, myBoards,  minmizeMiniBoard 
     const localVideo = useRef(null);
 
     useEffect(() => {
+        if (peerBoard.current && boardSrc) {
+            peerBoard.current.srcObject = boardSrc;
+        }
         if (peerScreen.current && screenSrc) {
             peerScreen.current.srcObject = screenSrc;
         }
-    });
-
-    useEffect(() => {
         if (peerVideo.current && peerSrc) {
             peerVideo.current.srcObject = peerSrc;
         }
@@ -143,6 +143,7 @@ VideoBoard.propTypes = {
     localSrc: PropTypes.object,
     peerSrc: PropTypes.object,
     screenSrc: PropTypes.object,
+    boardSrc: PropTypes.object,
     myBoards: PropTypes.object,
     minimizeMiniBoard: PropTypes.object,
 };

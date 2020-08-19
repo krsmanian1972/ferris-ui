@@ -52,6 +52,7 @@ class ObjectiveList extends Component {
 
         return (
             <div key={objective.id}>
+                <p style={{fontWeight:"bold"}}>&nbsp;</p>
                 <Reader value={objective.description} height={350} />
                 <div style={{padding: 10,height:100 }}>
                     <Steps progressDot current={0} size="small">
