@@ -232,18 +232,37 @@ export default class SessionStore {
         }
     }
 
-    alterSessionState = async (targetState) => {
-
-        const sessionId = this.event.session.id;
-        this.state = PENDING;
-        this.message = EMPTY_MESSAGE;
+    alterSessionState = async (givenState) => {
 
         const variables = {
             input: {
-                id: sessionId,
-                targetState: targetState
+                id: this.event.session.id,
+                targetState: givenState
             }
-        }
+        };
+
+        await this.doAlterSessionState(variables);
+    }
+
+    performClosure = async(request) => {
+        
+        const variables = {
+            input: {
+                id: this.event.session.id,
+                targetState: this.targetState,
+                closingNotes: request.closingNotes,
+                startTime: request.startTime,
+                duration: request.duration
+            }
+        };
+
+        await this.doAlterSessionState(variables);
+    }
+
+    doAlterSessionState = async(variables) => { 
+
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
 
         try {
             const response = await this.apiProxy.mutate(apiHost, alterSessionStateQuery, variables);
@@ -259,6 +278,7 @@ export default class SessionStore {
 
             this.event.session = result.session;
             this.change = result.session.status;
+            this.showClosureDrawer = false;
             this.state = DONE;
         }
         catch (e) {
@@ -267,6 +287,7 @@ export default class SessionStore {
             console.log(e);
         }
     }
+ 
 }
 
 decorate(SessionStore, {
@@ -302,4 +323,6 @@ decorate(SessionStore, {
     validateDate: action,
     alterSessionState: action,
     updateSessionProgress: action,
+    performClosure: action,
+    doAlterSessionState: action,
 });

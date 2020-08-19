@@ -8,18 +8,16 @@ import ClosureForm from './ClosureForm';
 class ClosureDrawer extends Component {
 
     close = () => {
-        const store = this.props.sessionStore;
-        store.showClosureDrawer = false;
+        this.props.store.showClosureDrawer = false;
     }
 
    
     render() {
-        const store = this.props.sessionStore;
-        const title = store.targetState==="DONE" ? "Completion Details" : "Cancellation Details";
+        const title = this.props.store.targetState==="DONE" ? "Completion Details" : "Cancellation Details";
 
         return (
-            <Drawer title={title} width={"45%"} closable={true} onClose={this.close} visible={store.showClosureDrawer} destroyOnClose>
-                <ClosureForm sessionStore = {store}/>
+            <Drawer title={title} width={"45%"} closable={true} onClose={this.close} visible={this.props.store.showClosureDrawer} destroyOnClose>
+                <ClosureForm store = {this.props.store}/>
             </Drawer>
         );
     }

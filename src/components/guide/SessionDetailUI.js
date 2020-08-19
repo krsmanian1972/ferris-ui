@@ -15,6 +15,7 @@ import BoardList from "../commons/BoardList";
 import SessionLauncher from './SessionLauncher';
 import GoldenTemplate from './GoldenTemplate';
 import NoteList from '../commons/NoteList';
+import ClosureDrawer from './ClosureDrawer';
 
 const { Title, Paragraph } = Typography;
 
@@ -139,12 +140,12 @@ class SessionDetailUI extends Component {
 
     cancelEvent = () => {
         this.store.targetState = "CANCEL";
-        this.store.showClosureDrawer=true;
+        this.store.showClosureDrawer = true;
     }
 
     completeEvent = () => {
         this.store.targetState = "DONE";
-        this.store.showClosureDrawer=true;
+        this.store.showClosureDrawer = true;
     }
 
     renderStatus = (session) => {
@@ -195,28 +196,31 @@ class SessionDetailUI extends Component {
         const change = this.store.change;
 
         return (
-            <PageHeader key="sessionDetail"
-                title={<Title level={3}>{session.name}</Title>}
-                subTitle={program.name}
-                extra={[
-                    this.renderStatus(session),
-                    this.makeReadyButton(),
-                    this.cancelEventButton(),
-                    this.completeEventButton(),
-                ]}
-            >
-                {this.renderTopSegment(program, session, sessionUser)}
-                {people.coach && (
-                    <div key="assets">
-                        <GoldenTemplate key="gt" enrollmentId={session.enrollmentId} memberId={people.member.user.id} apiProxy={this.props.appStore.apiProxy} />
-                        <BoardList key="cb" title="Coach Boards" sessionUserId={people.coach.sessionUser.id} />
-                        <BoardList key="ab" title="Actor Boards" sessionUserId={people.member.sessionUser.id} />
-                        <NoteList key="cn" title="Coach Notes" sessionUserId={people.coach.sessionUser.id} />
-                        <NoteList key="an" title="Actor Notes" sessionUserId={people.member.sessionUser.id} />
-                    </div>
-                )}
-                {this.renderPeople(people)}
-            </PageHeader>
+            <>
+                <PageHeader key="sessionDetail"
+                    title={<Title level={3}>{session.name}</Title>}
+                    subTitle={program.name}
+                    extra={[
+                        this.renderStatus(session),
+                        this.makeReadyButton(),
+                        this.cancelEventButton(),
+                        this.completeEventButton(),
+                    ]}
+                >
+                    {this.renderTopSegment(program, session, sessionUser)}
+                    {people.coach && (
+                        <div key="assets">
+                            <GoldenTemplate key="gt" enrollmentId={session.enrollmentId} memberId={people.member.user.id} apiProxy={this.props.appStore.apiProxy} />
+                            <BoardList key="cb" title="Coach Boards" sessionUserId={people.coach.sessionUser.id} />
+                            <BoardList key="ab" title="Actor Boards" sessionUserId={people.member.sessionUser.id} />
+                            <NoteList key="cn" title="Coach Notes" sessionUserId={people.coach.sessionUser.id} />
+                            <NoteList key="an" title="Actor Notes" sessionUserId={people.member.sessionUser.id} />
+                        </div>
+                    )}
+                    {this.renderPeople(people)}
+                </PageHeader>
+                <ClosureDrawer store={this.store}/>
+            </>
         )
     }
 }
