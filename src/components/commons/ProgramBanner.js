@@ -21,7 +21,7 @@ class ProgramBanner extends Component {
         return (
             <div style={{ textAlign: "center", height: 260}}>
                 <div style={{ display: "inline-block", verticalAlign: "middle", height:260 }}></div>
-                <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block" }} src={url} onClick={() => this.props.showProgramDetail(program.id)} />
+                <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius:"12px" }} src={url} onClick={() => this.props.showProgramDetail(program.id)} />
             </div>
         )
     }

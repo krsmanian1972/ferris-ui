@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 
-import { Typography, Button, Tooltip, Tag,Space,Upload } from 'antd';
+import { Typography, Button, Tooltip, Tag, Space, Upload } from 'antd';
 import { UploadOutlined, BorderHorizontalOutlined } from '@ant-design/icons';
 
 import { assetHost } from '../stores/APIEndpoints';
@@ -15,7 +15,7 @@ class CoachProgramList extends ProgramList {
 
     constructor(props) {
         super(props);
-        this.state = {imageBorder:"none"}
+        this.state = { imageBorder: "none" }
     }
 
     /**
@@ -35,14 +35,14 @@ class CoachProgramList extends ProgramList {
             name: 'cover.png',
             action: action,
             accept: ".png",
-            showUploadList:false
+            showUploadList: false
         };
 
         return (
-            <Upload {...props} onChange = {this.onCoverImageChange}>
+            <Upload {...props} onChange={this.onCoverImageChange}>
                 <Tooltip title="To Upload or Change the Thumbnail Image of this Program.">
-                    <Button icon={<UploadOutlined/>}></Button>
-                </Tooltip>    
+                    <Button icon={<UploadOutlined />}></Button>
+                </Tooltip>
             </Upload>
         )
     }
@@ -52,39 +52,44 @@ class CoachProgramList extends ProgramList {
      * @param {*} program 
      */
     getName = (program) => {
-        if(program.active) {
-            return <Text style={{ textAlign: "center" }}>{program.name}</Text>
+        if (program.active) {
+            return (
+                <Space>
+                    <Text style={{ textAlign: "center" }}>{program.name}</Text>
+                    {this.uploadCover(program)}
+                </Space>
+            )
         }
 
         return (
             <Space>
                 <Tooltip title="This is a Draft Program, pending activation.">
                     <Tag onClick={() => this.props.showProgramDetail(program.id)} color="geekblue" style={{ textAlign: "center" }}>{program.name}</Tag>
-                </Tooltip>     
+                </Tooltip>
                 {this.uploadCover(program)}
                 {this.guide()}
             </Space>
-        )          
+        )
     }
 
-     /**
-     * Provide a border to assess the fitment of the image in terms of size.
-     */
-   
+    /**
+    * Provide a border to assess the fitment of the image in terms of size.
+    */
+
     guide = () => {
         return (
             <Tooltip title="A border will be opened to check the fitment of the image.">
-                <Button key="guide" onClick={this.toggleGuide} icon={<BorderHorizontalOutlined/>} shape="circle"></Button>
+                <Button key="guide" onClick={this.toggleGuide} icon={<BorderHorizontalOutlined />} shape="circle"></Button>
             </Tooltip>
         )
     }
 
     toggleGuide = () => {
-        if(this.state.imageBorder === "none") {
-            this.setState({imageBorder:"1px dashed lightgray"})
+        if (this.state.imageBorder === "none") {
+            this.setState({ imageBorder: "1px dashed lightgray" })
         }
         else {
-            this.setState({imageBorder:"none"})
+            this.setState({ imageBorder: "none" })
         }
     }
 
@@ -97,6 +102,6 @@ class CoachProgramList extends ProgramList {
         const url = `${assetHost}/programs/${program.id}/cover/cover.png?nocache=${ver}`;
         return url;
     }
-    
+
 }
 export default CoachProgramList;

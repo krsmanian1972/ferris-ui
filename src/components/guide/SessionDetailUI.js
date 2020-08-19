@@ -68,7 +68,7 @@ class SessionDetailUI extends Component {
             <div key="programImage" style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ textAlign: "center", height: 175, marginRight: 10, marginLeft: 10 }}>
                     <div style={{ display: "inline-block", verticalAlign: "middle", height: 175 }}></div>
-                    <img style={{ maxHeight: "100%", maxWidth: "100%", minWidth: "100%", verticalAlign: "middle", display: "inline-block" }} src={this.getPosterUrl(program)} />
+                    <img style={{ maxHeight: "100%", maxWidth: "100%", minWidth: "100%", verticalAlign: "middle", display: "inline-block", borderRadius:"12px"}} src={this.getPosterUrl(program)} />
                 </div>
             </div>
         )
