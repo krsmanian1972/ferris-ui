@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
-import { Spin, Result, Carousel, Button, Tag, Tooltip } from 'antd';
+import { Spin, Result, Carousel, Button, Tag, Tooltip, Space } from 'antd';
 import { LeftOutlined, RightOutlined,PlusOutlined, EditOutlined } from '@ant-design/icons';
 
 import ObservationDrawer from './ObservationDrawer';
@@ -9,6 +9,8 @@ import Reader from "../commons/Reader";
 
 @observer
 class ObservationList extends Component {
+
+    index = 0;
 
     constructor(props) {
         super(props);
@@ -37,13 +39,7 @@ class ObservationList extends Component {
     renderObservation = (observation,index) => {
         return (
             <div key={observation.id}>
-                <Reader value={observation.description} height={350} />
-                <div style={{ display: "flex", flexWrap: "wrap", height: 40, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 10 }}></div>
-                <div style={{float:"right",paddingLeft: 10}}>
-                   <Tooltip key="ed_tip" title="To edit this observation">
-                        <Button key="edit_observation" icon={<EditOutlined />} shape="circle" onClick={() => this.showEditObservation(observation)}></Button>
-                    </Tooltip>
-                </div>
+                <Reader value={observation.description} height={350} />                
             </div>
         )
     }
@@ -67,6 +63,8 @@ class ObservationList extends Component {
             slidesToShow: 1,
             slidesToScroll: 1,
             swipeToSlide: true,
+            afterChange: (current) => {this.index = current},
+
         };
 
         return (
@@ -116,18 +114,25 @@ class ObservationList extends Component {
         store.showDrawer = true;
     }
 
-    showEditObservation = (observation) => {
+    showEditObservation = () => {
         const store = this.props.observationStore;
-        store.setCurrentObservation(observation);
-        store.showDrawer = true;
+        const flag = store.asCurrent(this.index);
+        store.showDrawer = flag;
     }
 
     getControls = () => {
+        const rowCount = this.props.observationStore.rowCount;
+
         return (
             <div style={{ display: "flex", flexWrap: "wrap", flexDirection: "row", alignItems: "center", paddingRight: 10 }}>
-                <Tooltip key="add_observation_tip" title="To Add New Observation">
-                    <Button key="add_observation" icon={<PlusOutlined />} shape="circle" onClick={() => this.showNewObservation()}></Button>
-                </Tooltip>
+                <Space>
+                    <Tooltip key="ed_tip" title="To edit this Observation">
+                        <Button key="edit_observation" icon={<EditOutlined />} disabled={rowCount === 0} shape="circle" onClick={() => this.showEditObservation()}></Button>
+                    </Tooltip>
+                    <Tooltip key="add_observation_tip" title="To Add New Observation">
+                        <Button key="add_observation" icon={<PlusOutlined />} shape="circle" onClick={() => this.showNewObservation()}></Button>
+                    </Tooltip>
+                </Space>
             </div>
         );
     }

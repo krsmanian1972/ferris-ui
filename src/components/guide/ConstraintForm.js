@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 
 import { Button, Form, Input, notification, message } from 'antd';
 import { PlusCircleOutlined,EditOutlined } from '@ant-design/icons';
+import moment from 'moment';
 
 import Editor from "../commons/Editor";
 
@@ -24,16 +25,24 @@ class ConstraintForm extends Component {
     
     formRef = React.createRef();
 
+    description = "";
+
     handleDescription = (text) => {
+        this.description = text;
         this.formRef.current && this.formRef.current.setFieldsValue({ description: text });
     }
 
     componentDidMount() {
         
         const store = this.props.constraintStore;
+        if(store.isNewOption) {
+            return;
+        }
         const {description} = store.currentOption;
 
         this.formRef.current && this.formRef.current.setFieldsValue({ description: description });
+        this.description = description;
+        store.change=moment();
     }
 
     onFinish = async (values) => {
@@ -69,7 +78,7 @@ class ConstraintForm extends Component {
     render() {
 
         const store = this.props.constraintStore;
-        const {description} = store.currentOption;
+        const change = store.change;
 
         return (
             <Form layout="vertical" ref={this.formRef} onFinish={this.onFinish} >
@@ -82,7 +91,7 @@ class ConstraintForm extends Component {
                     <div style={{ display: "none" }}><TextArea rows={1} /></div>
                     
                     <div style={{ border: "1px solid lightgray" }}>
-                        <Editor id="option_desc" value={description} onChange={this.handleDescription} height={300} />
+                        <Editor id="option_desc" value={this.description} onChange={this.handleDescription} height={300} />
                     </div>
                 </Form.Item>
 
