@@ -16,8 +16,8 @@ class ProgramBanner extends Component {
     }
 
 
-    getProgramPoster = (program) => {
-        const url = `${assetHost}/programs/${program.id}/poster/poster.png`;
+    getProgramBanner = (program) => {
+        const url = `${assetHost}/programs/${program.id}/banner/banner.png`;
         return (
             <div style={{ textAlign: "center", height: 260}}>
                 <div style={{ display: "inline-block", verticalAlign: "middle", height:260 }}></div>
@@ -53,7 +53,7 @@ class ProgramBanner extends Component {
                         {programs && programs.map(({ program }) => {
                             return (
                                 <div key={program.id}>
-                                    {this.getProgramPoster(program)}
+                                    {this.getProgramBanner(program)}
                                 </div>
                             )
                         })}
