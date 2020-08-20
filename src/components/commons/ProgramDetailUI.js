@@ -5,18 +5,20 @@ import { Spin, Result, PageHeader, Tooltip, Card, Button, Statistic } from 'antd
 import { PlusCircleOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
 import { Typography } from 'antd';
 
-const { Title, Paragraph } = Typography;
+import ReactPlayer from 'react-player';
 
 import { assetHost } from '../stores/APIEndpoints';
+import ProgramStore from '../stores/ProgramStore';
+import EnrollmentStore from '../stores/EnrollmentStore';
 
 import ProgramDescription from './ProgramDescription';
 import EnrollmentModal from './EnrollmentModal';
 
 import Milestones from '../guide/Milestones';
+import GoldenTemplate from '../guide/GoldenTemplate';
 import ProgramSessions from './ProgramSessions';
-import ProgramStore from '../stores/ProgramStore';
-import EnrollmentStore from '../stores/EnrollmentStore';
 
+const { Title, Paragraph } = Typography;
 
 @inject("appStore")
 @observer
@@ -40,11 +42,6 @@ class ProgramDetailUI extends Component {
         return `${assetHost}/programs/${programId}/poster/poster.png`;
     }
 
-    getTrailerUrl = () => {
-        const programId = this.props.params.programId;
-        return `${assetHost}/programs/${programId}/cover/cover.png`;
-    }
-
     getEnrollmentButton = () => {
         if (!this.store.canEnroll) {
             return;
@@ -61,7 +58,7 @@ class ProgramDetailUI extends Component {
     }
 
     showSessionDetail = (event) => {
-        const params = {event:event, parentKey: "programDetailUI" };
+        const params = { event: event, parentKey: "programDetailUI" };
         this.props.appStore.currentComponent = { label: "Session Detail", key: "sessionDetail", params: params };
     }
 
@@ -82,13 +79,46 @@ class ProgramDetailUI extends Component {
         return this.renderProgramModel();
     }
 
+    getTrailer = (program, change) => {
+        const url = `${assetHost}/programs/${program.id}/trailer/trailer.mp4`;
+        return (
+            <Card title={<Title level={4}>Trailer</Title>}>
+                <div className='trailer-wrapper'>
+                    <ReactPlayer width='100%' height='100%' controls className='trailer' url={url} />
+                </div>
+            </Card>
+        )
+    }
+
     getProgramPoster = (program, change) => {
         const url = `${assetHost}/programs/${program.id}/poster/poster.png`;
         return (
             <div style={{ textAlign: "center", height: 450 }}>
                 <div style={{ display: "inline-block", verticalAlign: "middle", height: 450 }}></div>
-                <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius:"12px" }} src={url} />
+                <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={url} />
             </div>
+        )
+    }
+
+    /**
+     * Let us show the coaching plan to the actor, if enrolled.
+     */
+    renderActorCoachingPlan = () => {
+        if (this.store.isOwner) {
+            return;
+        }
+
+        if (!this.store.isEnrolled) {
+            return;
+        }
+
+        const { enrollmentId } = this.store.programModel;
+        const memberId = this.props.appStore.apiProxy.getUserFuzzyId();
+
+        return (
+            <Card title={<Title level={4}>Coaching Plan</Title>}>
+                <GoldenTemplate key="gt" enrollmentId={enrollmentId} memberId={memberId} apiProxy={this.props.appStore.apiProxy} />
+            </Card>
         )
     }
 
@@ -105,6 +135,7 @@ class ProgramDetailUI extends Component {
                     ]}>
 
                     {this.getProgramPoster(program, change)}
+                    {this.getTrailer(program, change)}
 
                     <Card title={<Title level={4}>Coach</Title>} extra={<a href="#">More</a>}>
                         <Statistic value={coach.name} valueStyle={{ color: '#3f8600' }} />
@@ -113,11 +144,13 @@ class ProgramDetailUI extends Component {
                     </Card>
 
                     <ProgramDescription program={program} programStore={this.store} />
-                    
-                    <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy}/>
-                    
-                    <ProgramSessions programId = {program.id} apiProxy={this.props.appStore.apiProxy} showSessionDetail = {this.showSessionDetail}/>
-                    
+
+                    <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
+
+                    {this.renderActorCoachingPlan()}
+
+                    <ProgramSessions programId={program.id} apiProxy={this.props.appStore.apiProxy} showSessionDetail={this.showSessionDetail} />
+
                 </PageHeader>
 
                 <EnrollmentModal programStore={this.store} enrollmentStore={this.enrollmentStore} />

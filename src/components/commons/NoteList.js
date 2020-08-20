@@ -16,7 +16,7 @@ class NoteList extends Component {
     constructor(props) {
         super(props);
         this.store = new NoteListStore({ apiProxy: props.appStore.apiProxy });
-        this.store.load(props.sessionUserId);
+        this.store.load(props.sessionUserId, props.closingNotes);
     }
 
     next = () => {

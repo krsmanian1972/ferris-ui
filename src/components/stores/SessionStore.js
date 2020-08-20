@@ -250,9 +250,7 @@ export default class SessionStore {
             input: {
                 id: this.event.session.id,
                 targetState: this.targetState,
-                closingNotes: request.closingNotes,
-                startTime: request.startTime,
-                duration: request.duration
+                closingNotes: request.closingNotes
             }
         };
 

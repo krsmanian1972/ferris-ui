@@ -16,7 +16,7 @@ class ClosureDrawer extends Component {
         const title = this.props.store.targetState==="DONE" ? "Completion Details" : "Cancellation Details";
 
         return (
-            <Drawer title={title} width={"45%"} closable={true} onClose={this.close} visible={this.props.store.showClosureDrawer} destroyOnClose>
+            <Drawer title={title} width={"55%"} closable={true} onClose={this.close} visible={this.props.store.showClosureDrawer} destroyOnClose>
                 <ClosureForm store = {this.props.store}/>
             </Drawer>
         );

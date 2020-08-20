@@ -39,8 +39,6 @@ export default class GoldenTemplate extends Component {
     render() {
         return (
             <>
-                <Title style={{ marginTop: 30 }} level={4}>Plan</Title>
-
                 <div style={{ display: "flex", flexDirection: "row"}}>
                     <TaskList key="onward" taskStore={this.taskStore} />
                     <ObjectiveList key="objectives" objectiveStore={this.objectiveStore} />

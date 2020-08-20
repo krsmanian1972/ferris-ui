@@ -195,6 +195,7 @@ class SessionDetailUI extends Component {
         const people = this.store.people;
         const change = this.store.change;
 
+      
         return (
             <>
                 <PageHeader key="sessionDetail"
@@ -210,15 +211,19 @@ class SessionDetailUI extends Component {
                     {this.renderTopSegment(program, session, sessionUser)}
                     {people.coach && (
                         <div key="assets">
+                            
+                            <Title style={{ marginTop: 30 }} level={4}>Plan</Title>
                             <GoldenTemplate key="gt" enrollmentId={session.enrollmentId} memberId={people.member.user.id} apiProxy={this.props.appStore.apiProxy} />
+
                             <BoardList key="cb" title="Coach Boards" sessionUserId={people.coach.sessionUser.id} />
                             <BoardList key="ab" title="Actor Boards" sessionUserId={people.member.sessionUser.id} />
-                            <NoteList key="cn" title="Coach Notes" sessionUserId={people.coach.sessionUser.id} />
+                            <NoteList key="cn" title="Coach Notes" sessionUserId={people.coach.sessionUser.id} closingNotes={session.closingNotes}/>
                             <NoteList key="an" title="Actor Notes" sessionUserId={people.member.sessionUser.id} />
                         </div>
                     )}
                     {this.renderPeople(people)}
                 </PageHeader>
+
                 <ClosureDrawer store={this.store}/>
             </>
         )
