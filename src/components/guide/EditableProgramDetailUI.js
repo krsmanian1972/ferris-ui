@@ -12,6 +12,7 @@ import ProgramDescription from './EditableProgramDescription';
 import ActivationModal from './ActivationModal';
 import Milestones from './Milestones';
 import ReactPlayer from 'react-player';
+import EnrollmentList from '../commons/EnrollmentList';
 
 const { Title, Paragraph } = Typography;
 
@@ -219,6 +220,8 @@ class EditableProgramDetailUI extends Component {
                     <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
 
                     {this.getBanner(program, change)}
+
+                    <EnrollmentList programId={program.id}/>
 
                 </PageHeader>
                 <ActivationModal programStore={this.store} />

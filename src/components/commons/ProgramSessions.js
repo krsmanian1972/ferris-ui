@@ -65,12 +65,17 @@ class ProgramSession extends Component {
 
         const sessions = this.store.sessions;
 
+        if(this.store.rowCount === 0) {
+            return <></>
+        }
+       
         return (
-            <Card title={<Title level={4}>Your Sessions {this.countTag()}</Title>}>
-                {this.displayMessage()}
-                {this.renderSlots(sessions)}
-            </Card>
+                <Card title={<Title level={4}>Your Sessions {this.countTag()}</Title>}>
+                    {this.displayMessage()}
+                    {this.renderSlots(sessions)}
+                </Card>
         )
+        
     }
 
 }
