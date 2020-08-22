@@ -237,3 +237,18 @@ code {
   color:rgb(85,164,213);
   font-weight: bold;
 }
+
+.trailer-wrapper {
+  position: relative;
+  padding-top: 56.25%;
+}
+
+.trailer {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.trailer * {
+  outline: none;
+}

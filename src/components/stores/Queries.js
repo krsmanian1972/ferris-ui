@@ -22,6 +22,7 @@ export const programsQuery = `query ($criteria: ProgramCriteria!) {
         email
         name
       }
+      enrollmentId
       enrollmentStatus
     }
     error {
@@ -123,7 +124,8 @@ export const eventsQuery = `query ($criteria: EventCriteria!) {
         scheduleStart,
         scheduleEnd,
         status,
-        isClosed
+        isClosed,
+        closingNotes,
       }
       program {
         name,

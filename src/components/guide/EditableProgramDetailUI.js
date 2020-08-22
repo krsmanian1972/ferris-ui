@@ -11,6 +11,7 @@ import ProgramStore from '../stores/ProgramStore';
 import ProgramDescription from './EditableProgramDescription';
 import ActivationModal from './ActivationModal';
 import Milestones from './Milestones';
+import ReactPlayer from 'react-player';
 
 const { Title, Paragraph } = Typography;
 
@@ -55,7 +56,7 @@ class EditableProgramDetailUI extends Component {
      * Let the coach to upload the Poster image. 
      * @param {*} program 
     */
-    getContentButton = (program) => {
+    getPosterButton = (program) => {
         if (!this.store.canEdit) {
             return;
         }
@@ -69,9 +70,61 @@ class EditableProgramDetailUI extends Component {
         };
 
         return (
-            <Upload key="poster_uplod" {...props} onChange={this.onContentChange}>
+            <Upload key="poster_upload" {...props} onChange={this.onContentChange}>
                 <Tooltip key="poster_tp" title="To Upload or Change the Poster of this Program.">
                     <Button key="poster_button" type="primary" icon={<BuildOutlined />}>Poster</Button>
+                </Tooltip>
+            </Upload>
+        )
+    }
+
+    /**
+    * Let the coach to upload the Banner image. 
+    * @param {*} program 
+   */
+    getBannerButton = (program) => {
+        if (!this.store.canEdit) {
+            return;
+        }
+
+        const action = `${assetHost}/programs/${program.id}/banner`
+        const props = {
+            name: 'banner.png',
+            action: action,
+            accept: ".png",
+            showUploadList: false
+        };
+
+        return (
+            <Upload key="banner_upload" {...props} onChange={this.onContentChange}>
+                <Tooltip key="banner_tp" title="To Upload or Change the Banner of this Program.">
+                    <Button key="banner_button" type="primary" icon={<BuildOutlined />}>Banner</Button>
+                </Tooltip>
+            </Upload>
+        )
+    }
+
+    /**
+     * Let the coach to upload the Trailer
+     * @param {*} program 
+    */
+    getTrailerButton = (program) => {
+        if (!this.store.canEdit) {
+            return;
+        }
+
+        const action = `${assetHost}/programs/${program.id}/trailer`
+        const props = {
+            name: 'trailer.mp4',
+            action: action,
+            accept: ".mp4",
+            showUploadList: false
+        };
+
+        return (
+            <Upload key="trailer_upload" {...props} onChange={this.onContentChange}>
+                <Tooltip key="trailer_tp" title="To Upload or Change the Trailer for Program.">
+                    <Button key="trailer_button" type="primary" icon={<BuildOutlined />}>Trailer</Button>
                 </Tooltip>
             </Upload>
         )
@@ -109,8 +162,33 @@ class EditableProgramDetailUI extends Component {
         return (
             <div style={{ textAlign: "center", height: 450 }}>
                 <div style={{ display: "inline-block", verticalAlign: "middle", height: 450 }}></div>
-                <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block" }} src={url} />
+                <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={url} />
             </div>
+        )
+    }
+
+    getTrailer = (program, change) => {
+        const ver = new Date().getTime();
+        const url = `${assetHost}/programs/${program.id}/trailer/trailer.mp4?nocache=${ver}`;
+        return (
+            <Card title={<Title level={4}>Trailer</Title>} extra={this.getTrailerButton(program)}>
+                <div className='trailer-wrapper'>
+                    <ReactPlayer width='100%' height='100%' controls className='trailer' url={url} />
+                </div>
+            </Card>
+        )
+    }
+
+    getBanner = (program, change) => {
+        const ver = new Date().getTime();
+        const url = `${assetHost}/programs/${program.id}/banner/banner.png?nocache=${ver}`;
+        return (
+            <Card title={<Title level={4}>Banner</Title>} extra={this.getBannerButton(program)}>
+                <div style={{ textAlign: "center", height: 260 }}>
+                    <div style={{ display: "inline-block", verticalAlign: "middle", height: 260 }}></div>
+                    <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={url} />
+                </div>
+            </Card>
         )
     }
 
@@ -124,10 +202,11 @@ class EditableProgramDetailUI extends Component {
                 <PageHeader title={<Title level={3}>{program.name}</Title>}
                     extra={[
                         this.getActivationButton(),
-                        this.getContentButton(program)
+                        this.getPosterButton(program)
                     ]}>
 
                     {this.getProgramPoster(program, change)}
+                    {this.getTrailer(program, change)}
 
                     <Card title={<Title level={4}>Coach</Title>} extra={<a href="#">More</a>}>
                         <Statistic value={coach.name} valueStyle={{ color: '#3f8600' }} />
@@ -137,14 +216,9 @@ class EditableProgramDetailUI extends Component {
 
                     <ProgramDescription program={program} programStore={this.store} />
 
-                    <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy}/>
+                    <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
 
-                    <Card title={<Title level={4}>Trailers</Title>} extra={<a href="#">Edit</a>}>
-                        <Card
-                            style={{ border: '1px solid lightgray' }}
-                            cover={<img alt="cover" style={{ border: "1px solid lightgray" }} src={this.getTrailerUrl()} />}>
-                        </Card>
-                    </Card>
+                    {this.getBanner(program, change)}
 
                 </PageHeader>
                 <ActivationModal programStore={this.store} />

@@ -15,6 +15,7 @@ import BoardList from "../commons/BoardList";
 import SessionLauncher from './SessionLauncher';
 import GoldenTemplate from './GoldenTemplate';
 import NoteList from '../commons/NoteList';
+import ClosureDrawer from './ClosureDrawer';
 
 const { Title, Paragraph } = Typography;
 
@@ -67,7 +68,7 @@ class SessionDetailUI extends Component {
             <div key="programImage" style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ textAlign: "center", height: 175, marginRight: 10, marginLeft: 10 }}>
                     <div style={{ display: "inline-block", verticalAlign: "middle", height: 175 }}></div>
-                    <img style={{ maxHeight: "100%", maxWidth: "100%", minWidth: "100%", verticalAlign: "middle", display: "inline-block" }} src={this.getPosterUrl(program)} />
+                    <img style={{ maxHeight: "100%", maxWidth: "100%", minWidth: "100%", verticalAlign: "middle", display: "inline-block", borderRadius:"12px"}} src={this.getPosterUrl(program)} />
                 </div>
             </div>
         )
@@ -137,28 +138,14 @@ class SessionDetailUI extends Component {
         }
     }
 
-    cancelEvent = async () => {
-
-        await this.store.alterSessionState("CANCEL");
-
-        if (this.store.isError) {
-            failureNotification(store.message.help);
-        }
-        else if (this.store.isDone) {
-            message.success('The session is cancelled.');
-        }
+    cancelEvent = () => {
+        this.store.targetState = "CANCEL";
+        this.store.showClosureDrawer = true;
     }
 
-    completeEvent = async () => {
-
-        await this.store.alterSessionState("DONE");
-
-        if (this.store.isError) {
-            failureNotification(store.message.help);
-        }
-        else if (this.store.isDone) {
-            message.success('The session is marked as completed.');
-        }
+    completeEvent = () => {
+        this.store.targetState = "DONE";
+        this.store.showClosureDrawer = true;
     }
 
     renderStatus = (session) => {
@@ -208,29 +195,37 @@ class SessionDetailUI extends Component {
         const people = this.store.people;
         const change = this.store.change;
 
+      
         return (
-            <PageHeader key="sessionDetail"
-                title={<Title level={3}>{session.name}</Title>}
-                subTitle={program.name}
-                extra={[
-                    this.renderStatus(session),
-                    this.makeReadyButton(),
-                    this.cancelEventButton(),
-                    this.completeEventButton(),
-                ]}
-            >
-                {this.renderTopSegment(program, session, sessionUser)}
-                {people.coach && (
-                    <div key="assets">
-                        <GoldenTemplate key="gt" enrollmentId={session.enrollmentId} memberId={people.member.user.id} apiProxy={this.props.appStore.apiProxy} />
-                        <BoardList key="cb" title="Coach Boards" sessionUserId={people.coach.sessionUser.id} />
-                        <BoardList key="ab" title="Actor Boards" sessionUserId={people.member.sessionUser.id} />
-                        <NoteList key="cn" title="Coach Notes" sessionUserId={people.coach.sessionUser.id} />
-                        <NoteList key="an" title="Actor Notes" sessionUserId={people.member.sessionUser.id} />
-                    </div>
-                )}
-                {this.renderPeople(people)}
-            </PageHeader>
+            <>
+                <PageHeader key="sessionDetail"
+                    title={<Title level={3}>{session.name}</Title>}
+                    subTitle={program.name}
+                    extra={[
+                        this.renderStatus(session),
+                        this.makeReadyButton(),
+                        this.cancelEventButton(),
+                        this.completeEventButton(),
+                    ]}
+                >
+                    {this.renderTopSegment(program, session, sessionUser)}
+                    {people.coach && (
+                        <div key="assets">
+                            
+                            <Title style={{ marginTop: 30 }} level={4}>Plan</Title>
+                            <GoldenTemplate key="gt" enrollmentId={session.enrollmentId} memberId={people.member.user.id} apiProxy={this.props.appStore.apiProxy} />
+
+                            <BoardList key="cb" title="Coach Boards" sessionUserId={people.coach.sessionUser.id} />
+                            <BoardList key="ab" title="Actor Boards" sessionUserId={people.member.sessionUser.id} />
+                            <NoteList key="cn" title="Coach Notes" sessionUserId={people.coach.sessionUser.id} closingNotes={session.closingNotes}/>
+                            <NoteList key="an" title="Actor Notes" sessionUserId={people.member.sessionUser.id} />
+                        </div>
+                    )}
+                    {this.renderPeople(people)}
+                </PageHeader>
+
+                <ClosureDrawer store={this.store}/>
+            </>
         )
     }
 }

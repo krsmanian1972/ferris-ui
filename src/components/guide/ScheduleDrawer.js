@@ -18,7 +18,7 @@ class ScheduleDrawer extends Component {
         const title = "New Session Scheduling";
 
         return (
-            <Drawer title={title} width={"45%"} closable={true} onClose={this.close} visible={store.showDrawer} destroyOnClose>
+            <Drawer title={title} width={"55%"} closable={true} onClose={this.close} visible={store.showDrawer} destroyOnClose>
                 <ScheduleForm sessionStore = {store}/>
             </Drawer>
         );

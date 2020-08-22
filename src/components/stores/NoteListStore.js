@@ -1,6 +1,7 @@
 import { decorate, observable, computed,action } from 'mobx';
 import { apiHost } from './APIEndpoints';
 import {notesQuery} from './Queries'
+import {isBlank} from './Util';
 
 const PENDING = 'pending';
 const DONE = 'done';
@@ -37,7 +38,7 @@ export default class NoteListStore {
      * Obtain the List of Boards for the given sessionUserFuzzyId
      *
      */
-    load = async(sessionUserId) => {
+    load = async(sessionUserId,closingNotes) => {
         
         this.state  = PENDING;
         this.message = EMPTY_MESSAGE;
@@ -61,6 +62,7 @@ export default class NoteListStore {
             const result = data.data.getNotes.notes;
             this.notes = result;
             this.rowCount = result.length;
+            this.append(closingNotes);
             this.state = DONE;
         }
         catch (e) {
@@ -69,6 +71,17 @@ export default class NoteListStore {
             console.log(e);
         }
     
+    }
+
+    /**
+     * When we have a closure notes, esp from the coach, let us treat
+     * it as one of her notes.
+     */
+    append = (closingNotes) => {
+        if(closingNotes && !isBlank(closingNotes)) {
+            this.rowCount = this.rowCount+1;
+            this.notes.push({id:"closing",description:closingNotes,remindAt:""});
+        }
     }
 
 }
@@ -85,4 +98,5 @@ decorate(NoteListStore,{
     isDone:computed,
     
     load:action,
+    append:action,
 });
