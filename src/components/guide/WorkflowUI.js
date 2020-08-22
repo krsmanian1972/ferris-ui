@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Button, Row, Col, Tabs, Tooltip, Space } from 'antd';
-import { EditOutlined, ItalicOutlined, UndoOutlined, RedoOutlined, ScissorOutlined } from '@ant-design/icons';
+import { EditOutlined, ItalicOutlined, UndoOutlined, RedoOutlined, ScissorOutlined, NodeIndexOutlined } from '@ant-design/icons';
 
 import Moment from 'react-moment';
 import moment from 'moment';
@@ -9,7 +9,7 @@ import 'moment-timezone';
 import ObjectiveList from './ObjectiveList';
 import ObjectiveStore from '../stores/ObjectiveStore';
 import ObjectiveDrawer from './ObjectiveDrawer';
-
+import drawLineWithPrevPoint from './lineOperations';
 import { inject, observer } from 'mobx-react';
 import * as THREE from 'three';
 import DragControls from 'three-dragcontrols';
@@ -80,6 +80,9 @@ class WorkflowUI extends Component {
         this.lineSegmentArrayIndex = 0;
         this.line = [];
         this.lineSegment = [];
+        this.foundAConnector = "";
+        this.clickCounter = 0;
+        
     }
 
     componentDidMount() {
@@ -95,10 +98,19 @@ class WorkflowUI extends Component {
 
         this.container.addEventListener("dblclick", this.toggleDrawMode);
         this.container.addEventListener("click", this.mouseClick);
+        this.container.addEventListener("keydown", this.keyDown);
         
     }
 
+
+    keyDown = (event) => {
+      if(event.keyCode === 27){
+         console.log("Esc key pressed");
+      }
+      
+    }
     toggleDrawMode = (event) => {
+        console.log("Double Click");
         drawMode = !drawMode;
         if(drawMode)
         {
@@ -106,7 +118,7 @@ class WorkflowUI extends Component {
         }
         var xDiff = 0;
         var yDiff = 0;
-        if(this.mode === "TASK_CONNECTOR"){
+        if(this.mode === "TASK_CONNECTOR" || this.mode === "FREE_LINE_CONNECTOR"){
             const point = this.getClickPoint(event);
 
             this.taskBars.map((item) =>
@@ -116,7 +128,22 @@ class WorkflowUI extends Component {
     }
 
     mouseClick = (event) => {
-        if(this.mode === "TASK_CONNECTOR"){
+        console.log("Single Click");
+        console.log(this.clickCounter);
+        this.clickCounter++;
+        console.log(this.internalState);
+        console.log(this.lineSegmentArray);
+        if(this.mode === "TASK_CONNECTOR" || this.mode === "FREE_LINE_CONNECTOR"){
+//            if(this.internalState === "FOUND_SOURCE_PORT" || this.internalState === ""){
+            
+//                this.foundAConnector = "";
+ //               const point = this.getClickPoint(event);
+
+//                this.taskBars.map((item) =>
+ //                   this.process(item.userData.id, point));
+            
+//            }
+//            if(this.internalState === "FOUND_SOURCE_PORT" || this.foundAconnector === ""){
             if(this.internalState === "FOUND_SOURCE_PORT"){
                //draw projection of the line the previous points axis
               var point = this.getClickPoint(event);
@@ -124,31 +151,31 @@ class WorkflowUI extends Component {
               var clickY = point.y;
               var index = this.lineSegmentArray[this.lineSegmentArrayIndex].path.length - 1;
               var prevPoint = this.lineSegmentArray[this.lineSegmentArrayIndex].path[index];
-              var projectionX = Math.abs(point.x - prevPoint.x);
-              var projectionY = Math.abs(point.y - prevPoint.y);
               
-              if(projectionX <= projectionY){
-                  clickX = Math.round(prevPoint.x*2)/2;
-                  clickY = Math.round(clickY*2)/2;
-              }
-              else{
-                 clickX = Math.round(clickX*2)/2;;
-                 clickY = Math.round(prevPoint.y*2)/2;
-              }
-              var points = [];
-              var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF } );
-              points.push( new THREE.Vector3(prevPoint.x , prevPoint.y, 0 ) );
-              points.push( new THREE.Vector3( clickX, clickY, 0 ) );
-                       
- 	      var geometry = new THREE.BufferGeometry().setFromPoints( points );
+              if(this.mode === "TASK_CONNECTOR"){
+  	          var projectionX = Math.abs(point.x - prevPoint.x);
+		  var projectionY = Math.abs(point.y - prevPoint.y);
+		  
+		  if(projectionX <= projectionY){
+		      clickX = Math.round(prevPoint.x*2)/2;
+		      clickY = Math.round(clickY*2)/2;
+		  }
+		  else{
+		     clickX = Math.round(clickX*2)/2;;
+		     clickY = Math.round(prevPoint.y*2)/2;
+		  }
+	      }
  	      this.lineSegmentArray[this.lineSegmentArrayIndex].path.push({x: clickX, y:clickY});
-              this.lineSegmentArray[this.lineSegmentArrayIndex].line.push(new THREE.Line( geometry, material ));
-                  this.scene.add(this.lineSegmentArray[this.lineSegmentArrayIndex].line[this.lineSegmentArray[this.lineSegmentArrayIndex].line.length-1]);
+
+              drawLineWithPrevPoint(this.lineSegmentArray, this.scene, this.lineSegmentArrayIndex, index+1, "" );
+              //this.internalState = "TRAVERSING";
+	      
         
     	    }
 	}
     }
     process = (task, point) => {
+    
         let sourceX, sourceY, clickX, clickY;
         clickX = point.x;
         clickY = point.y;
@@ -177,6 +204,7 @@ class WorkflowUI extends Component {
         xDiff = sourceX - clickX;
         yDiff = sourceY - clickY;
         if (Math.abs(xDiff) <= 0.5 && Math.abs(yDiff) <= 0.5){
+           this.foundAConnector = "YES";
            if(this.internalState === ""){
                 if(DEBUG === true){
                     console.log("SOURCE PORT");
@@ -196,6 +224,14 @@ class WorkflowUI extends Component {
                 this.internalState = "FOUND_SOURCE_PORT";
            }
            else if(this.internalState === "FOUND_SOURCE_PORT"){
+                //since this is a double click event, 2 single clicks are logged, pop it out as a hack...
+                this.lineSegmentArray[this.lineSegmentArrayIndex].path.pop();
+                this.lineSegmentArray[this.lineSegmentArrayIndex].path.pop();
+                var lineIndex = this.lineSegmentArray[this.lineSegmentArrayIndex].line.length-2;
+ this.scene.remove(this.lineSegmentArray[this.lineSegmentArrayIndex].line[lineIndex]);
+                this.lineSegmentArray[this.lineSegmentArrayIndex].line.pop();
+
+
                 if(DEBUG === true){
                     console.log("DEST PORT");
                     console.log(task);
@@ -205,7 +241,17 @@ class WorkflowUI extends Component {
                                   	      y :sourceY,
                                   	      task:task,
                                   	      direction:direction};
+                var line = {};
+                line.x = sourceX;
+                line.y = sourceY;
+                this.scene.remove(this.line[0]);
+                this.lineSegmentArray[this.lineSegmentArrayIndex].path.push(line);
+                var pathIndex = this.lineSegmentArray[this.lineSegmentArrayIndex].path.length-1;
                 this.lineSegmentArray[this.lineSegmentArrayIndex].destDescription=this.destConnectorPort[0];
+                drawLineWithPrevPoint(this.lineSegmentArray, this.scene, this.lineSegmentArrayIndex, pathIndex, "");
+        	 console.log("Prevline path counter");
+        	 console.log(this.lineSegmentArray[this.lineSegmentArrayIndex].path.length);
+                
                 this.lineSegmentArrayIndex++;
         	 this.internalState = "";
                 
@@ -213,20 +259,52 @@ class WorkflowUI extends Component {
         }
     } 
 
-    updateConnectingLine = (index) => {
-        this.scene.remove(this.lineSegment[index].line);
+    updateConnectingLine = (index, port) => {
+        console.log("---");
+        console.log(this.lineSegmentArray[index]);
+        console.log("---");
+        var position = 0;
+        var lineSource = {};
+        var lineDest = {};
+        if(port === "SOURCE"){
+             position = 0;
+             lineSource.x = this.lineSegmentArray[index].sourceDescription.x;
+             lineSource.y = this.lineSegmentArray[index].sourceDescription.y;
+             lineDest.x = this.lineSegmentArray[index].path[1].x;
+             lineDest.y = this.lineSegmentArray[index].path[1].y;
+             
+             this.lineSegmentArray[index].path[0].x = lineSource.x ;        
+             this.lineSegmentArray[index].path[0].y = lineSource.y; 
+
+        }
+        else if (port === "DEST"){
+            position =this.lineSegmentArray[index].line.length -1;
+            var pathPosition = this.lineSegmentArray[index].path.length -1;
+            lineSource.x = this.lineSegmentArray[index].path[pathPosition -1].x;
+            lineSource.y = this.lineSegmentArray[index].path[pathPosition -1].y;
+            lineDest.x = this.lineSegmentArray[index].destDescription.x;            
+            lineDest.y = this.lineSegmentArray[index].destDescription.y;            
+            this.lineSegmentArray[index].path[pathPosition].x = lineDest.x;
+            this.lineSegmentArray[index].path[pathPosition].y = lineDest.y; 
+            
+        }
+             
+         //   this.lineSegmentArray[this.lineSegmentArrayIndex].path.push({x: clickX, y:clickY});
+         // this.lineSegmentArray[this.lineSegmentArrayIndex].line.push(new THREE.Line( geometry, material ));
+
+        this.scene.remove(this.lineSegmentArray[index].line[position]);
         var material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
         var points = [];
-        points.push( new THREE.Vector3( this.lineSegment[index].sourceX, this.lineSegment[index].sourceY, 0 ) );
-        points.push( new THREE.Vector3( this.lineSegment[index].destX, this.lineSegment[index].destY, 0 ) );
+        points.push( new THREE.Vector3( lineSource.x, lineSource.y, 0 ) );
+        points.push( new THREE.Vector3( lineDest.x, lineDest.y, 0 ) );
         //points.push( new THREE.Vector3( 2, 0, 0 ) );
 
         var geometry = new THREE.BufferGeometry().setFromPoints( points );
-        this.lineSegment[index].line = new THREE.Line( geometry, material );
+        this.lineSegmentArray[index].line[position] = new THREE.Line( geometry, material );
         if(DEBUG === true) {
-            console.log(this.lineSegment);
+            console.log(this.lineSegmentArray[index]);
          }
-        this.scene.add(this.lineSegment[index].line);
+        this.scene.add(this.lineSegmentArray[index].line[position]);
     
     }
     
@@ -279,8 +357,10 @@ class WorkflowUI extends Component {
 
     mouseMove = (event) => {
         var point = this.getClickPoint(event);
-        console.log(point.x, point.y);
+//        console.log("MouseMove");
+//        console.log(this.lineSegmentArray[0]);
         if (this.selectedTaskBar) {
+            console.log("Returning");
             this.moveDots();
             return;
         }
@@ -288,23 +368,28 @@ class WorkflowUI extends Component {
         {
 
         }
-        if(this.mode === "TASK_CONNECTOR"){
+        if(this.mode === "TASK_CONNECTOR" || this.mode === "FREE_LINE_CONNECTOR"){
+            console.log(this.internalState);
             if(this.internalState === "FOUND_SOURCE_PORT"){
                //draw projection of the line the previous points axis
+               console.log("Moving");
                var point = this.getClickPoint(event);
               this.scene.remove(this.line[0]);
               var clickX = point.x;
               var clickY = point.y;
               var index = (this.lineSegmentArray[this.lineSegmentArrayIndex].path.length)-1;
               var prevPoint = this.lineSegmentArray[this.lineSegmentArrayIndex].path[index];
-              var projectionX = Math.abs(point.x - prevPoint.x);
-              var projectionY = Math.abs(point.y - prevPoint.y);
               
-              if(projectionX <= projectionY){
-                  clickX = prevPoint.x;
-              }
-              else{
-                 clickY = prevPoint.y;
+              if(this.mode === "TASK_CONNECTOR"){
+                  var projectionX = Math.abs(point.x - prevPoint.x);
+                  var projectionY = Math.abs(point.y - prevPoint.y);
+              
+                  if(projectionX <= projectionY){
+                      clickX = prevPoint.x;
+                  }
+                  else{
+                     clickY = prevPoint.y;
+                  }
               }
   
               var points = [];
@@ -312,7 +397,7 @@ class WorkflowUI extends Component {
               points.push( new THREE.Vector3(prevPoint.x , prevPoint.y, 0 ) );
               points.push( new THREE.Vector3( clickX, clickY, 0 ) );
         
- 	      var geometry = new THREE.BufferGeometry().setFromPoints( points );
+    	      var geometry = new THREE.BufferGeometry().setFromPoints( points );
               this.line[0] = new THREE.Line( geometry, material );
               this.scene.add(this.line[0]);
                               
@@ -343,66 +428,72 @@ class WorkflowUI extends Component {
         bottom.position.set(bottomX, bottomY , 0);
 
         //move the lines start point or end point as well
-        for (var i = 0; i < this.lineSegment.length; i++){
-            if(this.lineSegment[i].sourceTask === taskName){
+        for (var i = 0; i < this.lineSegmentArray.length; i++){
+            console.log("Move dots");
+            console.log(i);
+            if(this.lineSegmentArray[i].sourceDescription.task === taskName){
                 console.log("Found out a moving line segment");
-                if(this.lineSegment[i].sourceDirection == 1){
+                var direction = this.lineSegmentArray[i].sourceDescription.direction;
+                if(direction == 1){
                    //left connector has a line
-                   this.lineSegment[i].sourceX = leftX;
-                   this.lineSegment[i].sourceY = leftY;
-                   this.updateConnectingLine(i);
+                   this.lineSegmentArray[i].sourceDescription.x = leftX;
+                   this.lineSegmentArray[i].sourceDescription.y = leftY;
+                   this.updateConnectingLine(i, "SOURCE");
                 }
-                if(this.lineSegment[i].sourceDirection == 2){
+                if(direction== 2){
                    //right connector has a line
-                   this.lineSegment[i].sourceX = rightX;
-                   this.lineSegment[i].sourceY = rightY;
-                   this.updateConnectingLine(i);
+                   this.lineSegmentArray[i].sourceDescription.x = rightX;
+                   this.lineSegmentArray[i].sourceDescription.y = rightY;
+                   this.updateConnectingLine(i, "SOURCE");
                 }
-                if(this.lineSegment[i].sourceDirection == 3){
+                if(direction == 3){
                    //Top connector has a line
-                   this.lineSegment[i].sourceX = topX;
-                   this.lineSegment[i].sourceY = topY;
-                   this.updateConnectingLine(i);
+                   this.lineSegmentArray[i].sourceDescription.x = topX;
+                   this.lineSegmentArray[i].sourceDescription.y = topY;
+                   this.updateConnectingLine(i, "SOURCE");
                 }
-                if(this.lineSegment[i].sourceDirection == 4){
+                if(direction == 4){
                    //bottom connector has a line
                    console.log("Bottom moved");
-                   this.lineSegment[i].sourceX = bottomX;
-                   this.lineSegment[i].sourceY = bottomY;
-                   this.updateConnectingLine(i);
+                   this.lineSegmentArray[i].sourceDescription.x = bottomX;
+                   this.lineSegmentArray[i].sourceDescription.y = bottomY;
+                   this.updateConnectingLine(i, "SOURCE");
                 }
             }
-            if(this.lineSegment[i].destTask === taskName){
+            if(this.lineSegmentArray[i].destDescription.task === taskName){
                 console.log("Found out a moving line segment");
-                if(this.lineSegment[i].destDirection == 1){
+                var direction = this.lineSegmentArray[i].destDescription.direction;
+                if(direction == 1){
                    //left connector has a line
-                   this.lineSegment[i].destX = leftX;
-                   this.lineSegment[i].destY = leftY;
-                   this.updateConnectingLine(i);
+                   this.lineSegmentArray[i].destDescription.x = leftX;
+                   this.lineSegmentArray[i].destDescription.y = leftY;
+                   this.updateConnectingLine(i, "DEST");
                 }
-                if(this.lineSegment[i].destDirection == 2){
+                if(direction == 2){
                    //right connector has a line
-                   this.lineSegment[i].destX = rightX;
-                   this.lineSegment[i].destY = rightY;
-                   this.updateConnectingLine(i);
+                   this.lineSegmentArray[i].destDescription.x = rightX;
+                   this.lineSegmentArray[i].destDescription.y = rightY;
+                   this.updateConnectingLine(i, "DEST");
                 }
-                if(this.lineSegment[i].destDirection == 3){
+                if(direction == 3){
                    //Top connector has a line
-                   this.lineSegment[i].destX = topX;
-                   this.lineSegment[i].destY = topY;
-                   this.updateConnectingLine(i);
+                   this.lineSegmentArray[i].destDescription.x = topX;
+                   this.lineSegmentArray[i].destDescription.y = topY;
+                   this.updateConnectingLine(i, "DEST");
                 }
-                if(this.lineSegment[i].destDirection == 4){
+                if(direction == 4){
                    //bottom connector has a line
                    console.log("Bottom moved");
-                   this.lineSegment[i].destX = bottomX;
-                   this.lineSegment[i].destY = bottomY;
-                   this.updateConnectingLine(i);
+                   this.lineSegmentArray[i].destDescription.x = bottomX;
+                   this.lineSegmentArray[i].destDescription.y = bottomY;
+                   this.updateConnectingLine(i, "DEST");
                 }
             }
         }
 
-    }
+
+
+}
 
     componentWillUnmount() {
         window.removeEventListener("resize", this.handleWindowResize);
@@ -580,12 +671,12 @@ class WorkflowUI extends Component {
     }
     
     connectTasks = () => {
-        if(this.mode != "TASK_CONNECTOR"){
-            this.mode = "TASK_CONNECTOR";
-        }
-        else if(this.mode == "TASK_CONNECTOR"){
+//        if(this.mode != "TASK_CONNECTOR"){
+//            this.mode = "TASK_CONNECTOR";
+ //       }
+//        else if(this.mode == "TASK_CONNECTOR"){
             this.mode = "";
-        }
+//        }
     }
     getObjectivesList = () => {
 
@@ -624,6 +715,10 @@ moment().tz("America/Los_Angeles").format();
     createObjective = () => {
 	this.objectiveStore.showDrawer = true;
     }
+    
+    drawFreeLineConnector = () => {
+        this.mode = "FREE_LINE_CONNECTOR";
+    }
 
     render() {
         return (
@@ -631,6 +726,8 @@ moment().tz("America/Los_Angeles").format();
             <Button onClick={this.connectTasks} id="connector" type="primary" icon={<EditOutlined />} shape={"circle"} />
             <Button onClick={this.getObjectivesList} id="dummy" type="primary" icon={<EditOutlined />} shape={"square"} />
             <Button onClick={this.createObjective} id="createobjective" type="primary" icon={<ItalicOutlined />} shape={"square"} />
+            <Button onClick={this.drawFreeLineConnector} id="createobjective" type="primary" icon={<NodeIndexOutlined />} shape={"circle"} />
+            
             <div style={canvasStyle} id="workflowContainer" ref={ref => (this.workflowContainer = ref)} />
             <ObjectiveDrawer objectiveStore={this.objectiveStore} />
             </div>
