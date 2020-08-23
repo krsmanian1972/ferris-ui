@@ -30,6 +30,10 @@ export default class EnrollmentListStore {
         return this.state === ERROR;
     }
 
+    get isDone() {
+        return this.state === DONE;
+    }
+
     /**
      * To Help the user to see both name and email together
      * 
@@ -40,18 +44,20 @@ export default class EnrollmentListStore {
             item.searchable = item.name+"::"+item.email;
         })
     }
+
     /**
      * Obtain the List of members who are enrolled into a Program
      *
      */
-    fetchEnrollments = async(programId) => {
+    fetchEnrollments = async(programId,given_desire) => {
         
         this.state  = PENDING;
         this.message = EMPTY_MESSAGE;
 
         const variables = {
             criteria: {
-                programId:programId
+                programId:programId,
+                desire:given_desire?given_desire:'ALL',
             }
         }
 
@@ -88,6 +94,7 @@ decorate(EnrollmentListStore,{
 
     isLoading:computed,
     isError:computed,
+    isDone:computed,
     
     fetchEnrollments:action,
 });

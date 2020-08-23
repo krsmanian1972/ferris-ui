@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Spin, Result, PageHeader, Tooltip, Card, Button, Statistic, Upload } from 'antd';
+import { Spin, Result, PageHeader, Tooltip, Card, Button, Statistic, Upload, message } from 'antd';
 import { RocketOutlined, MailOutlined, PhoneOutlined, BuildOutlined } from '@ant-design/icons';
 import { Typography } from 'antd';
 
@@ -11,7 +11,8 @@ import ProgramStore from '../stores/ProgramStore';
 import ProgramDescription from './EditableProgramDescription';
 import ActivationModal from './ActivationModal';
 import Milestones from './Milestones';
-import ReactPlayer from 'react-player';
+import EnrollmentList from '../commons/EnrollmentList';
+import Trailer from './Trailer';
 
 const { Title, Paragraph } = Typography;
 
@@ -70,7 +71,7 @@ class EditableProgramDetailUI extends Component {
         };
 
         return (
-            <Upload key="poster_upload" {...props} onChange={this.onContentChange}>
+            <Upload key="poster_upload" {...props} onChange={this.onContentUpload}>
                 <Tooltip key="poster_tp" title="To Upload or Change the Poster of this Program.">
                     <Button key="poster_button" type="primary" icon={<BuildOutlined />}>Poster</Button>
                 </Tooltip>
@@ -96,35 +97,9 @@ class EditableProgramDetailUI extends Component {
         };
 
         return (
-            <Upload key="banner_upload" {...props} onChange={this.onContentChange}>
+            <Upload key="banner_upload" {...props} onChange={this.onContentUpload}>
                 <Tooltip key="banner_tp" title="To Upload or Change the Banner of this Program.">
                     <Button key="banner_button" type="primary" icon={<BuildOutlined />}>Banner</Button>
-                </Tooltip>
-            </Upload>
-        )
-    }
-
-    /**
-     * Let the coach to upload the Trailer
-     * @param {*} program 
-    */
-    getTrailerButton = (program) => {
-        if (!this.store.canEdit) {
-            return;
-        }
-
-        const action = `${assetHost}/programs/${program.id}/trailer`
-        const props = {
-            name: 'trailer.mp4',
-            action: action,
-            accept: ".mp4",
-            showUploadList: false
-        };
-
-        return (
-            <Upload key="trailer_upload" {...props} onChange={this.onContentChange}>
-                <Tooltip key="trailer_tp" title="To Upload or Change the Trailer for Program.">
-                    <Button key="trailer_button" type="primary" icon={<BuildOutlined />}>Trailer</Button>
                 </Tooltip>
             </Upload>
         )
@@ -134,8 +109,16 @@ class EditableProgramDetailUI extends Component {
         this.store.showActivationModal = true;
     }
 
-    onContentChange = (info) => {
-        this.store.change = new Date().getTime();
+    onContentUpload = (info) => {
+        if (info.file.status !== 'uploading') {
+            console.log(info.file, info.fileList);
+        }
+        if (info.file.status === 'done') {
+            this.store.change = new Date().getTime();
+            message.success(`${info.file.name} file uploaded successfully`);
+        } else if (info.file.status === 'error') {
+            message.error(`${info.file.name} file upload failed.`);
+        }
     }
 
 
@@ -167,17 +150,7 @@ class EditableProgramDetailUI extends Component {
         )
     }
 
-    getTrailer = (program, change) => {
-        const ver = new Date().getTime();
-        const url = `${assetHost}/programs/${program.id}/trailer/trailer.mp4?nocache=${ver}`;
-        return (
-            <Card title={<Title level={4}>Trailer</Title>} extra={this.getTrailerButton(program)}>
-                <div className='trailer-wrapper'>
-                    <ReactPlayer width='100%' height='100%' controls className='trailer' url={url} />
-                </div>
-            </Card>
-        )
-    }
+
 
     getBanner = (program, change) => {
         const ver = new Date().getTime();
@@ -206,7 +179,8 @@ class EditableProgramDetailUI extends Component {
                     ]}>
 
                     {this.getProgramPoster(program, change)}
-                    {this.getTrailer(program, change)}
+
+                    <Trailer program_id={program.id} canEdit={this.store.canEdit} />
 
                     <Card title={<Title level={4}>Coach</Title>} extra={<a href="#">More</a>}>
                         <Statistic value={coach.name} valueStyle={{ color: '#3f8600' }} />
@@ -217,6 +191,8 @@ class EditableProgramDetailUI extends Component {
                     <ProgramDescription program={program} programStore={this.store} />
 
                     <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
+
+                    <EnrollmentList programId={program.id} />
 
                     {this.getBanner(program, change)}
 

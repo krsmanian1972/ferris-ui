@@ -73,10 +73,14 @@ class ScheduleForm extends Component {
         }
     }
 
+    /**
+     * fetch the list of all the members enrolled into this program
+     * @param {*} programId 
+     */
     onProgramChange = (programId) => {
         const store = this.props.sessionStore;
         this.formRef.current.setFieldsValue({ memberId: '' });
-        store.enrollmentListStore.fetchEnrollments(programId);
+        store.enrollmentListStore.fetchEnrollments(programId,'ALL');
     }
 
     getProgramLabel = () => {
