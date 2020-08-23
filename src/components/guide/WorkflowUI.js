@@ -9,7 +9,8 @@ import 'moment-timezone';
 import ObjectiveList from './ObjectiveList';
 import ObjectiveStore from '../stores/ObjectiveStore';
 import ObjectiveDrawer from './ObjectiveDrawer';
-import {drawLineWithPrevPoint, checkPointIsOnLineSegmentArray} from './lineOperations';
+import {drawLineWithPrevPoint, checkPointIsOnLineSegmentArray, snapAtClickPoint} from './lineOperations';
+import {updateVertexMovement} from './lineOperations';
 import { inject, observer } from 'mobx-react';
 import * as THREE from 'three';
 import DragControls from 'three-dragcontrols';
@@ -82,6 +83,7 @@ class WorkflowUI extends Component {
         this.lineSegment = [];
         this.foundAConnector = "";
         this.clickCounter = 0;
+        this.dragMode = {};
         
     }
 
@@ -131,10 +133,22 @@ class WorkflowUI extends Component {
         console.log("Single Click");
         var point = this.getClickPoint(event);
         console.log(this.mode);
+        if(this.mode === "VERTEX_DRAG_MODE"){
+            console.log("Mode Nullified");
+            this.mode = "";
+            return;
+        }
+        
         if(this.mode === ""){
             console.log("check point is online");
-            checkPointIsOnLineSegmentArray(this.lineSegmentArray, point);
-        }        
+            var result = snapAtClickPoint(this.lineSegmentArray, point, this.scene);
+            console.log(result);
+            if(result.status === "SUCCESS"){
+                this.dragMode.arrayIndex = result.arrayIndex;
+                this.dragMode.pathIndex = result.pathIndex;
+                this.mode = "VERTEX_DRAG_MODE";
+            }
+        }
         console.log(this.lineSegmentArray);
         if(this.mode === "TASK_CONNECTOR" || this.mode === "FREE_LINE_CONNECTOR"){
             if(this.internalState === "FOUND_SOURCE_PORT"){
@@ -329,6 +343,10 @@ class WorkflowUI extends Component {
             console.log("Returning");
             this.moveDots();
             return;
+        }
+        if(this.mode === "VERTEX_DRAG_MODE"){
+              console.log("VERTEX_DRAG_MODE");
+              updateVertexMovement(this.lineSegmentArray, this.dragMode.arrayIndex, this.dragMode.pathIndex, point, this.scene);
         }
         if(this.mode === "TASK_CONNECTOR" || this.mode === "FREE_LINE_CONNECTOR"){
             if(this.internalState === "FOUND_SOURCE_PORT"){
@@ -639,6 +657,11 @@ class WorkflowUI extends Component {
            
     }
     
+    
+    alignLines = () => {
+       this.mode = "";
+    
+    }
     createObjective = () => {
 	this.objectiveStore.showDrawer = true;
     }
@@ -650,7 +673,7 @@ class WorkflowUI extends Component {
     render() {
         return (
             <div style={containerStyle} id="paper" ref={ref => (this.container = ref)}>
-            <Button onClick={this.connectTasks} id="connector" type="primary" icon={<EditOutlined />} shape={"circle"} />
+            <Button onClick={this.alignLines} id="connector" type="primary" icon={<EditOutlined />} shape={"circle"} />
             <Button onClick={this.getObjectivesList} id="dummy" type="primary" icon={<EditOutlined />} shape={"square"} />
             <Button onClick={this.createObjective} id="createobjective" type="primary" icon={<ItalicOutlined />} shape={"square"} />
             <Button onClick={this.drawFreeLineConnector} id="createobjective" type="primary" icon={<NodeIndexOutlined />} shape={"circle"} />

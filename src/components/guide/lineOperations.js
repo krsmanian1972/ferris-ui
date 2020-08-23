@@ -25,30 +25,122 @@ const drawLineWithPrevPoint = function(lineSegmentArray, scene, arrayIndex, path
       lineSegmentArray[arrayIndex].line[lineIndex] = (new THREE.Line( geometry, material ));
        scene.add(lineSegmentArray[arrayIndex].line[lineIndex]);
    }
+}
 
+const snapAtClickPoint = function (lineSegmentArray, point, scene){
+     var result = {status: "FAILURE"};
+     var indexOfClick = checkPointIsOnLineSegmentArray(lineSegmentArray, point);
+     console.log("logging IndexOfClick");
+     console.log(indexOfClick);
+     if (indexOfClick.arrayIndex !== "Nan"){
+         //insert new vertex point into path Index          
+         lineSegmentArray[indexOfClick.arrayIndex].path.splice((indexOfClick.pathIndex)+1, 0, point);
+         splitLineToTwoAtVertex(lineSegmentArray, indexOfClick.arrayIndex, indexOfClick.pathIndex, point, scene);
+         result.status = "SUCCESS";
+         result.arrayIndex = indexOfClick.arrayIndex;
+         result.pathIndex = indexOfClick.pathIndex;
+         return result;
+     }
+     return result;
+}
 
+const splitLineToTwoAtVertex = function (lineSegmentArray, arrayIndex, pathIndex,vertex, scene){
+    scene.remove(lineSegmentArray[arrayIndex].line[pathIndex]);    
+    var source = {};
+    var dest = {};
+    source.x = lineSegmentArray[arrayIndex].path[pathIndex].x;
+    source.y = lineSegmentArray[arrayIndex].path[pathIndex].y;
+    dest.x = lineSegmentArray[arrayIndex].path[pathIndex+1].x;
+    dest.y = lineSegmentArray[arrayIndex].path[pathIndex+1].y;
 
+    var points = [];
+    var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF } );
+    points.push( new THREE.Vector3(source.x , source.y, 0 ) );
+    points.push( new THREE.Vector3(vertex.x, vertex.y, 0 ) );
+    var geometry = new THREE.BufferGeometry().setFromPoints( points );
+    lineSegmentArray[arrayIndex].line[pathIndex] = (new THREE.Line( geometry, material ));
+
+    var points = [];
+    var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF } );
+    points.push( new THREE.Vector3(vertex.x, vertex.y, 0 ) );
+    points.push( new THREE.Vector3(dest.x , dest.y, 0 ) );
+    
+    var geometry = new THREE.BufferGeometry().setFromPoints( points );
+    lineSegmentArray[arrayIndex].line.splice(pathIndex+1, 0, (new THREE.Line( geometry, material )));
+    scene.add(lineSegmentArray[arrayIndex].line[pathIndex]);    
+    scene.add(lineSegmentArray[arrayIndex].line[pathIndex+1]);    
+    
 }
 
 const checkPointIsOnLineSegmentArray = function(lineSegmentArray, point){
-
+    var hitLineAndPath = {arrayIndex:"Nan", pathIndex:"Nan"};
     for(var i = 0; i < lineSegmentArray.length; i++){
-        for(var j = 0; j < lineSegmentArray[i].path.length; j++){
-        
-            this.findDistanceSumMatches(lineSegmentArray[i].path[j],lineSegmentArray[i].path[j+1], point); 
-        }
-    }
+        for(var j = 0; j < lineSegmentArray[i].path.length -1; j++){
+            var hitOnLine = findDistanceSumMatches(lineSegmentArray[i].path[j],lineSegmentArray[i].path[j+1], point); 
+            if(hitOnLine === true){
+                 console.log("Found a point on line");
+                 hitLineAndPath.arrayIndex =i;
+                 hitLineAndPath.pathIndex = j;
+                 console.log("HitLineAndPath");
+                 console.log(hitLineAndPath);
+                 return hitLineAndPath;
+            }
 
+            }
+        }
+    return hitLineAndPath;
 }
 
+const updateVertexMovement = function(lineSegmentArray, arrayIndex, pathIndex, vertex, scene){
+
+    scene.remove(lineSegmentArray[arrayIndex].line[pathIndex]);    
+    scene.remove(lineSegmentArray[arrayIndex].line[pathIndex+1]);    
+    var source = {};
+    var dest = {};
+    source.x = lineSegmentArray[arrayIndex].path[pathIndex].x;
+    source.y = lineSegmentArray[arrayIndex].path[pathIndex].y;
+    dest.x = lineSegmentArray[arrayIndex].path[pathIndex+2].x;
+    dest.y = lineSegmentArray[arrayIndex].path[pathIndex+2].y;
+ 
+    //update path array
+    
+    // update Line Array
+    
+    // update scene
+
+    lineSegmentArray[arrayIndex].path[pathIndex+1].x = vertex.x;
+    lineSegmentArray[arrayIndex].path[pathIndex+1].y = vertex.y;
+
+    var points = [];
+    var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF } );
+    points.push( new THREE.Vector3(source.x , source.y, 0 ) );
+    points.push( new THREE.Vector3(vertex.x, vertex.y, 0 ) );
+    var geometry = new THREE.BufferGeometry().setFromPoints( points );
+    lineSegmentArray[arrayIndex].line[pathIndex] = (new THREE.Line( geometry, material ));
+
+    var points = [];
+    var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF } );
+    points.push( new THREE.Vector3(vertex.x, vertex.y, 0 ) );
+    points.push( new THREE.Vector3(dest.x , dest.y, 0 ) );
+    
+    var geometry = new THREE.BufferGeometry().setFromPoints( points );
+    lineSegmentArray[arrayIndex].line[pathIndex+1]= (new THREE.Line( geometry, material ));
+    scene.add(lineSegmentArray[arrayIndex].line[pathIndex]);    
+    scene.add(lineSegmentArray[arrayIndex].line[pathIndex+1]);    
+
+}
 const findDistanceSumMatches = function (source, dest, point){
     var distanceSourceToPoint = Math.sqrt((Math.pow((source.x - point.x), 2)) + Math.pow((source.y - point.y),2));
     var distanceDestToPoint = Math.sqrt((Math.pow((dest.x - point.x), 2)) + Math.pow((dest.y - point.y),2));    
     var distanceSourceToDest = Math.sqrt((Math.pow((dest.x - source.x), 2)) + Math.pow((dest.y - source.y),2));    
-   var sumOfDistance = Math.abs(distanceSourceToPoint) + Math.abs(distanceDestToPoint);
-   var diff = sumOfDistance - distanceSourceToDest;
-   console.log(diff);
+    var sumOfDistance = Math.abs(distanceSourceToPoint) + Math.abs(distanceDestToPoint);
+    var diff = sumOfDistance - distanceSourceToDest;
+    console.log(source.x, source.y, dest.x, dest.y, point.x, point.y, diff);
+    if(diff <= 0.003){
+       return true;
+    }
     
 }
-export {drawLineWithPrevPoint, checkPointIsOnLineSegmentArray};
+ 
+export {drawLineWithPrevPoint, checkPointIsOnLineSegmentArray, snapAtClickPoint, updateVertexMovement};
 
