@@ -13,7 +13,7 @@ const drawLineWithPrevPoint = function(lineSegmentArray, scene, arrayIndex, path
                        y:lineSegmentArray[arrayIndex].path[pathIndex-1].y};
                        
    var points = [];
-   var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF } );
+   var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF, linewidth: 2 } );
    points.push( new THREE.Vector3(currentPoint.x , currentPoint.y, 0 ) );
    points.push( new THREE.Vector3( prevPoint.x, prevPoint.y, 0 ) );
    var geometry = new THREE.BufferGeometry().setFromPoints( points );
@@ -33,9 +33,16 @@ const snapAtClickPoint = function (lineSegmentArray, point, scene){
      console.log("logging IndexOfClick");
      console.log(indexOfClick);
      if (indexOfClick.arrayIndex !== "Nan"){
-         //insert new vertex point into path Index          
-         lineSegmentArray[indexOfClick.arrayIndex].path.splice((indexOfClick.pathIndex)+1, 0, point);
-         splitLineToTwoAtVertex(lineSegmentArray, indexOfClick.arrayIndex, indexOfClick.pathIndex, point, scene);
+         //insert new vertex point into path Index
+         if(indexOfClick.existingVertex === null){
+             lineSegmentArray[indexOfClick.arrayIndex].path.splice((indexOfClick.pathIndex)+1, 0, point);
+         }
+         if(indexOfClick.existingVertex === "DEST"){
+             //indexOfClick.pathIndex = indexOfClick.pathIndex + 1;
+             point = lineSegmentArray[indexOfClick.arrayIndex].path[indexOfClick.pathIndex+1];
+         }
+
+         splitLineToTwoAtVertex(lineSegmentArray, indexOfClick.arrayIndex, indexOfClick.pathIndex, point, indexOfClick.existingVertex, scene);
          result.status = "SUCCESS";
          result.arrayIndex = indexOfClick.arrayIndex;
          result.pathIndex = indexOfClick.pathIndex;
@@ -44,7 +51,7 @@ const snapAtClickPoint = function (lineSegmentArray, point, scene){
      return result;
 }
 
-const splitLineToTwoAtVertex = function (lineSegmentArray, arrayIndex, pathIndex,vertex, scene){
+const splitLineToTwoAtVertex = function (lineSegmentArray, arrayIndex, pathIndex,vertex, existingVertex, scene){
     scene.remove(lineSegmentArray[arrayIndex].line[pathIndex]);    
     var source = {};
     var dest = {};
@@ -54,33 +61,39 @@ const splitLineToTwoAtVertex = function (lineSegmentArray, arrayIndex, pathIndex
     dest.y = lineSegmentArray[arrayIndex].path[pathIndex+1].y;
 
     var points = [];
-    var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF } );
+    var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF, linewidth: 2 } );
     points.push( new THREE.Vector3(source.x , source.y, 0 ) );
     points.push( new THREE.Vector3(vertex.x, vertex.y, 0 ) );
     var geometry = new THREE.BufferGeometry().setFromPoints( points );
     lineSegmentArray[arrayIndex].line[pathIndex] = (new THREE.Line( geometry, material ));
 
     var points = [];
-    var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF } );
+    var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF,linewidth: 2 } );
     points.push( new THREE.Vector3(vertex.x, vertex.y, 0 ) );
     points.push( new THREE.Vector3(dest.x , dest.y, 0 ) );
     
     var geometry = new THREE.BufferGeometry().setFromPoints( points );
-    lineSegmentArray[arrayIndex].line.splice(pathIndex+1, 0, (new THREE.Line( geometry, material )));
+    if(existingVertex === null){
+        lineSegmentArray[arrayIndex].line.splice(pathIndex+1, 0, (new THREE.Line( geometry, material )));
+    }        
     scene.add(lineSegmentArray[arrayIndex].line[pathIndex]);    
     scene.add(lineSegmentArray[arrayIndex].line[pathIndex+1]);    
     
 }
 
 const checkPointIsOnLineSegmentArray = function(lineSegmentArray, point){
-    var hitLineAndPath = {arrayIndex:"Nan", pathIndex:"Nan"};
+    var hitLineAndPath = {arrayIndex:"Nan", pathIndex:"Nan", existingVertex: null };
     for(var i = 0; i < lineSegmentArray.length; i++){
         for(var j = 0; j < lineSegmentArray[i].path.length -1; j++){
+            //check if point is already a vertex on the path
+
+            //if not find if it lies on any line
             var hitOnLine = findDistanceSumMatches(lineSegmentArray[i].path[j],lineSegmentArray[i].path[j+1], point); 
-            if(hitOnLine === true){
+            if(hitOnLine.status === true){
                  console.log("Found a point on line");
                  hitLineAndPath.arrayIndex =i;
                  hitLineAndPath.pathIndex = j;
+                 hitLineAndPath.existingVertex = hitOnLine.existingVertex;
                  console.log("HitLineAndPath");
                  console.log(hitLineAndPath);
                  return hitLineAndPath;
@@ -112,14 +125,14 @@ const updateVertexMovement = function(lineSegmentArray, arrayIndex, pathIndex, v
     lineSegmentArray[arrayIndex].path[pathIndex+1].y = vertex.y;
 
     var points = [];
-    var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF } );
+    var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF, linewidth: 2 } );
     points.push( new THREE.Vector3(source.x , source.y, 0 ) );
     points.push( new THREE.Vector3(vertex.x, vertex.y, 0 ) );
     var geometry = new THREE.BufferGeometry().setFromPoints( points );
     lineSegmentArray[arrayIndex].line[pathIndex] = (new THREE.Line( geometry, material ));
 
     var points = [];
-    var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF } );
+    var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF, linewidth: 2 } );
     points.push( new THREE.Vector3(vertex.x, vertex.y, 0 ) );
     points.push( new THREE.Vector3(dest.x , dest.y, 0 ) );
     
@@ -130,16 +143,26 @@ const updateVertexMovement = function(lineSegmentArray, arrayIndex, pathIndex, v
 
 }
 const findDistanceSumMatches = function (source, dest, point){
+    var result = {status: false, existingVertex: null};
     var distanceSourceToPoint = Math.sqrt((Math.pow((source.x - point.x), 2)) + Math.pow((source.y - point.y),2));
     var distanceDestToPoint = Math.sqrt((Math.pow((dest.x - point.x), 2)) + Math.pow((dest.y - point.y),2));    
     var distanceSourceToDest = Math.sqrt((Math.pow((dest.x - source.x), 2)) + Math.pow((dest.y - source.y),2));    
     var sumOfDistance = Math.abs(distanceSourceToPoint) + Math.abs(distanceDestToPoint);
     var diff = sumOfDistance - distanceSourceToDest;
-    console.log(source.x, source.y, dest.x, dest.y, point.x, point.y, diff);
-    if(diff <= 0.003){
-       return true;
-    }
+    console.log(source.x, source.y, dest.x, dest.y, point.x, point.y, diff, distanceSourceToPoint, distanceDestToPoint, distanceSourceToDest);
     
+    if(diff <= 0.003){
+       result.status = true;
+    }
+    if(distanceSourceToPoint <= 0.06){
+       result.status = true;
+       result.existingVertex = "SOURCE";
+    }
+    if(distanceDestToPoint <= 0.06){
+        result.status = true;
+        result.existingVertex = "DEST";
+   }
+    return result;
 }
  
 export {drawLineWithPrevPoint, checkPointIsOnLineSegmentArray, snapAtClickPoint, updateVertexMovement};

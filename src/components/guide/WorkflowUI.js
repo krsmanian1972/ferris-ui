@@ -371,7 +371,7 @@ class WorkflowUI extends Component {
               }
   
               var points = [];
-              var material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
+              var material = new THREE.LineBasicMaterial( { color: 0x0000ff, linewidth: 2 } );
               points.push( new THREE.Vector3(prevPoint.x , prevPoint.y, 0 ) );
               points.push( new THREE.Vector3( clickX, clickY, 0 ) );
         
