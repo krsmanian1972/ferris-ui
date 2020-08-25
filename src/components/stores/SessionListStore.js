@@ -147,7 +147,7 @@ export default class SessionListStore {
     buildEmptyRoster = () => {
         const roster = new Map();
 
-        const start = moment().subtract(6, 'hours');
+        const start = moment().startOf('hour').subtract(6, 'hours');
 
         var aDate = start;
         roster.set(aDate, []);
@@ -198,16 +198,23 @@ export default class SessionListStore {
      */
     fixRoster = (roster, events) => {
         events.map(event => {
-            const localeStart = moment(event.session.scheduleStart*1000);
-            const localeEnd = moment(event.session.scheduleEnd*1000);
-        
+            const eventStart = moment(event.session.scheduleStart*1000);
+            const eventEnd = moment(event.session.scheduleEnd*1000);
+            event.session.band = this.getSlotBand(event);
+
             for (let [key, value] of roster) {
-                if (key.isBetween(localeStart, localeEnd)) {
-                    event.session.band = this.getSlotBand(event);
+                const slotStart = key;
+                const slotEnd = moment(key).add(1,'hours').subtract(1,'minutes');
+
+                if (this.canAccomodate(slotStart,slotEnd,eventStart,eventEnd)) {
                     value.push(event);
                 }
             }
         })
+    }
+
+    canAccomodate = (slotStart,slotEnd,eventStart,eventEnd) => {
+        return (eventStart.isBetween(slotStart, slotEnd) || eventEnd.isBetween(slotStart,slotEnd) || slotStart.isBetween(eventStart,eventEnd,undefined,"[)"));
     }
 }
 

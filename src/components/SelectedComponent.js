@@ -41,7 +41,7 @@ class SelectedComponent extends Component {
                 return <SessionDetailUI params={currentComponent.params}/>
             }
             case 'planning': {
-                return <ConnectorUI />;
+                return <WorkflowUI />;
             }
             case 'login': {
                 return <Login />;

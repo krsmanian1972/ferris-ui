@@ -1,13 +1,23 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
+import Moment from 'react-moment';
 import moment from 'moment';
+import 'moment-timezone';
 
-import { DatePicker, Select, Button, Form, Input, Tooltip, InputNumber, notification, message } from 'antd';
+import { DatePicker, Select, Button, Form, Input, Tooltip, notification, message, Typography, InputNumber, TimePicker } from 'antd';
 import { QuestionCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 
 const { TextArea } = Input;
 const { Option } = Select;
+
+
+const marks = {
+    0: '0 min',
+    15: '15',
+    30: '30',
+    45: '45 min'
+}
 
 const formItemLayout = {
     labelCol: {
@@ -46,8 +56,27 @@ class ScheduleForm extends Component {
         return current && current < moment().startOf('day');
     }
 
+    disabledHours = () => {
+        return [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23];
+    }
+
     validateDate = (value) => {
         this.props.sessionStore.validateDate(value);
+    }
+
+    validateDuration = (value) => {
+        this.props.sessionStore.validateDuration(value);
+    }
+
+    getEndTime = () => {
+        const store = this.props.sessionStore;
+        const endTime = store.endTime;
+        if (endTime) {
+            return  (
+                <span className="ant-form-text"><Moment format="llll" >{endTime}</Moment></span>
+            )
+        }
+        return <></>
     }
 
     /**
@@ -80,7 +109,7 @@ class ScheduleForm extends Component {
     onProgramChange = (programId) => {
         const store = this.props.sessionStore;
         this.formRef.current.setFieldsValue({ memberId: '' });
-        store.enrollmentListStore.fetchEnrollments(programId,'ALL');
+        store.enrollmentListStore.fetchEnrollments(programId, 'ALL');
     }
 
     getProgramLabel = () => {
@@ -88,6 +117,28 @@ class ScheduleForm extends Component {
             <span>
                 Program Name&nbsp;
                 <Tooltip title="This session will be attached to the selected program. We display only the active programs.">
+                    <QuestionCircleOutlined />
+                </Tooltip>
+            </span>
+        );
+    }
+
+    getDurationLabel = () => {
+        return (
+            <span>
+                Duration (Hrs : Min) &nbsp;
+                <Tooltip title="The duration of this session. For example, if you want the session for 45 minutes, select 00 in the hour column followed by 45 in the minutes column in the picker. If you want the session for an hour, just select 01 followed by 00.">
+                    <QuestionCircleOutlined />
+                </Tooltip>
+            </span>
+        );
+    }
+
+    getEndTimeLabel = () => {
+        return (
+            <span>
+                Ends At &nbsp;
+                <Tooltip title="End time will be calcuated once you specify the start time and duration for this session.">
                     <QuestionCircleOutlined />
                 </Tooltip>
             </span>
@@ -112,6 +163,8 @@ class ScheduleForm extends Component {
         const memberMsg = this.pick(store.enrollmentListStore.message, store.memberMsg);
 
         const startTimeMsg = store.startTimeMsg;
+        const durationMsg = store.durationMsg;
+    
 
         return (
             <Form {...formItemLayout} ref={this.formRef} onFinish={this.onFinish} >
@@ -163,26 +216,36 @@ class ScheduleForm extends Component {
                 <Form.Item
                     name="description"
                     rules={[{ required: true, message: 'Please provide a short description about this session' }]}
-                    label="Short Description">
+                    label="Agenda">
                     <TextArea rows={4} />
                 </Form.Item>
 
                 <Form.Item
                     name="startTime"
-                    rules={[{ required: true, message: 'Please select the Start Time for this session' }]}
-                    label="Start Time"
+                    rules={[{ required: true, message: 'Please select the start time for this session' }]}
+                    label="Starts At"
                     validateStatus={startTimeMsg.status}
                     help={startTimeMsg.help}>
 
-                    <DatePicker showTime format="DD-MMM-YYYY HH:mm A" disabledDate={this.disabledDate} onChange={this.validateDate} />
+                    <DatePicker placeholder="When?" showTime={{ format: 'hh:mm A' }} showNow={false} format="DD-MMM-YYYY hh:mm A"  disabledDate={this.disabledDate} onChange={this.validateDate} minuteStep={15}/>
                 </Form.Item>
 
-                <Form.Item
-                    name="duration"
-                    rules={[{ required: true, message: 'Please provide a duration for this session' }]}
-                    label="Duration (Hrs)">
-                    <InputNumber min={1} max={8} />
+                <Form.Item 
+                    name="duration" 
+                    label={this.getDurationLabel()}
+                    rules={[{ required: true, message: 'Please select the duration of this session' }]}
+                    validateStatus={durationMsg.status}
+                    help={durationMsg.help}>
+
+                    <TimePicker placeholder="How long?" showTime={{ format: 'HH:mm' }} showNow={false} format="HH:mm" disabledHours={this.disabledHours} onChange={this.validateDuration} hideDisabledOptions={true} minuteStep={15}/>
                 </Form.Item>
+
+                <Form.Item 
+                    name="endTime" 
+                    label={this.getEndTimeLabel()}>
+                    {this.getEndTime()}
+                </Form.Item>
+                
 
                 <Form.Item>
                     <Button type="primary" disabled={store.isLoading} htmlType="submit" icon={<PlusCircleOutlined />}>Create Schedule</Button>

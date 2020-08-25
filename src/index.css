@@ -229,7 +229,9 @@ code {
 }
 
 .notes {
-  border:1px solid #ececec
+  border:1px outset gray;
+  border-radius:12px;
+  max-width:95%;
 }
 
 .ant-tabs-nav-more {

@@ -34,13 +34,18 @@ export default class SessionStore {
     showDrawer = false;
 
     startTimeMsg = {};
+    startTime=null;
+
+    durationMsg = {};
+    duration=0;
+
     programMsg = {};
     memberMsg = {};
 
     event = {};
     people = {};
     change = null;
-
+  
     showClosureDrawer = false;
     targetState="";
 
@@ -87,7 +92,7 @@ export default class SessionStore {
                 memberId: sessionRequest.memberId,
                 name: sessionRequest.name,
                 description: sessionRequest.description,
-                duration: sessionRequest.duration,
+                duration: this.duration,
                 startTime: sessionRequest.startTime.utc().format(),
             }
         }
@@ -128,20 +133,46 @@ export default class SessionStore {
         }
 
         this.validateDate(sessionRequest.startTime);
-
-        return this.programMsg.status !== ERROR && this.memberMsg.status !== ERROR && this.startTimeMsg !== ERROR;
+        this.validateDuration(sessionRequest.duration);
+    
+        return this.programMsg.status !== ERROR 
+            && this.memberMsg.status !== ERROR 
+            && this.startTimeMsg.status !== ERROR 
+            && this.durationMsg.status !== ERROR;
     }
 
-    validateDate = (value) => {
+    validateDate = (start) => {
 
+        this.startTime = start;
         this.startTimeMsg = EMPTY_MESSAGE;
 
-        const boundary = moment().add(1, 'hour');
-        const flag = value && value > boundary;
+        const boundary = moment().add(15, 'minute');
+        const flag = start && start > boundary;
 
         if (!flag) {
-            this.startTimeMsg = { status: ERROR, help: "Provide a time at least one hour after from now." };
+            this.startTimeMsg = { status: ERROR, help: "Select a start time that is at least 15 minutes from now." };
+            return
         }
+    }
+
+    validateDuration = (value) => {
+        this.duration = 0;
+        this.durationMsg = EMPTY_MESSAGE;
+
+        if(!value) {
+            this.durationMsg = { status: ERROR, help: "Select the duration for this session." }; 
+            return;
+        }
+
+        const hours = value.hours();
+        const minutes = value.minutes();
+
+        if(hours+minutes==0) {
+            this.durationMsg = { status: ERROR, help: "The minimum duration of a session is 15 minutes." }; 
+            return;
+        }
+
+        this.duration = (hours*60)+minutes;
     }
 
     loadPeople = async () => {
@@ -177,6 +208,12 @@ export default class SessionStore {
             this.state = ERROR;
             this.message = LOADING_ERROR;
             console.log(e);
+        }
+    }
+
+    get endTime() {
+        if(this.duration && this.duration > 0 && this.startTime) {
+            return moment(this.startTime).add(this.duration,'minutes');
         }
     }
 
@@ -222,6 +259,7 @@ export default class SessionStore {
 
         return "";
     }
+
 
     updateSessionProgress = async() => {
         if(!this.isCoach) {
@@ -291,8 +329,13 @@ export default class SessionStore {
 decorate(SessionStore, {
     state: observable,
     showDrawer: observable,
-
+    
+    startTime:observable,
     startTimeMsg: observable,
+
+    duration:observable,
+    durationMsg: observable,
+
     programMsg: observable,
     memberMsg: observable,
     message: observable,
@@ -310,6 +353,8 @@ decorate(SessionStore, {
     isInvalid: computed,
     isCoach: computed,
 
+    endTime: computed,
+
     canMakeReady: computed,
     canCancelEvent: computed,
     canBroadcast: computed,
@@ -319,6 +364,7 @@ decorate(SessionStore, {
 
     createSchedule: action,
     validateDate: action,
+    validateDuration: action,
     alterSessionState: action,
     updateSessionProgress: action,
     performClosure: action,

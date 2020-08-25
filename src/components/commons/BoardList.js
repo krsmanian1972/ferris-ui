@@ -52,7 +52,7 @@ class BoardList extends Component {
         }
         
         if (boardCount == 0) {
-            return <Result icon={<SmileOutlined />}  subTitle="Waiting for your boards."/>
+            return <Result icon={<SmileOutlined />}/>
         }
 
         const settings = {

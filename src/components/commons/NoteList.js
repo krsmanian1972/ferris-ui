@@ -73,7 +73,7 @@ class NoteList extends Component {
         }
 
         if (rowCount == 0) {
-            return <Result icon={<SmileOutlined />} subTitle="Waiting for your notes." />
+            return <Result icon={<SmileOutlined />}  />
         }
 
         const props = {
