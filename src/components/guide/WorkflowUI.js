@@ -10,7 +10,7 @@ import ObjectiveList from './ObjectiveList';
 import ObjectiveStore from '../stores/ObjectiveStore';
 import ObjectiveDrawer from './ObjectiveDrawer';
 import {drawLineWithPrevPoint, checkPointIsOnLineSegmentArray, snapAtClickPoint} from './lineOperations';
-import {updateVertexMovement} from './lineOperations';
+import {updateVertexMovement, removeRecurringPointOnLineSegment} from './lineOperations';
 import { inject, observer } from 'mobx-react';
 import * as THREE from 'three';
 import DragControls from 'three-dragcontrols';
@@ -47,7 +47,7 @@ const gridSize = 50;
 const gridStep = 0.25;
 
 const mouse = new THREE.Vector2();
-const DEBUG = true;
+const DEBUG = false;
 var drawMode = false;
 
 @inject("appStore")
@@ -84,6 +84,7 @@ class WorkflowUI extends Component {
         this.foundAConnector = "";
         this.clickCounter = 0;
         this.dragMode = {};
+        this.dummyArray = [1,2,3,4,5,6];
         
     }
 
@@ -134,8 +135,12 @@ class WorkflowUI extends Component {
         var point = this.getClickPoint(event);
         console.log(this.mode);
         if(this.mode === "VERTEX_DRAG_MODE"){
-            console.log("Mode Nullified");
+
+            //remove points which are inbetween lines
+            removeRecurringPointOnLineSegment(this.lineSegmentArray, this.dragMode.arrayIndex, this.scene, this.dummyArray);
+            console.log("Mode Nullified");            
             this.mode = "";
+            this.dragMode = {};
             return;
         }
         
@@ -260,7 +265,7 @@ class WorkflowUI extends Component {
     } 
 
     updateConnectingLine = (index, port) => {
-        console.log(this.lineSegmentArray);
+        //console.log(this.lineSegmentArray);
 //        return;
         var position = 0;
         var lineSource = {};
@@ -322,25 +327,39 @@ class WorkflowUI extends Component {
         drawMode = false;
 
         this.selectedTaskBar = event.object;
+        if(this.selectedTaskBar){
         
-        this.moveDots();
-     
+            this.moveDots();
+        }
+//        if(this.mode === "VERTEX_DRAG_MODE"){
+//              var point = this.getClickPoint(event);
+//              console.log("VERTEX_DRAG_MODE");
+//              updateVertexMovement(this.lineSegmentArray, this.dragMode.arrayIndex, this.dragMode.pathIndex, point, this.scene);
+//        }
+
     }
 
     dragEndCallback = (event) => {
         drawMode = false;
         var point = this.getClickPoint(event);
+        
+        if(this.selectedTaskBar){
         //align to X and Y to grid
-        this.selectedTaskBar.position.y = Math.round(this.selectedTaskBar.position.y*2)/2;
-        this.selectedTaskBar.position.x = Math.round(this.selectedTaskBar.position.x*2)/2;
-        this.moveDots();
-        this.selectedTaskBar = null;
+            this.selectedTaskBar.position.y = Math.round(this.selectedTaskBar.position.y*2)/2;
+            this.selectedTaskBar.position.x = Math.round(this.selectedTaskBar.position.x*2)/2;
+            this.moveDots();
+            this.selectedTaskBar = null;
+        }
+        
+        if(this.mode === "VERTEX_DRAG_MODE"){
+            this.mode = "";
+        }
     }
 
     mouseMove = (event) => {
         var point = this.getClickPoint(event);
         if (this.selectedTaskBar) {
-            console.log("Returning");
+            //console.log("Returning");
             this.moveDots();
             return;
         }
@@ -403,10 +422,10 @@ class WorkflowUI extends Component {
 
         //move the lines start point or end point as well
         for (var i = 0; i < this.lineSegmentArray.length; i++){
-            console.log("Move dots");
-            console.log(i);
+            //console.log("Move dots");
+            //console.log(i);
             if(this.lineSegmentArray[i].sourceDescription.task === taskName){
-                console.log("Found out a moving line segment");
+                //console.log("Found out a moving line segment");
                 var direction = this.lineSegmentArray[i].sourceDescription.direction;
                 if(direction == 1){
                    //left connector has a line
@@ -428,14 +447,14 @@ class WorkflowUI extends Component {
                 }
                 if(direction == 4){
                    //bottom connector has a line
-                   console.log("Bottom moved");
+                   //console.log("Bottom moved");
                    this.lineSegmentArray[i].sourceDescription.x = bottomX;
                    this.lineSegmentArray[i].sourceDescription.y = bottomY;
                    this.updateConnectingLine(i, "SOURCE");
                 }
             }
             if(this.lineSegmentArray[i].destDescription.task === taskName){
-                console.log("Found out a moving line segment");
+                //console.log("Found out a moving line segment");
                 var direction = this.lineSegmentArray[i].destDescription.direction;
                 if(direction == 1){
                    //left connector has a line
@@ -457,7 +476,7 @@ class WorkflowUI extends Component {
                 }
                 if(direction == 4){
                    //bottom connector has a line
-                   console.log("Bottom moved");
+                   //console.log("Bottom moved");
                    this.lineSegmentArray[i].destDescription.x = bottomX;
                    this.lineSegmentArray[i].destDescription.y = bottomY;
                    this.updateConnectingLine(i, "DEST");
