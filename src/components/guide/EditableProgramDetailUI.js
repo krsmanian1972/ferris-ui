@@ -143,8 +143,8 @@ class EditableProgramDetailUI extends Component {
         const ver = new Date().getTime();
         const url = `${assetHost}/programs/${program.id}/poster/poster.png?nocache=${ver}`;
         return (
-            <div style={{ textAlign: "center", height: 450 }}>
-                <div style={{ display: "inline-block", verticalAlign: "middle", height: 450 }}></div>
+            <div style={{ textAlign: "center", height: 350 }}>
+                <div style={{ display: "inline-block", verticalAlign: "middle", height: 350 }}></div>
                 <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={url} />
             </div>
         )
@@ -156,7 +156,7 @@ class EditableProgramDetailUI extends Component {
         const ver = new Date().getTime();
         const url = `${assetHost}/programs/${program.id}/banner/banner.png?nocache=${ver}`;
         return (
-            <Card title={<Title level={4}>Banner</Title>} extra={this.getBannerButton(program)}>
+            <Card style={{ borderRadius: "12px",marginTop: "10px" }} title={<Title level={4}>Banner</Title>} extra={this.getBannerButton(program)}>
                 <div style={{ textAlign: "center", height: 260 }}>
                     <div style={{ display: "inline-block", verticalAlign: "middle", height: 260 }}></div>
                     <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={url} />
@@ -177,26 +177,30 @@ class EditableProgramDetailUI extends Component {
                         this.getActivationButton(),
                         this.getPosterButton(program)
                     ]}>
+                </PageHeader>
+
+                <div style={{ paddingLeft: 5, paddingRight: 5 }}>
 
                     {this.getProgramPoster(program, change)}
 
                     <Trailer program_id={program.id} canEdit={this.store.canEdit} />
 
-                    <Card title={<Title level={4}>Coach</Title>} extra={<a href="#">More</a>}>
-                        <Statistic value={coach.name} valueStyle={{ color: '#3f8600' }} />
-                        <Paragraph><MailOutlined /> {coach.email}</Paragraph>
-                        <Paragraph><PhoneOutlined /> (91)99999 99999</Paragraph>
+                    <Card style={{ borderRadius: "12px", marginTop: "10px", background: "rgb(30,30,30)"}} title={<Title style={{color:"white"}} level={4}>Coach</Title>}>
+                        <Statistic value={coach.name} valueStyle={{color:"rgb(100,218,225)",fontWeight:"bold"}}/>
+                        <Paragraph style={{color:"white",marginTop:10}}><MailOutlined /> {coach.email}</Paragraph>
+                        <Paragraph style={{color:"white"}}><PhoneOutlined /> (91)99999 99999</Paragraph>
                     </Card>
-
+                    
+                    
                     <ProgramDescription program={program} programStore={this.store} />
-
+                    
                     <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
 
                     <EnrollmentList programId={program.id} />
 
                     {this.getBanner(program, change)}
+                </div>
 
-                </PageHeader>
                 <ActivationModal programStore={this.store} />
             </>
         )

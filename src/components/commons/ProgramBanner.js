@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Carousel, Button } from 'antd';
+import { Carousel, Button,Card } from 'antd';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 
 import { assetHost } from '../stores/APIEndpoints';
@@ -19,9 +19,9 @@ class ProgramBanner extends Component {
     getProgramBanner = (program) => {
         const url = `${assetHost}/programs/${program.id}/banner/banner.png`;
         return (
-            <div style={{ textAlign: "center", height: 260}}>
-                <div style={{ display: "inline-block", verticalAlign: "middle", height:260}}></div>
-                <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius:"12px",cursor:'pointer'  }} src={url} onClick={() => this.props.showProgramDetail(program.id)} />
+            <div style={{ textAlign: "center", height: 260 }}>
+                <div style={{ display: "inline-block", verticalAlign: "middle", height: 260 }}></div>
+                <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px", cursor: 'pointer' }} src={url} onClick={() => this.props.showProgramDetail(program.id)} />
             </div>
         )
     }
@@ -70,9 +70,9 @@ class ProgramBanner extends Component {
         const programs = store.programs;
 
         return (
-            <>
+            <Card bordered={false} style={{ background:"rgb(216,213,221)"}}>
                 {this.renderSlider(programs, store.rowCount)}
-            </>
+            </Card>
         )
     }
 }

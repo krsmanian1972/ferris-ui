@@ -7,14 +7,15 @@ const { Text } = Typography;
 const aboutStyle = {
     display: 'flex',
     flexDirection: 'column',
-    background: 'lightgray',
+    marginBottom:5,
 };
+
 
 const commentsStyle = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'left',
-    background: 'lightgray',
+    marginBottom:5,
 };
 
 

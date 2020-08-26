@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { assetHost } from '../stores/APIEndpoints';
 
-import { Typography, Statistic, PageHeader, Button, Tag, Popconfirm, notification, message } from 'antd';
+import { Typography, Card, Statistic, PageHeader, Button, Tag, Popconfirm, notification, message } from 'antd';
 import { MailOutlined, PhoneOutlined, CaretRightOutlined, CloseOutlined, CheckOutlined } from '@ant-design/icons';
 
 import Moment from 'react-moment';
@@ -52,14 +52,15 @@ class SessionDetailUI extends Component {
 
     renderTopSegment = (program, session, sessionUser) => {
         return (
-            <div key="top_segment">
-                <Title style={{ marginTop: 10 }} level={4}>Schedule</Title>
+
+            <Card key="top_segment" style={{ borderRadius: "12px" }} title={<Title level={4}>Schedule</Title>}>
                 <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", textAlign: "center", alignItems: "center" }}>
                     {this.renderProgramImage(program)}
                     {this.renderSchedule(session)}
                     <SessionLauncher store={this.store} session={session} sessionUser={sessionUser} />
                 </div>
-            </div>
+            </Card>
+
         )
     }
 
@@ -68,7 +69,7 @@ class SessionDetailUI extends Component {
             <div key="programImage" style={{ display: "flex", flexDirection: "column" }}>
                 <div style={{ textAlign: "center", height: 175, marginRight: 10, marginLeft: 10 }}>
                     <div style={{ display: "inline-block", verticalAlign: "middle", height: 175 }}></div>
-                    <img style={{ maxHeight: "100%", maxWidth: "100%", minWidth: "100%", verticalAlign: "middle", display: "inline-block", borderRadius:"12px"}} src={this.getPosterUrl(program)} />
+                    <img style={{ maxHeight: "100%", maxWidth: "100%", minWidth: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={this.getPosterUrl(program)} />
                 </div>
             </div>
         )
@@ -107,8 +108,7 @@ class SessionDetailUI extends Component {
         const member = people.member;
 
         return (
-            <div key="people">
-                <Title style={{ marginTop: 30 }} level={4}>People</Title>
+            <Card key="people" style={{ borderRadius: 12,marginTop:10 }} title={<Title level={4}>People</Title>}>
                 <div style={{ display: "flex", marginTop: 10, flexDirection: "row", justifyContent: "space-between" }}>
                     <div key="coachId" style={{ width: "50%" }}>
                         <Statistic title="Coach" value={coach.user.name} valueStyle={{ color: '#3f8600' }} />
@@ -122,7 +122,7 @@ class SessionDetailUI extends Component {
                         <Paragraph><PhoneOutlined /> (91)99999 xxxx</Paragraph>
                     </div>
                 </div>
-            </div>
+            </Card>
         )
     }
 
@@ -195,7 +195,7 @@ class SessionDetailUI extends Component {
         const people = this.store.people;
         const change = this.store.change;
 
-      
+
         return (
             <>
                 <PageHeader key="sessionDetail"
@@ -208,23 +208,26 @@ class SessionDetailUI extends Component {
                         this.completeEventButton(),
                     ]}
                 >
+                </PageHeader>
+
+                <div style={{paddingLeft:5, paddingRight:5}}>
                     {this.renderTopSegment(program, session, sessionUser)}
+
                     {people.coach && (
                         <div key="assets">
-                            
-                            <Title style={{ marginTop: 30 }} level={4}>Plan</Title>
                             <GoldenTemplate key="gt" enrollmentId={session.enrollmentId} memberId={people.member.user.id} apiProxy={this.props.appStore.apiProxy} />
-
                             <BoardList key="cb" title="Coach Boards" sessionUserId={people.coach.sessionUser.id} />
                             <BoardList key="ab" title="Actor Boards" sessionUserId={people.member.sessionUser.id} />
-                            <NoteList key="cn" title="Coach Notes" sessionUserId={people.coach.sessionUser.id} closingNotes={session.closingNotes}/>
+                            <NoteList key="cn" title="Coach Notes" sessionUserId={people.coach.sessionUser.id} closingNotes={session.closingNotes} />
                             <NoteList key="an" title="Actor Notes" sessionUserId={people.member.sessionUser.id} />
                         </div>
                     )}
-                    {this.renderPeople(people)}
-                </PageHeader>
 
-                <ClosureDrawer store={this.store}/>
+                    {this.renderPeople(people)}
+                
+                </div>
+
+                <ClosureDrawer store={this.store} />
             </>
         )
     }

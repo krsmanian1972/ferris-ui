@@ -57,7 +57,7 @@ class ProgramSession extends Component {
         }
 
         return (
-            <>{slots}</>
+            <div>{slots}</div>
         )
     }
 
@@ -70,7 +70,7 @@ class ProgramSession extends Component {
         }
        
         return (
-                <Card title={<Title level={4}>Your Sessions {this.countTag()}</Title>}>
+                <Card style={{ borderRadius: "12px",marginTop: "10px",background:"rgb(242,242,242)"}} title={<Title level={4}>Your Sessions {this.countTag()}</Title>}>
                     {this.displayMessage()}
                     {this.renderSlots(sessions)}
                 </Card>

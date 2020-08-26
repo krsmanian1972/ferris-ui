@@ -61,9 +61,12 @@ class HomeUI extends Component {
                     extra={[
                         this.newScheduleButton()
                     ]}>
-                    <TodaySessions sessionListStore={this.sessionListStore} sessionStore={this.sessionStore} showSessionDetail={this.showSessionDetail} />
                 </PageHeader>
 
+                <div style={{ paddingLeft: 5, paddingRight: 5 }}>
+                    <TodaySessions sessionListStore={this.sessionListStore} sessionStore={this.sessionStore} showSessionDetail={this.showSessionDetail} />
+                </div>
+                
                 <ScheduleDrawer sessionStore={this.sessionStore} />
             </>
         )

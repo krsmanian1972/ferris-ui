@@ -38,7 +38,7 @@ code {
 }
 
 .site-layout .site-layout-background {
-  background: #ffffff;
+  background: rgb(216,213,221);
 }
 
 .ant-carousel .slick-dots li {
@@ -145,25 +145,26 @@ code {
   display:flex;
   flex-direction:row;
   padding-bottom: 3px;
-  margin-bottom:5px;
+  margin-bottom:4px;
 }
 
 .slot-hour {
   display:flex;
   flex-direction:column;
   width:20%;
-  background-color: #4060a1;
-  border: 1px ridge #4060a1;
+  background-color: rgb(59,109,171);
   align-items: center;
   text-align: center;
   justify-content: center;
   padding: 5px;
   color:white;
+  border-radius:12px 0 0 12px;
 }
 
 .current {
-  background-color: #0b7261;
-  color:white;
+  background-color: black;
+  color:rgb(100,218,225);
+  font-weight: bold;
 }
 
 .slot-detail {
@@ -171,8 +172,8 @@ code {
   display: flex;
   padding: 5px;
   flex-direction: column;
-  background: #F5F5F5;
-  border: 1px solid lightgray;
+  background: white;
+  border-radius:0 12px 12px 0;
 }
 
 
@@ -255,3 +256,4 @@ code {
 .trailer * {
   outline: none;
 }
+

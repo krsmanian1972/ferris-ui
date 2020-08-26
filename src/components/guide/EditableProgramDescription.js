@@ -68,7 +68,7 @@ export default class EditableProgramDescription extends Component {
     render() {
 
         return (
-            <Card title={<Title level={4}>About</Title>} extra={this.getEditButton()}>
+            <Card style={{ borderRadius: "12px",marginTop: "10px" }} title={<Title level={4}>About</Title>} extra={this.getEditButton()}>
                 {this.renderDescription()}
             </Card>
         );

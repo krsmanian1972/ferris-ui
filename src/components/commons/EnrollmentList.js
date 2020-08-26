@@ -57,7 +57,7 @@ class EnrollmentList extends Component {
 
     render() {
         return(
-            <Card title={<Title level={4}>Enrollments {this.countTag()}</Title>} extra={this.getEnrollmentOptions()}>
+            <Card style={{ borderRadius: "12px",marginTop: "10px", background: "rgb(242,242,242)" }} title={<Title level={4}>Enrollments {this.countTag()}</Title>} extra={this.getEnrollmentOptions()}>
                 
                 <List
                     dataSource={this.store.members}

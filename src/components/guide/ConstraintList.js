@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
 import { Spin, Result, Carousel, Button, Tag, Tooltip, Space } from 'antd';
-import { LeftOutlined, RightOutlined,PlusOutlined,EditOutlined } from '@ant-design/icons';
+import { LeftOutlined, RightOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';
 
 import ConstraintDrawer from './ConstraintDrawer';
 import Reader from "../commons/Reader";
@@ -63,7 +63,7 @@ class ConstraintList extends Component {
             slidesToShow: 1,
             slidesToScroll: 1,
             swipeToSlide: true,
-            afterChange: (current) => {this.index = current},
+            afterChange: (current) => { this.index = current },
 
         };
 
@@ -146,8 +146,8 @@ class ConstraintList extends Component {
 
         return (
             <>
-                <div style={{ border: "1px solid #ECECEC", borderRadius:"12px", width: "50%"}}>
-                    <div style={{ background:"#F5F5F5", borderRadius:"12px", display: "flex", flexWrap: "wrap", height: 50, flexDirection: "row", justifyContent: "space-between" }}>
+                <div style={{ background:"rgb(242,242,242)", width: "50%", marginRight: "10px" }}>
+                    <div style={{ background: "rgb(209,69,77)", color: "white",  display: "flex", flexWrap: "wrap", height: 50, flexDirection: "row", justifyContent: "space-between" }}>
                         {this.getTitle()}
                         {this.getControls()}
                     </div>

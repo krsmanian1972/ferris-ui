@@ -104,7 +104,7 @@ export default class Milestones extends Component {
     render() {
 
         return (
-            <Card title={<Title level={4}>Milestones</Title>} extra={this.getEditButton()}>
+            <Card style={{ borderRadius: "12px",marginTop: "10px" }} title={<Title level={4}>Milestones</Title>} extra={this.getEditButton()}>
                 <Card.Meta description="The milestones represent the high-level overview of the program. The actual coaching plan will be customized, based on the context of the enrolled member of this program. Of course, the coaching plan will be aligned continuously." style={{ marginBottom: 10, paddingBottom: 10 }} />
                 {this.renderDescription()}
             </Card>

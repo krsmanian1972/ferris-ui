@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { inject,observer } from 'mobx-react';
 
-import { Spin, Result, Carousel, Button,Typography,Tag } from 'antd';
+import { Spin, Result, Carousel, Button,Typography,Tag,Card } from 'antd';
 import { LeftOutlined, RightOutlined,SmileOutlined } from '@ant-design/icons';
 
 import BoardListStore from "../stores/BoardListStore";
@@ -97,11 +97,10 @@ class BoardList extends Component {
         const boardCount = this.store.boardCount;
 
         return (
-            <div style={{ marginTop: 20 }} >
-                <Title level={4}>{this.props.title} {this.countTag()}</Title>
+            <Card key="board" style={{ borderRadius: 12,marginTop:10 }} title={<Title level={4}>{this.props.title} {this.countTag()}</Title>}>
                 {this.renderSlider(boards, boardCount)}
                 {this.displayMessage()}
-            </div>
+            </Card>
         )
     }
 }

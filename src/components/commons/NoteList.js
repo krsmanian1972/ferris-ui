@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Spin, Result, Carousel, Button, Typography, Tag } from 'antd';
+import { Spin, Result, Carousel, Button, Typography, Tag,Card } from 'antd';
 import { LeftOutlined, RightOutlined, SmileOutlined } from '@ant-design/icons';
 
 import NoteListStore from "../stores/NoteListStore";
@@ -106,11 +106,10 @@ class NoteList extends Component {
         const rowCount = this.store.rowCount;
 
         return (
-            <div style={{ marginTop: 20 }}>
-                <Title level={4}>{this.props.title} {this.countTag()}</Title>
+            <Card key="notes" style={{ borderRadius: 12,marginTop:10 }} title={<Title level={4}>{this.props.title} {this.countTag()}</Title>}>
                 {this.renderSlider(notes, rowCount)}
                 {this.displayMessage()}
-            </div>
+            </Card>
         )
     }
 

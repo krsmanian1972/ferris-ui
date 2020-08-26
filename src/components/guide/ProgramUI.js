@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Typography, Tooltip, Button, Tag } from 'antd';
+import { Typography, Tooltip, Button, Tag, Card } from 'antd';
 import { PlusCircleOutlined } from '@ant-design/icons';
 
 import ProgramListStore from '../stores/ProgramListStore';
@@ -94,21 +94,20 @@ class ProgramUI extends Component {
                 <ProgramBanner programListStore={this.deckListStore} showProgramDetail={this.showProgramDetail} />
 
                 {this.props.appStore.isCoach && (
-                    <>
-                        <Title style={{ marginTop: 10 }} level={4}>Yours {this.countTag(this.yourListStore)} {this.addProgramButton()}</Title>
+                    <Card style={{ marginLeft: 10, marginRight:10, marginTop: "10px", background: "rgb(242,242,242)" }} title={<Title level={4}>Yours {this.countTag(this.yourListStore)} {this.addProgramButton()}</Title>}>
                         <CoachProgramList programListStore={this.yourListStore} showProgramDetail={this.showEditableProgramDetail} />
-                    </>
+                    </Card>
                 )}
 
                 {this.enrolledListStore.rowCount > 0 && (
-                    <>
-                        <Title style={{ marginTop: 10 }} level={4}>Enrolled {this.countTag(this.enrolledListStore)} </Title>
+                    <Card style={{  marginLeft: 10, marginRight:10, marginTop: "10px", background: "rgb(242,242,242)" }} title={<Title level={4}>Enrolled {this.countTag(this.enrolledListStore)} </Title>}>
                         <ProgramList programListStore={this.enrolledListStore} showProgramDetail={this.showProgramDetail} />
-                    </>
+                    </Card>
                 )}
 
-                <Title style={{ marginTop: 10 }} level={4}>Explore</Title>
-                <ProgramList programListStore={this.exploreListStore} showProgramDetail={this.showProgramDetail} />
+                <Card style={{ marginLeft: 10, marginRight:10,  marginTop: "10px", background: "rgb(242,242,242)" }} title={<Title level={4}>Explore</Title>}>
+                    <ProgramList programListStore={this.exploreListStore} showProgramDetail={this.showProgramDetail} />
+                </Card>
 
                 <ProgramDrawer programStore={this.store} />
             </>

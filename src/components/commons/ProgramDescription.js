@@ -21,7 +21,7 @@ export default class ProgramDescription extends Component {
 
     render() {
         return (
-            <Card title={<Title level={4}>About</Title>}>
+            <Card style={{ borderRadius: "12px",marginTop: "10px" }} title={<Title level={4}>About</Title>}>
                 {this.renderDescription()}
             </Card>
         );

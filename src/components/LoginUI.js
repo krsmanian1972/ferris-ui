@@ -8,7 +8,7 @@ const { Title } = Typography;
 const loginCard = {
     marginLeft: "25%",
     width: "50%",
-    backgroundColor: 'lightgray',
+    borderRadius: 12,
 };
 
 const failureNotification = () => {
@@ -51,12 +51,12 @@ export default class LoginScreen extends Component {
                     </Form>
                 </Card>
 
-                <div style={{ textAlign: 'center', marginTop: 30 }}>
-                    <Button type="link" disabled={store.isLoading}>DON'T HAVE AN ACCOUNT? WRITE TO US</Button>
+                <div style={{ textAlign: 'center', marginTop: 20, marginBottom:20 }}>
+                    <Button style={{ color: "blue" }} type="link" disabled={store.isLoading}>DON'T HAVE AN ACCOUNT? WRITE TO US</Button>
                 </div>
 
                 <div>
-                    <About/>
+                    <About />
                 </div>
             </>
         );

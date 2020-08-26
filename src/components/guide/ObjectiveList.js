@@ -166,8 +166,8 @@ class ObjectiveList extends Component {
 
         return (
             <>
-                <div style={{ border: "1px solid #ECECEC", borderRadius:"12px", width: "50%" }}>
-                    <div style={{background:"#F5F5F5", borderRadius:"12px", display: "flex", flexWrap: "wrap", height: 50, flexDirection: "row", justifyContent: "space-between" }}>
+                <div style={{background:"rgb(242,242,242)", width: "50%" }}>
+                    <div style={{background:"rgb(250,231,143)", display: "flex", flexWrap: "wrap", height: 50, flexDirection: "row", justifyContent: "space-between" }}>
                         {this.getTitle()}
                         {this.getControls()}
                     </div>

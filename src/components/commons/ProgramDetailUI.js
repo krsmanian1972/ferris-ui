@@ -82,7 +82,7 @@ class ProgramDetailUI extends Component {
     getTrailer = (program, change) => {
         const url = `${assetHost}/programs/${program.id}/trailer/trailer.mp4`;
         return (
-            <Card title={<Title level={4}>Trailer</Title>}>
+            <Card style={{ borderRadius: "12px", marginTop: "10px" }} title={<Title level={4}>Trailer</Title>}>
                 <div className='trailer-wrapper'>
                     <ReactPlayer width='100%' height='100%' controls className='trailer' url={url} />
                 </div>
@@ -93,8 +93,8 @@ class ProgramDetailUI extends Component {
     getProgramPoster = (program, change) => {
         const url = `${assetHost}/programs/${program.id}/poster/poster.png`;
         return (
-            <div style={{ textAlign: "center", height: 450 }}>
-                <div style={{ display: "inline-block", verticalAlign: "middle", height: 450 }}></div>
+            <div style={{ textAlign: "center", height: 350 }}>
+                <div style={{ display: "inline-block", verticalAlign: "middle", height: 350 }}></div>
                 <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={url} />
             </div>
         )
@@ -116,9 +116,7 @@ class ProgramDetailUI extends Component {
         const memberId = this.props.appStore.apiProxy.getUserFuzzyId();
 
         return (
-            <Card title={<Title level={4}>Coaching Plan</Title>}>
-                <GoldenTemplate key="gt" enrollmentId={enrollmentId} memberId={memberId} apiProxy={this.props.appStore.apiProxy} />
-            </Card>
+            <GoldenTemplate key="gt" enrollmentId={enrollmentId} memberId={memberId} apiProxy={this.props.appStore.apiProxy} />
         )
     }
 
@@ -133,14 +131,17 @@ class ProgramDetailUI extends Component {
                     extra={[
                         this.getEnrollmentButton(),
                     ]}>
-
+                </PageHeader>
+                
+                <div style={{ paddingLeft: 5, paddingRight: 5 }}>
                     {this.getProgramPoster(program, change)}
+
                     {this.getTrailer(program, change)}
 
-                    <Card title={<Title level={4}>Coach</Title>} extra={<a href="#">More</a>}>
-                        <Statistic value={coach.name} valueStyle={{ color: '#3f8600' }} />
-                        <Paragraph><MailOutlined /> {coach.email}</Paragraph>
-                        <Paragraph><PhoneOutlined /> (91)99999 99999</Paragraph>
+                    <Card style={{ borderRadius: "12px", marginTop: "10px", background: "rgb(30,30,30)"}} title={<Title style={{color:"white"}} level={4}>Coach</Title>}>
+                        <Statistic value={coach.name} valueStyle={{color:"rgb(100,218,225)",fontWeight:"bold"}}/>
+                        <Paragraph style={{color:"white",marginTop:10}}><MailOutlined /> {coach.email}</Paragraph>
+                        <Paragraph style={{color:"white"}}><PhoneOutlined /> (91)99999 99999</Paragraph>
                     </Card>
 
                     <ProgramDescription program={program} programStore={this.store} />
@@ -150,8 +151,7 @@ class ProgramDetailUI extends Component {
                     {this.renderActorCoachingPlan()}
 
                     <ProgramSessions programId={program.id} apiProxy={this.props.appStore.apiProxy} showSessionDetail={this.showSessionDetail} />
-
-                </PageHeader>
+                </div>
 
                 <EnrollmentModal programStore={this.store} enrollmentStore={this.enrollmentStore} />
             </>

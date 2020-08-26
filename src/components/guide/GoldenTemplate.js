@@ -13,7 +13,7 @@ import ObservationStore from '../stores/ObservationStore';
 import ConstraintList from './ConstraintList';
 import ConstraintStore from '../stores/ConstraintStore';
 
-import { Typography } from 'antd';
+import { Typography,Card } from 'antd';
 
 const { Title } = Typography;
 
@@ -38,8 +38,8 @@ export default class GoldenTemplate extends Component {
 
     render() {
         return (
-            <>
-                <div style={{ display: "flex", flexDirection: "row"}}>
+            <Card style={{ borderRadius: "12px",marginTop: "10px" }} title={<Title level={4}>Plan</Title>}>
+                <div style={{ display: "flex",flexDirection: "row", marginBottom:"10px"}}>
                     <TaskList key="onward" taskStore={this.taskStore} />
                     <ObjectiveList key="objectives" objectiveStore={this.objectiveStore} />
                 </div>
@@ -49,7 +49,7 @@ export default class GoldenTemplate extends Component {
                     <ObservationList key="observations" observationStore={this.observationStore} />
                 </div>
 
-            </>
+            </Card>
         )
     }
 }
