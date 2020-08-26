@@ -39,6 +39,8 @@ class HomeUI extends Component {
     }
 
     showNewSchedule = () => {
+        this.sessionStore.startTimeMsg = {};
+        this.sessionStore.durationMsg = {};
         this.sessionStore.showDrawer = true;
     }
 

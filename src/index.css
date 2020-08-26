@@ -182,6 +182,7 @@ code {
   padding-left: 10px;
   display:flex;
   flex-direction: column;
+  cursor: pointer;
 }
 
 .slot-title {

@@ -26,6 +26,8 @@ const START = "START";
 
 const COACH = "coach";
 
+const ALLOWED_MINUTES = new Set([0, 15, 30, 45]);
+
 export default class SessionStore {
 
     state = INIT;
@@ -34,10 +36,10 @@ export default class SessionStore {
     showDrawer = false;
 
     startTimeMsg = {};
-    startTime=null;
+    startTime = null;
 
     durationMsg = {};
-    duration=0;
+    duration = 0;
 
     programMsg = {};
     memberMsg = {};
@@ -45,9 +47,9 @@ export default class SessionStore {
     event = {};
     people = {};
     change = null;
-  
+
     showClosureDrawer = false;
-    targetState="";
+    targetState = "";
 
     constructor(props) {
         this.apiProxy = props.apiProxy;
@@ -55,6 +57,7 @@ export default class SessionStore {
         this.programListStore = props.programListStore;
         this.enrollmentListStore = props.enrollmentListStore;
     }
+
 
     get isLoading() {
         return this.state === PENDING;
@@ -134,10 +137,10 @@ export default class SessionStore {
 
         this.validateDate(sessionRequest.startTime);
         this.validateDuration(sessionRequest.duration);
-    
-        return this.programMsg.status !== ERROR 
-            && this.memberMsg.status !== ERROR 
-            && this.startTimeMsg.status !== ERROR 
+
+        return this.programMsg.status !== ERROR
+            && this.memberMsg.status !== ERROR
+            && this.startTimeMsg.status !== ERROR
             && this.durationMsg.status !== ERROR;
     }
 
@@ -146,12 +149,22 @@ export default class SessionStore {
         this.startTime = start;
         this.startTimeMsg = EMPTY_MESSAGE;
 
+        if (!start) {
+            this.startTimeMsg = { status: ERROR, help: "Please provide a start time for the session." };
+            return;
+        }
+
+        const minutes = start.minutes();
+        if (!ALLOWED_MINUTES.has(minutes)) {
+            this.startTimeMsg = { status: ERROR, help: "Please select the minutes as one of 00,15,30 or 45." };
+            return;
+        }
+
         const boundary = moment().add(15, 'minute');
         const flag = start && start > boundary;
-
         if (!flag) {
             this.startTimeMsg = { status: ERROR, help: "Select a start time that is at least 15 minutes from now." };
-            return
+            return;
         }
     }
 
@@ -159,20 +172,20 @@ export default class SessionStore {
         this.duration = 0;
         this.durationMsg = EMPTY_MESSAGE;
 
-        if(!value) {
-            this.durationMsg = { status: ERROR, help: "Select the duration for this session." }; 
+        if (!value) {
+            this.durationMsg = { status: ERROR, help: "Select the duration for this session." };
             return;
         }
 
         const hours = value.hours();
         const minutes = value.minutes();
 
-        if(hours+minutes==0) {
-            this.durationMsg = { status: ERROR, help: "The minimum duration of a session is 15 minutes." }; 
+        if (hours + minutes == 0) {
+            this.durationMsg = { status: ERROR, help: "The minimum duration of a session is 15 minutes." };
             return;
         }
 
-        this.duration = (hours*60)+minutes;
+        this.duration = (hours * 60) + minutes;
     }
 
     loadPeople = async () => {
@@ -194,13 +207,13 @@ export default class SessionStore {
 
             const users = data.data.getSessionUsers.users;
 
-            if (users[0].sessionUser.userType===COACH) {
-                this.people = {coach:users[0],member:users[1]}
+            if (users[0].sessionUser.userType === COACH) {
+                this.people = { coach: users[0], member: users[1] }
             }
             else {
-                this.people = {coach:users[1],member:users[0]}
+                this.people = { coach: users[1], member: users[0] }
             }
- 
+
             this.state = DONE;
         }
 
@@ -212,8 +225,8 @@ export default class SessionStore {
     }
 
     get endTime() {
-        if(this.duration && this.duration > 0 && this.startTime) {
-            return moment(this.startTime).add(this.duration,'minutes');
+        if (this.duration && this.duration > 0 && this.startTime) {
+            return moment(this.startTime).add(this.duration, 'minutes');
         }
     }
 
@@ -251,7 +264,7 @@ export default class SessionStore {
     get broadcastHelp() {
 
         if (this.event && this.event.session && (this.event.session.status === PLANNED || this.event.session.status === OVERDUE)) {
-            if(this.isCoach) {
+            if (this.isCoach) {
                 return COACH_LAUNCH_HELP;
             }
             return ACTOR_LAUNCH_HELP;
@@ -261,11 +274,11 @@ export default class SessionStore {
     }
 
 
-    updateSessionProgress = async() => {
-        if(!this.isCoach) {
+    updateSessionProgress = async () => {
+        if (!this.isCoach) {
             return;
         }
-        if(this.event.session.status === READY) {
+        if (this.event.session.status === READY) {
             await this.alterSessionState(START);
         }
     }
@@ -282,8 +295,8 @@ export default class SessionStore {
         await this.doAlterSessionState(variables);
     }
 
-    performClosure = async(request) => {
-        
+    performClosure = async (request) => {
+
         const variables = {
             input: {
                 id: this.event.session.id,
@@ -295,7 +308,7 @@ export default class SessionStore {
         await this.doAlterSessionState(variables);
     }
 
-    doAlterSessionState = async(variables) => { 
+    doAlterSessionState = async (variables) => {
 
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
@@ -323,17 +336,17 @@ export default class SessionStore {
             console.log(e);
         }
     }
- 
+
 }
 
 decorate(SessionStore, {
     state: observable,
     showDrawer: observable,
-    
-    startTime:observable,
+
+    startTime: observable,
     startTimeMsg: observable,
 
-    duration:observable,
+    duration: observable,
     durationMsg: observable,
 
     programMsg: observable,
@@ -344,8 +357,8 @@ decorate(SessionStore, {
     people: observable,
     change: observable,
 
-    showClosureDrawer:observable,
-    targetState:observable,
+    showClosureDrawer: observable,
+    targetState: observable,
 
     isLoading: computed,
     isDone: computed,
@@ -358,7 +371,7 @@ decorate(SessionStore, {
     canMakeReady: computed,
     canCancelEvent: computed,
     canBroadcast: computed,
-    canCompleteEvent:computed,
+    canCompleteEvent: computed,
 
     broadcastHelp: computed,
 

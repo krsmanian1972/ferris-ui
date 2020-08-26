@@ -52,12 +52,13 @@ class ScheduleForm extends Component {
         store.programListStore.fetchCoachPrograms();
     }
 
+
     disabledDate = (current) => {
         return current && current < moment().startOf('day');
     }
 
     disabledHours = () => {
-        return [6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23];
+        return [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
     }
 
     validateDate = (value) => {
@@ -72,7 +73,7 @@ class ScheduleForm extends Component {
         const store = this.props.sessionStore;
         const endTime = store.endTime;
         if (endTime) {
-            return  (
+            return (
                 <span className="ant-form-text"><Moment format="llll" >{endTime}</Moment></span>
             )
         }
@@ -85,6 +86,9 @@ class ScheduleForm extends Component {
      * 
      */
     onFinish = async (values) => {
+
+        alert("On Finish");
+
         const store = this.props.sessionStore;
 
         await store.createSchedule(values);
@@ -94,7 +98,7 @@ class ScheduleForm extends Component {
         }
 
         if (store.isInvalid) {
-            message.warning('Need Additional Information.');
+            message.warning('Please correct the session information.');
         }
 
         if (store.isDone) {
@@ -152,6 +156,9 @@ class ScheduleForm extends Component {
         return msg2;
     }
 
+
+
+
     render() {
 
         const store = this.props.sessionStore;
@@ -164,10 +171,13 @@ class ScheduleForm extends Component {
 
         const startTimeMsg = store.startTimeMsg;
         const durationMsg = store.durationMsg;
-    
+
 
         return (
-            <Form {...formItemLayout} ref={this.formRef} onFinish={this.onFinish} >
+            <Form {...formItemLayout}
+                name="scheduleForm"
+                ref={this.formRef}
+                onFinish={this.onFinish} >
                 <Form.Item name="programId"
                     rules={[{ required: true, message: 'Please select a Program' }]}
                     label={this.getProgramLabel()}
@@ -208,7 +218,7 @@ class ScheduleForm extends Component {
                 </Form.Item>
 
                 <Form.Item name="name"
-                    rules={[{ required: true, message: 'Please provide a topic for this session' }]}
+                    rules={[{required: true, message: 'Please provide a topic for this session' }]}
                     label="Session Name">
                     <Input placeholder="Topic for this session" />
                 </Form.Item>
@@ -227,25 +237,32 @@ class ScheduleForm extends Component {
                     validateStatus={startTimeMsg.status}
                     help={startTimeMsg.help}>
 
-                    <DatePicker placeholder="When?" showTime={{ format: 'hh:mm A' }} showNow={false} format="DD-MMM-YYYY hh:mm A"  disabledDate={this.disabledDate} onChange={this.validateDate} minuteStep={15}/>
+                    <DatePicker
+                        placeholder="When?"
+                        showTime={{ format: 'hh:mm A' }}
+                        showNow={false}
+                        format="DD-MMM-YYYY hh:mm A"
+                        disabledDate={this.disabledDate}
+                        onChange={this.validateDate}
+                        minuteStep={15} />
                 </Form.Item>
 
-                <Form.Item 
-                    name="duration" 
+                <Form.Item
+                    name="duration"
                     label={this.getDurationLabel()}
                     rules={[{ required: true, message: 'Please select the duration of this session' }]}
                     validateStatus={durationMsg.status}
                     help={durationMsg.help}>
 
-                    <TimePicker placeholder="How long?" showTime={{ format: 'HH:mm' }} showNow={false} format="HH:mm" disabledHours={this.disabledHours} onChange={this.validateDuration} hideDisabledOptions={true} minuteStep={15}/>
+                    <TimePicker placeholder="How long?" showTime={{ format: 'HH:mm' }} showNow={false} format="HH:mm" disabledHours={this.disabledHours} onChange={this.validateDuration} hideDisabledOptions={true} minuteStep={15} />
                 </Form.Item>
 
-                <Form.Item 
-                    name="endTime" 
+                <Form.Item
+                    name="endTime"
                     label={this.getEndTimeLabel()}>
                     {this.getEndTime()}
                 </Form.Item>
-                
+
 
                 <Form.Item>
                     <Button type="primary" disabled={store.isLoading} htmlType="submit" icon={<PlusCircleOutlined />}>Create Schedule</Button>

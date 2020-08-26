@@ -75,7 +75,7 @@ class ProgramList extends Component {
                         {programs && programs.map(({ program }) => {
                             return (
                                 <div key={program.id} style={{ display: "flex", flexDirection: "column" }}>
-                                     <div style={{ textAlign: "center", height: 175, marginRight: 10, marginLeft: 10, border:this.state.imageBorder}}  onClick={() => this.props.showProgramDetail(program.id)}>
+                                     <div style={{ textAlign: "center", height: 175, marginRight: 10, marginLeft: 10, cursor:'pointer', border:this.state.imageBorder}}  onClick={() => this.props.showProgramDetail(program.id)}>
                                         <div style={{ display: "inline-block", verticalAlign: "middle", height: 175 }}></div>
                                         <img style={{ maxHeight: "100%", maxWidth: "100%", verticalAlign: "middle", display: "inline-block", border:this.state.imageBorder, borderRadius:"12px"}} src={this.getCoverUrl(program)} />
                                     </div>
