@@ -22,7 +22,13 @@ export default class TaskStore {
     message = EMPTY_MESSAGE;
 
     showDrawer = false;
+
+    startTime = null;
     startTimeMsg = {};
+    
+    duration = 0;
+    durationMsg = {};
+
     change = null;
 
     tasks = [];
@@ -58,9 +64,19 @@ export default class TaskStore {
 
     setNewTask = () => {
         this.currentTask = EMPTY_TASK;
+
+        this.startTimeMsg = {};
+        this.durationMsg = {};
+        this.startTime = null;
+        this.duration = 0;
     }
 
     asCurrent =(index) => {
+
+        this.startTimeMsg = {};
+        this.durationMsg = {};
+        this.startTime = null;
+        this.duration = 0;
 
         if(index >= 0 && index < this.rowCount) {
             this.currentTask = this.tasks[index];
@@ -194,20 +210,43 @@ export default class TaskStore {
     isValid = (request) => {
 
         this.validateDate(request.startTime);
+        this.validateDuration(request.duration);
    
         return this.startTimeMsg.status !== ERROR
+            && this.startTimeMsg.status !== ERROR
+            && this.durationMsg.status !== ERROR;
     }
 
-    validateDate = (date) => {
+    validateDate = (startDate) => {
 
+        this.startTime = startDate;
         this.startTimeMsg = EMPTY_MESSAGE;
 
+        if (!startDate) {
+            this.startTimeMsg = { status: ERROR, help: "Please provide a start time for the Task." };
+            return;
+        }
+
         const boundary = moment().add(1, 'hour');
-        const flag = date && date > boundary;
+        const flag = startDate && startDate > boundary;
 
         if (!flag) {
             this.startTimeMsg = { status: ERROR, help: "Provide a time at least one hour after from now." };
+            return;
         }
+
+    }
+
+    validateDuration = (value) => {
+
+        this.duration = 0;
+        this.durationMsg = EMPTY_MESSAGE;
+
+        if (!value) {
+            this.durationMsg = { status: ERROR, help: "Select the duration for this Task." };
+            return;
+        }
+
     }
 
 }
@@ -218,7 +257,11 @@ decorate(TaskStore, {
     change: observable,
     showDrawer: observable,
 
+    startTime:observable,
     startTimeMsg: observable,
+
+    duration:observable,
+    durationMsg:observable,
 
     tasks: observable,
     currentTask: observable,
@@ -235,4 +278,5 @@ decorate(TaskStore, {
     setNewTask:action,
     asCurrent:action,
     validateDate: action,
+    validateDuration:action,
 })

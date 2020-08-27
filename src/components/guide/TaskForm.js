@@ -37,6 +37,10 @@ class TaskForm extends Component {
         this.props.taskStore.validateDate(value);
     }
 
+    validateDuration = (value) => {
+        this.props.taskStore.validateDuration(value);
+    }
+
     handleDescription = (text) => {
         this.description = text;
         this.formRef.current && this.formRef.current.setFieldsValue({ description: text });
@@ -119,14 +123,14 @@ class TaskForm extends Component {
                     validateStatus={startTimeMsg.status}
                     help={startTimeMsg.help}>
 
-                    <DatePicker showTime format="DD-MMM-YYYY HH:mm A" disabledDate={this.disabledDate} onChange={this.validateDate} />
+                    <DatePicker showTime format="DD-MMM-YYYY hh:00 A"  showNow={false} disabledDate={this.disabledDate} onChange={this.validateDate} />
                 </Form.Item>
 
                 <Form.Item
                     name="duration"
                     rules={[{ required: true, message: 'Please provide a duration for this activity' }]}
                     label="Duration (Hrs)">
-                    <InputNumber min={1} max={8} />
+                    <InputNumber min={1} max={8} onChange={this.validateDuration}/>
                 </Form.Item>
 
                 <Form.Item>
