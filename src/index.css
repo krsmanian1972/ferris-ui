@@ -44,6 +44,9 @@ code {
 .ant-carousel .slick-dots li {
   background: gray;
 }
+.ant-steps-item-process .ant-steps-item-tail::after {
+  background: rgb(216,213,221) !important;
+}
 
 .ql-toolbar {
   background: #eaecec;

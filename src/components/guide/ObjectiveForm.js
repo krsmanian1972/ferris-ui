@@ -122,7 +122,7 @@ class ObjectiveForm extends Component {
                 <Form.Item
                     name="endTime"
                     rules={[{ required: true, message: 'Please provide the date of acheiving this objective.' }]}
-                    label="End Date"
+                    label="Completion Date"
                     validateStatus={endTimeMsg.status}
                     help={endTimeMsg.help}>
 

@@ -1,7 +1,7 @@
 import { decorate, observable, computed, action } from 'mobx';
 import { apiHost } from './APIEndpoints';
-import { createObjectiveQuery,objectivesQuery, updateObjectiveQuery } from './Queries';
-import {isBlank} from './Util';
+import { createObjectiveQuery, objectivesQuery, updateObjectiveQuery } from './Queries';
+import { isBlank } from './Util';
 
 import moment from 'moment';
 
@@ -11,7 +11,7 @@ const INVALID = "invalid";
 const DONE = 'done';
 const ERROR = 'error';
 
-const EMPTY_OBJECTIVE = {id:"",description:"",scheduleStart:null,scheduleEnd:null};
+const EMPTY_OBJECTIVE = { id: "", description: "", scheduleStart: null, scheduleEnd: null };
 
 const EMPTY_MESSAGE = { status: "", help: "" };
 const SAVING_ERROR = { status: "error", help: "We are very sorry. Unable to store the Planning Information." };
@@ -44,7 +44,7 @@ export default class ObjectiveStore {
     objectives = [];
     rowCount = 0;
     currentObjective = {};
-    
+
 
     /**
      * The section id can be any one of
@@ -81,11 +81,21 @@ export default class ObjectiveStore {
 
     setNewObjective = () => {
         this.currentObjective = EMPTY_OBJECTIVE;
+        
+        this.startTimeMsg = {};
+        this.endTimeMsg = {};
+        this.startTime = null;
+        this.endTime = null;
     }
 
-    asCurrent =(index) => {
+    asCurrent = (index) => {
 
-        if(index >= 0 && index < this.rowCount) {
+        this.startTimeMsg = {};
+        this.endTimeMsg = {};
+        this.startTime = null;
+        this.endTime = null;
+
+        if (index >= 0 && index < this.rowCount) {
             this.currentObjective = this.objectives[index];
             return true;
         }
@@ -125,8 +135,8 @@ export default class ObjectiveStore {
         }
     }
 
-    saveObjective = async(planRequest) => {
-        if(this.isNewObjective) {
+    saveObjective = async (planRequest) => {
+        if (this.isNewObjective) {
             await this.createObjective(planRequest);
         }
         else {
@@ -134,10 +144,10 @@ export default class ObjectiveStore {
         }
     }
 
-    updateObjective = async(planRequest) => {
+    updateObjective = async (planRequest) => {
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
-        
+
         if (!this.isValid(planRequest)) {
             this.state = INVALID;
             return;
@@ -145,8 +155,8 @@ export default class ObjectiveStore {
 
         const variables = {
             input: {
-                id:this.currentObjective.id,
-                description:planRequest.description,
+                id: this.currentObjective.id,
+                description: planRequest.description,
                 startTime: planRequest.startTime.utc().format(),
                 endTime: planRequest.endTime.utc().format()
             }
@@ -181,7 +191,7 @@ export default class ObjectiveStore {
     createObjective = async (planRequest) => {
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
-        
+
         if (!this.isValid(planRequest)) {
             this.state = INVALID;
             return;
@@ -189,7 +199,7 @@ export default class ObjectiveStore {
 
         const variables = {
             input: {
-                description:planRequest.description,
+                description: planRequest.description,
                 enrollmentId: this.enrollmentId,
                 startTime: planRequest.startTime.utc().format(),
                 endTime: planRequest.endTime.utc().format()
@@ -227,24 +237,49 @@ export default class ObjectiveStore {
 
     validateStartDate = (startDate) => {
 
-        this.startTime = startDate;
         this.startTimeMsg = EMPTY_MESSAGE;
+        this.startTime = startDate ? moment(startDate).startOf('day') : null;
+
+        if (!this.startTime) {
+            this.startTimeMsg = { status: ERROR, help: "Please provide a Start Date for working towards this objective." };
+            return;
+        }
 
         const boundary = moment().startOf('day');
-        const flag = startDate && startDate > boundary;
+        var flag = this.startTime >= boundary;
 
         if (!flag) {
-            this.startTimeMsg = { status: ERROR, help: "The start date should be a future date." };
+            this.startTimeMsg = { status: ERROR, help: "The start date should be a present or a future date." };
+            return;
+        }
+
+        if(!this.endTime) {
+            return;
+        }
+
+        flag = this.endTime >= this.startTime;
+
+        if (!flag) {
+            this.startTimeMsg = { status: ERROR, help: "The start date should be equal or earlier to the completion date." };
+            return;
         }
     }
 
     validateEndDate = (endDate) => {
 
-        this.endTime = endDate;
-
         this.endTimeMsg = EMPTY_MESSAGE;
+        this.endTime = endDate ? moment(endDate).startOf('day') : null;
 
-        const flag = endDate && this.startTime && endDate >= this.startTime;
+        if (!this.endTime) {
+            this.endTimeMsg = { status: ERROR, help: "Please provide the date of acheiving this objective." };
+            return;
+        }
+        
+        if(!this.startTime) {
+            return;
+        }
+
+        const flag = this.endTime && this.endTime >= this.startTime;
 
         if (!flag) {
             this.endTimeMsg = { status: ERROR, help: "The completion date should be later than the start date." };
@@ -265,8 +300,8 @@ decorate(ObjectiveStore, {
     endTime: observable,
 
     objectives: observable,
-    currentObjective:observable,
-    rowCount:observable,
+    currentObjective: observable,
+    rowCount: observable,
 
     isLoading: computed,
     isDone: computed,
@@ -274,7 +309,7 @@ decorate(ObjectiveStore, {
     isError: computed,
     isNewObjective: computed,
 
-    saveObjective:action,
+    saveObjective: action,
     fetchObjectives: action,
     setNewObjective: action,
     asCurrent: action,

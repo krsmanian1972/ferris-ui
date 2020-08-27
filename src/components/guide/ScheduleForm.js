@@ -87,8 +87,6 @@ class ScheduleForm extends Component {
      */
     onFinish = async (values) => {
 
-        alert("On Finish");
-
         const store = this.props.sessionStore;
 
         await store.createSchedule(values);
@@ -155,9 +153,6 @@ class ScheduleForm extends Component {
         }
         return msg2;
     }
-
-
-
 
     render() {
 
