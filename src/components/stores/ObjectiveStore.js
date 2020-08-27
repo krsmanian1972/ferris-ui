@@ -32,8 +32,13 @@ export default class ObjectiveStore {
     message = EMPTY_MESSAGE;
 
     showDrawer = false;
+
     startTimeMsg = {};
+    startTime = null;
+
     endTimeMsg = {};
+    endTime = null;
+
     change = null;
 
     objectives = [];
@@ -215,13 +220,14 @@ export default class ObjectiveStore {
     isValid = (request) => {
 
         this.validateStartDate(request.startTime);
-        this.validateEndDate(request.endTime,request.startTime);
+        this.validateEndDate(request.endTime);
 
         return this.startTimeMsg.status !== ERROR && this.endTimeMsg.status !== ERROR
     }
 
     validateStartDate = (startDate) => {
 
+        this.startTime = startDate;
         this.startTimeMsg = EMPTY_MESSAGE;
 
         const boundary = moment().startOf('day');
@@ -232,11 +238,13 @@ export default class ObjectiveStore {
         }
     }
 
-    validateEndDate = (endDate,startDate) => {
+    validateEndDate = (endDate) => {
+
+        this.endTime = endDate;
 
         this.endTimeMsg = EMPTY_MESSAGE;
 
-        const flag = endDate && startDate && endDate >= startDate;
+        const flag = endDate && this.startTime && endDate >= this.startTime;
 
         if (!flag) {
             this.endTimeMsg = { status: ERROR, help: "The completion date should be later than the start date." };
@@ -251,7 +259,10 @@ decorate(ObjectiveStore, {
     showDrawer: observable,
 
     startTimeMsg: observable,
+    startTime: observable,
+
     endTimeMsg: observable,
+    endTime: observable,
 
     objectives: observable,
     currentObjective:observable,

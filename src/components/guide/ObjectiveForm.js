@@ -31,6 +31,14 @@ class ObjectiveForm extends Component {
         return current && current < moment().startOf('day');
     }
 
+    validateStartDate = (date) => {
+        this.props.objectiveStore.validateStartDate(date);
+    }
+
+    validateEndDate = (endDate) => {
+        this.props.objectiveStore.validateEndDate(endDate);
+    }
+
     handleDescription = (text) => {
         this.description = text;
         this.formRef.current && this.formRef.current.setFieldsValue({ description: this.description });
@@ -108,7 +116,7 @@ class ObjectiveForm extends Component {
                     validateStatus={startTimeMsg.status}
                     help={startTimeMsg.help}>
 
-                    <DatePicker format="DD-MMM-YYYY" disabledDate={this.disabledDate} />
+                    <DatePicker format="DD-MMM-YYYY" disabledDate={this.disabledDate} onChange={this.validateStartDate}/>
                 </Form.Item>
 
                 <Form.Item
@@ -118,7 +126,7 @@ class ObjectiveForm extends Component {
                     validateStatus={endTimeMsg.status}
                     help={endTimeMsg.help}>
 
-                    <DatePicker format="DD-MMM-YYYY" disabledDate={this.disabledDate} />
+                    <DatePicker format="DD-MMM-YYYY" disabledDate={this.disabledDate} onChange={this.validateEndDate}/>
                 </Form.Item>
 
                 <Form.Item>
