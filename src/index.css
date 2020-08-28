@@ -191,10 +191,19 @@ code {
 
 .slot-title {
   font-weight: bold; 
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content:space-between;
 }
 
 .planned {
   border-left: 3px solid blue;
+}
+
+.task {
+  border: none;
 }
 
 .cancelled {

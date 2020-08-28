@@ -139,6 +139,40 @@ export const eventsQuery = `query ($criteria: EventCriteria!) {
   }
 }`;
 
+export const planEventsQuery = `query ($criteria: EventCriteria!) {
+  getPlanEvents(criteria: $criteria) {
+    planRows {
+      objective {
+        id,
+        scheduleStart,
+        scheduleEnd,
+        status,
+        description
+      },
+      task{
+        id,
+        name,
+        scheduleStart,
+        scheduleEnd,
+        duration,
+        status,
+        description
+      },
+      enrollment{
+        memberId
+      },
+      program {
+        name,
+        description,
+        coachName
+      }
+    }
+    error {
+      message
+    }
+  }
+}`;
+
 export const sessionUsersQuery = `query ($criteria: SessionCriteria!) {
   getSessionUsers(criteria: $criteria) {
     users {

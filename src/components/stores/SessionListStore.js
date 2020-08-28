@@ -3,7 +3,7 @@ import moment from 'moment';
 
 import { isBlank } from './Util';
 import { apiHost } from './APIEndpoints';
-import { eventsQuery } from './Queries';
+import { eventsQuery,planEventsQuery } from './Queries';
 
 const SLOT_SIZE = 35;
 
@@ -130,11 +130,44 @@ export default class SessionListStore {
         return events;
     }
 
+
+    fetchPlanEventsQuery = async (startDate, endDate) => {
+
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+
+        const userFuzzyId = this.apiProxy.getUserFuzzyId();
+
+        const variables = {
+            criteria: {
+                userId: userFuzzyId
+            }
+        }
+
+        let events = [];
+
+        try {
+            const response = await this.apiProxy.query(apiHost, planEventsQuery, variables);
+            const data = await response.json();
+            events =  data.data.getPlanEvents.planRows;
+            this.state = DONE;
+        }
+        catch (e) {
+            this.state = ERROR;
+            this.message = ERROR_MESSAGE;
+        }
+
+        return events;
+    }
+
     buildRoster = async () => {
         const { start, end, roster } = this.buildEmptyRoster();
-        const events = await this.fetchEvents(start, end);
 
-        this.fixRoster(roster, events);
+        const events = await this.fetchEvents(start, end);
+        this.fixSessionRoster(roster, events);
+
+        const planEvents = await this.fetchPlanEventsQuery(start,end);
+        this.fixPlanRoster(roster,planEvents);
 
         this.start = start;
         this.end = end;
@@ -196,7 +229,7 @@ export default class SessionListStore {
      * @param {*} roster 
      * @param {*} events 
      */
-    fixRoster = (roster, events) => {
+    fixSessionRoster = (roster, events) => {
         events.map(event => {
             const eventStart = moment(event.session.scheduleStart*1000);
             const eventEnd = moment(event.session.scheduleEnd*1000);
@@ -215,6 +248,29 @@ export default class SessionListStore {
 
     canAccomodate = (slotStart,slotEnd,eventStart,eventEnd) => {
         return (eventStart.isBetween(slotStart, slotEnd) || eventEnd.isBetween(slotStart,slotEnd) || slotStart.isBetween(eventStart,eventEnd,undefined,"[)"));
+    }
+
+    fixPlanRoster = (roster, events) => {
+        events.map(event => {
+            
+            if(event.objective) {
+                return;
+            }
+            
+            const item = event.task  ? event.task : event.objective;
+
+            const eventStart = moment(item.scheduleStart*1000);
+            const eventEnd = moment(item.scheduleEnd*1000);
+
+            for (let [key, value] of roster) {
+                const slotStart = key;
+                const slotEnd = moment(key).add(1,'hours').subtract(1,'minutes');
+
+                if (this.canAccomodate(slotStart,slotEnd,eventStart,eventEnd)) {
+                    value.push(event);
+                }
+            }
+        })
     }
 }
 
