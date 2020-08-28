@@ -36,19 +36,22 @@ function SessionSlot({ date, sessions, showSessionDetail }) {
     }
 
     const renderSession = (event, index) => {
+        const eventStart = moment(event.session.scheduleStart*1000);
+        const eventEnd = moment(event.session.scheduleEnd*1000);
+        
+        const timings = "@ "+eventStart.format('LT')+'-'+eventEnd.format('LT')
+
         return (
-            <div className="slot-detail">
                 <div key={index} className={"slot-item " + event.session.band} onClick={() => showSessionDetail(event)}>
                     <div className="slot-title">
                         {people(event)}
-                        <p style={{fontSize: "10px",width:"33.3%"}}>SESSION</p>
+                        <p style={{fontSize: "12px",width:"33.3%"}}>{timings}</p>
                         {bandText(event.session.band)}
                     </div>
                     <div>
                         <p style={{ float: 'left' }}>{event.session.description}</p>
                     </div>
                 </div>
-            </div>
         )
     }
 
@@ -69,7 +72,6 @@ function SessionSlot({ date, sessions, showSessionDetail }) {
 
     const renderTask = (event, index) => {
         return (
-            <div className="slot-detail">
                 <div key={index} className={"slot-item task"}>
                     <div className="slot-title">
                         <p style={{width:"33.3%"}}>{event.program.name}</p>
@@ -80,12 +82,10 @@ function SessionSlot({ date, sessions, showSessionDetail }) {
                         <p style={{ float: 'left' }}>{event.task.name}</p>
                     </div>
                 </div>
-            </div>
         )
     }
 
     const renderDetail = (sessions) => {
-        console.log(sessions.length);
         if(sessions.length === 0) {
             return ( 
                 <div className="slot-detail"></div>
@@ -93,14 +93,17 @@ function SessionSlot({ date, sessions, showSessionDetail }) {
         }
 
         return (
-            sessions.map((event, index) => {
-                if (event.session) {
-                    return renderSession(event, index)
+            <div className="slot-detail">
+               { sessions.map((event, index) => {
+                    if (event.session) {
+                        return renderSession(event, index)
+                    }
+                    else if (event.task) {
+                        return renderTask(event, index)
+                    }
+                })
                 }
-                else if (event.task) {
-                    return renderTask(event, index)
-                }
-            })
+            </div>
         )
     }
 

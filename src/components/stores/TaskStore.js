@@ -136,12 +136,14 @@ export default class TaskStore {
             return;
         }
         
+        const startTime = planRequest.startTime.startOf('hour');
+
         const variables = {
             input: {
                 id: this.currentTask.id,
                 name:planRequest.name,
                 description:planRequest.description,
-                startTime: planRequest.startTime.utc().format(),
+                startTime: startTime.utc().format(),
                 duration:planRequest.duration,
             }
         }
@@ -176,13 +178,15 @@ export default class TaskStore {
             return;
         }
 
+        const startTime = planRequest.startTime.startOf('hour');
+
         const variables = {
             input: {
                 name:planRequest.name,
                 description:planRequest.description,
                 enrollmentId: this.enrollmentId,
                 actorId:this.memberId,
-                startTime: planRequest.startTime.utc().format(),
+                startTime: startTime.utc().format(),
                 duration: planRequest.duration
             }
         }
