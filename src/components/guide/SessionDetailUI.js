@@ -50,14 +50,17 @@ class SessionDetailUI extends Component {
         console.log("Finished");
     }
 
-    renderTopSegment = (program, session, sessionUser) => {
+    renderTopSegment = (program, session, sessionUser,people) => {
+        
+        const memberId = people && people.member ? people.member.user.id : "";
+
         return (
 
             <Card key="top_segment" style={{ borderRadius: "12px" }} title={<Title level={4}>Schedule</Title>}>
                 <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", textAlign: "center", alignItems: "center" }}>
                     {this.renderProgramImage(program)}
                     {this.renderSchedule(session)}
-                    <SessionLauncher store={this.store} session={session} sessionUser={sessionUser} />
+                    <SessionLauncher store={this.store} session={session} sessionUser={sessionUser} memberId={memberId}/>
                 </div>
             </Card>
 
@@ -211,7 +214,7 @@ class SessionDetailUI extends Component {
                 </PageHeader>
 
                 <div style={{paddingLeft:5, paddingRight:5}}>
-                    {this.renderTopSegment(program, session, sessionUser)}
+                    {this.renderTopSegment(program, session, sessionUser,people)}
 
                     {people.coach && (
                         <div key="assets">

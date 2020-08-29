@@ -17,6 +17,7 @@ import Board from './Board';
 import { Button, Row, Col, Tooltip, Space } from 'antd';
 import { message } from 'antd';
 import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutlined, AudioMutedOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import SharedCoachingPlan from './SharedCoachingPlan';
 
 
 const CONNECTION_KEY_VIDEO_STREAM = "peerVideoStream";
@@ -24,6 +25,7 @@ const CONNECTION_KEY_SCREEN_STREAM = "peerScreenStream";
 const CONNECTION_KEY_BOARD_STREAM = "peerBoardStream";
 
 const MY_BOARD_KEY = 'myBoard';
+
 
 @inject("appStore")
 @observer
@@ -48,7 +50,7 @@ class Broadcast extends Component {
             videoDevice: 'On',
             audioDevice: 'On',
 
-            minimizeMiniBoard: false,
+            isMinimized: false,
 
             portalSize: { height: window.innerHeight, width: window.innerWidth }
         };
@@ -63,9 +65,13 @@ class Broadcast extends Component {
         this.rejectCallHandler = this.rejectCall.bind(this);
 
         const sessionUserId = this.props.params.sessionUserId;
+        const enrollmentId = this.props.params.enrollmentId;
+        const memberId = this.props.params.memberId;
 
         this.initializeNotesStore(sessionUserId);
-        this.initializeBoards(sessionUserId);
+        
+        this.myBoard = <Board key={MY_BOARD_KEY} boardId={MY_BOARD_KEY} sessionUserId={sessionUserId} onCanvasStream={this.onCanvasStream}/>
+        this.coachingPlan = <SharedCoachingPlan key="gt" enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
     }
 
     initializeNotesStore = (sessionUserId) => {
@@ -91,11 +97,7 @@ class Broadcast extends Component {
         }
     }
 
-    initializeBoards = (sessionUserId) => {
-        this.myBoards = new Map();
-        const el = <Board key={MY_BOARD_KEY} boardId={MY_BOARD_KEY} sessionUserId={sessionUserId} onCanvasStream={this.onCanvasStream}/>
-        this.myBoards.set(MY_BOARD_KEY, el);
-    }
+    
 
     buildTransceivers = (peerId) => {
         this.transceivers[CONNECTION_KEY_VIDEO_STREAM] = this.buildVideoTransceiver(peerId);
@@ -253,11 +255,11 @@ class Broadcast extends Component {
     }
 
     minimizeMiniBoard = () => {
-        if (this.state.minimizeMiniBoard === true) {
-            this.setState({ minimizeMiniBoard: false });
+        if (this.state.isMinimized === true) {
+            this.setState({ isMinimized: false });
         }
         else {
-            this.setState({ minimizeMiniBoard: true });
+            this.setState({ isMinimized: true });
         }
     }
 
@@ -324,17 +326,17 @@ class Broadcast extends Component {
     }
 
     render() {
-        const { localSrc, peerSrc, screenSrc, boardSrc, portalSize, minimizeMiniBoard } = this.state;
+        const { localSrc, peerSrc, screenSrc, boardSrc, portalSize, isMinimized } = this.state;
         const viewHeight = portalSize.height * 0.94;
         const canShare = this.peerStreamStatus === "active";
         const sessionUserId = this.props.params.sessionUserId;
 
         return (
-            <div style={{ padding: 8, height: viewHeight }}>
+            <div style={{ padding: 2, height: viewHeight }}>
 
-                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} boardSrc={boardSrc} myBoards={this.myBoards} minmizeMiniBoard={minimizeMiniBoard} />
+                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} boardSrc={boardSrc} myBoard={this.myBoard} coachingPlan={this.coachingPlan} isMinimized={isMinimized} />
 
-                <Row style={{ marginTop: 2 }}>
+                <Row style={{ marginTop: 8 }}>
                     <Col span={12}>
                     </Col>
                     <Col span={12} style={{ textAlign: "right" }}>

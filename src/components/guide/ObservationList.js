@@ -70,7 +70,7 @@ class ObservationList extends Component {
         return (
             <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", textAlign: "center", alignItems: "center" }}>
                 <Button key="back" onClick={this.previous} icon={<LeftOutlined />} shape="square"></Button>
-                <div style={{ width: "94%" }}>
+                <div style={{ width: "90%" }}>
                     <Carousel ref={ref => (this.carousel = ref)} {...settings}>
                         {observations && observations.map((observation) => {
                             return (

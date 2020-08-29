@@ -26,7 +26,13 @@ export default class App extends Component {
     const sessionUserId = params.get("sessionUserId");
     const sessionUserType = params.get("sessionUserType");
 
-    const sessionInfo = { sessionId: sessionId, sessionUserId: sessionUserId, sessionUserType: sessionUserType };
+    const sessionInfo = {
+      sessionId: sessionId,
+      sessionUserId: sessionUserId,
+      sessionUserType: sessionUserType,
+      enrollmentId: params.get("enrollmentId"),
+      memberId: params.get("memberId")
+    };
 
     if (featureKey && sessionUserId) {
       appStore.updatePreferredRoute(featureKey, sessionInfo);
@@ -50,7 +56,7 @@ export default class App extends Component {
             <SelectedComponent />
           </div>
         </Content>
-        <Footer style={{padding: '0 0px'}}>
+        <Footer style={{ padding: '0 0px' }}>
         </Footer>
       </>
     )

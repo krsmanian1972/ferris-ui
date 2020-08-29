@@ -9,7 +9,7 @@ const standardStyle = {
     overflow: "hidden",
 };
 
-function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoards,  minmizeMiniBoard }) {
+function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoard, coachingPlan, isMinimized }) {
 
     const [peerKey, setPeerKey] = useState('none');
     const [myKey, setMyKey] = useState('none');
@@ -69,10 +69,10 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoards,  minmize
         }
 
         if (myKey === "none") {
-            return { width: "50%" };
+            return { width: "33.3%" };
         }
 
-        return { width: "100%" };
+        return { width: "50%" };
     }
 
     const getSuspendedItems = (widgets, activeKey) => {
@@ -85,8 +85,8 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoards,  minmize
         return toSuspend;
     }
 
-    const getminiBoardheight = () => {
-        if (minmizeMiniBoard === true) {
+    const getMiniBoardHeight = () => {
+        if (isMinimized === true) {
             return { height: "0%" };
         }
         else {
@@ -100,11 +100,16 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoards,  minmize
     peerWidgets.set("peerScreen", <video key="peerScreen" className="videoItem" style={getPeerStyle("peerScreen")} poster="peerScreen.png" ref={peerScreen} autoPlay onClick={() => setSelected("peerScreen", "peer")} />);
     peerWidgets.set("peerBoard", <video key="peerBoard" className="videoItem" style={getPeerStyle("peerBoard")} poster="peerBoard.png" ref={peerBoard} autoPlay onClick={() => setSelected("peerBoard", "peer")} />);
 
-    
+
     const boardKey = 'myBoard';
-    const el = <div key="myMiniBoard" className="videoItem" style={getMyStyle(boardKey)} onClick={() => setSelected(boardKey, "self")} >My Board</div>
+    const boardDiv = <div key="myMiniBoard" className="videoItem" style={getMyStyle(boardKey)} onClick={() => setSelected(boardKey, "self")} >My Board</div>
+
+    const planKey = "coachingPlan";
+    const planDiv = <div key="coachingPlanDiv" className="videoItem" style={getMyStyle(planKey)} onClick={() => setSelected(planKey, "self")} >Coaching Plan</div>
+
     const myWidgets = new Map();
-    myWidgets.set(boardKey, el);
+    myWidgets.set(boardKey, boardDiv);
+    myWidgets.set(planKey, planDiv);
 
 
     const getActiveItem = () => {
@@ -116,7 +121,11 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoards,  minmize
             return peerWidgets.get(peerKey);
         }
 
-        return myBoards.get(myKey);
+        if (myKey == "myBoard") {
+            return myBoard;
+        }
+
+        return coachingPlan;
     }
 
     return (
@@ -126,11 +135,11 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoards,  minmize
                 {getActiveItem()}
             </div>
 
-            <div className="peerVideoContainer" style={getminiBoardheight()}>
+            <div className="peerVideoContainer" style={getMiniBoardHeight()}>
                 {getSuspendedItems(peerWidgets, peerKey).map(value => value)}
             </div>
 
-            <div className="myVideoContainer" style={getminiBoardheight()}>
+            <div className="myVideoContainer" style={getMiniBoardHeight()}>
                 {getSuspendedItems(myWidgets, myKey).map(value => value)}
                 <video key="myVideo" className="videoItem" style={getMyStyle("myVideo")} poster="videoSelf.png" onClick={() => minimizeAll()} ref={localVideo} autoPlay muted />
             </div>
@@ -144,8 +153,9 @@ VideoBoard.propTypes = {
     peerSrc: PropTypes.object,
     screenSrc: PropTypes.object,
     boardSrc: PropTypes.object,
-    myBoards: PropTypes.object,
-    minimizeMiniBoard: PropTypes.object,
+    myBoard: PropTypes.object,
+    coachingPlan: PropTypes.object,
+    isMinimized: PropTypes.bool,
 };
 
 export default VideoBoard;
