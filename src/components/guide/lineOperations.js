@@ -222,6 +222,22 @@ const removeRecurringPointOnLineSegment = function(lineSegmentArray, arrayIndex,
         
 }
 
+const removeLineSegmentOnCickPoint = function(lineSegmentArray, point, scene){
+    var status = "FAILURE";
+    const hitPoint = checkPointIsOnLineSegmentArray(lineSegmentArray, point);
+    if(hitPoint.arrayIndex !== "Nan"){
+        //found a hit point, remove the lines from the scene. 
+        for(var i = 0; i < lineSegmentArray[hitPoint.arrayIndex].line.length; i++){
+            scene.remove(lineSegmentArray[hitPoint.arrayIndex].line[i]);
+        }
+        //remove the arrayIndex from the lineSegmentArray
+        lineSegmentArray.splice(hitPoint.arrayIndex, 1);
+        status = "SUCCESS";
+    } 
+    return status;
+}
+
+
 const logPointsOnLine = function(line){
    console.log("Source and Dest of Line");
    console.log(line);
@@ -230,5 +246,5 @@ const logPointsOnLine = function(line){
    }
 }
 
-export {drawLineWithPrevPoint, checkPointIsOnLineSegmentArray, snapAtClickPoint, updateVertexMovement, removeRecurringPointOnLineSegment};
+export {drawLineWithPrevPoint, checkPointIsOnLineSegmentArray, snapAtClickPoint, updateVertexMovement, removeRecurringPointOnLineSegment, removeLineSegmentOnCickPoint};
 

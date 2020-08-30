@@ -10,7 +10,7 @@ import ObjectiveList from './ObjectiveList';
 import ObjectiveStore from '../stores/ObjectiveStore';
 import ObjectiveDrawer from './ObjectiveDrawer';
 import {drawLineWithPrevPoint, checkPointIsOnLineSegmentArray, snapAtClickPoint} from './lineOperations';
-import {updateVertexMovement, removeRecurringPointOnLineSegment} from './lineOperations';
+import {updateVertexMovement, removeRecurringPointOnLineSegment, removeLineSegmentOnCickPoint} from './lineOperations';
 import { inject, observer } from 'mobx-react';
 import * as THREE from 'three';
 import DragControls from 'three-dragcontrols';
@@ -33,12 +33,13 @@ const pointLightPosition = 1;
 
 const taskBarColor = "#2A4B7C";
 
-const barWidth = 5.5;//3
-const barHeight = 1;//1
+const barWidth = 2.5;//3
+const barHeight = 2.5/3;//1
 const barDepth = 0;
-const connectorRadius = 0.10;//0.06
+const connectorRadius = 0.06;//0.06
 
 const vGap = 20;
+const borderGap = 15;
 
 const boldFont = "bold 18px sans-serif";
 const regularFont = "18px sans-serif";
@@ -59,7 +60,7 @@ class WorkflowUI extends Component {
         this.objectiveStore = new ObjectiveStore({ apiProxy: props.appStore.apiProxy, enrollmentId: "4c7f668d-0a55-42d5-89d5-3efe73e41db7" });
         this.objectiveStore.fetchObjectives();
 
-        this.taskBarGeo = new THREE.BoxGeometry(barWidth, barHeight, barDepth);
+        this.taskBarGeo = new THREE.PlaneGeometry(barWidth, barHeight, barDepth);
 
         this.gridLineMaterial = new THREE.LineBasicMaterial({ color: 0x1d1d1d });
 
@@ -132,6 +133,7 @@ class WorkflowUI extends Component {
 
     mouseClick = (event) => {
         console.log("Single Click");
+        console.log(this.lineSegmentArray);
         var point = this.getClickPoint(event);
         console.log(this.mode);
         if(this.mode === "VERTEX_DRAG_MODE"){
@@ -143,7 +145,15 @@ class WorkflowUI extends Component {
             this.dragMode = {};
             return;
         }
-        
+        if(this.mode === "DELETE_CONNECTING_LINE"){
+             var status = removeLineSegmentOnCickPoint(this.lineSegmentArray, point, this.scene);
+             if(status === "SUCCESS"){
+                 this.lineSegmentArrayIndex--;
+             }
+             console.log(this.lineSegmentArray);
+             console.log(this.lineSegmentArrayIndex);
+             return;
+        }
         if(this.mode === ""){
             console.log("check point is online");
             var result = snapAtClickPoint(this.lineSegmentArray, point, this.scene);
@@ -153,8 +163,9 @@ class WorkflowUI extends Component {
                 this.dragMode.pathIndex = result.pathIndex;
                 this.mode = "VERTEX_DRAG_MODE";
             }
+            return;
         }
-        console.log(this.lineSegmentArray);
+
         if(this.mode === "TASK_CONNECTOR" || this.mode === "FREE_LINE_CONNECTOR"){
             if(this.internalState === "FOUND_SOURCE_PORT"){
                //draw projection of the line the previous points axis
@@ -259,7 +270,7 @@ class WorkflowUI extends Component {
                 drawLineWithPrevPoint(this.lineSegmentArray, this.scene, this.lineSegmentArrayIndex, pathIndex, "");
                 
                 this.lineSegmentArrayIndex++;
-       	this.internalState = "";
+         	this.internalState = "";
            }
         }
     } 
@@ -315,6 +326,31 @@ class WorkflowUI extends Component {
     }
 
     scroll = (event) => {
+        if(event.shiftKey && event.ctrlKey){
+             if(event.deltaY < 0){
+                  this.camera.position.x -= 0.1;
+             }
+             else{
+                  this.camera.position.x += 0.1;
+             }
+             return;
+
+        }
+
+        if(event.shiftKey){
+             if(event.deltaY < 0){
+                 this.camera.fov -=3;
+                 this.camera.updateProjectionMatrix();
+             }
+             else{
+                 this.camera.fov +=3;
+                 this.camera.updateProjectionMatrix();
+
+             }
+             return;
+
+        }
+
         if (event.deltaY > 0) {
             this.camera.position.y -= 0.1
         }
@@ -325,7 +361,7 @@ class WorkflowUI extends Component {
 
     dragStartCallback = (event) => {
         drawMode = false;
-
+         console.log("Drag start");
         this.selectedTaskBar = event.object;
         if(this.selectedTaskBar){
         
@@ -359,7 +395,8 @@ class WorkflowUI extends Component {
     mouseMove = (event) => {
         var point = this.getClickPoint(event);
         if (this.selectedTaskBar) {
-            //console.log("Returning");
+            console.log("Mouse Move is triggered");
+
             this.moveDots();
             return;
         }
@@ -403,18 +440,25 @@ class WorkflowUI extends Component {
 
     moveDots = () => {
         const taskName = this.selectedTaskBar.userData.id;
+        const shape = this.selectedTaskBar.userData.shape;
+        var xOffset = barWidth;
+        var yOffset = barHeight;
+        if(shape === "CIRCLE"){
+            xOffset = barHeight+0.5;
+            yOffset = barHeight;
+        }
         const left = this.connectorMap[taskName].connectorLeft;
         const right = this.connectorMap[taskName].connectorRight;
         const top = this.connectorMap[taskName].connectorTop;
         const bottom = this.connectorMap[taskName].connectorBottom;
-        const leftX = this.selectedTaskBar.position.x - barWidth / 2;
+        const leftX = this.selectedTaskBar.position.x - xOffset / 2;
         const leftY = this.selectedTaskBar.position.y;
-        const rightX = this.selectedTaskBar.position.x + barWidth / 2;
+        const rightX = this.selectedTaskBar.position.x + xOffset / 2;
         const rightY = this.selectedTaskBar.position.y;
         const topX = this.selectedTaskBar.position.x;
-        const topY = this.selectedTaskBar.position.y + barHeight / 2;
+        const topY = this.selectedTaskBar.position.y + yOffset / 2;
         const bottomX = this.selectedTaskBar.position.x;
-        const bottomY = this.selectedTaskBar.position.y - barHeight / 2;
+        const bottomY = this.selectedTaskBar.position.y - yOffset / 2;
         left.position.set(leftX, leftY , 0);
         right.position.set(rightX, rightY , 0);
         top.position.set(topX, topY , 0);
@@ -492,6 +536,7 @@ class WorkflowUI extends Component {
     init = () => {
         this.setupScene();
         this.setGraphPaper();
+        this.populateTasks();
         this.animate();
     }
 
@@ -547,7 +592,7 @@ class WorkflowUI extends Component {
         const canvas = document.createElement('canvas');
         canvas.id = 'task_' + id;
         canvas.style = { canvasStyle };
-        canvas.width = 350;//350
+        canvas.width = 256;//350
         canvas.height = 128;//128
 
         document.getElementById("workflowContainer").appendChild(canvas);
@@ -555,16 +600,92 @@ class WorkflowUI extends Component {
         return canvas;
     }
 
-    buildTextMaterial = (taskId, taskName, role, plannedPeriod, actualPeriod) => {
+ 
+    buildCircularTextMaterial = (taskId, taskName, role, plannedPeriod, actualPeriod) => { 
         const canvas = this.buildTaskCanvas(taskId);
 
         var y = 10;//10
 
         const context = canvas.getContext('2d');
+
+        // Make the canvas transparent for simplicity
+        //context.fillStyle = "transparent";
+        //context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+    
+        //context.fillStyle =  "white";
+        //context.fillStyle = taskBarColor;
+
+        //context.fillRect(0, 0, canvas.width, canvas.height);
+        //context.fillStyle = "white";
+        //context.fillRect(borderGap / 2, borderGap / 2, canvas.width - borderGap, canvas.height - borderGap);
+
+
+        // Make the canvas transparent for simplicity
+        context.beginPath();
+        context.strokeStyle = taskBarColor;
+        context.lineWidth = 10;
+        context.fillStyle = "white"
+        context.arc(canvas.width/2, canvas.height/2, canvas.height/2, 0, 2 * Math.PI);
+        context.stroke();
+        context.fill();
+
+        // Re-apply font since canvas is resized.
+        context.font = "56px monospace";
+        context.textAlign =  "center" ;
+        context.textBaseline = "middle";
+
+        context.fillStyle = "black";
+        context.textAlign = "center";
+
+        y = y + canvas.height/2;
+        context.font = boldFont;
+        context.fillText("Start", canvas.width / 2, y);
+
+        const texture = new THREE.CanvasTexture(canvas)
+        texture.minFilter = THREE.LinearFilter;
+        texture.needsUpdate = true;
+
+        const material = new THREE.MeshBasicMaterial({ map: texture,
+                                                     side:THREE.DoubleSide,
+					             transparent:true});
+        return material;    
+
+
+    }
+
+    buildRectTextMaterial = (taskId, taskName, role, plannedPeriod, actualPeriod) => {
+        const canvas = this.buildTaskCanvas(taskId);
+
+        var y = 10;//10
+
+        const context = canvas.getContext('2d');
+   
+        //canvas.style.width = width + "px";
+        // canvas.style.height = height + "px";
+
+        // Prepare the font to be able to measure
+        let fontSize =  56;
+        context.font = `${fontSize}px monospace`;
+    
+        const textMetrics = context.measureText(role);
+        let width = textMetrics.width;
+        let height = fontSize* 7;
+    
+        // Re-apply font since canvas is resized.
+        context.font = `${fontSize}px monospace`;
+        context.textAlign =  "center" ;
+        context.textBaseline = "middle";
+    
+        // Make the canvas transparent for simplicity
+        context.fillStyle = "transparent";
+        context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+    
+        context.fillStyle =  "white";
         context.fillStyle = taskBarColor;
+
         context.fillRect(0, 0, canvas.width, canvas.height);
         context.fillStyle = "white";
-        context.fillRect(vGap / 2, vGap / 2, canvas.width - vGap, canvas.height - vGap);
+        context.fillRect(borderGap / 2, borderGap / 2, canvas.width - borderGap, canvas.height - borderGap);
 
         context.fillStyle = "black";
         context.textAlign = "center";
@@ -584,17 +705,33 @@ class WorkflowUI extends Component {
         context.fillText(actualPeriod, (canvas.width) / 2, y);
 
         const texture = new THREE.CanvasTexture(canvas)
+        texture.minFilter = THREE.LinearFilter;
         texture.needsUpdate = true;
 
-        const material = new THREE.MeshBasicMaterial({ map: texture });
-        return material;
+        const material = new THREE.MeshBasicMaterial({ map: texture,
+                                                     side:THREE.DoubleSide,
+					             transparent:true});
+        return material;    
+    }
+    populateTasks = () => {
+
+         this.addTask('Task1', 'Doing the most amazing thing in life', '2019-08-9','2019-08-9', 0, 2, "");
+         this.addTask('Task2', 'Test', '2019-08-9','2019-08-9', 0, 0, "");
+         this.addTask('Task3', 'Test', '2019-08-9','2019-08-9', 0, -2, "");
+         this.addTask('Task4', 'Test', '2019-08-9','2019-08-9', 0, -4, "CIRCLE");
     }
 
-    addTask = (taskName, role, startDate, endDate, x, y) => {
+    addTask = (taskName, role, startDate, endDate, x, y, shape) => {
 
         const period = startDate + ' - ' + endDate;
-
-        const taskMaterial = this.buildTextMaterial(1, taskName, role, period, period);
+        var taskMaterial = '';
+        if(shape === ""){
+             taskMaterial = this.buildRectTextMaterial(1, taskName, role, period, period);
+        }
+        else if(shape === "CIRCLE"){
+            taskMaterial = this.buildCircularTextMaterial(1, taskName, role, period, period);
+        }
+        //const taskMaterial = this.buildSingleText(1, taskName, role, period, period);
 
         const taskBar = new THREE.Mesh(this.taskBarGeo, taskMaterial);
 
@@ -605,11 +742,17 @@ class WorkflowUI extends Component {
 
 
         taskBar.position.set(x, y, 0);
+        var xOffset = barWidth;
+        var yOffset = barHeight;
+        if(shape === "CIRCLE"){
+            xOffset = barHeight+0.5;
+            yOffset = barHeight;
+        }
+        connectorLeft.position.set(x - xOffset / 2, y, 0);
+        connectorRight.position.set(x + xOffset / 2, y, 0);
+        connectorTop.position.set(x, y + yOffset / 2, 0);
+        connectorBottom.position.set(x, y - yOffset / 2, 0);
 
-        connectorLeft.position.set(x - barWidth / 2, y, 0);
-        connectorRight.position.set(x + barWidth / 2, y, 0);
-        connectorTop.position.set(x, y + barHeight / 2, 0);
-        connectorBottom.position.set(x, y - barHeight / 2, 0);
 
 
         const group = new THREE.Group();
@@ -619,7 +762,7 @@ class WorkflowUI extends Component {
         group.add(connectorTop);
         group.add(connectorBottom);
 
-        taskBar.userData = { id: taskName, type: 'taskBar' };
+        taskBar.userData = { id: taskName, type: 'taskBar', shape:shape };
 
         this.scene.add(group);
         this.taskBars.push(taskBar);
@@ -688,6 +831,9 @@ class WorkflowUI extends Component {
     drawFreeLineConnector = () => {
         this.mode = "FREE_LINE_CONNECTOR";
     }
+    deleteConnectingLine = () => {
+        this.mode = "DELETE_CONNECTING_LINE";
+    }
 
     render() {
         return (
@@ -697,6 +843,8 @@ class WorkflowUI extends Component {
             <Button onClick={this.createObjective} id="createobjective" type="primary" icon={<ItalicOutlined />} shape={"square"} />
             <Button onClick={this.drawFreeLineConnector} id="createobjective" type="primary" icon={<NodeIndexOutlined />} shape={"circle"} />
             
+            <Button onClick={this.deleteConnectingLine} id="deleteConnectingLine" type="primary" icon={<ScissorOutlined />} shape={"circle"} />
+
             <div style={canvasStyle} id="workflowContainer" ref={ref => (this.workflowContainer = ref)} />
             <ObjectiveDrawer objectiveStore={this.objectiveStore} />
             </div>
