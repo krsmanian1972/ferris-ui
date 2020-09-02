@@ -52,6 +52,8 @@ class Broadcast extends Component {
 
             isMinimized: false,
 
+            sessionStatus: '',
+
             portalSize: { height: window.innerHeight, width: window.innerWidth }
         };
 
@@ -69,8 +71,8 @@ class Broadcast extends Component {
         const memberId = this.props.params.memberId;
 
         this.initializeNotesStore(sessionUserId);
-        
-        this.myBoard = <Board key={MY_BOARD_KEY} boardId={MY_BOARD_KEY} sessionUserId={sessionUserId} onCanvasStream={this.onCanvasStream}/>
+
+        this.myBoard = <Board key={MY_BOARD_KEY} boardId={MY_BOARD_KEY} sessionUserId={sessionUserId} onCanvasStream={this.onCanvasStream} />
         this.coachingPlan = <SharedCoachingPlan key="gt" enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
     }
 
@@ -91,13 +93,11 @@ class Broadcast extends Component {
         this.canvasStream = stream;
 
         const boardTransceiver = this.transceivers[CONNECTION_KEY_BOARD_STREAM]
-        
-        if(boardTransceiver) {
+
+        if (boardTransceiver) {
             boardTransceiver.start(this.canvasStream);
         }
     }
-
-    
 
     buildTransceivers = (peerId) => {
         this.transceivers[CONNECTION_KEY_VIDEO_STREAM] = this.buildVideoTransceiver(peerId);
@@ -116,7 +116,7 @@ class Broadcast extends Component {
             })
             .on(CONNECTION_KEY_VIDEO_STREAM, (src) => {
                 this.peerStreamStatus = 'active';
-                const newState = { peerSrc: src };
+                const newState = { peerSrc: src,sessionStatus:'Active'};
                 this.setState(newState);
             });
     }
@@ -160,20 +160,25 @@ class Broadcast extends Component {
 
     handleCallAdvice = (advice) => {
 
-        const role = this.props.appStore.credentials.role;
+        const role = this.props.params.sessionUserType;
 
-        if (role === "guide" && advice.status === "ok") {
+        this.setState({sessionStatus:advice.reason});
+
+        if (role === "coach" && advice.status === "ok") {
             this.callPeer(advice.memberSocketId);
         }
-        if (role !== "guide" && advice.status === "ok") {
+        if (role !== "coach" && advice.status === "ok") {
             this.callPeer(advice.guideSocketId);
         }
     }
 
     getSessionData = () => {
+
         const sessionId = this.props.params.sessionId;
         const role = this.props.params.sessionUserType;
         const fuzzyId = this.props.appStore.credentials.id;
+
+        this.setState({ sessionStatus: `Joining as ${role}` });
 
         return { sessionId: sessionId, fuzzyId: fuzzyId, role: role };
     }
@@ -181,9 +186,11 @@ class Broadcast extends Component {
     handleInvitation = ({ from: invitationFrom }) => {
         const callerName = invitationFrom.split('~')[1];
 
-        message.info(`${callerName} is joining`, 5)
+        const info = `${callerName} is joining`
 
-        this.setState({ peerRequestStatus: 'active', invitationFrom });
+        message.info(info, 5)
+
+        this.setState({ peerRequestStatus: 'active', invitationFrom, sessionStatus: info });
 
         this.joinCall(invitationFrom);
     }
@@ -206,6 +213,7 @@ class Broadcast extends Component {
 
         this.isCaller = true;
         this.buildTransceivers(peerId);
+        this.setState({sessionStatus:"Streaming"})
 
         if (peerId) {
             this.transceivers[CONNECTION_KEY_VIDEO_STREAM].start(true);
@@ -219,6 +227,7 @@ class Broadcast extends Component {
         this.buildTransceivers(peerId);
         this.transceivers[CONNECTION_KEY_VIDEO_STREAM].join(preference);
         this.transceivers[CONNECTION_KEY_BOARD_STREAM].start(this.canvasStream);
+        this.setState({sessionStatus:"Joining Call"})
     }
 
     shareScreen = () => {
@@ -265,16 +274,16 @@ class Broadcast extends Component {
 
     getAudioIcon = () => {
         if (this.state.audioDevice === 'On') {
-            return <AudioOutlined/>;
+            return <AudioOutlined />;
         }
-        return <AudioMutedOutlined/>
+        return <AudioMutedOutlined />
     }
 
     getVideoIcon = () => {
         if (this.state.videoDevice === 'On') {
-            return <CameraOutlined/>
+            return <CameraOutlined />
         }
-        return <EyeInvisibleOutlined/>;
+        return <EyeInvisibleOutlined />;
     }
 
     getVideoTooltip = () => {
@@ -297,9 +306,9 @@ class Broadcast extends Component {
         }
         return "Show the Mini-Boards";
     }
-    
+
     toggleVideoDevice = () => {
-        if(!this.transceivers[CONNECTION_KEY_VIDEO_STREAM]) {
+        if (!this.transceivers[CONNECTION_KEY_VIDEO_STREAM]) {
             return;
         }
 
@@ -313,7 +322,7 @@ class Broadcast extends Component {
     }
 
     toggleAudioDevice = () => {
-        if(!this.transceivers[CONNECTION_KEY_VIDEO_STREAM]) {
+        if (!this.transceivers[CONNECTION_KEY_VIDEO_STREAM]) {
             return;
         }
         this.transceivers[CONNECTION_KEY_VIDEO_STREAM].mediaDevice.toggle('Audio');
@@ -323,6 +332,10 @@ class Broadcast extends Component {
         else {
             this.setState({ audioDevice: 'On' })
         }
+    }
+
+    showSessionStatus = () => {
+        return <p>{this.state.sessionStatus}</p>
     }
 
     render() {
@@ -338,6 +351,7 @@ class Broadcast extends Component {
 
                 <Row style={{ marginTop: 8 }}>
                     <Col span={12}>
+                        {this.showSessionStatus()}
                     </Col>
                     <Col span={12} style={{ textAlign: "right" }}>
                         <Space>
