@@ -36,6 +36,7 @@ const taskBarColor = "#2A4B7C";
 const barWidth = 2.5;//3
 const barHeight = 2.5/3;//1
 const barDepth = 0;
+const squareBar = 2;
 const connectorRadius = 0.06;//0.06
 
 const vGap = 20;
@@ -61,12 +62,17 @@ class WorkflowUI extends Component {
         this.objectiveStore.fetchObjectives();
 
         this.taskBarGeo = new THREE.PlaneGeometry(barWidth, barHeight, barDepth);
+        this.taskBarSquareGeo = new THREE.PlaneGeometry(squareBar, squareBar, barDepth);
 
-        this.gridLineMaterial = new THREE.LineBasicMaterial({ color: 0x1d1d1d });
+        this.gridLineMaterial = new THREE.LineDashedMaterial({ color: 0xD3D3D3,
+ 							       dashSize:3,
+							       gapSize:10,
+                                                               scale:1,						
+                                                             });
 
         this.connectorGeo = new THREE.SphereGeometry(connectorRadius);
 
-        this.connectorMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff })
+        this.connectorMaterial = new THREE.MeshBasicMaterial({ color: taskBarColor })
 
         this.taskBars = [];
         this.connectorMap = {};
@@ -447,6 +453,10 @@ class WorkflowUI extends Component {
             xOffset = barHeight+0.5;
             yOffset = barHeight;
         }
+        if(shape === "DECISION_BOX"){
+            xOffset = squareBar;
+            yOffset = squareBar;
+        }
         const left = this.connectorMap[taskName].connectorLeft;
         const right = this.connectorMap[taskName].connectorRight;
         const top = this.connectorMap[taskName].connectorTop;
@@ -555,7 +565,7 @@ class WorkflowUI extends Component {
         this.camera.position.x = 1;
         this.camera.position.y = 0;
         this.camera.position.z = 15;
-
+        this.scene.background = new THREE.Color( 0xffffff );
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(width, height);
         this.container.appendChild(this.renderer.domElement);
@@ -588,12 +598,22 @@ class WorkflowUI extends Component {
         this.scene.add(grid);
     }
 
-    buildTaskCanvas = (id) => {
+    buildTaskCanvas = (id, width, height) => {
         const canvas = document.createElement('canvas');
         canvas.id = 'task_' + id;
         canvas.style = { canvasStyle };
-        canvas.width = 256;//350
-        canvas.height = 128;//128
+
+        if(width === undefined){
+            canvas.width = 256;//256
+            canvas.height = 128;//128
+        }
+        else{
+            canvas.width = width;//256
+            canvas.height = height;//128
+
+        }
+        canvas.style.width = canvas.width +"px";
+        canvas.style.height = canvas.height +"px";             
 
         document.getElementById("workflowContainer").appendChild(canvas);
 
@@ -639,7 +659,7 @@ class WorkflowUI extends Component {
 
         y = y + canvas.height/2;
         context.font = boldFont;
-        context.fillText("Start", canvas.width / 2, y);
+        context.fillText(taskName, canvas.width / 2, y);
 
         const texture = new THREE.CanvasTexture(canvas)
         texture.minFilter = THREE.LinearFilter;
@@ -653,7 +673,7 @@ class WorkflowUI extends Component {
 
     }
 
-    buildRectTextMaterial = (taskId, taskName, role, plannedPeriod, actualPeriod) => {
+    buildRectTextMaterial = (taskId, taskName, role, plannedPeriod, actualPeriod, shape) => {
         const canvas = this.buildTaskCanvas(taskId);
 
         var y = 10;//10
@@ -679,11 +699,11 @@ class WorkflowUI extends Component {
         // Make the canvas transparent for simplicity
         context.fillStyle = "transparent";
         context.fillRect(0, 0, context.canvas.width, context.canvas.height);
-    
         context.fillStyle =  "white";
         context.fillStyle = taskBarColor;
 
         context.fillRect(0, 0, canvas.width, canvas.height);
+
         context.fillStyle = "white";
         context.fillRect(borderGap / 2, borderGap / 2, canvas.width - borderGap, canvas.height - borderGap);
 
@@ -713,60 +733,135 @@ class WorkflowUI extends Component {
 					             transparent:true});
         return material;    
     }
-    populateTasks = () => {
+    buildSquareTextMaterial = (taskId, taskName, role, plannedPeriod, actualPeriod, shape) => {
+        const canvas = this.buildTaskCanvas(taskId, 256, 128);
 
-         this.addTask('Task1', 'Doing the most amazing thing in life', '2019-08-9','2019-08-9', 0, 2, "");
-         this.addTask('Task2', 'Test', '2019-08-9','2019-08-9', 0, 0, "");
-         this.addTask('Task3', 'Test', '2019-08-9','2019-08-9', 0, -2, "");
-         this.addTask('Task4', 'Test', '2019-08-9','2019-08-9', 0, -4, "CIRCLE");
+        var y = 30;//10
+
+        const context = canvas.getContext('2d');
+   
+        // Make the canvas transparent for simplicity
+        context.fillStyle = "transparent";
+        context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+        context.fillStyle =  "white";
+        //context.fillStyle = taskBarColor;
+
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+	//define the colour of the line
+	context.strokeStyle = taskBarColor;
+
+	//define the starting point of line1 (x1,y1)
+	context.moveTo(0,canvas.height/2);
+        context.lineWidth  = 5;
+	//define the end point of line1 (x2,y2)
+	context.lineTo(canvas.width/2,canvas.height);
+
+	//define the end point of line2 (x3,y3)	
+	context.lineTo(canvas.width,canvas.height/2);
+	context.lineTo(canvas.width/2,0);
+	context.lineTo(0, canvas.height/2);
+	//draw the points that makeup the triangle - (x1,y1) to (x2,y2), (x2,y2) to (x3,y3),  and (x3,y3) to (x1,y1)
+	context.stroke();  
+        context.fillStyle = "black";
+        // Re-apply font since canvas is resized.
+//        context.font = `56px monospace`;
+        context.font = boldFont;
+//        context.fillText(taskName, canvas.width / 2, y);
+
+//        context.fillStyle = "black";
+//        context.textAlign = "center";
+//        context.font = "bold 56px monospace" ;
+
+        context.fillText(taskName, canvas.width/2-80, canvas.height/2-10);
+        context.fillText(role, canvas.width/2-80, canvas.height/2+10);
+        
+        const texture = new THREE.CanvasTexture(canvas)
+        texture.minFilter = THREE.LinearFilter;
+        texture.needsUpdate = true;
+
+        const material = new THREE.MeshBasicMaterial({ map: texture,
+                                                     side:THREE.DoubleSide,
+					             transparent:true});
+        return material;    
+    }
+    populateTasks = () => {
+         this.addTask("START", "", "", "", 0, 3, "CIRCLE");
+         this.addTask('Task ', 'Completion Today', '2019-08-9','2019-08-9', 0, 1, "DECISION_BOX");
+         this.addTask('Work on it now', "", '2019-08-9','2019-08-9', -2, -1, "");
+         this.addTask('Look at it later', "", '2019-08-9','2019-08-9', 2, -1, "");
+         this.addTask("STOP", "", "", "", -2, -2.5, "CIRCLE");
+         this.addTask("STOP2", "", "", "", 2, -2.5, "CIRCLE");
+
+
+//         this.addTask('Task3', 'Test', '2019-08-9','2019-08-9', 0, -2, "");
+//         this.addTask('Task4', 'Test', '2019-08-9','2019-08-9', 0, -4, "CIRCLE");
     }
 
     addTask = (taskName, role, startDate, endDate, x, y, shape) => {
 
         const period = startDate + ' - ' + endDate;
         var taskMaterial = '';
+        var taskBar = ''
         if(shape === ""){
-             taskMaterial = this.buildRectTextMaterial(1, taskName, role, period, period);
+             taskMaterial = this.buildRectTextMaterial(1, taskName, role, period, period, shape);
+             taskBar = new THREE.Mesh(this.taskBarGeo, taskMaterial);
         }
+        else if(shape === "DECISION_BOX"){
+            taskMaterial = this.buildSquareTextMaterial(2, taskName, role, period, period, shape);
+            taskBar = new THREE.Mesh(this.taskBarSquareGeo, taskMaterial);
+
+        }
+
         else if(shape === "CIRCLE"){
-            taskMaterial = this.buildCircularTextMaterial(1, taskName, role, period, period);
+            taskMaterial = this.buildCircularTextMaterial(3, taskName, role, period, period);
+            taskBar = new THREE.Mesh(this.taskBarGeo, taskMaterial);
+
         }
         //const taskMaterial = this.buildSingleText(1, taskName, role, period, period);
-
-        const taskBar = new THREE.Mesh(this.taskBarGeo, taskMaterial);
-
-        const connectorLeft = new THREE.Mesh(this.connectorGeo, this.connectorMaterial);
-        const connectorRight = new THREE.Mesh(this.connectorGeo, this.connectorMaterial);
-        const connectorTop = new THREE.Mesh(this.connectorGeo, this.connectorMaterial);
-        const connectorBottom = new THREE.Mesh(this.connectorGeo, this.connectorMaterial);
-
-
-        taskBar.position.set(x, y, 0);
-        var xOffset = barWidth;
-        var yOffset = barHeight;
-        if(shape === "CIRCLE"){
-            xOffset = barHeight+0.5;
-            yOffset = barHeight;
-        }
-        connectorLeft.position.set(x - xOffset / 2, y, 0);
-        connectorRight.position.set(x + xOffset / 2, y, 0);
-        connectorTop.position.set(x, y + yOffset / 2, 0);
-        connectorBottom.position.set(x, y - yOffset / 2, 0);
-
 
 
         const group = new THREE.Group();
         group.add(taskBar);
-        group.add(connectorLeft);
-        group.add(connectorRight);
-        group.add(connectorTop);
-        group.add(connectorBottom);
+
+ 
+            const connectorLeft = new THREE.Mesh(this.connectorGeo, this.connectorMaterial);
+            const connectorRight = new THREE.Mesh(this.connectorGeo, this.connectorMaterial);
+            const connectorTop = new THREE.Mesh(this.connectorGeo, this.connectorMaterial);
+            const connectorBottom = new THREE.Mesh(this.connectorGeo, this.connectorMaterial);
+
+
+            taskBar.position.set(x, y, 0);
+            var xOffset = barWidth;
+            var yOffset = barHeight;
+            if(shape === "CIRCLE"){
+                xOffset = barHeight+0.5;
+                yOffset = barHeight;
+            }
+            if(shape === "DECISION_BOX"){
+                xOffset = squareBar;
+                yOffset = squareBar;
+             
+            }
+           connectorLeft.position.set(x - xOffset / 2, y, 0);
+           connectorRight.position.set(x + xOffset / 2, y, 0);
+           connectorTop.position.set(x, y + yOffset / 2, 0);
+           connectorBottom.position.set(x, y - yOffset / 2, 0);
+
+           group.add(connectorLeft);
+           group.add(connectorRight);
+           group.add(connectorTop);
+           group.add(connectorBottom);
+ 
+  
 
         taskBar.userData = { id: taskName, type: 'taskBar', shape:shape };
 
         this.scene.add(group);
         this.taskBars.push(taskBar);
         this.connectorMap[taskName] = { connectorLeft: connectorLeft, connectorRight: connectorRight, connectorTop: connectorTop, connectorBottom: connectorBottom };
+        this.camera.updateProjectionMatrix();
+        this.renderer.render(this.scene, this.camera);
     }
 
     handleWindowResize = () => {

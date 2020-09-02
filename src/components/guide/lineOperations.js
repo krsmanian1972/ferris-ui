@@ -13,7 +13,7 @@ const drawLineWithPrevPoint = function(lineSegmentArray, scene, arrayIndex, path
                        y:lineSegmentArray[arrayIndex].path[pathIndex-1].y};
                        
    var points = [];
-   var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF, linewidth: 2 } );
+   var material = new THREE.LineBasicMaterial( { color: 0x0000FF, linewidth: 2 } );
    points.push( new THREE.Vector3(currentPoint.x , currentPoint.y, 0 ) );
    points.push( new THREE.Vector3( prevPoint.x, prevPoint.y, 0 ) );
    var geometry = new THREE.BufferGeometry().setFromPoints( points );
@@ -61,14 +61,14 @@ const splitLineToTwoAtVertex = function (lineSegmentArray, arrayIndex, pathIndex
     dest.y = lineSegmentArray[arrayIndex].path[pathIndex+1].y;
 
     var points = [];
-    var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF, linewidth: 2 } );
+    var material = new THREE.LineBasicMaterial( { color: 0x0000FF, linewidth: 2 } );
     points.push( new THREE.Vector3(source.x , source.y, 0 ) );
     points.push( new THREE.Vector3(vertex.x, vertex.y, 0 ) );
     var geometry = new THREE.BufferGeometry().setFromPoints( points );
     lineSegmentArray[arrayIndex].line[pathIndex] = (new THREE.Line( geometry, material ));
 
     var points = [];
-    var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF,linewidth: 2 } );
+    var material = new THREE.LineBasicMaterial( { color: 0x0000FF,linewidth: 2 } );
     points.push( new THREE.Vector3(vertex.x, vertex.y, 0 ) );
     points.push( new THREE.Vector3(dest.x , dest.y, 0 ) );
     
@@ -128,14 +128,14 @@ const updateVertexMovement = function(lineSegmentArray, arrayIndex, pathIndex, v
     lineSegmentArray[arrayIndex].path[pathIndex+1].y = vertex.y;
 
     var points = [];
-    var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF, linewidth: 2 } );
+    var material = new THREE.LineBasicMaterial( { color: 0x0000FF, linewidth: 2 } );
     points.push( new THREE.Vector3(source.x , source.y, 0 ) );
     points.push( new THREE.Vector3(vertex.x, vertex.y, 0 ) );
     var geometry = new THREE.BufferGeometry().setFromPoints( points );
     lineSegmentArray[arrayIndex].line[pathIndex] = (new THREE.Line( geometry, material ));
 
     var points = [];
-    var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF, linewidth: 2 } );
+    var material = new THREE.LineBasicMaterial( { color: 0x0000FF, linewidth: 2 } );
     points.push( new THREE.Vector3(vertex.x, vertex.y, 0 ) );
     points.push( new THREE.Vector3(dest.x , dest.y, 0 ) );
     
@@ -204,7 +204,7 @@ const removeRecurringPointOnLineSegment = function(lineSegmentArray, arrayIndex,
              lineSegmentArray[arrayIndex].line.splice(i+1, 1);
 
              var points = [];
-             var material = new THREE.LineBasicMaterial( { color: 0xFFFFFF, linewidth: 2 } );
+             var material = new THREE.LineBasicMaterial( { color: 0x0000FF, linewidth: 2 } );
              points.push( new THREE.Vector3(source.x, source.y, 0 ) );
              points.push( new THREE.Vector3(dest.x , dest.y, 0 ) );
     
