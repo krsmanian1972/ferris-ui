@@ -11,6 +11,8 @@ import ObjectiveStore from '../stores/ObjectiveStore';
 import ObjectiveDrawer from './ObjectiveDrawer';
 import {drawLineWithPrevPoint, checkPointIsOnLineSegmentArray, snapAtClickPoint} from './lineOperations';
 import {updateVertexMovement, removeRecurringPointOnLineSegment, removeLineSegmentOnCickPoint} from './lineOperations';
+import {buildTaskCanvas, buildCircularTextMaterial, buildRectTextMaterial, buildSquareTextMaterial, buildStartStopTextMaterial} from './Shapes';
+import {taskBarColor, barWidth, barHeight, barDepth, squareBarWidth, squareBarHeight, connectorRadius, vGap, borderGap, boldFont, regularFont} from './Shapes';
 import { inject, observer } from 'mobx-react';
 import * as THREE from 'three';
 import DragControls from 'three-dragcontrols';
@@ -31,20 +33,6 @@ const far = 1000;
 const pointLightColor = 0xffffff;
 const pointLightPosition = 1;
 
-const taskBarColor = "#2A4B7C";
-
-const barWidth = 2.5;//3
-const barHeight = 2.5/3;//1
-const barDepth = 0;
-const squareBar = 2;
-const connectorRadius = 0.06;//0.06
-
-const vGap = 20;
-const borderGap = 15;
-
-const boldFont = "bold 18px sans-serif";
-const regularFont = "18px sans-serif";
-
 const gridSize = 50;
 const gridStep = 0.25;
 
@@ -62,7 +50,7 @@ class WorkflowUI extends Component {
         this.objectiveStore.fetchObjectives();
 
         this.taskBarGeo = new THREE.PlaneGeometry(barWidth, barHeight, barDepth);
-        this.taskBarSquareGeo = new THREE.PlaneGeometry(squareBar, squareBar, barDepth);
+        this.taskBarSquareGeo = new THREE.PlaneGeometry(squareBarWidth, squareBarHeight, barDepth);
 
         this.gridLineMaterial = new THREE.LineDashedMaterial({ color: 0xD3D3D3,
  							       dashSize:3,
@@ -454,8 +442,8 @@ class WorkflowUI extends Component {
             yOffset = barHeight;
         }
         if(shape === "DECISION_BOX"){
-            xOffset = squareBar;
-            yOffset = squareBar;
+            xOffset = squareBarWidth;
+            yOffset = squareBarHeight;
         }
         const left = this.connectorMap[taskName].connectorLeft;
         const right = this.connectorMap[taskName].connectorRight;
@@ -598,195 +586,8 @@ class WorkflowUI extends Component {
         this.scene.add(grid);
     }
 
-    buildTaskCanvas = (id, width, height) => {
-        const canvas = document.createElement('canvas');
-        canvas.id = 'task_' + id;
-        canvas.style = { canvasStyle };
-
-        if(width === undefined){
-            canvas.width = 256;//256
-            canvas.height = 128;//128
-        }
-        else{
-            canvas.width = width;//256
-            canvas.height = height;//128
-
-        }
-        canvas.style.width = canvas.width +"px";
-        canvas.style.height = canvas.height +"px";             
-
-        document.getElementById("workflowContainer").appendChild(canvas);
-
-        return canvas;
-    }
-
- 
-    buildCircularTextMaterial = (taskId, taskName, role, plannedPeriod, actualPeriod) => { 
-        const canvas = this.buildTaskCanvas(taskId);
-
-        var y = 10;//10
-
-        const context = canvas.getContext('2d');
-
-        // Make the canvas transparent for simplicity
-        //context.fillStyle = "transparent";
-        //context.fillRect(0, 0, context.canvas.width, context.canvas.height);
-    
-        //context.fillStyle =  "white";
-        //context.fillStyle = taskBarColor;
-
-        //context.fillRect(0, 0, canvas.width, canvas.height);
-        //context.fillStyle = "white";
-        //context.fillRect(borderGap / 2, borderGap / 2, canvas.width - borderGap, canvas.height - borderGap);
-
-
-        // Make the canvas transparent for simplicity
-        context.beginPath();
-        context.strokeStyle = taskBarColor;
-        context.lineWidth = 10;
-        context.fillStyle = "white"
-        context.arc(canvas.width/2, canvas.height/2, canvas.height/2, 0, 2 * Math.PI);
-        context.stroke();
-        context.fill();
-
-        // Re-apply font since canvas is resized.
-        context.font = "56px monospace";
-        context.textAlign =  "center" ;
-        context.textBaseline = "middle";
-
-        context.fillStyle = "black";
-        context.textAlign = "center";
-
-        y = y + canvas.height/2;
-        context.font = boldFont;
-        context.fillText(taskName, canvas.width / 2, y);
-
-        const texture = new THREE.CanvasTexture(canvas)
-        texture.minFilter = THREE.LinearFilter;
-        texture.needsUpdate = true;
-
-        const material = new THREE.MeshBasicMaterial({ map: texture,
-                                                     side:THREE.DoubleSide,
-					             transparent:true});
-        return material;    
-
-
-    }
-
-    buildRectTextMaterial = (taskId, taskName, role, plannedPeriod, actualPeriod, shape) => {
-        const canvas = this.buildTaskCanvas(taskId);
-
-        var y = 10;//10
-
-        const context = canvas.getContext('2d');
-   
-        //canvas.style.width = width + "px";
-        // canvas.style.height = height + "px";
-
-        // Prepare the font to be able to measure
-        let fontSize =  56;
-        context.font = `${fontSize}px monospace`;
-    
-        const textMetrics = context.measureText(role);
-        let width = textMetrics.width;
-        let height = fontSize* 7;
-    
-        // Re-apply font since canvas is resized.
-        context.font = `${fontSize}px monospace`;
-        context.textAlign =  "center" ;
-        context.textBaseline = "middle";
-    
-        // Make the canvas transparent for simplicity
-        context.fillStyle = "transparent";
-        context.fillRect(0, 0, context.canvas.width, context.canvas.height);
-        context.fillStyle =  "white";
-        context.fillStyle = taskBarColor;
-
-        context.fillRect(0, 0, canvas.width, canvas.height);
-
-        context.fillStyle = "white";
-        context.fillRect(borderGap / 2, borderGap / 2, canvas.width - borderGap, canvas.height - borderGap);
-
-        context.fillStyle = "black";
-        context.textAlign = "center";
-
-        y = y + vGap;
-        context.font = boldFont;
-        context.fillText(taskName, canvas.width / 2, y);
-
-        y = y + vGap + 2;
-        context.font = regularFont;
-        context.fillText(role, (canvas.width) / 2, y);
-
-        y = y + vGap + 5;
-        context.fillText(plannedPeriod, (canvas.width) / 2, y);
-
-        y = y + vGap + 2;
-        context.fillText(actualPeriod, (canvas.width) / 2, y);
-
-        const texture = new THREE.CanvasTexture(canvas)
-        texture.minFilter = THREE.LinearFilter;
-        texture.needsUpdate = true;
-
-        const material = new THREE.MeshBasicMaterial({ map: texture,
-                                                     side:THREE.DoubleSide,
-					             transparent:true});
-        return material;    
-    }
-    buildSquareTextMaterial = (taskId, taskName, role, plannedPeriod, actualPeriod, shape) => {
-        const canvas = this.buildTaskCanvas(taskId, 256, 128);
-
-        var y = 30;//10
-
-        const context = canvas.getContext('2d');
-   
-        // Make the canvas transparent for simplicity
-        context.fillStyle = "transparent";
-        context.fillRect(0, 0, context.canvas.width, context.canvas.height);
-        context.fillStyle =  "white";
-        //context.fillStyle = taskBarColor;
-
-        context.fillRect(0, 0, canvas.width, canvas.height);
-
-	//define the colour of the line
-	context.strokeStyle = taskBarColor;
-
-	//define the starting point of line1 (x1,y1)
-	context.moveTo(0,canvas.height/2);
-        context.lineWidth  = 5;
-	//define the end point of line1 (x2,y2)
-	context.lineTo(canvas.width/2,canvas.height);
-
-	//define the end point of line2 (x3,y3)	
-	context.lineTo(canvas.width,canvas.height/2);
-	context.lineTo(canvas.width/2,0);
-	context.lineTo(0, canvas.height/2);
-	//draw the points that makeup the triangle - (x1,y1) to (x2,y2), (x2,y2) to (x3,y3),  and (x3,y3) to (x1,y1)
-	context.stroke();  
-        context.fillStyle = "black";
-        // Re-apply font since canvas is resized.
-//        context.font = `56px monospace`;
-        context.font = boldFont;
-//        context.fillText(taskName, canvas.width / 2, y);
-
-//        context.fillStyle = "black";
-//        context.textAlign = "center";
-//        context.font = "bold 56px monospace" ;
-
-        context.fillText(taskName, canvas.width/2-80, canvas.height/2-10);
-        context.fillText(role, canvas.width/2-80, canvas.height/2+10);
-        
-        const texture = new THREE.CanvasTexture(canvas)
-        texture.minFilter = THREE.LinearFilter;
-        texture.needsUpdate = true;
-
-        const material = new THREE.MeshBasicMaterial({ map: texture,
-                                                     side:THREE.DoubleSide,
-					             transparent:true});
-        return material;    
-    }
     populateTasks = () => {
-         this.addTask("START", "", "", "", 0, 3, "CIRCLE");
+         this.addTask("START", "", "", "", 0, 3, "START_STOP_BOX");
          this.addTask('Task ', 'Completion Today', '2019-08-9','2019-08-9', 0, 1, "DECISION_BOX");
          this.addTask('Work on it now', "", '2019-08-9','2019-08-9', -2, -1, "");
          this.addTask('Look at it later', "", '2019-08-9','2019-08-9', 2, -1, "");
@@ -804,17 +605,22 @@ class WorkflowUI extends Component {
         var taskMaterial = '';
         var taskBar = ''
         if(shape === ""){
-             taskMaterial = this.buildRectTextMaterial(1, taskName, role, period, period, shape);
+             taskMaterial = buildRectTextMaterial(1, taskName, role, period, period, shape);
              taskBar = new THREE.Mesh(this.taskBarGeo, taskMaterial);
         }
         else if(shape === "DECISION_BOX"){
-            taskMaterial = this.buildSquareTextMaterial(2, taskName, role, period, period, shape);
+            taskMaterial = buildSquareTextMaterial(2, taskName, role, period, period, shape);
             taskBar = new THREE.Mesh(this.taskBarSquareGeo, taskMaterial);
 
         }
 
         else if(shape === "CIRCLE"){
-            taskMaterial = this.buildCircularTextMaterial(3, taskName, role, period, period);
+            taskMaterial = buildCircularTextMaterial(3, taskName, role, period, period);
+            taskBar = new THREE.Mesh(this.taskBarGeo, taskMaterial);
+
+        }
+        else if(shape === "START_STOP_BOX"){
+            taskMaterial = buildStartStopTextMaterial(3, taskName, role, period, period);
             taskBar = new THREE.Mesh(this.taskBarGeo, taskMaterial);
 
         }
@@ -839,8 +645,8 @@ class WorkflowUI extends Component {
                 yOffset = barHeight;
             }
             if(shape === "DECISION_BOX"){
-                xOffset = squareBar;
-                yOffset = squareBar;
+                xOffset = squareBarWidth;
+                yOffset = squareBarHeight;
              
             }
            connectorLeft.position.set(x - xOffset / 2, y, 0);
@@ -856,6 +662,7 @@ class WorkflowUI extends Component {
   
 
         taskBar.userData = { id: taskName, type: 'taskBar', shape:shape };
+
 
         this.scene.add(group);
         this.taskBars.push(taskBar);
