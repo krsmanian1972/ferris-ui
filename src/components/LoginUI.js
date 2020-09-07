@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
-import { Button, Form, Input, Card, Typography, notification, message } from 'antd';
 import { observer, inject } from 'mobx-react';
+
+import { Button, Form, Input, Card, Typography, notification, message } from 'antd';
+import { CodeOutlined } from '@ant-design/icons';
+
 import About from './About';
 
 const { Title } = Typography;
@@ -22,9 +25,22 @@ const failureNotification = () => {
     notification.open(args);
 };
 
+
+
 @inject('appStore')
 @observer
 export default class LoginScreen extends Component {
+
+    changePassword = () => {
+        const params = { parentKey: "login" };
+        this.props.appStore.currentComponent = { label: "Change Password", key: "passwordReset", params: params };
+    }
+
+    registration = () => {
+        const params = { parentKey: "login" };
+        this.props.appStore.currentComponent = { label: "Registration", key: "registration", params: params };
+    };
+
     render() {
         const store = this.props.appStore;
 
@@ -32,6 +48,7 @@ export default class LoginScreen extends Component {
             <>
                 <Card style={loginCard} title={<Title level={4}>Login</Title>}>
                     <Form layout="vertical" ref={this.formRef} onFinish={this.onFinish} >
+
                         <Form.Item name="email"
                             rules={[{ required: true, message: 'Please enter your registered email id.' }]}
                             label="EMAIL">
@@ -49,10 +66,15 @@ export default class LoginScreen extends Component {
                         </Form.Item>
 
                     </Form>
+
+                    <div style={{ textAlign: 'right' }}>
+                        <Button style={{ color: "blue" }} type="link" disabled={store.isLoading} onClick={this.changePassword} >Change Password</Button>
+                    </div>
+
                 </Card>
 
-                <div style={{ textAlign: 'center', marginTop: 20, marginBottom:20 }}>
-                    <Button style={{ color: "blue" }} type="link" disabled={store.isLoading}>DON'T HAVE AN ACCOUNT? WRITE TO US</Button>
+                <div style={{ textAlign: 'center', marginTop: 20, marginBottom: 20 }}>
+                    <Button style={{ color: "blue" }} disabled={store.isLoading} onClick={this.registration} icon={<CodeOutlined />} >DON'T HAVE AN ACCOUNT?&nbsp;&nbsp;REGISTER HERE.</Button>
                 </div>
 
                 <div>

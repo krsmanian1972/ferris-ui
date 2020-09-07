@@ -7,6 +7,36 @@ export const authenticationQuery = `query ($request: LoginRequest!) {
   }
 }`
 
+export const registrationQuery = `mutation($input: Registration!) {
+  createUser(registration:$input) {
+    user {
+    id
+    email
+    name
+    userType 
+    }
+    errors {
+      field
+      message
+    }
+  } 
+}`
+
+export const resetPasswordQuery = `mutation($input: ResetPasswordRequest!) {
+  resetPassword(request: $input) {
+    user {
+    id
+    email
+    name
+    userType 
+    }
+    errors {
+      field
+      message
+    }
+  } 
+}`
+
 export const programsQuery = `query ($criteria: ProgramCriteria!) {
   getPrograms(criteria: $criteria) {
     programs {
