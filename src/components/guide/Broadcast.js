@@ -16,7 +16,7 @@ import Board from './Board';
 
 import { Button, Row, Col, Tooltip, Space } from 'antd';
 import { message } from 'antd';
-import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutlined, AudioMutedOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
+import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutlined, AudioMutedOutlined, EyeInvisibleOutlined, VerticalAlignTopOutlined, VerticalAlignBottomOutlined } from '@ant-design/icons';
 import SharedCoachingPlan from './SharedCoachingPlan';
 
 
@@ -50,6 +50,7 @@ class Broadcast extends Component {
             videoDevice: 'On',
             audioDevice: 'On',
 
+            isScreenSharing: false,
             isMinimized: false,
 
             sessionStatus: '',
@@ -116,7 +117,7 @@ class Broadcast extends Component {
             })
             .on(CONNECTION_KEY_VIDEO_STREAM, (src) => {
                 this.peerStreamStatus = 'active';
-                const newState = { peerSrc: src,sessionStatus:'Active'};
+                const newState = { peerSrc: src, sessionStatus: 'Active' };
                 this.setState(newState);
             });
     }
@@ -162,7 +163,7 @@ class Broadcast extends Component {
 
         const role = this.props.params.sessionUserType;
 
-        this.setState({sessionStatus:advice.reason});
+        this.setState({ sessionStatus: advice.reason });
 
         if (role === "coach" && advice.status === "ok") {
             this.callPeer(advice.memberSocketId);
@@ -213,7 +214,7 @@ class Broadcast extends Component {
 
         this.isCaller = true;
         this.buildTransceivers(peerId);
-        this.setState({sessionStatus:"Streaming"})
+        this.setState({ sessionStatus: "Streaming" })
 
         if (peerId) {
             this.transceivers[CONNECTION_KEY_VIDEO_STREAM].start(true);
@@ -227,11 +228,28 @@ class Broadcast extends Component {
         this.buildTransceivers(peerId);
         this.transceivers[CONNECTION_KEY_VIDEO_STREAM].join(preference);
         this.transceivers[CONNECTION_KEY_BOARD_STREAM].start(this.canvasStream);
-        this.setState({sessionStatus:"Joining Call"})
+        this.setState({ sessionStatus: "Joining Call" })
     }
 
-    shareScreen = () => {
-        this.transceivers[CONNECTION_KEY_SCREEN_STREAM].start();
+    toggleScreenSharing = () => {
+        const canShare = this.peerStreamStatus === "active";
+        
+        if(!canShare) {
+            return;
+        }
+
+        if (!this.transceivers[CONNECTION_KEY_SCREEN_STREAM]) {
+            return;
+        }
+
+        if (!this.state.isScreenSharing) {
+            this.transceivers[CONNECTION_KEY_SCREEN_STREAM].start();
+            this.setState({ isScreenSharing: true });
+            return;
+        }
+
+        this.transceivers[CONNECTION_KEY_SCREEN_STREAM].mediaDevice.stop();
+        this.setState({ isScreenSharing: false });
     }
 
     rejectCall() {
@@ -301,10 +319,31 @@ class Broadcast extends Component {
     }
 
     getMiniBoardTooltip = () => {
-        if (!this.state.minimizeMiniBoard) {
-            return "Hide the Mini-Boards";
+        if (!this.state.isMinimized) {
+            return "Hide Panels";
         }
-        return "Show the Mini-Boards";
+        return "Show Panels";
+    }
+
+    getShareScreenTooltip = () => {
+        if (!this.state.isScreenSharing) {
+            return "Start Screen Sharing";
+        }
+        return "Stop Screen Sharing";
+    }
+
+    getMiniBoardIcon = () => {
+        if (!this.state.isMinimized) {
+            return <VerticalAlignBottomOutlined />;
+        }
+        return <VerticalAlignTopOutlined />;
+    }
+
+    getShareScreenIcon = () => {
+        if(!this.state.isScreenSharing) {
+            return <ShareAltOutlined/>;
+        }
+        return <StopOutlined/>;
     }
 
     toggleVideoDevice = () => {
@@ -358,9 +397,11 @@ class Broadcast extends Component {
                             <Tooltip title="Notes">
                                 <Button onClick={this.showNotes} disabled={false} id="notes" type="primary" icon={<BookOutlined />} shape="circle" />
                             </Tooltip>
-                            <Tooltip title="Share Screen">
-                                <Button onClick={this.shareScreen} disabled={!canShare} id="screenShare" type="primary" icon={<ShareAltOutlined />} shape="circle" />
+
+                            <Tooltip title={this.getShareScreenTooltip()}>
+                                <Button disabled={!canShare} id="screenShare" type="primary" icon={this.getShareScreenIcon()} shape="circle" onClick={this.toggleScreenSharing}/>
                             </Tooltip>
+
                             <Tooltip title={this.getVideoTooltip()}>
                                 <Button disabled={!canShare} type="primary" icon={this.getVideoIcon()} shape="circle" onClick={this.toggleVideoDevice} />
                             </Tooltip>
@@ -368,7 +409,7 @@ class Broadcast extends Component {
                                 <Button disabled={!canShare} type="primary" icon={this.getAudioIcon()} shape="circle" onClick={this.toggleAudioDevice} />
                             </Tooltip>
                             <Tooltip title={this.getMiniBoardTooltip()}>
-                                <Button onClick={this.minimizeMiniBoard} type="primary" icon={<StopOutlined />} shape="circle" />
+                                <Button onClick={this.minimizeMiniBoard} type="primary" icon={this.getMiniBoardIcon()} shape="circle" />
                             </Tooltip>
                         </Space>
                     </Col>
