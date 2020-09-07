@@ -2,8 +2,6 @@ import React, { Component } from "react";
 import { Card, Typography, Row, Col } from 'antd';
 import { CaretRightOutlined } from '@ant-design/icons';
 
-const { Text } = Typography;
-
 const aboutStyle = {
     display: 'flex',
     flexDirection: 'column',

@@ -2,9 +2,12 @@ import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 
 import Login from './LoginUI';
+import PasswordReset from './PasswordReset';
+import Registration from './Registration';
+
 import About from './About';
+
 import WorkflowUI from './guide/WorkflowUI';
-import ConnectorUI from './guide/ConnectorUI';
 import ProgramUI from './guide/ProgramUI';
 import ProgramDetailUI from './commons/ProgramDetailUI';
 import EditableProgramDetailUI from './guide/EditableProgramDetailUI';
@@ -45,6 +48,12 @@ class SelectedComponent extends Component {
             }
             case 'login': {
                 return <Login />;
+            }
+            case 'passwordReset' : {
+                return <PasswordReset />;
+            }
+            case 'registration' : {
+                return <Registration />;
             }
             case 'broadcast' : {
                 return <Broadcast params={currentComponent.params}/>
