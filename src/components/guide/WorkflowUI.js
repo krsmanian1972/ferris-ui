@@ -53,6 +53,7 @@ class WorkflowUI extends Component {
         this.taskBars = [];
         this.dots = [];
         this.hoveredPort={};
+        this.clickedPort = {};
 
         this.connectorMap = {};
 
@@ -91,6 +92,7 @@ class WorkflowUI extends Component {
 
     capturePort = (event) => {
         this.hoveredPort = event.object.userData;
+        console.log(this.hoveredPort);
     }
 
     keyDown = (event) => {
@@ -99,10 +101,77 @@ class WorkflowUI extends Component {
     }
 
     toggleDrawMode = (event) => {
+        console.log("Hover port is ", this.hoveredPort);
+        this.clickedPort = this.hoveredPort
+        this.hoeveredPort = '';
+        console.log(this.mode);
         if (this.mode === "FREE_LINE_CONNECTOR") {
-            const point = this.getClickPoint(event);
-            this.taskBars.map((item) =>
-                this.checkForConnectorPort(item.userData.id, point));
+            console.log(this.taskBars);
+            console.log(this.clickedPort);
+            var sourceX, sourceY;
+            var taskId = this.clickedPort.id;
+            //iterate through the taskBar to find out which 
+            if(this.clickedPort.direction === "bottom"){
+                console.log("Bottom");
+		sourceX = this.connectorMap[taskId].connectorBottom.position.x;
+		sourceY = this.connectorMap[taskId].connectorBottom.position.y;
+	    }
+            if(this.clickedPort.direction === "top"){
+                console.log("Top");
+		sourceX = this.connectorMap[taskId].connectorTop.position.x;
+		sourceY = this.connectorMap[taskId].connectorTop.position.y;
+	    }
+            if(this.clickedPort.direction === "left"){
+                console.log("Left");
+		sourceX = this.connectorMap[taskId].connectorLeft.position.x;
+		sourceY = this.connectorMap[taskId].connectorLeft.position.y;
+	    }
+            if(this.clickedPort.direction === "right"){
+                console.log("Right");
+		sourceX = this.connectorMap[taskId].connectorRight.position.x;
+		sourceY = this.connectorMap[taskId].connectorRight.position.y;
+	    }
+
+            if (this.internalState === "") {
+
+                this.sourceConnectorPort[0] = { x: sourceX, y: sourceY, taskId: taskId, direction: this.clickedPort.direction };
+                var line = {};
+                line.x = sourceX;
+                line.y = sourceY;
+                this.lineSegmentArray[this.lineSegmentArrayIndex] = { sourceDescription: this.sourceConnectorPort[0], path: [], destDescription: "", line: [] };
+                this.lineSegmentArray[this.lineSegmentArrayIndex].path.push(line);
+
+                this.internalState = "FOUND_SOURCE_PORT";
+            }
+            else if (this.internalState === "FOUND_SOURCE_PORT") {
+
+                //since this is a double click event, 2 single clicks are logged, pop it out as a hack...
+                this.lineSegmentArray[this.lineSegmentArrayIndex].path.pop();
+                this.lineSegmentArray[this.lineSegmentArrayIndex].path.pop();
+
+                var lineIndex = this.lineSegmentArray[this.lineSegmentArrayIndex].line.length - 1;
+                this.scene.remove(this.lineSegmentArray[this.lineSegmentArrayIndex].line[lineIndex]);
+                this.scene.remove(this.lineSegmentArray[this.lineSegmentArrayIndex].line[lineIndex - 1]);
+
+                this.lineSegmentArray[this.lineSegmentArrayIndex].line.pop();
+                this.lineSegmentArray[this.lineSegmentArrayIndex].line.pop();
+
+                this.destConnectorPort[0] = { x: sourceX, y: sourceY, taskId: taskId, direction: this.clickedPort.direction  };
+
+                var line = {};
+                line.x = sourceX;
+                line.y = sourceY;
+                this.scene.remove(this.line[0]);
+
+                this.lineSegmentArray[this.lineSegmentArrayIndex].path.push(line);
+                var pathIndex = this.lineSegmentArray[this.lineSegmentArrayIndex].path.length - 1;
+                this.lineSegmentArray[this.lineSegmentArrayIndex].destDescription = this.destConnectorPort[0];
+                drawLineWithPrevPoint(this.lineSegmentArray, this.scene, this.lineSegmentArrayIndex, pathIndex, "");
+
+                this.lineSegmentArrayIndex++;
+                this.internalState = "";
+            }
+           
         }
     }
 
@@ -145,74 +214,12 @@ class WorkflowUI extends Component {
         }
     }
 
-    checkForConnectorPort = (task, point) => {
-
-        let sourceX, sourceY;
-
-        const clickX = point.x;
-        const clickY = point.y;
-
-        sourceX = this.connectorMap[task].connectorLeft.position.x;
-        sourceY = this.connectorMap[task].connectorLeft.position.y;
-        this.findDistanceAndSetPort(task, 1, sourceX, sourceY, clickX, clickY);
-
-        sourceX = this.connectorMap[task].connectorRight.position.x;
-        sourceY = this.connectorMap[task].connectorRight.position.y;
-        this.findDistanceAndSetPort(task, 2, sourceX, sourceY, clickX, clickY);
-
-        sourceX = this.connectorMap[task].connectorTop.position.x;
-        sourceY = this.connectorMap[task].connectorTop.position.y;
-        this.findDistanceAndSetPort(task, 3, sourceX, sourceY, clickX, clickY);
-
-        sourceX = this.connectorMap[task].connectorBottom.position.x;
-        sourceY = this.connectorMap[task].connectorBottom.position.y;
-        this.findDistanceAndSetPort(task, 4, sourceX, sourceY, clickX, clickY);
-    }
-
     findDistanceAndSetPort = (task, direction, sourceX, sourceY, clickX, clickY) => {
         let xDiff = sourceX - clickX;
         let yDiff = sourceY - clickY;
 
         if (Math.abs(xDiff) <= 0.5 && Math.abs(yDiff) <= 0.5) {
 
-            if (this.internalState === "") {
-                this.sourceConnectorPort[0] = { x: sourceX, y: sourceY, task: task, direction: direction };
-                var line = {};
-                line.x = sourceX;
-                line.y = sourceY;
-                this.lineSegmentArray[this.lineSegmentArrayIndex] = { sourceDescription: this.sourceConnectorPort[0], path: [], destDescription: "", line: [] };
-                this.lineSegmentArray[this.lineSegmentArrayIndex].path.push(line);
-
-                this.internalState = "FOUND_SOURCE_PORT";
-            }
-            else if (this.internalState === "FOUND_SOURCE_PORT") {
-
-                //since this is a double click event, 2 single clicks are logged, pop it out as a hack...
-                this.lineSegmentArray[this.lineSegmentArrayIndex].path.pop();
-                this.lineSegmentArray[this.lineSegmentArrayIndex].path.pop();
-
-                var lineIndex = this.lineSegmentArray[this.lineSegmentArrayIndex].line.length - 1;
-                this.scene.remove(this.lineSegmentArray[this.lineSegmentArrayIndex].line[lineIndex]);
-                this.scene.remove(this.lineSegmentArray[this.lineSegmentArrayIndex].line[lineIndex - 1]);
-
-                this.lineSegmentArray[this.lineSegmentArrayIndex].line.pop();
-                this.lineSegmentArray[this.lineSegmentArrayIndex].line.pop();
-
-                this.destConnectorPort[0] = { x: sourceX, y: sourceY, task: task, direction: direction };
-
-                var line = {};
-                line.x = sourceX;
-                line.y = sourceY;
-                this.scene.remove(this.line[0]);
-
-                this.lineSegmentArray[this.lineSegmentArrayIndex].path.push(line);
-                var pathIndex = this.lineSegmentArray[this.lineSegmentArrayIndex].path.length - 1;
-                this.lineSegmentArray[this.lineSegmentArrayIndex].destDescription = this.destConnectorPort[0];
-                drawLineWithPrevPoint(this.lineSegmentArray, this.scene, this.lineSegmentArrayIndex, pathIndex, "");
-
-                this.lineSegmentArrayIndex++;
-                this.internalState = "";
-            }
         }
     }
 
@@ -351,6 +358,7 @@ class WorkflowUI extends Component {
     moveDots = () => {
         const taskName = this.selectedTaskBar.userData.id;
         const shape = this.selectedTaskBar.userData.shape;
+        
 
         var xOffset = barWidth;
         var yOffset = barHeight;
@@ -385,28 +393,28 @@ class WorkflowUI extends Component {
 
         //move the lines start point or end point as well
         for (var i = 0; i < this.lineSegmentArray.length; i++) {
-            if (this.lineSegmentArray[i].sourceDescription.task === taskName) {
+            if (this.lineSegmentArray[i].sourceDescription.taskId === taskName) {
                 var direction = this.lineSegmentArray[i].sourceDescription.direction;
 
-                if (direction == 1) {
+                if (direction == "left") {
                     //left connector has a line
                     this.lineSegmentArray[i].sourceDescription.x = leftX;
                     this.lineSegmentArray[i].sourceDescription.y = leftY;
                     this.updateConnectingLine(i, "SOURCE");
                 }
-                if (direction == 2) {
+                if (direction == "right") {
                     //right connector has a line
                     this.lineSegmentArray[i].sourceDescription.x = rightX;
                     this.lineSegmentArray[i].sourceDescription.y = rightY;
                     this.updateConnectingLine(i, "SOURCE");
                 }
-                if (direction == 3) {
+                if (direction == "top") {
                     //Top connector has a line
                     this.lineSegmentArray[i].sourceDescription.x = topX;
                     this.lineSegmentArray[i].sourceDescription.y = topY;
                     this.updateConnectingLine(i, "SOURCE");
                 }
-                if (direction == 4) {
+                if (direction == "bottom") {
                     //bottom connector has a line
                     this.lineSegmentArray[i].sourceDescription.x = bottomX;
                     this.lineSegmentArray[i].sourceDescription.y = bottomY;
@@ -414,27 +422,27 @@ class WorkflowUI extends Component {
                 }
             }
 
-            if (this.lineSegmentArray[i].destDescription.task === taskName) {
+            if (this.lineSegmentArray[i].destDescription.taskId === taskName) {
                 var direction = this.lineSegmentArray[i].destDescription.direction;
-                if (direction == 1) {
+                if (direction == "left") {
                     //left connector has a line
                     this.lineSegmentArray[i].destDescription.x = leftX;
                     this.lineSegmentArray[i].destDescription.y = leftY;
                     this.updateConnectingLine(i, "DEST");
                 }
-                if (direction == 2) {
+                if (direction == "right") {
                     //right connector has a line
                     this.lineSegmentArray[i].destDescription.x = rightX;
                     this.lineSegmentArray[i].destDescription.y = rightY;
                     this.updateConnectingLine(i, "DEST");
                 }
-                if (direction == 3) {
+                if (direction == "top") {
                     //Top connector has a line
                     this.lineSegmentArray[i].destDescription.x = topX;
                     this.lineSegmentArray[i].destDescription.y = topY;
                     this.updateConnectingLine(i, "DEST");
                 }
-                if (direction == 4) {
+                if (direction == "bottom") {
                     //bottom connector has a line
                     this.lineSegmentArray[i].destDescription.x = bottomX;
                     this.lineSegmentArray[i].destDescription.y = bottomY;
@@ -502,15 +510,15 @@ class WorkflowUI extends Component {
 
 
     populateTasks = () => {
-        this.addTask("START", "", "", "", 0, 3, "START_STOP_BOX");
-        this.addTask('Task ', 'Completion Today', '2019-08-9', '2019-08-9', 0, 1, "DECISION_BOX");
-        this.addTask('Work on it now', "", '2019-08-9', '2019-08-9', -2, -1, "");
-        this.addTask('Look at it later', "", '2019-08-9', '2019-08-9', 2, -1, "");
-        this.addTask("STOP", "", "", "", -2, -2.5, "CIRCLE");
-        this.addTask("STOP2", "", "", "", 2, -2.5, "CIRCLE");
+        this.addTask(1, "START", "", "", "", 0, 3, "START_STOP_BOX");
+        this.addTask(2, 'Task ', 'Completion Today', '2019-08-9', '2019-08-9', 0, 1, "DECISION_BOX");
+        this.addTask(3, 'Work on it now', "", '2019-08-9', '2019-08-9', -2, -1, "");
+        this.addTask(4, 'Look at it later', "", '2019-08-9', '2019-08-9', 2, -1, "");
+        this.addTask(5, "STOP", "", "", "", -2, -2.5, "CIRCLE");
+        this.addTask(6, "STOP2", "", "", "", 2, -2.5, "CIRCLE");
     }
 
-    addTask = (taskName, role, startDate, endDate, x, y, shape) => {
+    addTask = (taskId, taskName, role, startDate, endDate, x, y, shape) => {
 
         const period = startDate + ' - ' + endDate;
         var taskMaterial = '';
@@ -556,16 +564,16 @@ class WorkflowUI extends Component {
         }
 
         connectorLeft.position.set(x - xOffset / 2, y, 0);
-        connectorLeft.userData = { id: taskName, direction: 'left' };
+        connectorLeft.userData = { id: taskId, direction: 'left' };
 
         connectorRight.position.set(x + xOffset / 2, y, 0);
-        connectorRight.userData = { id: taskName, direction: 'right' };
+        connectorRight.userData = { id: taskId, direction: 'right' };
 
         connectorTop.position.set(x, y + yOffset / 2, 0);
-        connectorTop.userData = { id: taskName, direction: 'top' };
+        connectorTop.userData = { id: taskId, direction: 'top' };
 
         connectorBottom.position.set(x, y - yOffset / 2, 0);
-        connectorBottom.userData = { id: taskName, direction: 'bottom' };
+        connectorBottom.userData = { id: taskId, direction: 'bottom' };
 
         group.add(connectorLeft);
         group.add(connectorRight);
@@ -573,9 +581,9 @@ class WorkflowUI extends Component {
         group.add(connectorBottom);
 
         // we need task_id and task_name
-        taskBar.userData = { id: taskName, type: 'taskBar', shape: shape };
+        taskBar.userData = { id: taskId, type: 'taskBar', shape: shape };
 
-        this.connectorMap[taskName] = { connectorLeft: connectorLeft, connectorRight: connectorRight, connectorTop: connectorTop, connectorBottom: connectorBottom };
+        this.connectorMap[taskId] = { connectorLeft: connectorLeft, connectorRight: connectorRight, connectorTop: connectorTop, connectorBottom: connectorBottom };
 
 
         this.scene.add(group);
