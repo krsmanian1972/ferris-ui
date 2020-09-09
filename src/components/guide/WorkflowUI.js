@@ -52,8 +52,8 @@ class WorkflowUI extends Component {
 
         this.taskBars = [];
         this.dots = [];
-        this.hoveredPort={};
-        this.clickedPort = {};
+        this.hoveredPort = {};
+        
 
         this.connectorMap = {};
 
@@ -81,6 +81,7 @@ class WorkflowUI extends Component {
         this.dragControls.addEventListener('dragend', this.dragEndCallback);
 
         this.dotControls.addEventListener('hoveron', this.capturePort);
+        this.dotControls.addEventListener('hoveroff', this.clearCapturedPort);
 
         this.renderer.domElement.addEventListener("mousemove", this.mouseMove);
         this.renderer.domElement.addEventListener("wheel", this.scroll);
@@ -92,7 +93,10 @@ class WorkflowUI extends Component {
 
     capturePort = (event) => {
         this.hoveredPort = event.object.userData;
-        console.log(this.hoveredPort);
+    }
+
+    clearCapturedPort = (event) => {
+        this.hoveredPort = {};
     }
 
     keyDown = (event) => {
@@ -100,78 +104,82 @@ class WorkflowUI extends Component {
         }
     }
 
+    getPortDescription = (selectedPort) => {
+
+        var sourceX, sourceY;
+
+        const taskId = selectedPort.id;
+        const direction = selectedPort.direction;
+        const task = this.connectorMap[taskId]
+
+        if (direction === "bottom") {
+            sourceX = task.connectorBottom.position.x;
+            sourceY = task.connectorBottom.position.y;
+        }
+        else if (direction === "top") {
+            sourceX = task.connectorTop.position.x;
+            sourceY = task.connectorTop.position.y;
+        }
+        else if (direction === "left") {
+            sourceX = task.connectorLeft.position.x;
+            sourceY = task.connectorLeft.position.y;
+        }
+        else if (direction === "right") {
+            sourceX = task.connectorRight.position.x;
+            sourceY = task.connectorRight.position.y;
+        }
+
+        return { x: sourceX, y: sourceY, taskId: taskId, direction: direction};
+    }
+
     toggleDrawMode = (event) => {
-        console.log("Hover port is ", this.hoveredPort);
-        this.clickedPort = this.hoveredPort
-        this.hoeveredPort = '';
-        console.log(this.mode);
-        if (this.mode === "FREE_LINE_CONNECTOR") {
-            console.log(this.taskBars);
-            console.log(this.clickedPort);
-            var sourceX, sourceY;
-            var taskId = this.clickedPort.id;
-            //iterate through the taskBar to find out which 
-            if(this.clickedPort.direction === "bottom"){
-                console.log("Bottom");
-		sourceX = this.connectorMap[taskId].connectorBottom.position.x;
-		sourceY = this.connectorMap[taskId].connectorBottom.position.y;
-	    }
-            if(this.clickedPort.direction === "top"){
-                console.log("Top");
-		sourceX = this.connectorMap[taskId].connectorTop.position.x;
-		sourceY = this.connectorMap[taskId].connectorTop.position.y;
-	    }
-            if(this.clickedPort.direction === "left"){
-                console.log("Left");
-		sourceX = this.connectorMap[taskId].connectorLeft.position.x;
-		sourceY = this.connectorMap[taskId].connectorLeft.position.y;
-	    }
-            if(this.clickedPort.direction === "right"){
-                console.log("Right");
-		sourceX = this.connectorMap[taskId].connectorRight.position.x;
-		sourceY = this.connectorMap[taskId].connectorRight.position.y;
-	    }
 
-            if (this.internalState === "") {
+        if (this.mode !== "FREE_LINE_CONNECTOR") {
+            return;
+        }
 
-                this.sourceConnectorPort[0] = { x: sourceX, y: sourceY, taskId: taskId, direction: this.clickedPort.direction };
-                var line = {};
-                line.x = sourceX;
-                line.y = sourceY;
-                this.lineSegmentArray[this.lineSegmentArrayIndex] = { sourceDescription: this.sourceConnectorPort[0], path: [], destDescription: "", line: [] };
-                this.lineSegmentArray[this.lineSegmentArrayIndex].path.push(line);
+        const clickedPort = this.hoveredPort;
+        this.hoveredPort = {};
 
-                this.internalState = "FOUND_SOURCE_PORT";
-            }
-            else if (this.internalState === "FOUND_SOURCE_PORT") {
+        const portDescription = this.getPortDescription(clickedPort);
+        const vertex = {x:portDescription.sourceX, y:portDescription.sourceY};
+       
+        if (this.internalState === "") {
 
-                //since this is a double click event, 2 single clicks are logged, pop it out as a hack...
-                this.lineSegmentArray[this.lineSegmentArrayIndex].path.pop();
-                this.lineSegmentArray[this.lineSegmentArrayIndex].path.pop();
+            this.sourceConnectorPort[0] = portDescription;
 
-                var lineIndex = this.lineSegmentArray[this.lineSegmentArrayIndex].line.length - 1;
-                this.scene.remove(this.lineSegmentArray[this.lineSegmentArrayIndex].line[lineIndex]);
-                this.scene.remove(this.lineSegmentArray[this.lineSegmentArrayIndex].line[lineIndex - 1]);
+            const segment = { sourceDescription: portDescription, destDescription: {}, path: [], line: [] };
+            segment.path.push(vertex);
+            
+            this.lineSegmentArray[this.lineSegmentArrayIndex] = segment;
 
-                this.lineSegmentArray[this.lineSegmentArrayIndex].line.pop();
-                this.lineSegmentArray[this.lineSegmentArrayIndex].line.pop();
+            this.internalState = "FOUND_SOURCE_PORT";
+        }
+        else if (this.internalState === "FOUND_SOURCE_PORT") {
 
-                this.destConnectorPort[0] = { x: sourceX, y: sourceY, taskId: taskId, direction: this.clickedPort.direction  };
+            //since this is a double click event, 2 single clicks are logged, pop it out as a hack...
+            this.lineSegmentArray[this.lineSegmentArrayIndex].path.pop();
+            this.lineSegmentArray[this.lineSegmentArrayIndex].path.pop();
 
-                var line = {};
-                line.x = sourceX;
-                line.y = sourceY;
-                this.scene.remove(this.line[0]);
+            var lineIndex = this.lineSegmentArray[this.lineSegmentArrayIndex].line.length - 1;
+            this.scene.remove(this.lineSegmentArray[this.lineSegmentArrayIndex].line[lineIndex]);
+            this.scene.remove(this.lineSegmentArray[this.lineSegmentArrayIndex].line[lineIndex - 1]);
 
-                this.lineSegmentArray[this.lineSegmentArrayIndex].path.push(line);
-                var pathIndex = this.lineSegmentArray[this.lineSegmentArrayIndex].path.length - 1;
-                this.lineSegmentArray[this.lineSegmentArrayIndex].destDescription = this.destConnectorPort[0];
-                drawLineWithPrevPoint(this.lineSegmentArray, this.scene, this.lineSegmentArrayIndex, pathIndex, "");
+            this.lineSegmentArray[this.lineSegmentArrayIndex].line.pop();
+            this.lineSegmentArray[this.lineSegmentArrayIndex].line.pop();
+            
+            this.scene.remove(this.line[0]);
 
-                this.lineSegmentArrayIndex++;
-                this.internalState = "";
-            }
-           
+            this.destConnectorPort[0] = portDescription;
+            this.lineSegmentArray[this.lineSegmentArrayIndex].path.push(vertex);
+
+            var pathIndex = this.lineSegmentArray[this.lineSegmentArrayIndex].path.length - 1;
+            this.lineSegmentArray[this.lineSegmentArrayIndex].destDescription = this.destConnectorPort[0];
+            
+            drawLineWithPrevPoint(this.lineSegmentArray, this.scene, this.lineSegmentArrayIndex, pathIndex, "");
+
+            this.lineSegmentArrayIndex++;
+            this.internalState = "";
         }
     }
 
@@ -214,14 +222,6 @@ class WorkflowUI extends Component {
         }
     }
 
-    findDistanceAndSetPort = (task, direction, sourceX, sourceY, clickX, clickY) => {
-        let xDiff = sourceX - clickX;
-        let yDiff = sourceY - clickY;
-
-        if (Math.abs(xDiff) <= 0.5 && Math.abs(yDiff) <= 0.5) {
-
-        }
-    }
 
     updateConnectingLine = (index, port) => {
         var position = 0;
@@ -358,7 +358,7 @@ class WorkflowUI extends Component {
     moveDots = () => {
         const taskName = this.selectedTaskBar.userData.id;
         const shape = this.selectedTaskBar.userData.shape;
-        
+
 
         var xOffset = barWidth;
         var yOffset = barHeight;
