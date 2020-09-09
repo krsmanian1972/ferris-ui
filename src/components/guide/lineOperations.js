@@ -1,57 +1,73 @@
 import * as THREE from 'three';
 
+const arrowHelper = function(prevPoint,currentPoint) {
+
+    const color = 0xff00;
+
+    const origin = new THREE.Vector3(prevPoint.x, prevPoint.y, 0);
+    const dest = new THREE.Vector3(currentPoint.x, currentPoint.y, 0);
+    const direction = new THREE.Vector3().sub(dest, origin);
+
+    const deltaX = currentPoint.x - prevPoint.x;
+    const deltaY = currentPoint.y - prevPoint.y;
+
+    const length = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
+    
+    return new THREE.ArrowHelper(direction.clone().normalize(), origin, length, color, 0.15, 0.15);
+}
+
+const lineHelper = function(prevPoint,currentPoint) {
+    var material = new THREE.LineBasicMaterial({ color: 0x0000FF, linewidth: 2 });
+
+    const points = [];
+    points.push(new THREE.Vector3(currentPoint.x, currentPoint.y, 0));
+    points.push(new THREE.Vector3(prevPoint.x, prevPoint.y, 0));
+
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+    return new THREE.Line(geometry, material)
+}
+
 const drawLineWithPrevPoint = function (lineSegmentArray, scene, arrayIndex, pathIndex, lineIndex) {
-    if (lineIndex !== "") {
-        scene.remove(lineSegmentArray[arrayIndex].line[lineIndex]);
+    const segment = lineSegmentArray[arrayIndex];
+
+    if(!segment.path[pathIndex-1]) {
+        return;
     }
 
-    var currentPoint = {
-        x: lineSegmentArray[arrayIndex].path[pathIndex].x,
-        y: lineSegmentArray[arrayIndex].path[pathIndex].y
-    };
+    if (lineIndex !== "") {
+        scene.remove(segment.line[lineIndex]);
+    }
 
-    var prevPoint = {
-        x: lineSegmentArray[arrayIndex].path[pathIndex - 1].x,
-        y: lineSegmentArray[arrayIndex].path[pathIndex - 1].y
-    };
+    const currentPoint = { x: segment.path[pathIndex].x, y: segment.path[pathIndex].y };
+    const prevPoint = { x: segment.path[pathIndex - 1].x, y: segment.path[pathIndex - 1].y };
 
     //find out if the point matches with the destiation descriptor and if so replace with a arrow
-    if (currentPoint.x === lineSegmentArray[arrayIndex].destDescription.x &&
-        currentPoint.y === lineSegmentArray[arrayIndex].destDescription.y) {
+    if (currentPoint.x === segment.destDescription.x &&
+        currentPoint.y === segment.destDescription.y) {
 
-        var origin = new THREE.Vector3(prevPoint.x, prevPoint.y, 0);
-        var dest = new THREE.Vector3(currentPoint.x, currentPoint.y, 0);
-        var direction = new THREE.Vector3().sub(dest, origin);
+        const arrowHelper = arrowHelper(prevPoint,currentPoint);
 
-        //direction.normalize();
-
-        var distanceSourceToPoint = Math.sqrt((Math.pow((currentPoint.x - prevPoint.x), 2)) + Math.pow((currentPoint.y - prevPoint.y), 2));
-        var color = 0xff00;
-
-        var arrowHelper = new THREE.ArrowHelper(direction.clone().normalize(), origin, distanceSourceToPoint, color, 0.15, 0.15);
         if (lineIndex === "") {
-            lineSegmentArray[arrayIndex].line.push(arrowHelper);
-            scene.add(lineSegmentArray[arrayIndex].line[lineSegmentArray[arrayIndex].line.length - 1]);
+            segment.line.push(arrowHelper);
+            scene.add(segment.line[segment.line.length - 1]);
         }
         else {
-            lineSegmentArray[arrayIndex].line[lineIndex] = arrowHelper;
-            scene.add(lineSegmentArray[arrayIndex].line[lineIndex]);
+            segment.line[lineIndex] = arrowHelper;
+            scene.add(segment.line[lineIndex]);
         }
 
     }
     else {
-        var points = [];
-        var material = new THREE.LineBasicMaterial({ color: 0x0000FF, linewidth: 2 });
-        points.push(new THREE.Vector3(currentPoint.x, currentPoint.y, 0));
-        points.push(new THREE.Vector3(prevPoint.x, prevPoint.y, 0));
-        var geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const line = lineHelper(prevPoint,currentPoint)
+
         if (lineIndex === "") {
-            lineSegmentArray[arrayIndex].line.push(new THREE.Line(geometry, material));
-            scene.add(lineSegmentArray[arrayIndex].line[lineSegmentArray[arrayIndex].line.length - 1]);
+            segment.line.push(line);
+            scene.add(segment.line[segment.line.length - 1]);
         }
         else {
-            lineSegmentArray[arrayIndex].line[lineIndex] = (new THREE.Line(geometry, material));
-            scene.add(lineSegmentArray[arrayIndex].line[lineIndex]);
+            segment.line[lineIndex] = line;
+            scene.add(segment.line[lineIndex]);
         }
     }
 }
@@ -174,7 +190,7 @@ const findDistanceSumMatches = function (source, dest, point) {
     var distanceSourceToDest = Math.sqrt((Math.pow((dest.x - source.x), 2)) + Math.pow((dest.y - source.y), 2));
     var sumOfDistance = Math.abs(distanceSourceToPoint) + Math.abs(distanceDestToPoint);
     var diff = sumOfDistance - distanceSourceToDest;
-  
+
     if (diff <= 0.003) {
         result.status = true;
     }
@@ -192,7 +208,7 @@ const findDistanceSumMatches = function (source, dest, point) {
 const removeRecurringPointOnLineSegment = function (lineSegmentArray, arrayIndex, scene) {
 
     for (var i = 0; i < lineSegmentArray[arrayIndex].path.length - 2; i++) {
-   
+
         //take points i and i+2
         var source = lineSegmentArray[arrayIndex].path[i];
         var dest = lineSegmentArray[arrayIndex].path[i + 2];
@@ -200,10 +216,10 @@ const removeRecurringPointOnLineSegment = function (lineSegmentArray, arrayIndex
         var result = { status: false };
         result = findDistanceSumMatches(source, dest, point);
         if (result.status === true) {
-  
+
             //remove index point i+1
             lineSegmentArray[arrayIndex].path.splice(i + 1, 1);
-  
+
             //remove line i and i+1
             scene.remove(lineSegmentArray[arrayIndex].line[i]);
             scene.remove(lineSegmentArray[arrayIndex].line[i + 1]);
@@ -218,9 +234,9 @@ const removeRecurringPointOnLineSegment = function (lineSegmentArray, arrayIndex
             var geometry = new THREE.BufferGeometry().setFromPoints(points);
             lineSegmentArray[arrayIndex].line[i] = (new THREE.Line(geometry, material));
             scene.add(lineSegmentArray[arrayIndex].line[i]);
-            
+
             i = i - 1;
-      }
+        }
 
     }
 }
