@@ -12,8 +12,8 @@ const arrowHelper = function(prevPoint,currentPoint) {
     const deltaY = currentPoint.y - prevPoint.y;
 
     const length = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
-    
-    return new THREE.ArrowHelper(direction.clone().normalize(), origin, length, color, 0.15, 0.15);
+    var arrowHelper = new THREE.ArrowHelper(direction.clone().normalize(), origin, length, color, 0.15, 0.15);
+    return arrowHelper;
 }
 
 const lineHelper = function(prevPoint,currentPoint) {
@@ -24,8 +24,8 @@ const lineHelper = function(prevPoint,currentPoint) {
     points.push(new THREE.Vector3(prevPoint.x, prevPoint.y, 0));
 
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-    return new THREE.Line(geometry, material)
+    var line = new THREE.Line(geometry, material);
+    return line;
 }
 
 const drawLineWithPrevPoint = function (lineSegmentArray, scene, arrayIndex, pathIndex, lineIndex) {
@@ -46,14 +46,27 @@ const drawLineWithPrevPoint = function (lineSegmentArray, scene, arrayIndex, pat
     if (currentPoint.x === segment.destDescription.x &&
         currentPoint.y === segment.destDescription.y) {
 
-        const arrowHelper = arrowHelper(prevPoint,currentPoint);
+        console.log(lineSegmentArray);
+        const arrow = arrowHelper(prevPoint,currentPoint);
 
         if (lineIndex === "") {
-            segment.line.push(arrowHelper);
+            var positions = lineSegmentArray[arrayIndex].lineBuffer.geometry.attributes.position.array;
+            var positionsIndex = lineSegmentArray[arrayIndex].lineBufferLength;
+            positions[positionsIndex++] = currentPoint.x;
+            positions[positionsIndex++] = currentPoint.y;
+            positions[positionsIndex++] = 0;
+            console.log("Position Index", positionsIndex)
+
+            var lineBufferGeometry = lineSegmentArray[arrayIndex].lineBuffer.geometry;
+            lineBufferGeometry.setDrawRange( 0, positionsIndex / 3 );
+            lineBufferGeometry.attributes.position.needsUpdate = true;
+            lineSegmentArray[arrayIndex].lineBufferLength = positionsIndex;
+
+            segment.line.push(arrow);
             scene.add(segment.line[segment.line.length - 1]);
         }
         else {
-            segment.line[lineIndex] = arrowHelper;
+            segment.line[lineIndex] = arrow;
             scene.add(segment.line[lineIndex]);
         }
 
@@ -245,7 +258,7 @@ const removeLineSegmentOnCickPoint = function (lineSegmentArray, point, scene) {
     var status = "FAILURE";
     const hitPoint = checkPointIsOnLineSegmentArray(lineSegmentArray, point);
     if (hitPoint.arrayIndex !== "Nan") {
-        //found a hit point, remove the lines from the scene. 
+        //found a hit point, remove the lines from the scene.
         for (var i = 0; i < lineSegmentArray[hitPoint.arrayIndex].line.length; i++) {
             scene.remove(lineSegmentArray[hitPoint.arrayIndex].line[i]);
         }
@@ -258,4 +271,3 @@ const removeLineSegmentOnCickPoint = function (lineSegmentArray, point, scene) {
 
 
 export { drawLineWithPrevPoint, checkPointIsOnLineSegmentArray, snapAtClickPoint, updateVertexMovement, removeRecurringPointOnLineSegment, removeLineSegmentOnCickPoint };
-

@@ -36,6 +36,7 @@ const pointLightPosition = 1;
 const gridSize = 50;
 const gridStep = 0.25;
 
+const MAX_POINTS = 500;
 @inject("appStore")
 @observer
 class WorkflowUI extends Component {
@@ -53,7 +54,7 @@ class WorkflowUI extends Component {
         this.taskBars = [];
         this.dots = [];
         this.hoveredPort = {};
-        
+
 
         this.connectorMap = {};
 
@@ -81,7 +82,7 @@ class WorkflowUI extends Component {
         this.dragControls.addEventListener('dragend', this.dragEndCallback);
 
         this.dotControls.addEventListener('hoveron', this.capturePort);
-        this.dotControls.addEventListener('hoveroff', this.clearCapturedPort);
+        //this.dotControls.addEventListener('hoveroff', this.clearCapturedPort);
 
         this.renderer.domElement.addEventListener("mousemove", this.mouseMove);
         this.renderer.domElement.addEventListener("wheel", this.scroll);
@@ -92,10 +93,14 @@ class WorkflowUI extends Component {
     }
 
     capturePort = (event) => {
+        console.log("Hover ON");
+        console.log(event);
         this.hoveredPort = event.object.userData;
     }
 
     clearCapturedPort = (event) => {
+      console.log("Hover OFF");
+      console.log(event);
         this.hoveredPort = {};
     }
 
@@ -113,22 +118,26 @@ class WorkflowUI extends Component {
         const task = this.connectorMap[taskId]
 
         if (direction === "bottom") {
+            console.log("Bottom");
             sourceX = task.connectorBottom.position.x;
             sourceY = task.connectorBottom.position.y;
         }
         else if (direction === "top") {
+          console.log("Top");
             sourceX = task.connectorTop.position.x;
             sourceY = task.connectorTop.position.y;
         }
         else if (direction === "left") {
+          console.log("Left");
             sourceX = task.connectorLeft.position.x;
             sourceY = task.connectorLeft.position.y;
         }
         else if (direction === "right") {
+          console.log("Right");
             sourceX = task.connectorRight.position.x;
             sourceY = task.connectorRight.position.y;
         }
-
+        console.log("clicked Port", sourceX, sourceY, taskId, direction);
         return { x: sourceX, y: sourceY, taskId: taskId, direction: direction};
     }
 
@@ -139,18 +148,38 @@ class WorkflowUI extends Component {
         }
 
         const clickedPort = this.hoveredPort;
-        this.hoveredPort = {};
+        //this.hoveredPort = {};
 
         const portDescription = this.getPortDescription(clickedPort);
-        const vertex = {x:portDescription.sourceX, y:portDescription.sourceY};
-       
+        const vertex = {x:portDescription.x, y:portDescription.y};
+
         if (this.internalState === "") {
+             // geometry
+             var geometry = new THREE.BufferGeometry();
+            // attributes
+            var lineBufferLength = 0;
+
+            var positions = new Float32Array( MAX_POINTS * 3 ); // 3 vertices per point
+            positions[lineBufferLength++] = vertex.x;
+            positions[lineBufferLength++] = vertex.y;
+            positions[lineBufferLength++] = 0;
+            geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
+            // drawcalls
+            var drawCount = 2; // draw the first 2 points, only
+            geometry.setDrawRange( 0, drawCount );
+            geometry.attributes.position.needsUpdate = true;
+            // material
+            var material = new THREE.LineBasicMaterial( { color: 0xff0000, linewidth: 2 } );
+
+            // line
+            var lineBuffer = new THREE.Line( geometry,  material );
+            this.scene.add( lineBuffer );
 
             this.sourceConnectorPort[0] = portDescription;
 
-            const segment = { sourceDescription: portDescription, destDescription: {}, path: [], line: [] };
+            const segment = { sourceDescription: portDescription, destDescription: {}, path: [], line: [], lineBuffer: lineBuffer, lineBufferLength: lineBufferLength };
             segment.path.push(vertex);
-            
+
             this.lineSegmentArray[this.lineSegmentArrayIndex] = segment;
 
             this.internalState = "FOUND_SOURCE_PORT";
@@ -167,7 +196,7 @@ class WorkflowUI extends Component {
 
             this.lineSegmentArray[this.lineSegmentArrayIndex].line.pop();
             this.lineSegmentArray[this.lineSegmentArrayIndex].line.pop();
-            
+
             this.scene.remove(this.line[0]);
 
             this.destConnectorPort[0] = portDescription;
@@ -175,7 +204,10 @@ class WorkflowUI extends Component {
 
             var pathIndex = this.lineSegmentArray[this.lineSegmentArrayIndex].path.length - 1;
             this.lineSegmentArray[this.lineSegmentArrayIndex].destDescription = this.destConnectorPort[0];
-            
+             //insert the new found points into the Geometry
+
+
+
             drawLineWithPrevPoint(this.lineSegmentArray, this.scene, this.lineSegmentArrayIndex, pathIndex, "");
 
             this.lineSegmentArrayIndex++;
@@ -510,12 +542,12 @@ class WorkflowUI extends Component {
 
 
     populateTasks = () => {
-        this.addTask(1, "START", "", "", "", 0, 3, "START_STOP_BOX");
-        this.addTask(2, 'Task ', 'Completion Today', '2019-08-9', '2019-08-9', 0, 1, "DECISION_BOX");
-        this.addTask(3, 'Work on it now', "", '2019-08-9', '2019-08-9', -2, -1, "");
-        this.addTask(4, 'Look at it later', "", '2019-08-9', '2019-08-9', 2, -1, "");
-        this.addTask(5, "STOP", "", "", "", -2, -2.5, "CIRCLE");
-        this.addTask(6, "STOP2", "", "", "", 2, -2.5, "CIRCLE");
+        this.addTask(0, "START", "", "", "", 0, 3, "START_STOP_BOX");
+        this.addTask(1, 'Task ', 'Completion Today', '2019-08-9', '2019-08-9', 0, 1, "DECISION_BOX");
+        this.addTask(2, 'Work on it now', "", '2019-08-9', '2019-08-9', -2, -1, "");
+        this.addTask(3, 'Look at it later', "", '2019-08-9', '2019-08-9', 2, -1, "");
+        this.addTask(4, "STOP", "", "", "", -2, -2.5, "CIRCLE");
+        this.addTask(5, "STOP2", "", "", "", 2, -2.5, "CIRCLE");
     }
 
     addTask = (taskId, taskName, role, startDate, endDate, x, y, shape) => {
