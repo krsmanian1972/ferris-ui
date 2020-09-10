@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-
+const SINGLE_BUFFER_GEO = false;
 const arrowHelper = function(prevPoint,currentPoint) {
 
     const color = 0xff00;
@@ -50,22 +50,36 @@ const drawLineWithPrevPoint = function (lineSegmentArray, scene, arrayIndex, pat
         const arrow = arrowHelper(prevPoint,currentPoint);
 
         if (lineIndex === "") {
-            var positions = lineSegmentArray[arrayIndex].lineBuffer.geometry.attributes.position.array;
-            var positionsIndex = lineSegmentArray[arrayIndex].lineBufferLength;
-            positions[positionsIndex++] = currentPoint.x;
-            positions[positionsIndex++] = currentPoint.y;
-            positions[positionsIndex++] = 0;
-            console.log("Position Index", positionsIndex)
-
-            var lineBufferGeometry = lineSegmentArray[arrayIndex].lineBuffer.geometry;
-            lineBufferGeometry.setDrawRange( 0, positionsIndex / 3 );
-            lineBufferGeometry.attributes.position.needsUpdate = true;
-            lineSegmentArray[arrayIndex].lineBufferLength = positionsIndex;
-
+            if(SINGLE_BUFFER_GEO === true){
+            // var positions = lineSegmentArray[arrayIndex].lineBuffer.geometry.attributes.position.array;
+            // var positionsIndex = lineSegmentArray[arrayIndex].lineBufferLength;
+            // positions[positionsIndex++] = currentPoint.x;
+            // positions[positionsIndex++] = currentPoint.y;
+            // positions[positionsIndex++] = 0;
+            // console.log("Position Index", positionsIndex)
+            //
+            // var lineBufferGeometry = lineSegmentArray[arrayIndex].lineBuffer.geometry;
+            // lineBufferGeometry.setDrawRange( 0, positionsIndex / 3 );
+            // lineBufferGeometry.attributes.position.needsUpdate = true;
+            // lineSegmentArray[arrayIndex].lineBufferLength = positionsIndex;
+            }
             segment.line.push(arrow);
             scene.add(segment.line[segment.line.length - 1]);
         }
         else {
+          if(SINGLE_BUFFER_GEO === true){
+            // var positions = lineSegmentArray[arrayIndex].lineBuffer.geometry.attributes.position.array;
+            // var positionsIndex = lineSegmentArray[arrayIndex].lineBufferLength;
+            // positions[positionsIndex++] = currentPoint.x;
+            // positions[positionsIndex++] = currentPoint.y;
+            // positions[positionsIndex++] = 0;
+            // console.log("Position Index", positionsIndex)
+            //
+            // var lineBufferGeometry = lineSegmentArray[arrayIndex].lineBuffer.geometry;
+            // lineBufferGeometry.setDrawRange( 0, positionsIndex / 3 );
+            // lineBufferGeometry.attributes.position.needsUpdate = true;
+            // lineSegmentArray[arrayIndex].lineBufferLength = positionsIndex;
+          }
             segment.line[lineIndex] = arrow;
             scene.add(segment.line[lineIndex]);
         }
@@ -270,4 +284,4 @@ const removeLineSegmentOnCickPoint = function (lineSegmentArray, point, scene) {
 }
 
 
-export { drawLineWithPrevPoint, checkPointIsOnLineSegmentArray, snapAtClickPoint, updateVertexMovement, removeRecurringPointOnLineSegment, removeLineSegmentOnCickPoint };
+export { drawLineWithPrevPoint, checkPointIsOnLineSegmentArray, snapAtClickPoint, updateVertexMovement, removeRecurringPointOnLineSegment, removeLineSegmentOnCickPoint,SINGLE_BUFFER_GEO };

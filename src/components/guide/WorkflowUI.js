@@ -11,7 +11,7 @@ import Moment from 'react-moment';
 import moment from 'moment';
 import 'moment-timezone';
 
-import { drawLineWithPrevPoint, snapAtClickPoint } from './lineOperations';
+import { drawLineWithPrevPoint, snapAtClickPoint, SINGLE_BUFFER_GEO } from './lineOperations';
 import { updateVertexMovement, removeRecurringPointOnLineSegment, removeLineSegmentOnCickPoint } from './lineOperations';
 
 import { buildCircularTextMaterial, buildRectTextMaterial, buildSquareTextMaterial, buildStartStopTextMaterial } from './Shapes';
@@ -154,27 +154,28 @@ class WorkflowUI extends Component {
         const vertex = {x:portDescription.x, y:portDescription.y};
 
         if (this.internalState === "") {
-             // geometry
-             var geometry = new THREE.BufferGeometry();
-            // attributes
-            var lineBufferLength = 0;
+            if(SINGLE_BUFFER_GEO === true){
+                 // geometry
+                 var geometry = new THREE.BufferGeometry();
+                // attributes
+                var lineBufferLength = 0;
 
-            var positions = new Float32Array( MAX_POINTS * 3 ); // 3 vertices per point
-            positions[lineBufferLength++] = vertex.x;
-            positions[lineBufferLength++] = vertex.y;
-            positions[lineBufferLength++] = 0;
-            geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
-            // drawcalls
-            var drawCount = 2; // draw the first 2 points, only
-            geometry.setDrawRange( 0, drawCount );
-            geometry.attributes.position.needsUpdate = true;
-            // material
-            var material = new THREE.LineBasicMaterial( { color: 0xff0000, linewidth: 2 } );
+                var positions = new Float32Array( MAX_POINTS * 3 ); // 3 vertices per point
+                positions[lineBufferLength++] = vertex.x;
+                positions[lineBufferLength++] = vertex.y;
+                positions[lineBufferLength++] = 0;
+                geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
+                // drawcalls
+                var drawCount = 2; // draw the first 2 points, only
+                geometry.setDrawRange( 0, drawCount );
+                geometry.attributes.position.needsUpdate = true;
+                // material
+                var material = new THREE.LineBasicMaterial( { color: 0xff0000, linewidth: 2 } );
 
-            // line
-            var lineBuffer = new THREE.Line( geometry,  material );
-            this.scene.add( lineBuffer );
-
+                // line
+                var lineBuffer = new THREE.Line( geometry,  material );
+                this.scene.add( lineBuffer );
+            }
             this.sourceConnectorPort[0] = portDescription;
 
             const segment = { sourceDescription: portDescription, destDescription: {}, path: [], line: [], lineBuffer: lineBuffer, lineBufferLength: lineBufferLength };
