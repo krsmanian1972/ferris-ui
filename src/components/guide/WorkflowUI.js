@@ -4,6 +4,7 @@ import { inject, observer } from 'mobx-react';
 import * as THREE from 'three';
 import DragControls from 'three-dragcontrols';
 import { ClickControls } from './ClickControls';
+import TaskLinkFactory from './TaskLinkFactory';
 
 import { Button } from 'antd';
 import { EditOutlined, ScissorOutlined, NodeIndexOutlined } from '@ant-design/icons';
@@ -17,6 +18,7 @@ import { updateVertexMovement, removeRecurringPointOnLineSegment, removeLineSegm
 
 import { buildCircularTextMaterial, buildRectTextMaterial, buildSquareTextMaterial, buildStartStopTextMaterial } from './Shapes';
 import { taskBarColor, barWidth, barHeight, barDepth, squareBarWidth, squareBarHeight, connectorRadius } from './Shapes';
+
 
 const containerStyle = {
     height: window.innerHeight,
@@ -70,6 +72,8 @@ class WorkflowUI extends Component {
 
         this.clickCounter = 0;
         this.dragMode = {};
+
+        this.taskLinkFactory = new TaskLinkFactory();
     }
 
     componentDidMount() {
@@ -91,105 +95,23 @@ class WorkflowUI extends Component {
     }
 
     onConnectorSelect = (event) => {
-        const mesh = event.object;
-        const userData = mesh.userData;
-
-        if (this.selectedPort.id === userData.id) {
-            this.selectedPort = {}
-            mesh.material.color.set(taskBarColor);
-        }
-        else {
-            this.selectedPort = userData;
-            mesh.material.color.set(0xff0000);
-        }
+        const connector = event.object;
+        this.taskLinkFactory.onConnectorSelect(connector,this.scene);
     }
+
 
     keyDown = (event) => {
         if (event.keyCode === 27) {
         }
     }
-
-    getPortDescription = (selectedPort) => {
-
-        var sourceX, sourceY;
-
-        const taskId = selectedPort.id;
-        const direction = selectedPort.direction;
-        const task = this.connectorMap[taskId]
-
-        if (direction === "bottom") {
-            sourceX = task.connectorBottom.position.x;
-            sourceY = task.connectorBottom.position.y;
-        }
-        else if (direction === "top") {
-            sourceX = task.connectorTop.position.x;
-            sourceY = task.connectorTop.position.y;
-        }
-        else if (direction === "left") {
-            sourceX = task.connectorLeft.position.x;
-            sourceY = task.connectorLeft.position.y;
-        }
-        else if (direction === "right") {
-            sourceX = task.connectorRight.position.x;
-            sourceY = task.connectorRight.position.y;
-        }
-        return { x: sourceX, y: sourceY, taskId: taskId, direction: direction };
-    }
-
-    toggleDrawMode = (event) => {
-
-        if (this.mode !== "FREE_LINE_CONNECTOR") {
-            return;
-        }
-
-        const clickedPort = this.selectedPort;
-        this.selectedPort = {};
-
-        const portDescription = this.getPortDescription(clickedPort);
-        const vertex = { x: portDescription.x, y: portDescription.y };
-
-        if (this.internalState === "") {
-
-            this.sourceConnectorPort[0] = portDescription;
-
-            const segment = { sourceDescription: portDescription, destDescription: {}, path: [], line: [] };
-            segment.path.push(vertex);
-
-            this.lineSegmentArray[this.lineSegmentArrayIndex] = segment;
-
-            this.internalState = "FOUND_SOURCE_PORT";
-        }
-        else if (this.internalState === "FOUND_SOURCE_PORT") {
-
-            //since this is a double click event, 2 single clicks are logged, pop it out as a hack...
-            this.lineSegmentArray[this.lineSegmentArrayIndex].path.pop();
-            this.lineSegmentArray[this.lineSegmentArrayIndex].path.pop();
-
-            var lineIndex = this.lineSegmentArray[this.lineSegmentArrayIndex].line.length - 1;
-            this.scene.remove(this.lineSegmentArray[this.lineSegmentArrayIndex].line[lineIndex]);
-            this.scene.remove(this.lineSegmentArray[this.lineSegmentArrayIndex].line[lineIndex - 1]);
-
-            this.lineSegmentArray[this.lineSegmentArrayIndex].line.pop();
-            this.lineSegmentArray[this.lineSegmentArrayIndex].line.pop();
-
-            this.scene.remove(this.line[0]);
-
-            this.destConnectorPort[0] = portDescription;
-            this.lineSegmentArray[this.lineSegmentArrayIndex].path.push(vertex);
-
-            var pathIndex = this.lineSegmentArray[this.lineSegmentArrayIndex].path.length - 1;
-            this.lineSegmentArray[this.lineSegmentArrayIndex].destDescription = this.destConnectorPort[0];
-            //insert the new found points into the Geometry
-
-            drawLineWithPrevPoint(this.lineSegmentArray, this.scene, this.lineSegmentArrayIndex, pathIndex, "");
-
-            this.lineSegmentArrayIndex++;
-            this.internalState = "";
-        }
-    }
-
+   
     mouseClick = (event) => {
         var point = this.getClickPoint(event);
+
+        if(this.taskLinkFactory.canDraw()) {
+            this.taskLinkFactory.addVertex(point);
+            return;
+        }
 
         if (this.mode === "VERTEX_DRAG_MODE") {
             removeRecurringPointOnLineSegment(this.lineSegmentArray, this.dragMode.arrayIndex, this.scene);
@@ -214,16 +136,6 @@ class WorkflowUI extends Component {
                 this.mode = "VERTEX_DRAG_MODE";
             }
             return;
-        }
-
-        if (this.mode === "FREE_LINE_CONNECTOR") {
-            if (this.internalState === "FOUND_SOURCE_PORT") {
-                var clickX = point.x;
-                var clickY = point.y;
-                var index = this.lineSegmentArray[this.lineSegmentArrayIndex].path.length - 1;
-                this.lineSegmentArray[this.lineSegmentArrayIndex].path.push({ x: clickX, y: clickY });
-                drawLineWithPrevPoint(this.lineSegmentArray, this.scene, this.lineSegmentArrayIndex, index + 1, "");
-            }
         }
     }
 
@@ -332,6 +244,7 @@ class WorkflowUI extends Component {
 
     mouseMove = (event) => {
         var point = this.getClickPoint(event);
+
         if (this.selectedTaskBar) {
             this.moveDots();
             return;
@@ -339,21 +252,31 @@ class WorkflowUI extends Component {
         if (this.mode === "VERTEX_DRAG_MODE") {
             updateVertexMovement(this.lineSegmentArray, this.dragMode.arrayIndex, this.dragMode.pathIndex, point, this.scene);
         }
+
+        if (this.taskLinkFactory.canDraw()) {
+            this.taskLinkFactory.updatePoint(point);
+            return;
+        }
+
         if (this.mode === "FREE_LINE_CONNECTOR") {
             if (this.internalState === "FOUND_SOURCE_PORT") {
                 //draw projection of the line the previous points axis
                 this.scene.remove(this.line[0]);
                 var clickX = point.x;
                 var clickY = point.y;
+
                 var index = (this.lineSegmentArray[this.lineSegmentArrayIndex].path.length) - 1;
                 var prevPoint = this.lineSegmentArray[this.lineSegmentArrayIndex].path[index];
 
                 var points = [];
+
                 var material = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 2 });
+
                 points.push(new THREE.Vector3(prevPoint.x, prevPoint.y, 0));
                 points.push(new THREE.Vector3(clickX, clickY, 0));
 
                 var geometry = new THREE.BufferGeometry().setFromPoints(points);
+
                 this.line[0] = new THREE.Line(geometry, material);
                 this.scene.add(this.line[0]);
             }
