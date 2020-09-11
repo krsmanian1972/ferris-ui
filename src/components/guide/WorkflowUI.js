@@ -3,6 +3,7 @@ import { inject, observer } from 'mobx-react';
 
 import * as THREE from 'three';
 import DragControls from 'three-dragcontrols';
+import { ClickControls } from './ClickControls';
 
 import { Button } from 'antd';
 import { EditOutlined, ScissorOutlined, NodeIndexOutlined } from '@ant-design/icons';
@@ -49,12 +50,10 @@ class WorkflowUI extends Component {
         this.connectorGeo = new THREE.SphereGeometry(connectorRadius);
 
         this.gridLineMaterial = new THREE.LineDashedMaterial({ color: 0xD3D3D3, dashSize: 2, gapSize: 8, scale: 1 });
-        this.connectorMaterial = new THREE.MeshBasicMaterial({ color: taskBarColor })
 
         this.taskBars = [];
         this.dots = [];
-        this.hoveredPort = {};
-
+        this.selectedPort = {};
 
         this.connectorMap = {};
 
@@ -81,8 +80,7 @@ class WorkflowUI extends Component {
         this.dragControls.addEventListener('dragstart', this.dragStartCallback);
         this.dragControls.addEventListener('dragend', this.dragEndCallback);
 
-        this.dotControls.addEventListener('hoveron', this.capturePort);
-        //this.dotControls.addEventListener('hoveroff', this.clearCapturedPort);
+        this.clickControls.addEventListener('onSelect', this.onConnectorSelect);
 
         this.renderer.domElement.addEventListener("mousemove", this.mouseMove);
         this.renderer.domElement.addEventListener("wheel", this.scroll);
@@ -92,16 +90,18 @@ class WorkflowUI extends Component {
         this.container.addEventListener("keydown", this.keyDown);
     }
 
-    capturePort = (event) => {
-        console.log("Hover ON");
-        console.log(event);
-        this.hoveredPort = event.object.userData;
-    }
+    onConnectorSelect = (event) => {
+        const mesh = event.object;
+        const userData = mesh.userData;
 
-    clearCapturedPort = (event) => {
-      console.log("Hover OFF");
-      console.log(event);
-        this.hoveredPort = {};
+        if (this.selectedPort.id === userData.id) {
+            this.selectedPort = {}
+            mesh.material.color.set(taskBarColor);
+        }
+        else {
+            this.selectedPort = userData;
+            mesh.material.color.set(0xff0000);
+        }
     }
 
     keyDown = (event) => {
@@ -118,27 +118,22 @@ class WorkflowUI extends Component {
         const task = this.connectorMap[taskId]
 
         if (direction === "bottom") {
-            console.log("Bottom");
             sourceX = task.connectorBottom.position.x;
             sourceY = task.connectorBottom.position.y;
         }
         else if (direction === "top") {
-          console.log("Top");
             sourceX = task.connectorTop.position.x;
             sourceY = task.connectorTop.position.y;
         }
         else if (direction === "left") {
-          console.log("Left");
             sourceX = task.connectorLeft.position.x;
             sourceY = task.connectorLeft.position.y;
         }
         else if (direction === "right") {
-          console.log("Right");
             sourceX = task.connectorRight.position.x;
             sourceY = task.connectorRight.position.y;
         }
-        console.log("clicked Port", sourceX, sourceY, taskId, direction);
-        return { x: sourceX, y: sourceY, taskId: taskId, direction: direction};
+        return { x: sourceX, y: sourceY, taskId: taskId, direction: direction };
     }
 
     toggleDrawMode = (event) => {
@@ -147,34 +142,35 @@ class WorkflowUI extends Component {
             return;
         }
 
-        const clickedPort = this.hoveredPort;
-        //this.hoveredPort = {};
+        const clickedPort = this.selectedPort;
+        this.selectedPort = {};
 
         const portDescription = this.getPortDescription(clickedPort);
-        const vertex = {x:portDescription.x, y:portDescription.y};
+        const vertex = { x: portDescription.x, y: portDescription.y };
 
         if (this.internalState === "") {
-            if(SINGLE_BUFFER_GEO === true){
-                 // geometry
-                 var geometry = new THREE.BufferGeometry();
-                // attributes
+
+            if (SINGLE_BUFFER_GEO === true) {
+                var geometry = new THREE.BufferGeometry();
                 var lineBufferLength = 0;
 
-                var positions = new Float32Array( MAX_POINTS * 3 ); // 3 vertices per point
+                var positions = new Float32Array(MAX_POINTS * 3); // 3 vertices per point
                 positions[lineBufferLength++] = vertex.x;
                 positions[lineBufferLength++] = vertex.y;
                 positions[lineBufferLength++] = 0;
-                geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
+                geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
+         
                 // drawcalls
                 var drawCount = 2; // draw the first 2 points, only
-                geometry.setDrawRange( 0, drawCount );
+                geometry.setDrawRange(0, drawCount);
                 geometry.attributes.position.needsUpdate = true;
+         
                 // material
-                var material = new THREE.LineBasicMaterial( { color: 0xff0000, linewidth: 2 } );
+                var material = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 2 });
 
                 // line
-                var lineBuffer = new THREE.Line( geometry,  material );
-                this.scene.add( lineBuffer );
+                var lineBuffer = new THREE.Line(geometry, material);
+                this.scene.add(lineBuffer);
             }
             this.sourceConnectorPort[0] = portDescription;
 
@@ -205,9 +201,7 @@ class WorkflowUI extends Component {
 
             var pathIndex = this.lineSegmentArray[this.lineSegmentArrayIndex].path.length - 1;
             this.lineSegmentArray[this.lineSegmentArrayIndex].destDescription = this.destConnectorPort[0];
-             //insert the new found points into the Geometry
-
-
+            //insert the new found points into the Geometry
 
             drawLineWithPrevPoint(this.lineSegmentArray, this.scene, this.lineSegmentArrayIndex, pathIndex, "");
 
@@ -522,7 +516,7 @@ class WorkflowUI extends Component {
         this.scene.add(light);
 
         this.dragControls = new DragControls(this.taskBars, this.camera, this.renderer.domElement);
-        this.dotControls = new DragControls(this.dots, this.camera, this.renderer.domElement);
+        this.clickControls = new ClickControls(this.dots, this.camera, this.renderer.domElement);
     };
 
     setGraphPaper = () => {
@@ -576,12 +570,10 @@ class WorkflowUI extends Component {
         const group = new THREE.Group();
         group.add(taskBar);
 
-
-        const connectorLeft = new THREE.Mesh(this.connectorGeo, this.connectorMaterial);
-        const connectorRight = new THREE.Mesh(this.connectorGeo, this.connectorMaterial);
-        const connectorTop = new THREE.Mesh(this.connectorGeo, this.connectorMaterial);
-        const connectorBottom = new THREE.Mesh(this.connectorGeo, this.connectorMaterial);
-
+        const connectorLeft = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
+        const connectorRight = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
+        const connectorTop = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
+        const connectorBottom = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
 
         taskBar.position.set(x, y, 0);
         var xOffset = barWidth;

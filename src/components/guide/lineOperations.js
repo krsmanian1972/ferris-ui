@@ -149,6 +149,7 @@ const splitLineToTwoAtVertex = function (lineSegmentArray, arrayIndex, pathIndex
 
 }
 
+
 const checkPointIsOnLineSegmentArray = function (lineSegmentArray, point) {
     var hitLineAndPath = { arrayIndex: "Nan", pathIndex: "Nan", existingVertex: null };
     for (var i = 0; i < lineSegmentArray.length; i++) {

@@ -185,20 +185,20 @@ class EditableProgramDetailUI extends Component {
 
                     <Trailer program_id={program.id} canEdit={this.store.canEdit} />
 
-                    <Card style={{ borderRadius: "12px", marginTop: "10px", background: "rgb(30,30,30)"}} title={<Title style={{color:"white"}} level={4}>Coach</Title>}>
+                    <Card style={{ borderRadius: "12px", marginTop: "10px", background: "rgb(40,40,40)"}} title={<Title style={{color:"white"}} level={4}>Coach</Title>}>
                         <Statistic value={coach.name} valueStyle={{color:"rgb(100,218,225)",fontWeight:"bold"}}/>
                         <Paragraph style={{color:"white",marginTop:10}}><MailOutlined /> {coach.email}</Paragraph>
                         <Paragraph style={{color:"white"}}><PhoneOutlined /> (91)99999 99999</Paragraph>
                     </Card>
                     
-                    
                     <ProgramDescription program={program} programStore={this.store} />
                     
                     <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
 
-                    <EnrollmentList programId={program.id} />
-
                     {this.getBanner(program, change)}
+
+                    <EnrollmentList programId={program.id} />
+                   
                 </div>
 
                 <ActivationModal programStore={this.store} />

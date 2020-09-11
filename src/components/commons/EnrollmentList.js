@@ -57,14 +57,13 @@ class EnrollmentList extends Component {
 
     render() {
         return(
-            <Card style={{ borderRadius: "12px",marginTop: "10px", background: "rgb(242,242,242)" }} title={<Title level={4}>Enrollments {this.countTag()}</Title>} extra={this.getEnrollmentOptions()}>
-                
+            <Card style={{ borderRadius: "12px",marginTop: "10px" }} title={<Title level={4}>Enrollments {this.countTag()}</Title>} extra={this.getEnrollmentOptions()}>
                 <List
                     dataSource={this.store.members}
                     renderItem={item => (
-                        <List.Item key={item.id}>
+                        <List.Item key={item.id} style={{background: "rgb(242,242,242)",color:'black',marginBottom:10}}>
                             <List.Item.Meta 
-                                avatar={<Avatar style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />}/>}
+                                avatar={<Avatar style={{ backgroundColor: '#87d068',margin:10 }} icon={<UserOutlined />}/>}
                                 title={item.name} 
                                 description={item.email}/>
                         </List.Item>
