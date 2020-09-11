@@ -150,31 +150,9 @@ class WorkflowUI extends Component {
 
         if (this.internalState === "") {
 
-            if (SINGLE_BUFFER_GEO === true) {
-                var geometry = new THREE.BufferGeometry();
-                var lineBufferLength = 0;
-
-                var positions = new Float32Array(MAX_POINTS * 3); // 3 vertices per point
-                positions[lineBufferLength++] = vertex.x;
-                positions[lineBufferLength++] = vertex.y;
-                positions[lineBufferLength++] = 0;
-                geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
-         
-                // drawcalls
-                var drawCount = 2; // draw the first 2 points, only
-                geometry.setDrawRange(0, drawCount);
-                geometry.attributes.position.needsUpdate = true;
-         
-                // material
-                var material = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 2 });
-
-                // line
-                var lineBuffer = new THREE.Line(geometry, material);
-                this.scene.add(lineBuffer);
-            }
             this.sourceConnectorPort[0] = portDescription;
 
-            const segment = { sourceDescription: portDescription, destDescription: {}, path: [], line: [], lineBuffer: lineBuffer, lineBufferLength: lineBufferLength };
+            const segment = { sourceDescription: portDescription, destDescription: {}, path: [], line: [] };
             segment.path.push(vertex);
 
             this.lineSegmentArray[this.lineSegmentArrayIndex] = segment;
