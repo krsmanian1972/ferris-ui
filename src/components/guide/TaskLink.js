@@ -36,7 +36,7 @@ export default class TaskLink {
         this.addInitialPoint(this.source.position.clone());
 
         this.line = new Line(this.geometry, this.material);
-        this.line.userData = this.getKey(connector);
+        this.line.userData = {id: this.getKey(connector)};
     }
 
     /**
@@ -74,6 +74,7 @@ export default class TaskLink {
      */
     addInitialPoint = (point) => {
         this.points.length = 0;
+        this.points.push(point);
         this.points.push(point);
 
         this.index = 0;
@@ -117,7 +118,7 @@ export default class TaskLink {
         }
         else if (type === TARGET) {
             const point = this.target.position.clone();
-            
+
             this.updatePoint(point);
         }
     }

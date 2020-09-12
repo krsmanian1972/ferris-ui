@@ -86,7 +86,9 @@ class WorkflowUI extends Component {
 
         this.clickControls.addEventListener('onSelect', this.onConnectorSelect);
 
-        this.lineObserver.addEventListener('onSelect', this.lineSelected);
+        this.lineObserver.addEventListener('onSnapStart', this.snapStart);
+        this.lineObserver.addEventListener('onSnapProgress', this.snapProgress);
+        this.lineObserver.addEventListener('onSnapEnd', this.snapEnd);
 
         this.renderer.domElement.addEventListener("mousemove", this.mouseMove);
         this.renderer.domElement.addEventListener("wheel", this.scroll);
@@ -100,10 +102,21 @@ class WorkflowUI extends Component {
         this.taskLinkFactory.onConnectorSelect(connector, this.scene);
     }
 
-    lineSelected = (event) => {
+    snapStart = (event) => {
         const line = event.object;
         line.material.color.set(0xFF0000);
     }
+
+    snapEnd = (event) => {
+        const line = event.object;
+        line.material.color.set(0x0000FF);
+    }
+    snapProgress = (event) => {
+        const line = event.object.selected;
+        const point = (event.object.clickPoint);
+        this.taskLinkFactory.snapLineAtPoint(line, point);
+    }
+
 
     keyDown = (event) => {
         if (event.keyCode === 27) {
@@ -142,7 +155,7 @@ class WorkflowUI extends Component {
             return;
         }
     }
-    
+
     getClickPoint = (event) => {
 
         const width = this.container.clientWidth;
@@ -411,7 +424,7 @@ class WorkflowUI extends Component {
 
         var xOffset = barWidth;
         var yOffset = barHeight;
-        
+
         if (shape === "CIRCLE") {
             xOffset = barHeight + 0.5;
             yOffset = barHeight;

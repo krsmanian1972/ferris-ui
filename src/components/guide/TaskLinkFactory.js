@@ -48,6 +48,39 @@ export default class TaskLinkFactory {
         this.state = DRAWING
         return this.currentLink;
     }
+    snapLineAtPoint = (line, point) => {
+         if(!this.snapLink) {
+             //console.log(line);
+             this.snapLink = this.taskLinks.get(line.userData.id);
+             var result = this.snapPointIndex =  this.findSnapPointIndex(this.snapLink, point);
+         }
+    }
+
+
+    findSnapPointIndex = (snapLink, point) =>{
+        for(var i = 0; i < snapLink.points.length-1; i++){
+            console.log(i);
+            var result = this.findDistanceSumMatches(snapLink.points[i],snapLink.points[i+1],point);
+            if(result.status === true){
+              console.log("Match at Index", i);
+              return i;
+            }
+      }
+    }
+
+    findDistanceSumMatches =  (source, dest, point) => {
+        var result = { status: false, existingVertex: null };
+        var distanceSourceToPoint = Math.sqrt((Math.pow((source.x - point.x), 2)) + Math.pow((source.y - point.y), 2));
+        var distanceDestToPoint = Math.sqrt((Math.pow((dest.x - point.x), 2)) + Math.pow((dest.y - point.y), 2));
+        var distanceSourceToDest = Math.sqrt((Math.pow((dest.x - source.x), 2)) + Math.pow((dest.y - source.y), 2));
+        var sumOfDistance = Math.abs(distanceSourceToPoint) + Math.abs(distanceDestToPoint);
+        var diff = sumOfDistance - distanceSourceToDest;
+
+        if (diff <= 0.003) {
+            result.status = true;
+        }
+        return result;
+    }
 
     finish = (connector) => {
 
