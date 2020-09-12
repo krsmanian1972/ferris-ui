@@ -12,8 +12,8 @@ import { EditOutlined, ScissorOutlined, NodeIndexOutlined } from '@ant-design/ic
 import Moment from 'react-moment';
 import moment from 'moment';
 import 'moment-timezone';
-
 import { drawLineWithPrevPoint, snapAtClickPoint, SINGLE_BUFFER_GEO } from './lineOperations';
+import {LineObserver} from './LineObserver';
 import { updateVertexMovement, removeRecurringPointOnLineSegment, removeLineSegmentOnCickPoint } from './lineOperations';
 
 import { buildCircularTextMaterial, buildRectTextMaterial, buildSquareTextMaterial, buildStartStopTextMaterial } from './Shapes';
@@ -73,7 +73,6 @@ class WorkflowUI extends Component {
         this.clickCounter = 0;
         this.dragMode = {};
 
-        this.taskLinkFactory = new TaskLinkFactory();
     }
 
     componentDidMount() {
@@ -84,7 +83,9 @@ class WorkflowUI extends Component {
         this.dragControls.addEventListener('dragstart', this.dragStartCallback);
         this.dragControls.addEventListener('dragend', this.dragEndCallback);
 
-        this.connectorControls.addEventListener('onSelect', this.onConnectorSelect);
+        this.clickControls.addEventListener('onSelect', this.onConnectorSelect);
+
+        this.lineObserver.addEventListener('onSelect', this.lineSelected);
 
         this.renderer.domElement.addEventListener("mousemove", this.mouseMove);
         this.renderer.domElement.addEventListener("wheel", this.scroll);
@@ -95,9 +96,12 @@ class WorkflowUI extends Component {
 
     onConnectorSelect = (event) => {
         const connector = event.object;
-        this.taskLinkFactory.onConnectorSelect(connector, this.scene);
+        this.taskLinkFactory.onConnectorSelect(connector,this.scene);
     }
-
+    lineSelected = (event) =>{
+        const line = event.object;
+        line.material.color.set( 0xFF0000 );
+    }
 
     keyDown = (event) => {
         if (event.keyCode === 27) {
@@ -106,8 +110,7 @@ class WorkflowUI extends Component {
 
     mouseClick = (event) => {
         var point = this.getClickPoint(event);
-
-        if (this.taskLinkFactory.canDraw()) {
+        if(this.taskLinkFactory.canDraw()) {
             this.taskLinkFactory.addVertex(point);
             return;
         }
@@ -135,6 +138,34 @@ class WorkflowUI extends Component {
                 this.mode = "VERTEX_DRAG_MODE";
             }
             return;
+        }
+    }
+
+
+    updateConnectingLine = (index, port) => {
+        var position = 0;
+        var lineSource = {};
+        var lineDest = {};
+
+        if (port === "SOURCE") {
+            position = 0;
+            lineSource.x = this.lineSegmentArray[index].sourceDescription.x;
+            lineSource.y = this.lineSegmentArray[index].sourceDescription.y;
+            pathPosition = 1;
+            this.lineSegmentArray[index].path[0].x = lineSource.x;
+            this.lineSegmentArray[index].path[0].y = lineSource.y;
+            drawLineWithPrevPoint(this.lineSegmentArray, this.scene, index, pathPosition, position);
+        }
+        else if (port === "DEST") {
+            position = this.lineSegmentArray[index].line.length - 1;
+            var pathPosition = this.lineSegmentArray[index].path.length - 1;
+            lineSource.x = this.lineSegmentArray[index].path[pathPosition - 1].x;
+            lineSource.y = this.lineSegmentArray[index].path[pathPosition - 1].y;
+            lineDest.x = this.lineSegmentArray[index].destDescription.x;
+            lineDest.y = this.lineSegmentArray[index].destDescription.y;
+            this.lineSegmentArray[index].path[pathPosition].x = lineDest.x;
+            this.lineSegmentArray[index].path[pathPosition].y = lineDest.y;
+            drawLineWithPrevPoint(this.lineSegmentArray, this.scene, index, pathPosition, position);
         }
     }
 
@@ -190,46 +221,46 @@ class WorkflowUI extends Component {
             this.camera.position.y += 0.1
         }
     }
-
-    moveLinks = () => {
-        if (!this.selectedTaskBar) {
+    moveLinks = () =>{
+        if(!this.selectedTaskBar ){
             return;
         }
         const taskId = this.selectedTaskBar.userData.id;
 
-        var inboundLinks = this.getLinksByType(taskId, "target");
-        for (var i = 0; i < inboundLinks.length; i++) {
-            inboundLinks[i] && inboundLinks[i].onMove("target");
-        }
+      var inboundLinks = this.getLinksByType(taskId, "target");
+      for (var i = 0; i < inboundLinks.length; i++){
+        inboundLinks[i] && inboundLinks[i].onMove("target");
+      }
 
-        var outboundLinks = this.getLinksByType(taskId, "source");
-        for (var i = 0; i < outboundLinks.length; i++) {
-            outboundLinks[i] && outboundLinks[i].onMove("source");
-        }
+      var outboundLinks = this.getLinksByType(taskId, "source");
+      for (var i = 0; i < outboundLinks.length; i++){
+        outboundLinks[i] && outboundLinks[i].onMove("source");
+      }
+
     }
-
     dragStartCallback = (event) => {
         this.selectedTaskBar = event.object;
-
         if (this.selectedTaskBar) {
             this.moveDots();
             this.moveLinks();
+
         }
     }
 
     dragEndCallback = (event) => {
 
         if (this.selectedTaskBar) {
-
+            //align to X and Y to grid
             this.selectedTaskBar.position.y = Math.round(this.selectedTaskBar.position.y * 2) / 2;
             this.selectedTaskBar.position.x = Math.round(this.selectedTaskBar.position.x * 2) / 2;
-
             this.moveDots();
             this.moveLinks();
-
             this.selectedTaskBar = null;
         }
 
+        if (this.mode === "VERTEX_DRAG_MODE") {
+            this.mode = "";
+        }
     }
 
     mouseMove = (event) => {
@@ -237,7 +268,6 @@ class WorkflowUI extends Component {
 
         if (this.selectedTaskBar) {
             this.moveDots();
-            this.moveLinks();
             return;
         }
 
@@ -285,6 +315,66 @@ class WorkflowUI extends Component {
         right.position.set(rightX, rightY, 0);
         top.position.set(topX, topY, 0);
         bottom.position.set(bottomX, bottomY, 0);
+
+        //move the lines start point or end point as well
+        for (var i = 0; i < this.lineSegmentArray.length; i++) {
+            if (this.lineSegmentArray[i].sourceDescription.taskId === taskName) {
+                var direction = this.lineSegmentArray[i].sourceDescription.direction;
+
+                if (direction == "left") {
+                    //left connector has a line
+                    this.lineSegmentArray[i].sourceDescription.x = leftX;
+                    this.lineSegmentArray[i].sourceDescription.y = leftY;
+                    this.updateConnectingLine(i, "SOURCE");
+                }
+                if (direction == "right") {
+                    //right connector has a line
+                    this.lineSegmentArray[i].sourceDescription.x = rightX;
+                    this.lineSegmentArray[i].sourceDescription.y = rightY;
+                    this.updateConnectingLine(i, "SOURCE");
+                }
+                if (direction == "top") {
+                    //Top connector has a line
+                    this.lineSegmentArray[i].sourceDescription.x = topX;
+                    this.lineSegmentArray[i].sourceDescription.y = topY;
+                    this.updateConnectingLine(i, "SOURCE");
+                }
+                if (direction == "bottom") {
+                    //bottom connector has a line
+                    this.lineSegmentArray[i].sourceDescription.x = bottomX;
+                    this.lineSegmentArray[i].sourceDescription.y = bottomY;
+                    this.updateConnectingLine(i, "SOURCE");
+                }
+            }
+
+            if (this.lineSegmentArray[i].destDescription.taskId === taskName) {
+                var direction = this.lineSegmentArray[i].destDescription.direction;
+                if (direction == "left") {
+                    //left connector has a line
+                    this.lineSegmentArray[i].destDescription.x = leftX;
+                    this.lineSegmentArray[i].destDescription.y = leftY;
+                    this.updateConnectingLine(i, "DEST");
+                }
+                if (direction == "right") {
+                    //right connector has a line
+                    this.lineSegmentArray[i].destDescription.x = rightX;
+                    this.lineSegmentArray[i].destDescription.y = rightY;
+                    this.updateConnectingLine(i, "DEST");
+                }
+                if (direction == "top") {
+                    //Top connector has a line
+                    this.lineSegmentArray[i].destDescription.x = topX;
+                    this.lineSegmentArray[i].destDescription.y = topY;
+                    this.updateConnectingLine(i, "DEST");
+                }
+                if (direction == "bottom") {
+                    //bottom connector has a line
+                    this.lineSegmentArray[i].destDescription.x = bottomX;
+                    this.lineSegmentArray[i].destDescription.y = bottomY;
+                    this.updateConnectingLine(i, "DEST");
+                }
+            }
+        }
     }
 
     componentWillUnmount() {
@@ -324,7 +414,13 @@ class WorkflowUI extends Component {
         this.scene.add(light);
 
         this.dragControls = new DragControls(this.taskBars, this.camera, this.renderer.domElement);
-        this.connectorControls = new ClickControls(this.dots, this.camera, this.renderer.domElement);
+        this.clickControls = new ClickControls(this.dots, this.camera, this.renderer.domElement);
+
+        this.lineContainer = new THREE.Object3D();
+        this.scene.add(this.lineContainer);
+
+        this.lineObserver = new LineObserver(this.camera, this.renderer.domElement, this.lineContainer);
+        this.taskLinkFactory = new TaskLinkFactory(this.lineContainer );
     };
 
     setGraphPaper = () => {
@@ -344,19 +440,19 @@ class WorkflowUI extends Component {
     }
 
     getLinksByType = (taskId, linkType) => {
-        const { connectorLeft, connectorRight, connectorTop, connectorBottom } = this.connectorMap[taskId];
+        const {connectorLeft,connectorRight,connectorTop, connectorBottom} = this.connectorMap[taskId];
         const links = [];
-        if (connectorLeft.userData.taskLinkDirection === linkType) {
-            links.push(connectorLeft.userData.taskLink);
+        if(connectorLeft.userData.taskLinkDirection === linkType){
+          links.push(connectorLeft.userData.taskLink);
         }
-        if (connectorRight.userData.taskLinkDirection === linkType) {
-            links.push(connectorRight.userData.taskLink);
+        if(connectorRight.userData.taskLinkDirection === linkType){
+          links.push(connectorRight.userData.taskLink);
         }
-        if (connectorTop.userData.taskLinkDirection === linkType) {
-            links.push(connectorTop.userData.taskLink);
+        if(connectorTop.userData.taskLinkDirection === linkType){
+          links.push(connectorTop.userData.taskLink);
         }
-        if (connectorBottom.userData.taskLinkDirection === linkType) {
-            links.push(connectorBottom.userData.taskLink);
+        if(connectorBottom.userData.taskLinkDirection === linkType){
+          links.push(connectorBottom.userData.taskLink);
         }
         return links;
     }
@@ -370,7 +466,7 @@ class WorkflowUI extends Component {
         this.addTask(5, "STOP2", "", "", "", 2, -2.5, "CIRCLE");
     }
 
-    addLink = (sourceTaskId, targetTaskId, sourcePort, targetPort, points) => {
+    addLink = (sourceTaskId,targetTaskId,sourcePort,targetPort,points) => {
 
     }
 
@@ -420,7 +516,7 @@ class WorkflowUI extends Component {
         const connectorBottom = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
 
         connectorLeft.position.set(x - xOffset / 2, y, 0);
-        connectorLeft.userData = { id: taskId, direction: 'left', };
+        connectorLeft.userData = { id: taskId, direction: 'left',  };
 
         connectorRight.position.set(x + xOffset / 2, y, 0);
         connectorRight.userData = { id: taskId, direction: 'right' };

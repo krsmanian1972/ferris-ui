@@ -6,7 +6,7 @@ const barHeight = 2.5 / 3;//1
 const barDepth = 0;
 const squareBarWidth = 2;
 const squareBarHeight = 2;
-const connectorRadius = 0.04;//0.06
+const connectorRadius = 0.06;//0.06
 
 const vGap = 20;
 const borderGap = 15;
@@ -224,7 +224,7 @@ const buildSquareTextMaterial = function (taskId, taskName, role, plannedPeriod,
     //define the end point of line1 (x2,y2)
     context.lineTo(canvas.width / 2, canvas.height);
 
-    //define the end point of line2 (x3,y3)	
+    //define the end point of line2 (x3,y3)
     context.lineTo(canvas.width, canvas.height / 2);
     context.lineTo(canvas.width / 2, 0 * canvas.height);
     context.lineTo(0, canvas.height / 2);
@@ -251,4 +251,3 @@ const buildSquareTextMaterial = function (taskId, taskName, role, plannedPeriod,
 }
 
 export { buildTaskCanvas, buildCircularTextMaterial, buildRectTextMaterial, buildSquareTextMaterial, buildStartStopTextMaterial, taskBarColor, barWidth, barHeight, barDepth, squareBarWidth, squareBarHeight, connectorRadius, vGap, borderGap, boldFont, regularFont };
-

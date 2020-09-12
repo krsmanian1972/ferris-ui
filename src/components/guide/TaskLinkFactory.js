@@ -1,5 +1,4 @@
 import TaskLink from "./TaskLink";
-
 const IDLE = "idle"
 const DRAWING = "drawing";
 const SOURCE = "source";
@@ -8,12 +7,12 @@ export default class TaskLinkFactory {
 
     //The Key is the Task_id and the direction
     taskLinks = new Map();
-    
+
 
     state = IDLE;
 
-    constructor(lineObserver) {
-        this.lineObserver = lineObserver;
+    constructor(lineContainer) {
+        this.lineContainer = lineContainer;
     }
 
     onConnectorSelect = (connector, scene) => {
@@ -41,9 +40,7 @@ export default class TaskLinkFactory {
             connector.userData.taskLinkDirection = SOURCE;
 
             const theLine = taskLink.getLine();
-            scene.add(theLine);
-            this.lineObserver.add(theLine)
-
+            this.lineContainer.add(theLine)
             this.taskLinks.set(key, taskLink);
             this.currentLink = taskLink;
         }
@@ -81,4 +78,5 @@ export default class TaskLinkFactory {
     getKey = (connector) => {
         return connector.userData.id + "~" + connector.userData.direction;
     }
+
 }
