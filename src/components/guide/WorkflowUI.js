@@ -411,6 +411,12 @@ class WorkflowUI extends Component {
         this.scene.add(grid);
     }
 
+    getInboundLinks = (taskId) => {
+
+        const {connectorLeft,connectorRight,connectorTop, connectorBottom} = this.connectorMap[taskId] 
+
+
+    }
 
     populateTasks = () => {
         this.addTask(0, "START", "", "", "", 0, 3, "START_STOP_BOX");
@@ -419,6 +425,10 @@ class WorkflowUI extends Component {
         this.addTask(3, 'Look at it later', "", '2019-08-9', '2019-08-9', 2, -1, "");
         this.addTask(4, "STOP1", "", "", "", -2, -2.5, "CIRCLE");
         this.addTask(5, "STOP2", "", "", "", 2, -2.5, "CIRCLE");
+    }
+
+    addLink = (sourceTaskId,targetTaskId,sourcePort,targetPort,points) => {
+
     }
 
     addTask = (taskId, taskName, role, startDate, endDate, x, y, shape) => {
@@ -467,7 +477,7 @@ class WorkflowUI extends Component {
         const connectorBottom = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
 
         connectorLeft.position.set(x - xOffset / 2, y, 0);
-        connectorLeft.userData = { id: taskId, direction: 'left' };
+        connectorLeft.userData = { id: taskId, direction: 'left',  };
 
         connectorRight.position.set(x + xOffset / 2, y, 0);
         connectorRight.userData = { id: taskId, direction: 'right' };

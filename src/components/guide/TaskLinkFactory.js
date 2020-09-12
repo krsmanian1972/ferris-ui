@@ -73,4 +73,14 @@ export default class TaskLinkFactory {
     getKey = (connector) => {
         return connector.userData.id + "~" + connector.userData.direction;
     }
+
+
+
+    /**
+     * The connector can be either a source or a target of a taskLink
+     * @param {*} connector 
+     */
+    onConnectorMove = (connector) => {
+        const key = this.getKey(connector);
+    }
 }

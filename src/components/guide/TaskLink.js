@@ -71,6 +71,7 @@ export default class TaskLink {
     addInitialPoint = (point) => {
         this.points.length = 0;
         this.points.push(point);
+
         this.index=0;
 
         this.positions[ this.index ++ ] = point.x;
@@ -102,6 +103,8 @@ export default class TaskLink {
 
     addVertex = (point) => {
 
+        this.points.push(point);
+        
         this.positions[ this.index ++ ] = point.x;
         this.positions[ this.index ++ ] = point.y;
         this.positions[ this.index ++ ] = 0
