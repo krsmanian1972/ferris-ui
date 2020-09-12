@@ -1,4 +1,4 @@
-import { BufferAttribute,Line,LineBasicMaterial,BufferGeometry } from 'three';
+import { BufferAttribute, Line, LineBasicMaterial, BufferGeometry } from 'three';
 
 const taskBarColor = "#2A4B7C";
 const sourceColor = 0xff0000;
@@ -31,11 +31,11 @@ export default class TaskLink {
         this.source = connector;
         this.source.material.color.set(sourceColor);
 
-        this.geometry.setAttribute( 'position', new BufferAttribute( this.positions, 3 ) );
+        this.geometry.setAttribute('position', new BufferAttribute(this.positions, 3));
 
         this.addInitialPoint(this.source.position.clone());
 
-        this.line = new Line( this.geometry,  this.material );
+        this.line = new Line(this.geometry, this.material);
         this.line.userData = this.getKey(connector);
     }
 
@@ -75,17 +75,17 @@ export default class TaskLink {
         this.points.length = 0;
         this.points.push(point);
 
-        this.index=0;
+        this.index = 0;
 
-        this.positions[ this.index ++ ] = point.x;
-        this.positions[ this.index ++ ] = point.y;
-        this.positions[ this.index ++ ] = point.z;
+        this.positions[this.index++] = point.x;
+        this.positions[this.index++] = point.y;
+        this.positions[this.index++] = point.z;
 
-        this.positions[ this.index ++ ] = point.x;
-        this.positions[ this.index ++ ] = point.y;
-        this.positions[ this.index ++ ] = point.z;
+        this.positions[this.index++] = point.x;
+        this.positions[this.index++] = point.y;
+        this.positions[this.index++] = point.z;
 
-        this.geometry.setDrawRange( 0, this.index/3 );
+        this.geometry.setDrawRange(0, this.index / 3);
         this.geometry.attributes.position.needsUpdate = true;
     }
 
@@ -97,38 +97,39 @@ export default class TaskLink {
      */
     updatePoint = (point) => {
 
-        this.positions[this.index-3] = point.x;
-        this.positions[this.index-2] = point.y;
-        this.positions[this.index-1] = point.z;
+        this.positions[this.index - 3] = point.x;
+        this.positions[this.index - 2] = point.y;
+        this.positions[this.index - 1] = point.z;
 
         this.geometry.attributes.position.needsUpdate = true;
     }
 
     onMove = (type) => {
-      if(type === SOURCE){
-        const point = this.source.position.clone();;
+        if (type === SOURCE) {
+            const point = this.source.position.clone();
 
-        this.positions[ 0 ] = point.x;
-        this.positions[ 1 ] = point.y;
-        this.positions[ 2 ] = 0;
-        this.geometry.attributes.position.needsUpdate = true;
-      }
-      else if(type === TARGET){
-        const point = this.target.position.clone();;
-        this.updatePoint(point);
-      }
+            this.positions[0] = point.x;
+            this.positions[1] = point.y;
+            this.positions[2] = 0;
+
+            this.geometry.attributes.position.needsUpdate = true;
+        }
+        else if (type === TARGET) {
+            const point = this.target.position.clone();
+            
+            this.updatePoint(point);
+        }
     }
-
 
     addVertex = (point) => {
 
         this.points.push(point);
 
-        this.positions[ this.index ++ ] = point.x;
-        this.positions[ this.index ++ ] = point.y;
-        this.positions[ this.index ++ ] = 0
+        this.positions[this.index++] = point.x;
+        this.positions[this.index++] = point.y;
+        this.positions[this.index++] = 0
 
-        this.geometry.setDrawRange( 0, this.index/3 );
+        this.geometry.setDrawRange(0, this.index / 3);
 
         this.geometry.attributes.position.needsUpdate = true;
     }

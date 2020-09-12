@@ -8,16 +8,17 @@ export default class TaskLinkFactory {
 
     //The Key is the Task_id and the direction
     taskLinks = new Map();
+    
 
     state = IDLE;
 
-    constructor() {
-
+    constructor(lineObserver) {
+        this.lineObserver = lineObserver;
     }
 
-    onConnectorSelect = (connector,scene) => {
-        if(this.state === IDLE) {
-            this.start(connector,scene);
+    onConnectorSelect = (connector, scene) => {
+        if (this.state === IDLE) {
+            this.start(connector, scene);
         }
         else {
             this.finish(connector);
@@ -38,7 +39,11 @@ export default class TaskLinkFactory {
             const taskLink = new TaskLink(connector);
             connector.userData.taskLink = taskLink;
             connector.userData.taskLinkDirection = SOURCE;
-            scene.add(taskLink.getLine());
+
+            const theLine = taskLink.getLine();
+            scene.add(theLine);
+            this.lineObserver.add(theLine)
+
             this.taskLinks.set(key, taskLink);
             this.currentLink = taskLink;
         }
@@ -62,31 +67,18 @@ export default class TaskLinkFactory {
     }
 
     addVertex = (point) => {
-
-        if(this.canDraw()) {
+        if (this.canDraw()) {
             this.currentLink.addVertex(point);
         }
     }
 
     updatePoint = (point) => {
-
-        if(this.canDraw()) {
+        if (this.canDraw()) {
             this.currentLink.updatePoint(point);
         }
     }
 
-
     getKey = (connector) => {
         return connector.userData.id + "~" + connector.userData.direction;
-    }
-
-
-
-    /**
-     * The connector can be either a source or a target of a taskLink
-     * @param {*} connector
-     */
-    onConnectorMove = (connector) => {
-        const key = this.getKey(connector);
     }
 }
