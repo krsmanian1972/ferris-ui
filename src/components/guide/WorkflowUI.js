@@ -89,7 +89,6 @@ class WorkflowUI extends Component {
         this.renderer.domElement.addEventListener("mousemove", this.mouseMove);
         this.renderer.domElement.addEventListener("wheel", this.scroll);
 
-        this.container.addEventListener("dblclick", this.toggleDrawMode);
         this.container.addEventListener("click", this.mouseClick);
         this.container.addEventListener("keydown", this.keyDown);
     }
@@ -249,6 +248,7 @@ class WorkflowUI extends Component {
             this.moveDots();
             return;
         }
+
         if (this.mode === "VERTEX_DRAG_MODE") {
             updateVertexMovement(this.lineSegmentArray, this.dragMode.arrayIndex, this.dragMode.pathIndex, point, this.scene);
         }
@@ -257,36 +257,11 @@ class WorkflowUI extends Component {
             this.taskLinkFactory.updatePoint(point);
             return;
         }
-
-        if (this.mode === "FREE_LINE_CONNECTOR") {
-            if (this.internalState === "FOUND_SOURCE_PORT") {
-                //draw projection of the line the previous points axis
-                this.scene.remove(this.line[0]);
-                var clickX = point.x;
-                var clickY = point.y;
-
-                var index = (this.lineSegmentArray[this.lineSegmentArrayIndex].path.length) - 1;
-                var prevPoint = this.lineSegmentArray[this.lineSegmentArrayIndex].path[index];
-
-                var points = [];
-
-                var material = new THREE.LineBasicMaterial({ color: 0x0000ff, linewidth: 2 });
-
-                points.push(new THREE.Vector3(prevPoint.x, prevPoint.y, 0));
-                points.push(new THREE.Vector3(clickX, clickY, 0));
-
-                var geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-                this.line[0] = new THREE.Line(geometry, material);
-                this.scene.add(this.line[0]);
-            }
-        }
     }
 
     moveDots = () => {
-        const taskName = this.selectedTaskBar.userData.id;
+        const taskId = this.selectedTaskBar.userData.id;
         const shape = this.selectedTaskBar.userData.shape;
-
 
         var xOffset = barWidth;
         var yOffset = barHeight;
@@ -300,10 +275,10 @@ class WorkflowUI extends Component {
             yOffset = squareBarHeight;
         }
 
-        const left = this.connectorMap[taskName].connectorLeft;
-        const right = this.connectorMap[taskName].connectorRight;
-        const top = this.connectorMap[taskName].connectorTop;
-        const bottom = this.connectorMap[taskName].connectorBottom;
+        const left = this.connectorMap[taskId].connectorLeft;
+        const right = this.connectorMap[taskId].connectorRight;
+        const top = this.connectorMap[taskId].connectorTop;
+        const bottom = this.connectorMap[taskId].connectorBottom;
 
         const leftX = this.selectedTaskBar.position.x - xOffset / 2;
         const leftY = this.selectedTaskBar.position.y;
@@ -442,7 +417,7 @@ class WorkflowUI extends Component {
         this.addTask(1, 'Task ', 'Completion Today', '2019-08-9', '2019-08-9', 0, 1, "DECISION_BOX");
         this.addTask(2, 'Work on it now', "", '2019-08-9', '2019-08-9', -2, -1, "");
         this.addTask(3, 'Look at it later', "", '2019-08-9', '2019-08-9', 2, -1, "");
-        this.addTask(4, "STOP", "", "", "", -2, -2.5, "CIRCLE");
+        this.addTask(4, "STOP1", "", "", "", -2, -2.5, "CIRCLE");
         this.addTask(5, "STOP2", "", "", "", 2, -2.5, "CIRCLE");
     }
 
@@ -451,6 +426,7 @@ class WorkflowUI extends Component {
         const period = startDate + ' - ' + endDate;
         var taskMaterial = '';
         var taskBar = ''
+
         if (shape === "") {
             taskMaterial = buildRectTextMaterial(1, taskName, role, period, period, shape);
             taskBar = new THREE.Mesh(this.taskBarGeo, taskMaterial);
@@ -468,18 +444,13 @@ class WorkflowUI extends Component {
             taskBar = new THREE.Mesh(this.taskBarGeo, taskMaterial);
         }
 
-        const group = new THREE.Group();
-        group.add(taskBar);
-
-        const connectorLeft = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
-        const connectorRight = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
-        const connectorTop = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
-        const connectorBottom = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
-
+        // we need task_id and task_name
+        taskBar.userData = { id: taskId, type: 'taskBar', shape: shape };
         taskBar.position.set(x, y, 0);
+        this.taskBars.push(taskBar);
+
         var xOffset = barWidth;
         var yOffset = barHeight;
-
         if (shape === "CIRCLE") {
             xOffset = barHeight + 0.5;
             yOffset = barHeight;
@@ -488,6 +459,12 @@ class WorkflowUI extends Component {
             xOffset = squareBarWidth;
             yOffset = squareBarHeight;
         }
+
+
+        const connectorLeft = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
+        const connectorRight = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
+        const connectorTop = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
+        const connectorBottom = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
 
         connectorLeft.position.set(x - xOffset / 2, y, 0);
         connectorLeft.userData = { id: taskId, direction: 'left' };
@@ -501,26 +478,26 @@ class WorkflowUI extends Component {
         connectorBottom.position.set(x, y - yOffset / 2, 0);
         connectorBottom.userData = { id: taskId, direction: 'bottom' };
 
-        group.add(connectorLeft);
-        group.add(connectorRight);
-        group.add(connectorTop);
-        group.add(connectorBottom);
-
-        // we need task_id and task_name
-        taskBar.userData = { id: taskId, type: 'taskBar', shape: shape };
-
         this.connectorMap[taskId] = { connectorLeft: connectorLeft, connectorRight: connectorRight, connectorTop: connectorTop, connectorBottom: connectorBottom };
-
-
-        this.scene.add(group);
-
-        this.taskBars.push(taskBar);
+        
         this.dots.push(connectorLeft);
         this.dots.push(connectorRight);
         this.dots.push(connectorTop);
         this.dots.push(connectorBottom);
 
+        const group = new THREE.Group();
+
+        group.add(taskBar);
+
+        group.add(connectorLeft);
+        group.add(connectorRight);
+        group.add(connectorTop);
+        group.add(connectorBottom);
+
+        this.scene.add(group);
+       
         this.camera.updateProjectionMatrix();
+
         this.renderer.render(this.scene, this.camera);
     }
 
