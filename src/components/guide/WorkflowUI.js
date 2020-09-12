@@ -103,7 +103,7 @@ class WorkflowUI extends Component {
         if (event.keyCode === 27) {
         }
     }
-   
+
     mouseClick = (event) => {
         var point = this.getClickPoint(event);
 
@@ -218,11 +218,29 @@ class WorkflowUI extends Component {
             this.camera.position.y += 0.1
         }
     }
+    moveLinks = () =>{
+      if(!this.selectedTaskBar ){
+        return;
+      }
+      const taskId = this.selectedTaskBar.userData.id;
 
+      var inboundLinks = this.getLinksByType(taskId, "target");
+      for (var i = 0; i < inboundLinks.length; i++){
+        inboundLinks[i] && inboundLinks[i].onMove("target");
+      }
+
+      var outboundLinks = this.getLinksByType(taskId, "source");
+      for (var i = 0; i < outboundLinks.length; i++){
+        outboundLinks[i] && outboundLinks[i].onMove("source");
+      }
+
+    }
     dragStartCallback = (event) => {
         this.selectedTaskBar = event.object;
         if (this.selectedTaskBar) {
             this.moveDots();
+            this.moveLinks();
+
         }
     }
 
@@ -233,6 +251,7 @@ class WorkflowUI extends Component {
             this.selectedTaskBar.position.y = Math.round(this.selectedTaskBar.position.y * 2) / 2;
             this.selectedTaskBar.position.x = Math.round(this.selectedTaskBar.position.x * 2) / 2;
             this.moveDots();
+            this.moveLinks();
             this.selectedTaskBar = null;
         }
 
@@ -411,10 +430,23 @@ class WorkflowUI extends Component {
         this.scene.add(grid);
     }
 
-    getInboundLinks = (taskId) => {
+    getLinksByType = (taskId, linkType) => {
 
-        const {connectorLeft,connectorRight,connectorTop, connectorBottom} = this.connectorMap[taskId] 
-
+        const {connectorLeft,connectorRight,connectorTop, connectorBottom} = this.connectorMap[taskId];
+        const links = [];
+        if(connectorLeft.userData.taskLinkDirection === linkType){
+          links.push(connectorLeft.userData.taskLink);
+        }
+        if(connectorRight.userData.taskLinkDirection === linkType){
+          links.push(connectorRight.userData.taskLink);
+        }
+        if(connectorTop.userData.taskLinkDirection === linkType){
+          links.push(connectorTop.userData.taskLink);
+        }
+        if(connectorBottom.userData.taskLinkDirection === linkType){
+          links.push(connectorBottom.userData.taskLink);
+        }
+        return links;
 
     }
 
@@ -489,7 +521,7 @@ class WorkflowUI extends Component {
         connectorBottom.userData = { id: taskId, direction: 'bottom' };
 
         this.connectorMap[taskId] = { connectorLeft: connectorLeft, connectorRight: connectorRight, connectorTop: connectorTop, connectorBottom: connectorBottom };
-        
+
         this.dots.push(connectorLeft);
         this.dots.push(connectorRight);
         this.dots.push(connectorTop);
@@ -505,7 +537,7 @@ class WorkflowUI extends Component {
         group.add(connectorBottom);
 
         this.scene.add(group);
-       
+
         this.camera.updateProjectionMatrix();
 
         this.renderer.render(this.scene, this.camera);

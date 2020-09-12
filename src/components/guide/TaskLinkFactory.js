@@ -2,7 +2,8 @@ import TaskLink from "./TaskLink";
 
 const IDLE = "idle"
 const DRAWING = "drawing";
-
+const SOURCE = "source";
+const TARGET = "target";
 export default class TaskLinkFactory {
 
     //The Key is the Task_id and the direction
@@ -35,6 +36,8 @@ export default class TaskLinkFactory {
         }
         else {
             const taskLink = new TaskLink(connector);
+            connector.userData.taskLink = taskLink;
+            connector.userData.taskLinkDirection = SOURCE;
             scene.add(taskLink.getLine());
             this.taskLinks.set(key, taskLink);
             this.currentLink = taskLink;
@@ -48,6 +51,8 @@ export default class TaskLinkFactory {
 
         if (this.currentLink) {
             this.currentLink.finish(connector);
+            connector.userData.taskLink = this.currentLink;
+            connector.userData.taskLinkDirection = TARGET;
             this.state = IDLE;
         }
     }
@@ -57,18 +62,19 @@ export default class TaskLinkFactory {
     }
 
     addVertex = (point) => {
-    
+
         if(this.canDraw()) {
             this.currentLink.addVertex(point);
         }
     }
 
     updatePoint = (point) => {
-    
+
         if(this.canDraw()) {
             this.currentLink.updatePoint(point);
         }
     }
+
 
     getKey = (connector) => {
         return connector.userData.id + "~" + connector.userData.direction;
@@ -78,7 +84,7 @@ export default class TaskLinkFactory {
 
     /**
      * The connector can be either a source or a target of a taskLink
-     * @param {*} connector 
+     * @param {*} connector
      */
     onConnectorMove = (connector) => {
         const key = this.getKey(connector);
