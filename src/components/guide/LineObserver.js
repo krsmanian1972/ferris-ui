@@ -10,11 +10,11 @@ var LineObserver = function (_camera, _domElement, _lineContainer) {
     var scope = this;
 
     function activate() {
-        _domElement.addEventListener('mousedown', onDocumentMouseDown, false);
+        _domElement.addEventListener('dblclick', onDoubleClick, false);
     }
 
 
-    function onDocumentMouseDown(event) {
+    function onDoubleClick(event) {
 
         event.preventDefault();
 

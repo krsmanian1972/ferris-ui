@@ -56,6 +56,7 @@ export default class TaskLink {
         return false;
     }
 
+
     getKey = (connector) => {
         return connector.userData.id + "~" + connector.userData.direction;
     }
