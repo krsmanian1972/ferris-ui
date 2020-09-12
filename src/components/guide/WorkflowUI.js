@@ -431,7 +431,6 @@ class WorkflowUI extends Component {
     }
 
     getLinksByType = (taskId, linkType) => {
-
         const {connectorLeft,connectorRight,connectorTop, connectorBottom} = this.connectorMap[taskId];
         const links = [];
         if(connectorLeft.userData.taskLinkDirection === linkType){
@@ -447,7 +446,6 @@ class WorkflowUI extends Component {
           links.push(connectorBottom.userData.taskLink);
         }
         return links;
-
     }
 
     populateTasks = () => {

@@ -104,8 +104,9 @@ export default class TaskLink {
         this.geometry.attributes.position.needsUpdate = true;
     }
 
-    onMove = (point, type) => {
+    onMove = (type) => {
       if(type === SOURCE){
+        const point = this.source.position.clone();;
 
         this.positions[ 0 ] = point.x;
         this.positions[ 1 ] = point.y;
@@ -113,7 +114,7 @@ export default class TaskLink {
         this.geometry.attributes.position.needsUpdate = true;
       }
       else if(type === TARGET){
-
+        const point = this.target.position.clone();;
         this.updatePoint(point);
       }
     }
