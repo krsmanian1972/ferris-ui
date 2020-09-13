@@ -32,8 +32,7 @@ var ClickControls = function (_objects, _camera, _domElement) {
         _raycaster.intersectObjects(_objects, true, _intersections);
 
         if (_intersections.length > 0) {
-
-            _selected = (scope.transformGroup === true) ? _objects[0] : _intersections[0].object;
+            _selected = _intersections[0].object;
             _domElement.style.cursor = 'pointer';
             scope.dispatchEvent({ type: 'onSelect', object: _selected });
         }

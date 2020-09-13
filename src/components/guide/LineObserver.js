@@ -1,7 +1,7 @@
 import {EventDispatcher,Raycaster,Vector2} from 'three';
 
 
-var LineObserver = function (_camera, _domElement, _lineContainer) {
+var LineObserver = function (_lineContainer, _camera, _domElement ) {
     var _raycaster = new Raycaster();
     _raycaster.params.Line.threshold = 0.1;
     var _mouse = new Vector2();
@@ -36,15 +36,19 @@ var LineObserver = function (_camera, _domElement, _lineContainer) {
     function onSnapStart(event) {
 
         event.preventDefault();
-        var rect = _domElement.getBoundingClientRect();
-        _mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-        _mouse.y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
 
+        var rect = _domElement.getBoundingClientRect();
+        const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        const y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+        _mouse.x = x;
+        _mouse.y = y;
+        
         _intersections.length = 0;
 
         _raycaster.setFromCamera(_mouse, _camera);
 
-        _raycaster.intersectObjects(_lineContainer.children, true, _intersections);
+        _raycaster.intersectObjects(_lineContainer, true, _intersections);
 
         if (_intersections.length > 0) {
             _selected = _intersections[0].object;

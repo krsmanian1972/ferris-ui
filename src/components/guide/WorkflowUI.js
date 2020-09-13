@@ -92,8 +92,8 @@ class WorkflowUI extends Component {
 
         this.renderer.domElement.addEventListener("mousemove", this.mouseMove);
         this.renderer.domElement.addEventListener("wheel", this.scroll);
+        this.renderer.domElement.addEventListener("click", this.mouseClick);
 
-        this.container.addEventListener("click", this.mouseClick);
         this.container.addEventListener("keydown", this.keyDown);
     }
 
@@ -158,11 +158,10 @@ class WorkflowUI extends Component {
 
     getClickPoint = (event) => {
 
-        const width = this.container.clientWidth;
-        const height = this.container.clientHeight
-        const x = (event.offsetX / width) * 2 - 1;
-        const y = -(event.offsetY / height) * 2 + 1;
-
+        var rect = this.renderer.domElement.getBoundingClientRect();
+        const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        const y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
+    
         var vector = new THREE.Vector3(x, y, 0);
         vector.unproject(this.camera);
 
@@ -340,12 +339,16 @@ class WorkflowUI extends Component {
         this.dragControls = new DragControls(this.taskBars, this.camera, this.renderer.domElement);
         this.clickControls = new ClickControls(this.dots, this.camera, this.renderer.domElement);
 
-        this.lineContainer = new THREE.Object3D();
-        this.scene.add(this.lineContainer);
-
-        this.lineObserver = new LineObserver(this.camera, this.renderer.domElement, this.lineContainer);
-        this.taskLinkFactory = new TaskLinkFactory(this.lineContainer);
+        this.lineContainer = []
+      
+        this.lineObserver = new LineObserver(this.lineContainer, this.camera, this.renderer.domElement);
+        this.taskLinkFactory = new TaskLinkFactory(this.addTaskLink);
     };
+
+    addTaskLink = (taskLink) => {
+        this.lineContainer.push(taskLink);
+        this.scene.add(taskLink);
+    }
 
     setGraphPaper = () => {
 

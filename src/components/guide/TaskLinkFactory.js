@@ -11,8 +11,8 @@ export default class TaskLinkFactory {
 
     state = IDLE;
 
-    constructor(lineContainer) {
-        this.lineContainer = lineContainer;
+    constructor(addTaskLink) {
+        this.addTaskLink = addTaskLink;
     }
 
     onConnectorSelect = (connector, scene) => {
@@ -40,7 +40,8 @@ export default class TaskLinkFactory {
             connector.userData.taskLinkDirection = SOURCE;
 
             const theLine = taskLink.getLine();
-            this.lineContainer.add(theLine)
+            this.addTaskLink(theLine);
+            
             this.taskLinks.set(key, taskLink);
             this.currentLink = taskLink;
         }
