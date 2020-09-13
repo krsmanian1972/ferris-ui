@@ -11,20 +11,22 @@ export default class TaskLinkFactory {
 
     state = IDLE;
 
-    constructor(addTaskLink) {
+    constructor(addTaskLink,removeTaskLink,addTubeLink) {
         this.addTaskLink = addTaskLink;
+        this.removeTaskLink = removeTaskLink;
+        this.addTubeLink = addTubeLink;
     }
 
-    onConnectorSelect = (connector, scene) => {
+    onConnectorSelect = (connector) => {
         if (this.state === IDLE) {
-            this.start(connector, scene);
+            this.start(connector);
         }
         else {
             this.finish(connector);
         }
     }
 
-    start = (connector, scene) => {
+    start = (connector) => {
 
         if (!connector.userData) {
             return
@@ -90,6 +92,12 @@ export default class TaskLinkFactory {
             connector.userData.taskLink = this.currentLink;
             connector.userData.taskLinkDirection = TARGET;
             this.state = IDLE;
+
+            const theLine = this.currentLink.getLine();
+            const theTube = this.currentLink.getTube();
+
+            this.removeTaskLink(theLine);
+            this.addTubeLink(theTube);
         }
     }
 

@@ -1,6 +1,6 @@
-import { BufferAttribute, Line, LineBasicMaterial, BufferGeometry } from 'three';
+import { BufferAttribute, Line, LineBasicMaterial, BufferGeometry, Vector3,CatmullRomCurve3,TubeGeometry,MeshBasicMaterial,Mesh } from 'three';
 
-const taskBarColor = "#2A4B7C";
+const lineColor = 0x0000ff;
 const sourceColor = 0xff0000;
 const targetColor = 0x00ff00;
 
@@ -20,7 +20,7 @@ export default class TaskLink {
     // The vertex points - vertices
     points = [];
 
-    material = new LineBasicMaterial({ color: 0x0000ff, linewidth: 2 });
+    material = new LineBasicMaterial({ color: lineColor, linewidth: 2 });
     geometry = new BufferGeometry();
     positions = new Float32Array(MAX_VERTICES * 3); // 3 vertices per point
 
@@ -63,6 +63,30 @@ export default class TaskLink {
 
     getLine = () => {
         return this.line;
+    }
+
+    getTube = () => {
+        const tubePoints = [];
+
+        for(var i=0;i<this.index;) {
+            
+            var x = this.positions[i]
+            var y = this.positions[i+1]
+            var z = this.positions[i+2]
+            
+            var point = new Vector3(x,y,z);
+            tubePoints.push(point);
+
+            i=i+3;
+        }
+
+        const path = new CatmullRomCurve3(tubePoints,false,'catmullrom',0.05);
+        const tubeGeometry = new TubeGeometry(path, 150, 0.02, 20, false );
+        const tubeMaterial = new MeshBasicMaterial( { color: lineColor } );
+
+        this.tube = new Mesh(tubeGeometry,tubeMaterial);
+
+        return this.tube
     }
 
 

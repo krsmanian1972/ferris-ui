@@ -10,7 +10,7 @@ var LineObserver = function (_lineContainer, _camera, _domElement ) {
     var scope = this;
 
     function activate() {
-        _domElement.addEventListener('dblclick', onDoubleClick, false);
+        _domElement.addEventListener('mousedown', onDocumentMouseDown, false);
         _domElement.addEventListener('mousemove', onMouseMove, false);
     }
 
@@ -24,8 +24,9 @@ var LineObserver = function (_lineContainer, _camera, _domElement ) {
         }
     }
 
-    function onDoubleClick(event){
+    function onDocumentMouseDown(event){
           event.preventDefault();
+          
           if(_selected){
               onSnapEnd(event);
           }
@@ -35,14 +36,9 @@ var LineObserver = function (_lineContainer, _camera, _domElement ) {
     }
     function onSnapStart(event) {
 
-        event.preventDefault();
-
         var rect = _domElement.getBoundingClientRect();
-        const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-        const y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-        _mouse.x = x;
-        _mouse.y = y;
+        _mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        _mouse.y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
         
         _intersections.length = 0;
 

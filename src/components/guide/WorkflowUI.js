@@ -19,6 +19,7 @@ import { updateVertexMovement, removeRecurringPointOnLineSegment, removeLineSegm
 
 import { buildCircularTextMaterial, buildRectTextMaterial, buildSquareTextMaterial, buildStartStopTextMaterial } from './Shapes';
 import { taskBarColor, barWidth, barHeight, barDepth, squareBarWidth, squareBarHeight, connectorRadius } from './Shapes';
+import { Vector3 } from 'three';
 
 
 const containerStyle = {
@@ -56,6 +57,8 @@ class WorkflowUI extends Component {
 
         this.taskBars = [];
         this.dots = [];
+        this.lineContainer = []
+
         this.selectedPort = {};
 
         this.connectorMap = {};
@@ -87,7 +90,7 @@ class WorkflowUI extends Component {
         this.clickControls.addEventListener('onSelect', this.onConnectorSelect);
 
         this.lineObserver.addEventListener('onSnapStart', this.snapStart);
-        this.lineObserver.addEventListener('onSnapProgress', this.snapProgress);
+        //this.lineObserver.addEventListener('onSnapProgress', this.snapProgress);
         this.lineObserver.addEventListener('onSnapEnd', this.snapEnd);
 
         this.renderer.domElement.addEventListener("mousemove", this.mouseMove);
@@ -99,7 +102,7 @@ class WorkflowUI extends Component {
 
     onConnectorSelect = (event) => {
         const connector = event.object;
-        this.taskLinkFactory.onConnectorSelect(connector, this.scene);
+        this.taskLinkFactory.onConnectorSelect(connector);
     }
 
     snapStart = (event) => {
@@ -338,16 +341,22 @@ class WorkflowUI extends Component {
 
         this.dragControls = new DragControls(this.taskBars, this.camera, this.renderer.domElement);
         this.clickControls = new ClickControls(this.dots, this.camera, this.renderer.domElement);
-
-        this.lineContainer = []
       
         this.lineObserver = new LineObserver(this.lineContainer, this.camera, this.renderer.domElement);
-        this.taskLinkFactory = new TaskLinkFactory(this.addTaskLink);
+        this.taskLinkFactory = new TaskLinkFactory(this.addTaskLink,this.removeTaskLink,this.addTubeLink);
     };
 
     addTaskLink = (taskLink) => {
-        this.lineContainer.push(taskLink);
         this.scene.add(taskLink);
+    }
+
+    removeTaskLink = (taskLink) => {
+        this.scene.remove(taskLink);
+    }
+
+    addTubeLink = (tubeLink) => {
+        this.lineContainer.push(tubeLink);
+        this.scene.add(tubeLink)
     }
 
     setGraphPaper = () => {
@@ -385,16 +394,38 @@ class WorkflowUI extends Component {
     }
 
     populateTasks = () => {
+
         this.addTask(0, "START", "", "", "", 0, 3, "START_STOP_BOX");
         this.addTask(1, 'Task ', 'Completion Today', '2019-08-9', '2019-08-9', 0, 1, "DECISION_BOX");
         this.addTask(2, 'Work on it now', "", '2019-08-9', '2019-08-9', -2, -1, "");
         this.addTask(3, 'Look at it later', "", '2019-08-9', '2019-08-9', 2, -1, "");
         this.addTask(4, "STOP1", "", "", "", -2, -2.5, "CIRCLE");
         this.addTask(5, "STOP2", "", "", "", 2, -2.5, "CIRCLE");
+
+        this.addTube();
+    }
+
+    addTube = () => {
+        var v1 = new THREE.Vector3(barWidth,3,0);
+        var v2 = new THREE.Vector3(barWidth+1,3,0);
+        var v3 = new THREE.Vector3(barWidth+1,2,0);
+        var v4 = new THREE.Vector3(barWidth+1,1,0);
+
+        var points = [];
+        points.push(v1);
+        points.push(v2);
+        points.push(v3);
+        points.push(v4);
+
+        var path = new THREE.CatmullRomCurve3(points,false,'catmullrom',0.05);
+        var material = new THREE.MeshBasicMaterial( { color: 0x0000ff } );
+        var tubeGeometry = new THREE.TubeGeometry(path, 150, 0.02, 20, false );
+        var tube = new THREE.Mesh(tubeGeometry,material);
+
+        this.scene.add(tube);
     }
 
     addLink = (sourceTaskId, targetTaskId, sourcePort, targetPort, points) => {
-
     }
 
     addTask = (taskId, taskName, role, startDate, endDate, x, y, shape) => {
@@ -436,7 +467,6 @@ class WorkflowUI extends Component {
             xOffset = squareBarWidth;
             yOffset = squareBarHeight;
         }
-
 
         const connectorLeft = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
         const connectorRight = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
