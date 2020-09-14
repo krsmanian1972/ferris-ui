@@ -7,7 +7,7 @@ import { ClickControls } from './ClickControls';
 import TaskLinkFactory from './TaskLinkFactory';
 
 import { Button } from 'antd';
-import { EditOutlined, ScissorOutlined, NodeIndexOutlined } from '@ant-design/icons';
+import { ScissorOutlined } from '@ant-design/icons';
 
 import Moment from 'react-moment';
 import moment from 'moment';
@@ -19,7 +19,6 @@ import { updateVertexMovement, removeRecurringPointOnLineSegment, removeLineSegm
 
 import { buildCircularTextMaterial, buildRectTextMaterial, buildSquareTextMaterial, buildStartStopTextMaterial } from './Shapes';
 import { taskBarColor, barWidth, barHeight, barDepth, squareBarWidth, squareBarHeight, connectorRadius } from './Shapes';
-import { Vector3 } from 'three';
 
 
 const containerStyle = {
@@ -59,24 +58,14 @@ class WorkflowUI extends Component {
         this.dots = [];
         this.lineContainer = []
 
-        this.selectedPort = {};
-
         this.connectorMap = {};
 
-        this.lastEvent = null;
-        this.sourceConnectorPort = {};
-        this.destConnectorPort = {};
-
         this.mode = "";
-        this.internalState = "";
 
         this.lineSegmentArray = [];
         this.lineSegmentArrayIndex = 0;
-        this.line = [];
 
-        this.clickCounter = 0;
         this.dragMode = {};
-
     }
 
     componentDidMount() {
@@ -114,6 +103,7 @@ class WorkflowUI extends Component {
         const line = event.object;
         line.material.color.set(0x0000FF);
     }
+
     snapProgress = (event) => {
         const line = event.object.selected;
         const point = (event.object.clickPoint);
@@ -123,6 +113,7 @@ class WorkflowUI extends Component {
 
     keyDown = (event) => {
         if (event.keyCode === 27) {
+
         }
     }
 
@@ -164,7 +155,7 @@ class WorkflowUI extends Component {
         var rect = this.renderer.domElement.getBoundingClientRect();
         const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
         const y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
-    
+
         var vector = new THREE.Vector3(x, y, 0);
         vector.unproject(this.camera);
 
@@ -186,7 +177,6 @@ class WorkflowUI extends Component {
                 this.camera.position.x += 0.1;
             }
             return;
-
         }
 
         if (event.shiftKey) {
@@ -200,7 +190,6 @@ class WorkflowUI extends Component {
 
             }
             return;
-
         }
 
         if (event.deltaY > 0) {
@@ -242,8 +231,10 @@ class WorkflowUI extends Component {
             //align to X and Y to grid
             this.selectedTaskBar.position.y = Math.round(this.selectedTaskBar.position.y * 2) / 2;
             this.selectedTaskBar.position.x = Math.round(this.selectedTaskBar.position.x * 2) / 2;
+
             this.moveDots();
             this.moveLinks();
+
             this.selectedTaskBar = null;
         }
     }
@@ -290,10 +281,13 @@ class WorkflowUI extends Component {
 
         const leftX = this.selectedTaskBar.position.x - xOffset / 2;
         const leftY = this.selectedTaskBar.position.y;
+
         const rightX = this.selectedTaskBar.position.x + xOffset / 2;
         const rightY = this.selectedTaskBar.position.y;
+
         const topX = this.selectedTaskBar.position.x;
         const topY = this.selectedTaskBar.position.y + yOffset / 2;
+
         const bottomX = this.selectedTaskBar.position.x;
         const bottomY = this.selectedTaskBar.position.y - yOffset / 2;
 
@@ -326,7 +320,7 @@ class WorkflowUI extends Component {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(fov, width / height, near, far);
 
-        this.camera.position.x = 1;
+        this.camera.position.x = 0;
         this.camera.position.y = 0;
         this.camera.position.z = 15;
 
@@ -341,12 +335,12 @@ class WorkflowUI extends Component {
 
         this.dragControls = new DragControls(this.taskBars, this.camera, this.renderer.domElement);
         this.clickControls = new ClickControls(this.dots, this.camera, this.renderer.domElement);
-      
+
         this.lineObserver = new LineObserver(this.lineContainer, this.camera, this.renderer.domElement);
-        this.taskLinkFactory = new TaskLinkFactory(this.scene,this.lineContainer);
+        this.taskLinkFactory = new TaskLinkFactory(this.scene, this.lineContainer);
     };
 
-   
+
     setGraphPaper = () => {
 
         const geometry = new THREE.Geometry();
@@ -392,8 +386,9 @@ class WorkflowUI extends Component {
 
     }
 
-   
+
     addLink = (sourceTaskId, targetTaskId, sourcePort, targetPort, points) => {
+
     }
 
     addTask = (taskId, taskName, role, startDate, endDate, x, y, shape) => {
@@ -484,26 +479,18 @@ class WorkflowUI extends Component {
     }
 
 
-    resetStateMachine = () => {
-        this.mode = "";
-    }
-
-    drawFreeLineConnector = () => {
-        this.mode = "FREE_LINE_CONNECTOR";
-    }
     deleteConnectingLine = () => {
         this.mode = "DELETE_CONNECTING_LINE";
     }
 
     render() {
         return (
-            <div style={containerStyle} id="paper" ref={ref => (this.container = ref)}>
-                <Button onClick={this.resetStateMachine} id="connector" type="primary" icon={<EditOutlined />} shape={"circle"} />
-                <Button onClick={this.drawFreeLineConnector} id="createobjective" type="primary" icon={<NodeIndexOutlined />} shape={"circle"} />
+            <>
                 <Button onClick={this.deleteConnectingLine} id="deleteConnectingLine" type="primary" icon={<ScissorOutlined />} shape={"circle"} />
-
-                <div style={canvasStyle} id="workflowContainer" ref={ref => (this.workflowContainer = ref)} />
-            </div>
+                <div style={containerStyle} id="paper" ref={ref => (this.container = ref)}>
+                    <div style={canvasStyle} id="workflowContainer" ref={ref => (this.workflowContainer = ref)} />
+                </div>
+            </>
         )
     }
 

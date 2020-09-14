@@ -7,8 +7,6 @@ const targetColor = 0x00ff00;
 const SOURCE = "source";
 const TARGET = "target";
 
-const MAX_VERTICES = 20;
-
 export default class TaskLink {
 
     // The Source Connector
@@ -19,21 +17,13 @@ export default class TaskLink {
 
     // The vertex points - vertices
     points = [];
-
-    geometry = new BufferGeometry();
-    positions = new Float32Array(MAX_VERTICES * 3); // 3 vertices per point
-  
-    index = 0;
-
+ 
     constructor(connector) {
 
         this.source = connector;
         this.source.material.color.set(sourceColor);
 
-        this.geometry.setAttribute('position', new BufferAttribute(this.positions, 3));
-
         this.addInitialPoint(this.source.position.clone());
-        
      }
 
     /**
@@ -62,24 +52,11 @@ export default class TaskLink {
     }
 
     buildTube = () => {
-        const tubePoints = [];
 
-        for(var i=0;i<this.index;) {
-            
-            var x = this.positions[i]
-            var y = this.positions[i+1]
-            var z = this.positions[i+2]
-            
-            var point = new Vector3(x,y,z);
-            tubePoints.push(point);
-
-            i=i+3;
-        }
-
-        const path = new CatmullRomCurve3(tubePoints,false,'catmullrom',0.05);
+        const path = new CatmullRomCurve3(this.points,false,'catmullrom',0.05);
         const tubeGeometry = new TubeGeometry(path, 150, 0.02, 20, false );
         const tubeMaterial = new MeshBasicMaterial( { color: lineColor } );
-
+        
         if(!this.tube) {
             this.tube = new Mesh(tubeGeometry,tubeMaterial);
             this.tube.userData = {id: this.getKey(this.source)};
@@ -100,22 +77,13 @@ export default class TaskLink {
      * @param {*} point
      */
     addInitialPoint = (point) => {
+
+        const nextPoint = point.clone();
+        nextPoint.x=nextPoint.x+0.01;
+
         this.points.length = 0;
         this.points.push(point);
-        this.points.push(point);
-
-        this.index = 0;
-
-        this.positions[this.index++] = point.x;
-        this.positions[this.index++] = point.y;
-        this.positions[this.index++] = point.z;
-
-        this.positions[this.index++] = point.x+0.01;
-        this.positions[this.index++] = point.y;
-        this.positions[this.index++] = point.z;
-
-        this.geometry.setDrawRange(0, this.index / 3);
-        this.geometry.attributes.position.needsUpdate = true;
+        this.points.push(nextPoint);
 
         this.buildTube();
     }
@@ -128,45 +96,26 @@ export default class TaskLink {
      */
     updatePoint = (point) => {
 
-        this.positions[this.index - 3] = point.x;
-        this.positions[this.index - 2] = point.y;
-        this.positions[this.index - 1] = point.z;
-
-        this.geometry.attributes.position.needsUpdate = true;
-
+        const index = this.points.length-1;
+        this.points[index] = point
+       
         this.buildTube();
     }
 
     onMove = (type) => {
         if (type === SOURCE) {
             const point = this.source.position.clone();
-
-            this.positions[0] = point.x;
-            this.positions[1] = point.y;
-            this.positions[2] = 0;
-
-            this.geometry.attributes.position.needsUpdate = true;
+            this.points[0] = point;
             this.buildTube();
         }
         else if (type === TARGET) {
             const point = this.target.position.clone();
-
             this.updatePoint(point);
         }
     }
 
     addVertex = (point) => {
-
         this.points.push(point);
-
-        this.positions[this.index++] = point.x;
-        this.positions[this.index++] = point.y;
-        this.positions[this.index++] = 0
-
-        this.geometry.setDrawRange(0, this.index / 3);
-
-        this.geometry.attributes.position.needsUpdate = true;
-
         this.buildTube();
     }
 }
