@@ -34,6 +34,7 @@ var LineObserver = function (_lineContainer, _camera, _domElement ) {
               onSnapStart(event);
           }
     }
+    
     function onSnapStart(event) {
 
         var rect = _domElement.getBoundingClientRect();

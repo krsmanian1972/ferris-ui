@@ -8,13 +8,11 @@ export default class TaskLinkFactory {
     //The Key is the Task_id and the direction
     taskLinks = new Map();
 
-
     state = IDLE;
 
-    constructor(addTaskLink,removeTaskLink,addTubeLink) {
-        this.addTaskLink = addTaskLink;
-        this.removeTaskLink = removeTaskLink;
-        this.addTubeLink = addTubeLink;
+    constructor(scene,lineContainer) {
+        this.scene = scene;
+        this.lineContainer = lineContainer;
     }
 
     onConnectorSelect = (connector) => {
@@ -41,16 +39,17 @@ export default class TaskLinkFactory {
             connector.userData.taskLink = taskLink;
             connector.userData.taskLinkDirection = SOURCE;
 
-            const theLine = taskLink.getLine();
-            this.addTaskLink(theLine);
-            
             this.taskLinks.set(key, taskLink);
             this.currentLink = taskLink;
+
+            const theLine = taskLink.getLine();
+            this.scene.add(theLine);
         }
 
         this.state = DRAWING
         return this.currentLink;
     }
+
     snapLineAtPoint = (line, point) => {
          if(!this.snapLink) {
              //console.log(line);
@@ -94,10 +93,10 @@ export default class TaskLinkFactory {
             this.state = IDLE;
 
             const theLine = this.currentLink.getLine();
-            const theTube = this.currentLink.getTube();
-
-            this.removeTaskLink(theLine);
-            this.addTubeLink(theTube);
+            this.scene.remove(theLine);
+            this.scene.add(theLine);
+            
+            this.lineContainer.push(theLine);
         }
     }
 
@@ -108,12 +107,18 @@ export default class TaskLinkFactory {
     addVertex = (point) => {
         if (this.canDraw()) {
             this.currentLink.addVertex(point);
+            const theLine = this.currentLink.getLine();
+            this.scene.remove(theLine);
+            this.scene.add(theLine);
         }
     }
 
     updatePoint = (point) => {
         if (this.canDraw()) {
             this.currentLink.updatePoint(point);
+            const theLine = this.currentLink.getLine();
+            this.scene.remove(theLine);
+            this.scene.add(theLine);
         }
     }
 

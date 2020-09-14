@@ -1,4 +1,4 @@
-import { BufferAttribute, Line, LineBasicMaterial, BufferGeometry, Vector3,CatmullRomCurve3,TubeGeometry,MeshBasicMaterial,Mesh } from 'three';
+import { BufferAttribute,  BufferGeometry, Vector3,CatmullRomCurve3,TubeGeometry,MeshBasicMaterial,Mesh } from 'three';
 
 const lineColor = 0x0000ff;
 const sourceColor = 0xff0000;
@@ -20,10 +20,9 @@ export default class TaskLink {
     // The vertex points - vertices
     points = [];
 
-    material = new LineBasicMaterial({ color: lineColor, linewidth: 2 });
     geometry = new BufferGeometry();
     positions = new Float32Array(MAX_VERTICES * 3); // 3 vertices per point
-
+  
     index = 0;
 
     constructor(connector) {
@@ -34,10 +33,8 @@ export default class TaskLink {
         this.geometry.setAttribute('position', new BufferAttribute(this.positions, 3));
 
         this.addInitialPoint(this.source.position.clone());
-
-        this.line = new Line(this.geometry, this.material);
-        this.line.userData = {id: this.getKey(connector)};
-    }
+        
+     }
 
     /**
      * Toggle between the Source and Target Connector
@@ -56,16 +53,15 @@ export default class TaskLink {
         return false;
     }
 
-
     getKey = (connector) => {
         return connector.userData.id + "~" + connector.userData.direction;
     }
 
     getLine = () => {
-        return this.line;
+        return this.tube;
     }
 
-    getTube = () => {
+    buildTube = () => {
         const tubePoints = [];
 
         for(var i=0;i<this.index;) {
@@ -84,9 +80,16 @@ export default class TaskLink {
         const tubeGeometry = new TubeGeometry(path, 150, 0.02, 20, false );
         const tubeMaterial = new MeshBasicMaterial( { color: lineColor } );
 
-        this.tube = new Mesh(tubeGeometry,tubeMaterial);
+        if(!this.tube) {
+            this.tube = new Mesh(tubeGeometry,tubeMaterial);
+            this.tube.userData = {id: this.getKey(this.source)};
+        }
+        else {
+            this.tube.geometry = tubeGeometry;
+        }
 
-        return this.tube
+
+        return this.tube;
     }
 
 
@@ -107,12 +110,14 @@ export default class TaskLink {
         this.positions[this.index++] = point.y;
         this.positions[this.index++] = point.z;
 
-        this.positions[this.index++] = point.x;
+        this.positions[this.index++] = point.x+0.01;
         this.positions[this.index++] = point.y;
         this.positions[this.index++] = point.z;
 
         this.geometry.setDrawRange(0, this.index / 3);
         this.geometry.attributes.position.needsUpdate = true;
+
+        this.buildTube();
     }
 
     /**
@@ -128,6 +133,8 @@ export default class TaskLink {
         this.positions[this.index - 1] = point.z;
 
         this.geometry.attributes.position.needsUpdate = true;
+
+        this.buildTube();
     }
 
     onMove = (type) => {
@@ -139,6 +146,7 @@ export default class TaskLink {
             this.positions[2] = 0;
 
             this.geometry.attributes.position.needsUpdate = true;
+            this.buildTube();
         }
         else if (type === TARGET) {
             const point = this.target.position.clone();
@@ -158,5 +166,7 @@ export default class TaskLink {
         this.geometry.setDrawRange(0, this.index / 3);
 
         this.geometry.attributes.position.needsUpdate = true;
+
+        this.buildTube();
     }
 }

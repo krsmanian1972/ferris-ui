@@ -343,22 +343,10 @@ class WorkflowUI extends Component {
         this.clickControls = new ClickControls(this.dots, this.camera, this.renderer.domElement);
       
         this.lineObserver = new LineObserver(this.lineContainer, this.camera, this.renderer.domElement);
-        this.taskLinkFactory = new TaskLinkFactory(this.addTaskLink,this.removeTaskLink,this.addTubeLink);
+        this.taskLinkFactory = new TaskLinkFactory(this.scene,this.lineContainer);
     };
 
-    addTaskLink = (taskLink) => {
-        this.scene.add(taskLink);
-    }
-
-    removeTaskLink = (taskLink) => {
-        this.scene.remove(taskLink);
-    }
-
-    addTubeLink = (tubeLink) => {
-        this.lineContainer.push(tubeLink);
-        this.scene.add(tubeLink)
-    }
-
+   
     setGraphPaper = () => {
 
         const geometry = new THREE.Geometry();
@@ -402,29 +390,9 @@ class WorkflowUI extends Component {
         this.addTask(4, "STOP1", "", "", "", -2, -2.5, "CIRCLE");
         this.addTask(5, "STOP2", "", "", "", 2, -2.5, "CIRCLE");
 
-        this.addTube();
     }
 
-    addTube = () => {
-        var v1 = new THREE.Vector3(barWidth,3,0);
-        var v2 = new THREE.Vector3(barWidth+1,3,0);
-        var v3 = new THREE.Vector3(barWidth+1,2,0);
-        var v4 = new THREE.Vector3(barWidth+1,1,0);
-
-        var points = [];
-        points.push(v1);
-        points.push(v2);
-        points.push(v3);
-        points.push(v4);
-
-        var path = new THREE.CatmullRomCurve3(points,false,'catmullrom',0.05);
-        var material = new THREE.MeshBasicMaterial( { color: 0x0000ff } );
-        var tubeGeometry = new THREE.TubeGeometry(path, 150, 0.02, 20, false );
-        var tube = new THREE.Mesh(tubeGeometry,material);
-
-        this.scene.add(tube);
-    }
-
+   
     addLink = (sourceTaskId, targetTaskId, sourcePort, targetPort, points) => {
     }
 
@@ -503,9 +471,6 @@ class WorkflowUI extends Component {
 
         this.scene.add(group);
 
-        this.camera.updateProjectionMatrix();
-
-        this.renderer.render(this.scene, this.camera);
     }
 
     handleWindowResize = () => {
