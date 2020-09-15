@@ -6,7 +6,7 @@ import DragControls from 'three-dragcontrols';
 import { ClickControls } from './ClickControls';
 import TaskLinkFactory from './TaskLinkFactory';
 
-import { Button } from 'antd';
+import { Button, Row, Col, Typography, Tooltip, Space, Spin } from 'antd';
 import { ScissorOutlined } from '@ant-design/icons';
 
 import Moment from 'react-moment';
@@ -15,19 +15,23 @@ import 'moment-timezone';
 
 import { snapAtClickPoint } from './lineOperations';
 import { LineObserver } from './LineObserver';
-import { updateVertexMovement, removeRecurringPointOnLineSegment, removeLineSegmentOnCickPoint } from './lineOperations';
 
+import { updateVertexMovement, removeRecurringPointOnLineSegment, removeLineSegmentOnCickPoint } from './lineOperations';
 import { buildCircularTextMaterial, buildRectTextMaterial, buildSquareTextMaterial, buildStartStopTextMaterial } from './Shapes';
 import { taskBarColor, barWidth, barHeight, barDepth, squareBarWidth, squareBarHeight, connectorRadius } from './Shapes';
 
+const { Title } = Typography;
 
 const containerStyle = {
     height: window.innerHeight,
     width: window.innerWidth
 };
 
-const canvasStyle = {
-    display: 'none'
+const graphPaperStyle = {
+    border: "1px solid black",
+    borderRadius: "12px",
+    maxHeight: window.innerHeight * .82,
+    overflowY: "auto"
 }
 
 const fov = 30;
@@ -37,7 +41,7 @@ const far = 1000;
 const pointLightColor = 0xffffff;
 const pointLightPosition = 1;
 
-const gridSize = 50;
+const gridSize = 4*10;
 const gridStep = 0.25;
 
 
@@ -169,8 +173,9 @@ class WorkflowUI extends Component {
     }
 
     scroll = (event) => {
+
         if (event.shiftKey && event.ctrlKey) {
-            if (event.deltaY < 0) {
+            if (event.deltaX > 0) {
                 this.camera.position.x -= 0.1;
             }
             else {
@@ -187,7 +192,6 @@ class WorkflowUI extends Component {
             else {
                 this.camera.fov += 3;
                 this.camera.updateProjectionMatrix();
-
             }
             return;
         }
@@ -196,8 +200,11 @@ class WorkflowUI extends Component {
             this.camera.position.y -= 0.1
         }
         else {
-            this.camera.position.y += 0.1
+            if (this.camera.position.y < 0) {
+                this.camera.position.y += 0.1
+            }
         }
+
     }
 
     moveLinks = () => {
@@ -376,14 +383,12 @@ class WorkflowUI extends Component {
     }
 
     populateTasks = () => {
-
-        this.addTask(0, "START", "", "", "", 0, 3, "START_STOP_BOX");
+        this.addTask(0, "START", "", "", "", 0, 3.5, "START_STOP_BOX");
         this.addTask(1, 'Task ', 'Completion Today', '2019-08-9', '2019-08-9', 0, 1, "DECISION_BOX");
         this.addTask(2, 'Work on it now', "", '2019-08-9', '2019-08-9', -2, -1, "");
         this.addTask(3, 'Look at it later', "", '2019-08-9', '2019-08-9', 2, -1, "");
-        this.addTask(4, "STOP1", "", "", "", -2, -2.5, "CIRCLE");
-        this.addTask(5, "STOP2", "", "", "", 2, -2.5, "CIRCLE");
-
+        this.addTask(4, "STOP1", "", "", "", -2, -3.5, "CIRCLE");
+        this.addTask(5, "STOP2", "", "", "", 2, -3.5, "CIRCLE");
     }
 
 
@@ -483,14 +488,38 @@ class WorkflowUI extends Component {
         this.mode = "DELETE_CONNECTING_LINE";
     }
 
+    renderControls = (isLoading) => {
+
+        if (isLoading) {
+            return <Spin />
+        }
+
+        return (
+            <Row>
+                <Col span={12}>
+                    <Title level={4}>Planning</Title>
+                </Col>
+                <Col span={10}>
+                    <div style={{ float: "right", textAlign: "left", paddingRight: "10px" }}>
+                        <Space>
+                            <Tooltip title="Delete Line">
+                                <Button onClick={this.deleteConnectingLine} id="deleteConnectingLine" type="primary" icon={<ScissorOutlined />} shape={"circle"} />
+                            </Tooltip>
+                        </Space>
+                    </div>
+                </Col>
+            </Row>
+        )
+    }
+
     render() {
         return (
-            <>
-                <Button onClick={this.deleteConnectingLine} id="deleteConnectingLine" type="primary" icon={<ScissorOutlined />} shape={"circle"} />
-                <div style={containerStyle} id="paper" ref={ref => (this.container = ref)}>
-                    <div style={canvasStyle} id="workflowContainer" ref={ref => (this.workflowContainer = ref)} />
+            <div>
+                {this.renderControls(false)}
+                <div style={graphPaperStyle}>
+                    <div style={containerStyle} id="container" ref={ref => (this.container = ref)} />
                 </div>
-            </>
+            </div>
         )
     }
 

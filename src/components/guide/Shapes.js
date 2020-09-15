@@ -28,9 +28,7 @@ const buildTaskCanvas = function (id, width, height) {
     }
     canvas.style.width = canvas.width + "px";
     canvas.style.height = canvas.height + "px";
-
-    document.getElementById("workflowContainer").appendChild(canvas);
-
+  
     return canvas;
 }
 
