@@ -9,7 +9,7 @@ const squareBarHeight = 2;
 const connectorRadius = 0.06;//0.06
 
 const vGap = 20;
-const borderGap = 15;
+const borderGap = 10;
 
 const boldFont = "bold 18px sans-serif";
 const regularFont = "18px sans-serif";
@@ -38,10 +38,7 @@ const buildTaskCanvas = function (id, width, height) {
 const buildCircularTextMaterial = function (taskId, taskName, role, plannedPeriod, actualPeriod) {
     const canvas = buildTaskCanvas(taskId);
 
-    var y = 10;//10
-
     const context = canvas.getContext('2d');
-
 
     // Make the canvas transparent for simplicity
     context.beginPath();
@@ -56,10 +53,10 @@ const buildCircularTextMaterial = function (taskId, taskName, role, plannedPerio
     context.font = "56px monospace";
     context.textAlign = "center";
     context.textBaseline = "middle";
-
     context.fillStyle = "black";
     context.textAlign = "center";
 
+    var y = 10;
     y = y + canvas.height / 2;
     context.font = boldFont;
     context.fillText(taskName, canvas.width / 2, y);
@@ -74,54 +71,35 @@ const buildCircularTextMaterial = function (taskId, taskName, role, plannedPerio
         transparent: true
     });
     return material;
-
-
 }
 
 const buildStartStopTextMaterial = function (taskId, taskName, role, plannedPeriod, actualPeriod) {
     const canvas = buildTaskCanvas(taskId);
 
-    var y = 10;//10
-
     const context = canvas.getContext('2d');
-
-
-    // Make the canvas transparent for simplicity
+  
     context.beginPath();
-    context.strokeStyle = taskBarColor;
-    //define the colour of the line
-    context.strokeStyle = taskBarColor;
     context.lineWidth = 5;
 
-    //define the starting point of line1 (x1,y1)
-    context.moveTo((canvas.height / 2), canvas.height);
-    //define the end point of line1 (x2,y2)
-    context.lineTo((canvas.width - canvas.height / 2), canvas.height);
-    context.stroke();
-
-    //define the starting point of line1 (x1,y1)
-    context.moveTo((canvas.height / 2), 0);
-    //define the end point of line1 (x2,y2)
-    context.lineTo((canvas.width - canvas.height / 2), 0);
-    context.stroke();
-
-    //draw arcs to complete the shape
     context.arc((canvas.width - canvas.height / 2), (canvas.height / 2), (canvas.height / 2), 1.5 * Math.PI, 0.5 * Math.PI);
     context.arc(canvas.height / 2, canvas.height / 2, (canvas.height / 2), 0.5 * Math.PI, 1.5 * Math.PI);
+    
+    context.fillStyle = "white"
+    context.fill();
+
+    context.moveTo((canvas.height / 2), 0);
+    context.lineTo((canvas.width - canvas.height / 2), 0);
+    context.strokeStyle = taskBarColor;
     context.stroke();
 
-    //    context.fillStyle = "grey"
-    //    context.fill();
-
     // Re-apply font since canvas is resized.
+    var y = 10;
+    y = y + canvas.height / 2;
     context.font = "56px monospace";
     context.textAlign = "center";
     context.textBaseline = "middle";
-
     context.fillStyle = "black";
     context.textAlign = "center";
-
-    y = y + canvas.height / 2;
     context.font = boldFont;
     context.fillText("START", canvas.width / 2, y);
 
@@ -134,6 +112,7 @@ const buildStartStopTextMaterial = function (taskId, taskName, role, plannedPeri
         side: THREE.DoubleSide,
         transparent: true
     });
+    
     return material;
 
 
