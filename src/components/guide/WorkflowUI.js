@@ -70,6 +70,9 @@ class WorkflowUI extends Component {
         this.lineSegmentArrayIndex = 0;
 
         this.dragMode = {};
+
+        this.selectedTaskBar = null;
+        this.selectedLine = null;
     }
 
     componentDidMount() {
@@ -99,25 +102,31 @@ class WorkflowUI extends Component {
     }
 
     snapStart = (event) => {
-        const line = event.object;
-        line.material.color.set(0xFF0000);
+        var line = event.object;
+        if (line.userData.id) {
+            line.material.color.set("#d1454d");
+            this.selectedLine = line;
+        }
     }
 
     snapEnd = (event) => {
         const line = event.object;
-        line.material.color.set(0x0000FF);
+        if (line.userData.id) {
+            line.material.color.set(0x0000ff);
+            this.selectedLine = null;
+        }
     }
 
     snapProgress = (event) => {
         const line = event.object.selected;
-        const point = (event.object.clickPoint);
+        const point = event.object.clickPoint;
         this.taskLinkFactory.snapLineAtPoint(line, point);
     }
 
 
     keyDown = (event) => {
         if (event.keyCode === 27) {
-
+            
         }
     }
 
@@ -134,15 +143,7 @@ class WorkflowUI extends Component {
             this.dragMode = {};
             return;
         }
-
-        if (this.mode === "DELETE_CONNECTING_LINE") {
-            var status = removeLineSegmentOnCickPoint(this.lineSegmentArray, point, this.scene);
-            if (status === "SUCCESS") {
-                this.lineSegmentArrayIndex--;
-            }
-            return;
-        }
-
+     
         if (this.mode === "") {
             var result = snapAtClickPoint(this.lineSegmentArray, point, this.scene);
             if (result.status === "SUCCESS") {
@@ -226,6 +227,7 @@ class WorkflowUI extends Component {
 
     dragStartCallback = (event) => {
         this.selectedTaskBar = event.object;
+        this.selectedTaskBar.material.color.set("#fae78f");
         if (this.selectedTaskBar) {
             this.moveDots();
             this.moveLinks();
@@ -242,6 +244,7 @@ class WorkflowUI extends Component {
             this.moveDots();
             this.moveLinks();
 
+            this.selectedTaskBar.material.color.set(0xFFFFFF);
             this.selectedTaskBar = null;
         }
     }
@@ -399,8 +402,9 @@ class WorkflowUI extends Component {
     addTask = (taskId, taskName, role, startDate, endDate, x, y, shape) => {
 
         const period = startDate + ' - ' + endDate;
-        var taskMaterial = '';
-        var taskBar = ''
+        
+        var taskMaterial = null;
+        var taskBar = null;
 
         if (shape === "") {
             taskMaterial = buildRectTextMaterial(1, taskName, role, period, period, shape);
@@ -484,8 +488,15 @@ class WorkflowUI extends Component {
     }
 
 
-    deleteConnectingLine = () => {
-        this.mode = "DELETE_CONNECTING_LINE";
+    deleteLink = () => {
+        if(this.selectedLine) {
+            this.taskLinkFactory.deleteLink(this.selectedLine)
+            this.selectedLine = null;
+        }
+    }
+
+    deleteTask = () => {
+
     }
 
     renderControls = (isLoading) => {
@@ -502,8 +513,8 @@ class WorkflowUI extends Component {
                 <Col span={10}>
                     <div style={{ float: "right", textAlign: "left", paddingRight: "10px" }}>
                         <Space>
-                            <Tooltip title="Delete Line">
-                                <Button onClick={this.deleteConnectingLine} id="deleteConnectingLine" type="primary" icon={<ScissorOutlined />} shape={"circle"} />
+                            <Tooltip title="Delete Selected Link">
+                                <Button key="deleteLink" onClick={this.deleteLink}  type="primary" icon={<ScissorOutlined />} shape={"circle"} />
                             </Tooltip>
                         </Space>
                     </div>

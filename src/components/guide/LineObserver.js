@@ -3,7 +3,6 @@ import {EventDispatcher,Raycaster,Vector2} from 'three';
 
 var LineObserver = function (_lineContainer, _camera, _domElement ) {
     var _raycaster = new Raycaster();
-    _raycaster.params.Line.threshold = 0.1;
     var _mouse = new Vector2();
     var _intersections = [];
     var _selected = null;

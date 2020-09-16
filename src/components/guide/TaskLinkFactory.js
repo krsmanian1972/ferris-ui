@@ -1,11 +1,14 @@
 import TaskLink from "./TaskLink";
+
 const IDLE = "idle"
 const DRAWING = "drawing";
+
 const SOURCE = "source";
 const TARGET = "target";
+
 export default class TaskLinkFactory {
 
-    //The Key is the Task_id and the direction
+    //The Key is the source task_id and target task_id
     taskLinks = new Map();
 
     state = IDLE;
@@ -30,24 +33,14 @@ export default class TaskLinkFactory {
             return
         }
 
-        const key = this.getKey(connector);
-        if (this.taskLinks.has(key)) {
-            this.currentLink = this.taskLinks.get(key);
-        }
-        else {
-            const taskLink = new TaskLink(connector);
-            connector.userData.taskLink = taskLink;
-            connector.userData.taskLinkDirection = SOURCE;
+        this.currentLink = new TaskLink(connector);
+        connector.userData.taskLink = this.currentLink;
+        connector.userData.taskLinkDirection = SOURCE;
 
-            this.taskLinks.set(key, taskLink);
-            this.currentLink = taskLink;
-
-            const theLine = taskLink.getLine();
-            this.scene.add(theLine);
-        }
-
+        const theLine = this.currentLink.getLine();
+        this.scene.add(theLine);
+        
         this.state = DRAWING
-        return this.currentLink;
     }
 
     snapLineAtPoint = (line, point) => {
@@ -85,19 +78,75 @@ export default class TaskLinkFactory {
     }
 
     finish = (connector) => {
-
-        if (this.currentLink) {
-            this.currentLink.finish(connector);
-            connector.userData.taskLink = this.currentLink;
-            connector.userData.taskLinkDirection = TARGET;
-            this.state = IDLE;
-
-            const theLine = this.currentLink.getLine();
-            this.scene.remove(theLine);
-            this.scene.add(theLine);
-            
-            this.lineContainer.push(theLine);
+        if(!this.canDraw()) {
+            return;
         }
+
+        this.state = IDLE;
+        const preFinishLine = this.currentLink.getLine();
+        this.scene.remove(preFinishLine);
+
+        // Ensure One connection between source and target
+        const key = this.currentLink.source.userData.id + "~"+ connector.userData.id;
+        if(this.taskLinks.has(key)) {
+            this.currentLink = null;
+            return;
+        }
+
+        if(this.currentLink.source.userData.id === connector.userData.id) {
+            this.currentLink = null;
+            return;
+        }
+
+        this.currentLink.finish(connector);
+        this.taskLinks.set(this.currentLink.getKey(),this.currentLink);
+
+        connector.userData.taskLink = this.currentLink;
+        connector.userData.taskLinkDirection = TARGET;
+
+        const theLine = this.currentLink.getLine();
+        this.scene.add(theLine);
+        this.lineContainer.push(theLine);
+
+        this.currentLink = null;
+    }
+
+    findLineIndex = (key) => {
+        for(var index=0;index<this.lineContainer.length;index++) {
+            if(key === this.lineContainer[index].userData.id) {
+                return index;
+            } 
+        }
+        return -1;
+    }
+
+    deleteLink = (selectedLine) => {
+        if(!selectedLine) {
+            return;
+        }
+
+        const key = selectedLine.userData.id;
+        const index = this.findLineIndex(key);
+        if(index == -1) {
+            return;
+        }
+        
+        const taskLink = this.taskLinks.get(key);
+        const theLine = taskLink.getLine();
+        this.scene.remove(theLine);
+
+        this.lineContainer.splice(index, 1);
+        this.taskLinks.delete(key);
+        
+    }
+
+    getLineById = (key) => {
+        const index = this.findLineIndex(key);
+        if(index == -1) {
+            return null;
+        }
+        
+        return this.lineContainer[index];
     }
 
     canDraw = () => {
@@ -120,10 +169,6 @@ export default class TaskLinkFactory {
             this.scene.remove(theLine);
             this.scene.add(theLine);
         }
-    }
-
-    getKey = (connector) => {
-        return connector.userData.id + "~" + connector.userData.direction;
     }
 
 }

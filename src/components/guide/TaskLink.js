@@ -1,8 +1,9 @@
-import { BufferAttribute,  BufferGeometry, Vector3,CatmullRomCurve3,TubeGeometry,MeshBasicMaterial,Mesh } from 'three';
+import { Vector3, CatmullRomCurve3,TubeGeometry,MeshBasicMaterial,Mesh,ArrowHelper,BoxHelper} from 'three';
+import { taskBarColor } from './Shapes';
 
 const lineColor = 0x0000ff;
 const sourceColor = 0xff0000;
-const targetColor = 0x00ff00;
+const arrowColor = "#4e8d07"
 
 const SOURCE = "source";
 const TARGET = "target";
@@ -10,13 +11,15 @@ const TARGET = "target";
 export default class TaskLink {
 
     // The Source Connector
-    source = {};
+    source = null;
 
     // The Target Connector
-    target = {};
+    target = null;
 
     // The vertex points - vertices
     points = [];
+
+    
  
     constructor(connector) {
 
@@ -24,6 +27,7 @@ export default class TaskLink {
         this.source.material.color.set(sourceColor);
 
         this.addInitialPoint(this.source.position.clone());
+
      }
 
     /**
@@ -34,39 +38,55 @@ export default class TaskLink {
      */
     finish = (connector) => {
 
-        if (!this.target.userData) {
+        if (!this.target) {
             this.target = connector;
-            this.target.material.color.set(targetColor);
+            this.buildTube();
+
+            this.source.material.color.set(taskBarColor);
+                  
+            const key = this.getKey();
+
+            this.tube.userData = {id: key};
+            this.arrow.userData = {id: key};
+            
+
             return true;
         }
 
         return false;
     }
 
-    getKey = (connector) => {
-        return connector.userData.id + "~" + connector.userData.direction;
+    getKey = () => {
+        if(this.target) {
+            return this.source.userData.id + "~" + this.target.userData.id;
+        }
+        return this.source.userData.id;
     }
 
     getLine = () => {
         return this.tube;
     }
 
+
     buildTube = () => {
 
         const path = new CatmullRomCurve3(this.points,false,'catmullrom',0.05);
-        const tubeGeometry = new TubeGeometry(path, 150, 0.02, 20, false );
+        const tubeGeometry = new TubeGeometry(path, 600, 0.02, 30, false );
         const tubeMaterial = new MeshBasicMaterial( { color: lineColor } );
         
         if(!this.tube) {
             this.tube = new Mesh(tubeGeometry,tubeMaterial);
-            this.tube.userData = {id: this.getKey(this.source)};
         }
         else {
             this.tube.geometry = tubeGeometry;
         }
 
+        this.buildArrow();
 
-        return this.tube;
+        if(this.arrow) {
+            this.tube.add(this.arrow);
+        }
+
     }
 
 
@@ -118,4 +138,36 @@ export default class TaskLink {
         this.points.push(point);
         this.buildTube();
     }
+
+
+    buildArrow =  () => {
+
+        if(this.points.length < 2) {
+            return;
+        }
+
+        if(!this.target) {
+            return;
+        }
+
+        const prevPoint = this.points[this.points.length-2];
+        const currentPoint = this.points[this.points.length-1];
+    
+        const origin = new Vector3(prevPoint.x, prevPoint.y, 0);
+        const dest = new Vector3(currentPoint.x, currentPoint.y, 0);
+        const direction = new Vector3().sub(dest, origin);
+    
+        const deltaX = currentPoint.x - prevPoint.x;
+        const deltaY = currentPoint.y - prevPoint.y;
+
+        const length = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
+        
+        if(!this.arrow) {
+            this.arrow = new ArrowHelper(direction.clone().normalize(), origin, length, arrowColor, 0.15, 0.15);
+        }
+        else {
+            this.arrow.setDirection(direction.clone().normalize());
+        }
+    }
+    
 }

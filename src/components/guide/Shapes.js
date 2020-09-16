@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-const taskBarColor = "#2A4B7C";
+const taskBarColor = "#3b6dab";
 const barWidth = 2.5;//3
 const barHeight = 2.5 / 3;//1
 const barDepth = 0;
