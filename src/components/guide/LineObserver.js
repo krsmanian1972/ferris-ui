@@ -1,63 +1,91 @@
-import {EventDispatcher,Raycaster,Vector2} from 'three';
+import { EventDispatcher, Raycaster, Vector2 } from 'three';
 
 
-var LineObserver = function (_lineContainer, _camera, _domElement ) {
+var LineObserver = function (_lineContainer, _camera, _domElement) {
     var _raycaster = new Raycaster();
     var _mouse = new Vector2();
     var _intersections = [];
     var _selected = null;
+    var _hovered = null;
     var scope = this;
 
     function activate() {
-        _domElement.addEventListener('mousedown', onDocumentMouseDown, false);
         _domElement.addEventListener('mousemove', onMouseMove, false);
+        _domElement.addEventListener('mousedown', onMouseClicked, false );
     }
 
-    function onMouseMove(event){
-        if(_selected){
-              var rect = _domElement.getBoundingClientRect();
-              _mouse.x = ( ( event.clientX - rect.left ) / rect.width ) * 2 - 1;
-              _mouse.y = - ( ( event.clientY - rect.top ) / rect.height ) * 2 + 1;
-              var clickPoint = {x:_mouse.x, y:_mouse.y}
-              scope.dispatchEvent({ type: 'onSnapProgress', object: {selected: _selected, clickPoint: clickPoint }});
+    function onMouseClicked(event) {
+        event.preventDefault();
+        
+        if(!_hovered) {
+            return;
+        }
+       
+        if(!_selected) {
+            _selected = _hovered;
+            _domElement.style.cursor = 'move';
+            scope.dispatchEvent({ type: 'onSelect', object: _selected });
+        }
+        else {
+            _domElement.style.cursor = 'auto';
+            scope.dispatchEvent({ type: 'offSelect', object: _selected });
+            _selected = null;
+            _hovered = null;
         }
     }
 
-    function onDocumentMouseDown(event){
-          event.preventDefault();
-          
-          if(_selected){
-              onSnapEnd(event);
-          }
-          else{
-              onSnapStart(event);
-          }
-    }
-    
-    function onSnapStart(event) {
+    function onMouseMove(event) {
+
+        event.preventDefault();
 
         var rect = _domElement.getBoundingClientRect();
         _mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
         _mouse.y = - ((event.clientY - rect.top) / rect.height) * 2 + 1;
-        
+
         _intersections.length = 0;
-
         _raycaster.setFromCamera(_mouse, _camera);
-
         _raycaster.intersectObjects(_lineContainer, true, _intersections);
 
+        if (_selected) {
+            return
+        }
+
         if (_intersections.length > 0) {
-            _selected = _intersections[0].object;
-            _domElement.style.cursor = 'pointer';
-            scope.dispatchEvent({ type: 'onSnapStart', object: _selected });
+
+            var _filtered = applyFilter("Mesh");
+
+            if (_filtered.length == 0) {
+                return;
+            }
+
+            var object = _filtered[0].object;
+
+            if (_hovered !== object) {
+                _hovered = object
+                _domElement.style.cursor = 'pointer';
+                scope.dispatchEvent({ type: 'onHover', object: _hovered });
+            }
+        }
+        else {
+            if (_hovered != null) {
+                _domElement.style.cursor = 'auto';
+                scope.dispatchEvent({ type: 'offHover', object: _hovered });
+                _hovered = null;
+            }
         }
     }
 
-    function onSnapEnd(event){
-        scope.dispatchEvent({ type: 'onSnapEnd', object: _selected });
-        _selected = null;
-        _domElement.style.cursor = 'auto';
+    function applyFilter(type) {
+        var filtered = [];
 
+        for (var i = 0; i < _intersections.length; i++) {
+            var object = _intersections[i];
+            if (object.object.type === type) {
+                filtered.push(object);
+            }
+        }
+
+        return filtered;
     }
 
     activate();

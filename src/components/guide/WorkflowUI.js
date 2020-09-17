@@ -41,7 +41,7 @@ const far = 1000;
 const pointLightColor = 0xffffff;
 const pointLightPosition = 1;
 
-const gridSize = 4*10;
+const gridSize = 4 * 10;
 const gridStep = 0.25;
 
 
@@ -85,9 +85,10 @@ class WorkflowUI extends Component {
 
         this.clickControls.addEventListener('onSelect', this.onConnectorSelect);
 
-        this.lineObserver.addEventListener('onSnapStart', this.snapStart);
-        //this.lineObserver.addEventListener('onSnapProgress', this.snapProgress);
-        this.lineObserver.addEventListener('onSnapEnd', this.snapEnd);
+        this.lineObserver.addEventListener('onHover', this.onLineHovered);
+        this.lineObserver.addEventListener('onSelect', this.onLineSelected);
+        this.lineObserver.addEventListener('offSelect', this.offLineSelected);
+        this.lineObserver.addEventListener('offHover', this.offLineHovered);
 
         this.renderer.domElement.addEventListener("mousemove", this.mouseMove);
         this.renderer.domElement.addEventListener("wheel", this.scroll);
@@ -101,32 +102,55 @@ class WorkflowUI extends Component {
         this.taskLinkFactory.onConnectorSelect(connector);
     }
 
-    snapStart = (event) => {
+    onLineHovered = (event) => {
         var line = event.object;
         if (line.userData.id) {
+            if (this.hoveredLine) {
+                this.hoveredLine.material.color.set(0x0000ff);
+            }
+            line.material.color.set("#4e8d07");
+            this.hoveredLine = line;
+        }
+    }
+
+    offLineHovered = (event) => {
+        const line = event.object;
+        if (line.userData.id) {
+            line.material.color.set(0x0000ff);
+            this.hoveredLine = null;
+        }
+    }
+
+    onLineSelected = (event) => {
+        const line = event.object;
+        if (line.userData.id) {
+            if (this.hoveredLine) {
+                this.hoveredLine.material.color.set(0x0000ff);
+            }
+            if (this.selectedLine) {
+                this.selectedLine.material.color.set(0x0000ff);
+            }
+            this.hoveredLine = null;
+            this.selectedLine = null;
+
             line.material.color.set("#d1454d");
             this.selectedLine = line;
         }
     }
 
-    snapEnd = (event) => {
+    offLineSelected = (event) => {
         const line = event.object;
         if (line.userData.id) {
             line.material.color.set(0x0000ff);
             this.selectedLine = null;
+            this.hoveredLine = null;
         }
-    }
-
-    snapProgress = (event) => {
-        const line = event.object.selected;
-        const point = event.object.clickPoint;
-        this.taskLinkFactory.snapLineAtPoint(line, point);
     }
 
 
     keyDown = (event) => {
         if (event.keyCode === 27) {
-            
+
         }
     }
 
@@ -143,7 +167,7 @@ class WorkflowUI extends Component {
             this.dragMode = {};
             return;
         }
-     
+
         if (this.mode === "") {
             var result = snapAtClickPoint(this.lineSegmentArray, point, this.scene);
             if (result.status === "SUCCESS") {
@@ -402,7 +426,7 @@ class WorkflowUI extends Component {
     addTask = (taskId, taskName, role, startDate, endDate, x, y, shape) => {
 
         const period = startDate + ' - ' + endDate;
-        
+
         var taskMaterial = null;
         var taskBar = null;
 
@@ -489,7 +513,7 @@ class WorkflowUI extends Component {
 
 
     deleteLink = () => {
-        if(this.selectedLine) {
+        if (this.selectedLine) {
             this.taskLinkFactory.deleteLink(this.selectedLine)
             this.selectedLine = null;
         }
@@ -514,7 +538,7 @@ class WorkflowUI extends Component {
                     <div style={{ float: "right", textAlign: "left", paddingRight: "10px" }}>
                         <Space>
                             <Tooltip title="Delete Selected Link">
-                                <Button key="deleteLink" onClick={this.deleteLink}  type="primary" icon={<ScissorOutlined />} shape={"circle"} />
+                                <Button key="deleteLink" onClick={this.deleteLink} type="primary" icon={<ScissorOutlined />} shape={"circle"} />
                             </Tooltip>
                         </Space>
                     </div>

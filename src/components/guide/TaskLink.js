@@ -1,4 +1,4 @@
-import { Vector3, CatmullRomCurve3,TubeGeometry,MeshBasicMaterial,Mesh,ArrowHelper,BoxHelper} from 'three';
+import { Vector3, CatmullRomCurve3,TubeGeometry,MeshBasicMaterial,Mesh,ArrowHelper,Group} from 'three';
 import { taskBarColor } from './Shapes';
 
 const lineColor = 0x0000ff;
@@ -7,6 +7,7 @@ const arrowColor = "#4e8d07"
 
 const SOURCE = "source";
 const TARGET = "target";
+
 
 export default class TaskLink {
 
@@ -20,6 +21,7 @@ export default class TaskLink {
     points = [];
 
     
+    group = new Group();
  
     constructor(connector) {
 
@@ -46,6 +48,7 @@ export default class TaskLink {
                   
             const key = this.getKey();
 
+            this.group.userData = {id:key};
             this.tube.userData = {id: key};
             this.arrow.userData = {id: key};
             
@@ -64,29 +67,27 @@ export default class TaskLink {
     }
 
     getLine = () => {
-        return this.tube;
+        return this.group;
     }
 
 
     buildTube = () => {
 
         const path = new CatmullRomCurve3(this.points,false,'catmullrom',0.05);
-        const tubeGeometry = new TubeGeometry(path, 600, 0.02, 30, false );
+        const tubeGeometry = new TubeGeometry(path, 200, 0.02, 30, false );
         const tubeMaterial = new MeshBasicMaterial( { color: lineColor } );
         
         if(!this.tube) {
             this.tube = new Mesh(tubeGeometry,tubeMaterial);
+            this.group.add(this.tube);
         }
         else {
             this.tube.geometry = tubeGeometry;
         }
 
-        this.buildArrow();
-
-        if(this.arrow) {
-            this.tube.add(this.arrow);
+        if(this.target) {
+            this.buildArrow();
         }
-
     }
 
 
@@ -150,23 +151,23 @@ export default class TaskLink {
             return;
         }
 
-        const prevPoint = this.points[this.points.length-2];
+        const origin = this.points[this.points.length-2];
         const currentPoint = this.points[this.points.length-1];
+
+        const direction = currentPoint.clone().sub(origin).normalize();
     
-        const origin = new Vector3(prevPoint.x, prevPoint.y, 0);
-        const dest = new Vector3(currentPoint.x, currentPoint.y, 0);
-        const direction = new Vector3().sub(dest, origin);
-    
-        const deltaX = currentPoint.x - prevPoint.x;
-        const deltaY = currentPoint.y - prevPoint.y;
+        const deltaX = currentPoint.x - origin.x;
+        const deltaY = currentPoint.y - origin.y;
 
         const length = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
         
         if(!this.arrow) {
-            this.arrow = new ArrowHelper(direction.clone().normalize(), origin, length, arrowColor, 0.15, 0.15);
+            this.arrow = new ArrowHelper(direction, origin, length, arrowColor, 0.15, 0.15);
+            this.group.add(this.arrow);
         }
         else {
-            this.arrow.setDirection(direction.clone().normalize());
+            this.arrow.setDirection(direction);
+            this.arrow.setLength(length,0.15,0.15);
         }
     }
     
