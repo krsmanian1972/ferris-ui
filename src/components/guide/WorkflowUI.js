@@ -9,11 +9,12 @@ import { Button, Row, Col, Typography, Tooltip, Space, Spin } from 'antd';
 import { ScissorOutlined, CloseOutlined } from '@ant-design/icons';
 
 import * as THREE from 'three';
-import DragControls from 'three-dragcontrols';
 
+import DragControls from 'three-dragcontrols';
 import { ClickControls } from './ClickControls';
-import TaskLinkFactory from './TaskLinkFactory';
 import { LineObserver } from './LineObserver';
+
+import TaskLinkFactory from './TaskLinkFactory';
 
 import { buildCircularTextMaterial, buildRectTextMaterial, buildSquareTextMaterial, buildStartStopTextMaterial } from './Shapes';
 import { barWidth, barHeight, barDepth, squareBarWidth, squareBarHeight, connectorRadius } from './Shapes';
@@ -84,7 +85,6 @@ class WorkflowUI extends Component {
         this.taskControls.addEventListener('onRightClick', this.onTaskSelect);
         this.dotControls.addEventListener('onClick', this.onConnectorSelect);
 
-
         this.lineObserver.addEventListener('onHover', this.onLineHovered);
         this.lineObserver.addEventListener('onSelect', this.onLineSelected);
         this.lineObserver.addEventListener('offSelect', this.offLineSelected);
@@ -151,7 +151,6 @@ class WorkflowUI extends Component {
             this.hoveredLine = null;
         }
     }
-
 
     keyDown = (event) => {
         if (event.keyCode === 27) {
@@ -368,7 +367,6 @@ class WorkflowUI extends Component {
         this.taskLinkFactory = new TaskLinkFactory(this.scene, this.lineContainer);
     };
 
-
     setGraphPaper = () => {
 
         const geometry = new THREE.Geometry();
@@ -532,7 +530,7 @@ class WorkflowUI extends Component {
     }
 
     deleteTaskLinks = (taskId) => {
-    
+
         var inboundLinks = this.getLinksByType(taskId, "target");
         for (var i = 0; i < inboundLinks.length; i++) {
             this.taskLinkFactory.delete(inboundLinks[i]);
