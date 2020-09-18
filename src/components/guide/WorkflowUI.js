@@ -1,24 +1,22 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import * as THREE from 'three';
-import DragControls from 'three-dragcontrols';
-import { ClickControls } from './ClickControls';
-import TaskLinkFactory from './TaskLinkFactory';
-
-import { Button, Row, Col, Typography, Tooltip, Space, Spin } from 'antd';
-import { ScissorOutlined } from '@ant-design/icons';
-
 import Moment from 'react-moment';
 import moment from 'moment';
 import 'moment-timezone';
 
-import { snapAtClickPoint } from './lineOperations';
+import { Button, Row, Col, Typography, Tooltip, Space, Spin } from 'antd';
+import { ScissorOutlined } from '@ant-design/icons';
+
+import * as THREE from 'three';
+import DragControls from 'three-dragcontrols';
+
+import { ClickControls } from './ClickControls';
+import TaskLinkFactory from './TaskLinkFactory';
 import { LineObserver } from './LineObserver';
 
-import { updateVertexMovement, removeRecurringPointOnLineSegment, removeLineSegmentOnCickPoint } from './lineOperations';
 import { buildCircularTextMaterial, buildRectTextMaterial, buildSquareTextMaterial, buildStartStopTextMaterial } from './Shapes';
-import { taskBarColor, barWidth, barHeight, barDepth, squareBarWidth, squareBarHeight, connectorRadius } from './Shapes';
+import { barWidth, barHeight, barDepth, squareBarWidth, squareBarHeight, connectorRadius } from './Shapes';
 
 const { Title } = Typography;
 
@@ -34,16 +32,22 @@ const graphPaperStyle = {
     overflowY: "auto"
 }
 
-const fov = 30;
+const fov = 33;
 const near = 0.1;
 const far = 1000;
 
-const pointLightColor = 0xffffff;
-const pointLightPosition = 1;
-
 const gridSize = 4 * 10;
-const gridStep = 0.25;
+const gridStep = 0.20;
 
+const sceneColor = 0xffffff;
+const gridColor = "#f2f2f2";
+
+const blueLine = "#4169E1";
+const greenLine = "#4e8d07"
+const redLine = "#d1454d"
+
+const dotColor = "#646464";
+const yellow = "#fae78f"
 
 @inject("appStore")
 @observer
@@ -56,20 +60,13 @@ class WorkflowUI extends Component {
         this.taskBarSquareGeo = new THREE.PlaneGeometry(squareBarWidth, squareBarHeight, barDepth);
         this.connectorGeo = new THREE.SphereGeometry(connectorRadius);
 
-        this.gridLineMaterial = new THREE.LineDashedMaterial({ color: 0xD3D3D3, dashSize: 2, gapSize: 8, scale: 1 });
+        this.gridLineMaterial = new THREE.LineBasicMaterial({ color: gridColor });
 
         this.taskBars = [];
         this.dots = [];
         this.lineContainer = []
 
         this.connectorMap = {};
-
-        this.mode = "";
-
-        this.lineSegmentArray = [];
-        this.lineSegmentArrayIndex = 0;
-
-        this.dragMode = {};
 
         this.selectedTaskBar = null;
         this.selectedLine = null;
@@ -83,7 +80,9 @@ class WorkflowUI extends Component {
         this.dragControls.addEventListener('dragstart', this.dragStartCallback);
         this.dragControls.addEventListener('dragend', this.dragEndCallback);
 
-        this.clickControls.addEventListener('onSelect', this.onConnectorSelect);
+        this.taskControls.addEventListener('onRightClick', this.onTaskSelect);
+        this.dotControls.addEventListener('onClick', this.onConnectorSelect);
+    
 
         this.lineObserver.addEventListener('onHover', this.onLineHovered);
         this.lineObserver.addEventListener('onSelect', this.onLineSelected);
@@ -95,7 +94,12 @@ class WorkflowUI extends Component {
         this.renderer.domElement.addEventListener("click", this.mouseClick);
 
         this.container.addEventListener("keydown", this.keyDown);
+        this.container.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        });
+        
     }
+
 
     onConnectorSelect = (event) => {
         const connector = event.object;
@@ -106,9 +110,9 @@ class WorkflowUI extends Component {
         var line = event.object;
         if (line.userData.id) {
             if (this.hoveredLine) {
-                this.hoveredLine.material.color.set(0x0000ff);
+                this.hoveredLine.material.color.set(blueLine);
             }
-            line.material.color.set("#4e8d07");
+            line.material.color.set(greenLine);
             this.hoveredLine = line;
         }
     }
@@ -116,7 +120,7 @@ class WorkflowUI extends Component {
     offLineHovered = (event) => {
         const line = event.object;
         if (line.userData.id) {
-            line.material.color.set(0x0000ff);
+            line.material.color.set(blueLine);
             this.hoveredLine = null;
         }
     }
@@ -125,15 +129,15 @@ class WorkflowUI extends Component {
         const line = event.object;
         if (line.userData.id) {
             if (this.hoveredLine) {
-                this.hoveredLine.material.color.set(0x0000ff);
+                this.hoveredLine.material.color.set(blueLine);
             }
             if (this.selectedLine) {
-                this.selectedLine.material.color.set(0x0000ff);
+                this.selectedLine.material.color.set(blueLine);
             }
             this.hoveredLine = null;
             this.selectedLine = null;
 
-            line.material.color.set("#d1454d");
+            line.material.color.set(redLine);
             this.selectedLine = line;
         }
     }
@@ -141,7 +145,7 @@ class WorkflowUI extends Component {
     offLineSelected = (event) => {
         const line = event.object;
         if (line.userData.id) {
-            line.material.color.set(0x0000ff);
+            line.material.color.set(blueLine);
             this.selectedLine = null;
             this.hoveredLine = null;
         }
@@ -158,23 +162,6 @@ class WorkflowUI extends Component {
         var point = this.getClickPoint(event);
         if (this.taskLinkFactory.canDraw()) {
             this.taskLinkFactory.addVertex(point);
-            return;
-        }
-
-        if (this.mode === "VERTEX_DRAG_MODE") {
-            removeRecurringPointOnLineSegment(this.lineSegmentArray, this.dragMode.arrayIndex, this.scene);
-            this.mode = "";
-            this.dragMode = {};
-            return;
-        }
-
-        if (this.mode === "") {
-            var result = snapAtClickPoint(this.lineSegmentArray, point, this.scene);
-            if (result.status === "SUCCESS") {
-                this.dragMode.arrayIndex = result.arrayIndex;
-                this.dragMode.pathIndex = result.pathIndex;
-                this.mode = "VERTEX_DRAG_MODE";
-            }
             return;
         }
     }
@@ -211,11 +198,11 @@ class WorkflowUI extends Component {
 
         if (event.shiftKey) {
             if (event.deltaY < 0) {
-                this.camera.fov -= 3;
+                this.camera.fov -= 1;
                 this.camera.updateProjectionMatrix();
             }
             else {
-                this.camera.fov += 3;
+                this.camera.fov += 1;
                 this.camera.updateProjectionMatrix();
             }
             return;
@@ -225,7 +212,7 @@ class WorkflowUI extends Component {
             this.camera.position.y -= 0.1
         }
         else {
-            if (this.camera.position.y < 0) {
+            if (this.camera.position.y < 0.1) {
                 this.camera.position.y += 0.1
             }
         }
@@ -249,10 +236,23 @@ class WorkflowUI extends Component {
         }
     }
 
+    onTaskSelect = (event) => {
+        if(this.lockedTaskBar) {
+            this.lockedTaskBar.material.color.set(sceneColor);
+            this.lockedTaskBar = null;
+        }
+        else {
+            this.lockedTaskBar = event.object 
+            this.lockedTaskBar.material.color.set(yellow);
+        }
+
+    }
+
     dragStartCallback = (event) => {
         this.selectedTaskBar = event.object;
-        this.selectedTaskBar.material.color.set("#fae78f");
+
         if (this.selectedTaskBar) {
+            this.selectedTaskBar.material.color.set(yellow);
             this.moveDots();
             this.moveLinks();
         }
@@ -261,14 +261,13 @@ class WorkflowUI extends Component {
     dragEndCallback = (event) => {
 
         if (this.selectedTaskBar) {
-            //align to X and Y to grid
-            this.selectedTaskBar.position.y = Math.round(this.selectedTaskBar.position.y * 2) / 2;
-            this.selectedTaskBar.position.x = Math.round(this.selectedTaskBar.position.x * 2) / 2;
 
             this.moveDots();
             this.moveLinks();
-
-            this.selectedTaskBar.material.color.set(0xFFFFFF);
+        
+            if(this.lockedTaskBar !== this.selectedTaskBar) {
+                this.selectedTaskBar.material.color.set(sceneColor);
+            }
             this.selectedTaskBar = null;
         }
     }
@@ -280,10 +279,6 @@ class WorkflowUI extends Component {
             this.moveDots();
             this.moveLinks();
             return;
-        }
-
-        if (this.mode === "VERTEX_DRAG_MODE") {
-            updateVertexMovement(this.lineSegmentArray, this.dragMode.arrayIndex, this.dragMode.pathIndex, point, this.scene);
         }
 
         if (this.taskLinkFactory.canDraw()) {
@@ -355,20 +350,18 @@ class WorkflowUI extends Component {
         this.camera = new THREE.PerspectiveCamera(fov, width / height, near, far);
 
         this.camera.position.x = 0;
-        this.camera.position.y = 0;
+        this.camera.position.y = 0.1;
         this.camera.position.z = 15;
 
-        this.scene.background = new THREE.Color(0xffffff);
+        this.scene.background = new THREE.Color(sceneColor);
+
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(width, height);
         this.container.appendChild(this.renderer.domElement);
 
-        const light = new THREE.PointLight(pointLightColor, pointLightPosition);
-        light.position.set(1, 1, 1).normalize();
-        this.scene.add(light);
-
         this.dragControls = new DragControls(this.taskBars, this.camera, this.renderer.domElement);
-        this.clickControls = new ClickControls(this.dots, this.camera, this.renderer.domElement);
+        this.dotControls = new ClickControls(this.dots, this.camera, this.renderer.domElement);
+        this.taskControls = new ClickControls(this.taskBars, this.camera, this.renderer.domElement);
 
         this.lineObserver = new LineObserver(this.lineContainer, this.camera, this.renderer.domElement);
         this.taskLinkFactory = new TaskLinkFactory(this.scene, this.lineContainer);
@@ -410,12 +403,12 @@ class WorkflowUI extends Component {
     }
 
     populateTasks = () => {
-        this.addTask(0, "START", "", "", "", 0, 3.5, "START_STOP_BOX");
-        this.addTask(1, 'Task ', 'Completion Today', '2019-08-9', '2019-08-9', 0, 1, "DECISION_BOX");
-        this.addTask(2, 'Work on it now', "", '2019-08-9', '2019-08-9', -2, -1, "");
-        this.addTask(3, 'Look at it later', "", '2019-08-9', '2019-08-9', 2, -1, "");
-        this.addTask(4, "STOP1", "", "", "", -2, -3.5, "CIRCLE");
-        this.addTask(5, "STOP2", "", "", "", 2, -3.5, "CIRCLE");
+        this.addTask(0, "START", "", "", "", 0, 4, "START_STOP_BOX");
+        this.addTask(1, 'Rule: ', 'When Completed ?', '2019-08-9', '2019-08-9', 0, 2, "DECISION_BOX");
+        this.addTask(2, 'Work on it now', "", '2019-08-9', '2019-08-9', -2, 0, "");
+        this.addTask(3, 'Look at it later', "", '2019-08-9', '2019-08-9', 2, 0, "");
+        this.addTask(4, "STOP 1", "", "", "", -2, -2, "CIRCLE");
+        this.addTask(5, "STOP 2", "", "", "", 2, -2, "CIRCLE");
     }
 
 
@@ -464,10 +457,10 @@ class WorkflowUI extends Component {
             yOffset = squareBarHeight;
         }
 
-        const connectorLeft = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
-        const connectorRight = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
-        const connectorTop = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
-        const connectorBottom = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: taskBarColor }));
+        const connectorLeft = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: dotColor }));
+        const connectorRight = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: dotColor }));
+        const connectorTop = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: dotColor }));
+        const connectorBottom = new THREE.Mesh(this.connectorGeo, new THREE.MeshBasicMaterial({ color: dotColor }));
 
         connectorLeft.position.set(x - xOffset / 2, y, 0);
         connectorLeft.userData = { id: taskId, direction: 'left', };

@@ -89,11 +89,13 @@ export default class TaskLinkFactory {
         // Ensure One connection between source and target
         const key = this.currentLink.source.userData.id + "~"+ connector.userData.id;
         if(this.taskLinks.has(key)) {
+            this.currentLink.reset();
             this.currentLink = null;
             return;
         }
 
         if(this.currentLink.source.userData.id === connector.userData.id) {
+            this.currentLink.reset();
             this.currentLink = null;
             return;
         }

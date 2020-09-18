@@ -1,12 +1,12 @@
 import * as THREE from 'three';
 
-const taskBarColor = "#3b6dab";
-const barWidth = 2.5;//3
-const barHeight = 2.5 / 3;//1
+const taskBarColor = "gray";
+const barWidth = 3;
+const barHeight = 1;
 const barDepth = 0;
-const squareBarWidth = 2;
-const squareBarHeight = 2;
-const connectorRadius = 0.06;//0.06
+const squareBarWidth = 3;
+const squareBarHeight = 1;
+const connectorRadius = 0.06;
 
 const vGap = 20;
 const borderGap = 10;
@@ -28,7 +28,7 @@ const buildTaskCanvas = function (id, width, height) {
     }
     canvas.style.width = canvas.width + "px";
     canvas.style.height = canvas.height + "px";
-  
+ 
     return canvas;
 }
 
@@ -54,10 +54,8 @@ const buildCircularTextMaterial = function (taskId, taskName, role, plannedPerio
     context.fillStyle = "black";
     context.textAlign = "center";
 
-    var y = 10;
-    y = y + canvas.height / 2;
     context.font = boldFont;
-    context.fillText(taskName, canvas.width / 2, y);
+    context.fillText(taskName, canvas.width / 2, canvas.height / 2);
 
     const texture = new THREE.CanvasTexture(canvas)
     texture.minFilter = THREE.LinearFilter;
@@ -75,13 +73,13 @@ const buildStartStopTextMaterial = function (taskId, taskName, role, plannedPeri
     const canvas = buildTaskCanvas(taskId);
 
     const context = canvas.getContext('2d');
-  
+
     context.beginPath();
     context.lineWidth = 5;
 
     context.arc((canvas.width - canvas.height / 2), (canvas.height / 2), (canvas.height / 2), 1.5 * Math.PI, 0.5 * Math.PI);
     context.arc(canvas.height / 2, canvas.height / 2, (canvas.height / 2), 0.5 * Math.PI, 1.5 * Math.PI);
-    
+
     context.fillStyle = "white"
     context.fill();
 
@@ -110,7 +108,7 @@ const buildStartStopTextMaterial = function (taskId, taskName, role, plannedPeri
         side: THREE.DoubleSide,
         transparent: true
     });
-    
+
     return material;
 
 
@@ -196,7 +194,7 @@ const buildSquareTextMaterial = function (taskId, taskName, role, plannedPeriod,
 
     //define the starting point of line1 (x1,y1)
     context.moveTo(0, canvas.height / 2);
-    context.lineWidth = 3;
+    context.lineWidth = 5;
 
     //define the end point of line1 (x2,y2)
     context.lineTo(canvas.width / 2, canvas.height);
@@ -212,8 +210,8 @@ const buildSquareTextMaterial = function (taskId, taskName, role, plannedPeriod,
 
     // Re-apply font since canvas is resized.
     context.font = boldFont;
-    context.fillText(taskName, canvas.width / 2 - 80, canvas.height / 2 - 10);
-    context.fillText(role, canvas.width / 2 - 80, canvas.height / 2 + 10);
+    context.fillText(taskName, (canvas.width / 4) + 45, canvas.height / 2 - 10);
+    context.fillText(role, (canvas.width / 4) - 15, canvas.height / 2 + 15);
 
     const texture = new THREE.CanvasTexture(canvas)
     texture.minFilter = THREE.LinearFilter;

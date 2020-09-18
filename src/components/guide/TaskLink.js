@@ -1,13 +1,14 @@
-import { Vector3, CatmullRomCurve3,TubeGeometry,MeshBasicMaterial,Mesh,ArrowHelper,Group} from 'three';
-import { taskBarColor } from './Shapes';
+import { CatmullRomCurve3,TubeGeometry,MeshBasicMaterial,Mesh,ArrowHelper,Group} from 'three';
 
-const lineColor = 0x0000ff;
-const sourceColor = 0xff0000;
+
+const lineColor = "#4169E1";
+
+const dotColor = "#646464";
+const sourceColor = "#d1454d";
 const arrowColor = "#4e8d07"
 
 const SOURCE = "source";
 const TARGET = "target";
-
 
 export default class TaskLink {
 
@@ -32,6 +33,10 @@ export default class TaskLink {
 
      }
 
+     reset = () => {
+         this.source.material.color.set(dotColor);
+     }
+
     /**
      * Toggle between the Source and Target Connector
      *
@@ -44,7 +49,7 @@ export default class TaskLink {
             this.target = connector;
             this.buildTube();
 
-            this.source.material.color.set(taskBarColor);
+            this.source.material.color.set(dotColor);
                   
             const key = this.getKey();
 
@@ -73,8 +78,8 @@ export default class TaskLink {
 
     buildTube = () => {
 
-        const path = new CatmullRomCurve3(this.points,false,'catmullrom',0.05);
-        const tubeGeometry = new TubeGeometry(path, 200, 0.02, 30, false );
+        const path = new CatmullRomCurve3(this.points,false,'catmullrom',0.04);
+        const tubeGeometry = new TubeGeometry(path, 200, 0.02, 20, false );
         const tubeMaterial = new MeshBasicMaterial( { color: lineColor } );
         
         if(!this.tube) {
