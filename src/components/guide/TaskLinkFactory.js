@@ -122,7 +122,7 @@ export default class TaskLinkFactory {
         return -1;
     }
 
-    deleteLink = (selectedLine) => {
+    deleteByLine = (selectedLine) => {
         if(!selectedLine) {
             return;
         }
@@ -139,7 +139,24 @@ export default class TaskLinkFactory {
 
         this.lineContainer.splice(index, 1);
         this.taskLinks.delete(key);
+    }
+
+    delete = (taskLink) => {
+        if(!taskLink) {
+            return;
+        }
+
+        const key = taskLink.getKey();
+        const index = this.findLineIndex(key);
+        if(index == -1) {
+            return;
+        }
         
+        const theLine = taskLink.getLine();
+        this.scene.remove(theLine);
+
+        this.lineContainer.splice(index, 1);
+        this.taskLinks.delete(key);
     }
 
     getLineById = (key) => {

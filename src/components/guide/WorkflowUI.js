@@ -6,7 +6,7 @@ import moment from 'moment';
 import 'moment-timezone';
 
 import { Button, Row, Col, Typography, Tooltip, Space, Spin } from 'antd';
-import { ScissorOutlined } from '@ant-design/icons';
+import { ScissorOutlined, CloseOutlined } from '@ant-design/icons';
 
 import * as THREE from 'three';
 import DragControls from 'three-dragcontrols';
@@ -66,6 +66,7 @@ class WorkflowUI extends Component {
         this.dots = [];
         this.lineContainer = []
 
+        this.taskGroupMap = new Map();
         this.connectorMap = {};
 
         this.selectedTaskBar = null;
@@ -82,7 +83,7 @@ class WorkflowUI extends Component {
 
         this.taskControls.addEventListener('onRightClick', this.onTaskSelect);
         this.dotControls.addEventListener('onClick', this.onConnectorSelect);
-    
+
 
         this.lineObserver.addEventListener('onHover', this.onLineHovered);
         this.lineObserver.addEventListener('onSelect', this.onLineSelected);
@@ -97,7 +98,7 @@ class WorkflowUI extends Component {
         this.container.addEventListener('contextmenu', function (e) {
             e.preventDefault();
         });
-        
+
     }
 
 
@@ -237,12 +238,12 @@ class WorkflowUI extends Component {
     }
 
     onTaskSelect = (event) => {
-        if(this.lockedTaskBar) {
+        if (this.lockedTaskBar) {
             this.lockedTaskBar.material.color.set(sceneColor);
             this.lockedTaskBar = null;
         }
         else {
-            this.lockedTaskBar = event.object 
+            this.lockedTaskBar = event.object
             this.lockedTaskBar.material.color.set(yellow);
         }
 
@@ -264,8 +265,8 @@ class WorkflowUI extends Component {
 
             this.moveDots();
             this.moveLinks();
-        
-            if(this.lockedTaskBar !== this.selectedTaskBar) {
+
+            if (this.lockedTaskBar !== this.selectedTaskBar) {
                 this.selectedTaskBar.material.color.set(sceneColor);
             }
             this.selectedTaskBar = null;
@@ -490,8 +491,10 @@ class WorkflowUI extends Component {
         group.add(connectorTop);
         group.add(connectorBottom);
 
+        group.userData = { id: taskId }
         this.scene.add(group);
 
+        this.taskGroupMap.set(taskId, group);
     }
 
     handleWindowResize = () => {
@@ -505,15 +508,40 @@ class WorkflowUI extends Component {
     }
 
 
-    deleteLink = () => {
+    deleteByLine = () => {
         if (this.selectedLine) {
-            this.taskLinkFactory.deleteLink(this.selectedLine)
+            this.taskLinkFactory.deleteByLine(this.selectedLine)
             this.selectedLine = null;
+            this.hoveredLine = null;
         }
     }
 
     deleteTask = () => {
+        if (this.lockedTaskBar) {
+            const taskId = this.lockedTaskBar.userData.id
+            this.deleteTaskLinks(taskId);
 
+            const group = this.taskGroupMap.get(taskId);
+            this.scene.remove(group);
+
+            this.selectedTask = null;
+            this.lockedTask = null;
+
+            this.taskGroupMap.delete(taskId);
+        }
+    }
+
+    deleteTaskLinks = (taskId) => {
+    
+        var inboundLinks = this.getLinksByType(taskId, "target");
+        for (var i = 0; i < inboundLinks.length; i++) {
+            this.taskLinkFactory.delete(inboundLinks[i]);
+        }
+
+        var outboundLinks = this.getLinksByType(taskId, "source");
+        for (var i = 0; i < outboundLinks.length; i++) {
+            this.taskLinkFactory.delete(outboundLinks[i]);
+        }
     }
 
     renderControls = (isLoading) => {
@@ -531,7 +559,11 @@ class WorkflowUI extends Component {
                     <div style={{ float: "right", textAlign: "left", paddingRight: "10px" }}>
                         <Space>
                             <Tooltip title="Delete Selected Link">
-                                <Button key="deleteLink" onClick={this.deleteLink} type="primary" icon={<ScissorOutlined />} shape={"circle"} />
+                                <Button key="deleteByLine" onClick={this.deleteByLine} type="primary" icon={<ScissorOutlined />} shape={"circle"} />
+                            </Tooltip>
+
+                            <Tooltip title="Delete Selected Task">
+                                <Button key="deleteTask" danger onClick={this.deleteTask} type="primary" icon={<CloseOutlined />} shape={"circle"} />
                             </Tooltip>
                         </Space>
                     </div>
