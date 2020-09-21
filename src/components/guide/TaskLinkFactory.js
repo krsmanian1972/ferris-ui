@@ -33,7 +33,9 @@ export default class TaskLinkFactory {
             return
         }
 
-        this.currentLink = new TaskLink(connector);
+        this.currentLink = new TaskLink();
+
+        this.currentLink.start(connector);
         connector.userData.taskLink = this.currentLink;
         connector.userData.taskLinkDirection = SOURCE;
 
@@ -101,10 +103,10 @@ export default class TaskLinkFactory {
         }
 
         this.currentLink.finish(connector);
-        this.taskLinks.set(this.currentLink.getKey(),this.currentLink);
-
         connector.userData.taskLink = this.currentLink;
         connector.userData.taskLinkDirection = TARGET;
+
+        this.taskLinks.set(this.currentLink.getKey(),this.currentLink);
 
         const theLine = this.currentLink.getLine();
         this.scene.add(theLine);
@@ -190,4 +192,20 @@ export default class TaskLinkFactory {
         }
     }
 
+    buildFrom = async(source,target,points) => {
+
+        const theLink = new TaskLink();
+        theLink.buildFrom(source,target,points);
+
+        source.userData.taskLink = theLink;
+        source.userData.taskLinkDirection = SOURCE;
+        target.userData.taskLink = theLink;
+        target.userData.taskLinkDirection = TARGET;
+
+        this.taskLinks.set(theLink.getKey(),theLink);
+     
+        const theLine = theLink.getLine();
+        this.scene.add(theLine);
+        this.lineContainer.push(theLine);
+    }
 }

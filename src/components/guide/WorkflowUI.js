@@ -6,7 +6,7 @@ import moment from 'moment';
 import 'moment-timezone';
 
 import { Button, Row, Col, Typography, Tooltip, Space, Spin } from 'antd';
-import { ScissorOutlined, CloseOutlined } from '@ant-design/icons';
+import { ScissorOutlined, CloseOutlined, AimOutlined, PlusOutlined } from '@ant-design/icons';
 
 import * as THREE from 'three';
 
@@ -72,6 +72,10 @@ class WorkflowUI extends Component {
 
         this.selectedTaskBar = null;
         this.selectedLine = null;
+
+        this.state = {
+            isReady : false
+        }
     }
 
     componentDidMount() {
@@ -99,6 +103,7 @@ class WorkflowUI extends Component {
             e.preventDefault();
         });
 
+        this.setState({ isReady: true })
     }
 
 
@@ -209,11 +214,11 @@ class WorkflowUI extends Component {
         }
 
         if (event.deltaY > 0) {
-            this.camera.position.y -= 0.1
+            this.camera.position.y -= 0.2
         }
         else {
             if (this.camera.position.y < 0.1) {
-                this.camera.position.y += 0.1
+                this.camera.position.y += 0.2
             }
         }
 
@@ -333,7 +338,6 @@ class WorkflowUI extends Component {
     init = () => {
         this.setupScene();
         this.setGraphPaper();
-        this.populateTasks();
         this.animate();
     }
 
@@ -401,19 +405,56 @@ class WorkflowUI extends Component {
         return links;
     }
 
-    populateTasks = () => {
+    prepareWorkflow = async() => {
+        if (!this.state.isReady) {
+            return
+        }
+
+        await this.populateTasks();
+        this.populateLinks();
+    }
+
+
+    populateTasks = async() => {
+
         this.addTask(0, "START", "", "", "", 0, 4, "START_STOP_BOX");
-        this.addTask(1, 'Rule: ', 'When Completed ?', '2019-08-9', '2019-08-9', 0, 2, "DECISION_BOX");
-        this.addTask(2, 'Work on it now', "", '2019-08-9', '2019-08-9', -2, 0, "");
-        this.addTask(3, 'Look at it later', "", '2019-08-9', '2019-08-9', 2, 0, "");
-        this.addTask(4, "STOP 1", "", "", "", -2, -2, "CIRCLE");
-        this.addTask(5, "STOP 2", "", "", "", 2, -2, "CIRCLE");
+        this.addTask(1, 'Rule: ', 'When Completed ?', '09-Nov-2020', '10-Nov-2020', 0, 2, "DECISION_BOX");
+        this.addTask(2, 'Work on it now', "", '09-Nov-2020', '09-Nov-2020', -2, 0, "");
+        this.addTask(3, 'Look at it later', "", '09-Nov-2020', '09-Nov-2020', 2, 0, "");
+
+        var i=4;
+        var x=-2;
+        var y=-2;
+        for(;i<200;i++) {
+            var taskName = `Task - ${i}`
+            this.addTask(i,taskName,"",'09-Nov-2020', '09-Nov-2020', x, y, "");
+            i++;
+
+            var taskName = `Task - ${i}`
+            this.addTask(i,taskName,"",'09-Nov-2020', '09-Nov-2020', x*(-1), y, "");
+            y=y-2;
+        }
+
+        this.addTask(i, "STOP 1", "", "", "", x, y, "CIRCLE");
+        this.addTask(i+1, "STOP 2", "", "", "", x*(-1), y, "CIRCLE");
     }
 
+    populateLinks = async() => {
+        var i=6
+        for (;i<180;i++) {
+            var sourceId=i;
+            var targetId=i+3;
+            var sourcePort = this.connectorMap[sourceId].connectorBottom;
+            var targetPort = this.connectorMap[targetId].connectorLeft;
 
-    addLink = (sourceTaskId, targetTaskId, sourcePort, targetPort, points) => {
+            var points = []
+            points.push(sourcePort.position.clone());
+            points.push(targetPort.position.clone());
 
+            this.taskLinkFactory.buildFrom(sourcePort,targetPort,points);
+        }
     }
+
 
     addTask = (taskId, taskName, role, startDate, endDate, x, y, shape) => {
 
@@ -542,22 +583,33 @@ class WorkflowUI extends Component {
         }
     }
 
-    renderControls = (isLoading) => {
+    renderControls = () => {
 
-        if (isLoading) {
-            return <Spin />
-        }
+        this.prepareWorkflow();
 
         return (
             <Row>
-                <Col span={12}>
+                <Col span={20}>
                     <Title level={4}>Planning</Title>
                 </Col>
-                <Col span={10}>
-                    <div style={{ float: "right", textAlign: "left", paddingRight: "10px" }}>
+                <Col span={2}>
+                    <div style={{textAlign: "left", paddingRight: "10px" }}>
+                        <Space>
+                            <Tooltip title="Define A New Task">
+                                <Button key="defineTask" onClick={this.defineTask} type="primary" icon={<AimOutlined />} shape={"circle"} />
+                            </Tooltip>
+
+                            <Tooltip title="Pull Tasks">
+                                <Button key="pullTasks" onClick={this.pullTasks} style={{ border: "1px solid green", color: "green" }} icon={<PlusOutlined />} shape={"circle"} />
+                            </Tooltip>
+                        </Space>
+                    </div>
+                </Col>
+                <Col span={2}>
+                    <div style={{textAlign: "left", paddingRight: "10px" }}>
                         <Space>
                             <Tooltip title="Delete Selected Link">
-                                <Button key="deleteByLine" onClick={this.deleteByLine} type="primary" icon={<ScissorOutlined />} shape={"circle"} />
+                                <Button key="deleteByLine" danger onClick={this.deleteByLine} type="primary" icon={<ScissorOutlined />} shape={"circle"} />
                             </Tooltip>
 
                             <Tooltip title="Delete Selected Task">
@@ -573,9 +625,9 @@ class WorkflowUI extends Component {
     render() {
         return (
             <div>
-                {this.renderControls(false)}
-                <div style={graphPaperStyle}>
-                    <div style={containerStyle} id="container" ref={ref => (this.container = ref)} />
+                {this.renderControls()}
+                <div key="graphPaper" style={graphPaperStyle}>
+                    <div key="container" style={containerStyle} id="container" ref={ref => (this.container = ref)} />
                 </div>
             </div>
         )

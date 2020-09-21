@@ -428,3 +428,46 @@ export const constraintsQuery = `query ($criteria: PlanCriteria!) {
     }
   }
 }`;
+
+export const createAbstractTaskQuery = `mutation($input: NewAbstractTaskRequest!) {
+  createAbstractTask(request: $input) {
+    abstractTask {
+    name
+    }
+    errors {
+      field
+      message
+    }
+  } 
+}`;
+
+export const abstractTasksQuery = `query ($criteria: AbstractTaskCriteria!) {
+  getAbstractTasks(criteria:$criteria) {
+    abstractTasks {
+    	name,
+    }
+  }
+}`;
+
+export const createMasterPlanQuery = `mutation($input: NewMasterPlanRequest!) {
+  createMasterPlan(request: $input) {
+    masterPlan {
+      id,
+      name,
+      description
+      coachId
+    }
+    errors {
+      field
+      message
+    }
+  }
+}`
+
+export const masterPlansQuery = `query ($criteria: MasterPlanCriteria!) {
+  getMasterPlans(criteria:$criteria) {
+    masterPlans {
+    	name,
+    }
+  }
+}`
