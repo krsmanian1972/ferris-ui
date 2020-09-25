@@ -464,10 +464,26 @@ export const createMasterPlanQuery = `mutation($input: NewMasterPlanRequest!) {
   }
 }`
 
+export const updateMasterPlanQuery = `mutation($input: UpdateMasterPlanRequest!) {
+  updateMasterPlan(request: $input) {
+    masterPlan {
+      id,
+      name,
+      description
+      coachId
+    }
+    errors {
+      field
+      message
+    }
+  }
+}`
+
 export const masterPlansQuery = `query ($criteria: MasterPlanCriteria!) {
   getMasterPlans(criteria:$criteria) {
     masterPlans {
-    	name,
+      name,
+      description
     }
   }
 }`

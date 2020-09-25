@@ -7,6 +7,7 @@ import Registration from './Registration';
 
 import About from './About';
 
+import PlanningUI from './guide/PlanningUI';
 import WorkflowUI from './guide/WorkflowUI';
 import ProgramUI from './guide/ProgramUI';
 import ProgramDetailUI from './commons/ProgramDetailUI';
@@ -44,6 +45,9 @@ class SelectedComponent extends Component {
                 return <SessionDetailUI params={currentComponent.params}/>
             }
             case 'planning': {
+                return <PlanningUI />;
+            }
+            case 'masterPlan': {
                 return <WorkflowUI />;
             }
             case 'login': {
