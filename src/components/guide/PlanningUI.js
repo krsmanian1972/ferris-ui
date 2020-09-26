@@ -25,8 +25,8 @@ class PlanningUI extends Component {
         this.planListStore.fetchPlans();
     }
 
-    showPlanDetail = (event) => {
-        const params = { event: event, parentKey: "planning" };
+    showPlanDetail = (plan) => {
+        const params = { plan: {...plan}, parentKey: "planning" };
         this.props.appStore.currentComponent = { label: "Master Plan", key: "masterPlan", params: params };
     }
 
@@ -71,7 +71,7 @@ class PlanningUI extends Component {
                 <List
                     dataSource={this.planListStore.plans}
                     renderItem={item => (
-                        <List.Item key={item.id} style={{ background: "rgb(242,242,242)", color: 'black', marginBottom: 10 }}>
+                        <List.Item key={item.id} style={{ background: "rgb(242,242,242)", color: 'black', marginBottom: 10, cursor:"pointer" }} onClick = {()=>this.showPlanDetail(item)}>
                             <List.Item.Meta
                                 avatar={<Avatar style={{ backgroundColor: '#87d068', margin: 10 }} icon={<UserOutlined />} />}
                                 title={item.name}

@@ -482,6 +482,7 @@ export const updateMasterPlanQuery = `mutation($input: UpdateMasterPlanRequest!)
 export const masterPlansQuery = `query ($criteria: MasterPlanCriteria!) {
   getMasterPlans(criteria:$criteria) {
     masterPlans {
+      id,
       name,
       description
     }

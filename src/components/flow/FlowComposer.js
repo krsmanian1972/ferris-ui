@@ -1,37 +1,13 @@
-import React, { Component } from 'react';
-import { inject, observer } from 'mobx-react';
-
-import Moment from 'react-moment';
-import moment from 'moment';
-import 'moment-timezone';
-
-import { Button, Row, Col, Typography, Tooltip, Space, Spin } from 'antd';
-import { ScissorOutlined, CloseOutlined, AimOutlined, PlusOutlined } from '@ant-design/icons';
-
 import * as THREE from 'three';
 
 import DragControls from 'three-dragcontrols';
+
 import { ClickControls } from './ClickControls';
 import { LineObserver } from './LineObserver';
-
 import TaskLinkFactory from './TaskLinkFactory';
 
 import { buildCircularTextMaterial, buildRectTextMaterial, buildSquareTextMaterial, buildStartStopTextMaterial } from './Shapes';
 import { barWidth, barHeight, barDepth, squareBarWidth, squareBarHeight, connectorRadius } from './Shapes';
-
-const { Title } = Typography;
-
-const containerStyle = {
-    height: window.innerHeight,
-    width: window.innerWidth
-};
-
-const graphPaperStyle = {
-    border: "1px solid black",
-    borderRadius: "12px",
-    maxHeight: window.innerHeight * .82,
-    overflowY: "auto"
-}
 
 const fov = 33;
 const near = 0.1;
@@ -50,12 +26,11 @@ const redLine = "#d1454d"
 const dotColor = "#646464";
 const yellow = "#fae78f"
 
-@inject("appStore")
-@observer
-class WorkflowUI extends Component {
+class FlowComposer {
 
-    constructor(props) {
-        super(props);
+    constructor(container) {
+
+        this.container = container;
 
         this.taskBarGeo = new THREE.PlaneGeometry(barWidth, barHeight, barDepth);
         this.taskBarSquareGeo = new THREE.PlaneGeometry(squareBarWidth, squareBarHeight, barDepth);
@@ -73,12 +48,6 @@ class WorkflowUI extends Component {
         this.selectedTaskBar = null;
         this.selectedLine = null;
 
-        this.state = {
-            isReady : false
-        }
-    }
-
-    componentDidMount() {
         this.init();
 
         window.addEventListener("resize", this.handleWindowResize);
@@ -102,8 +71,6 @@ class WorkflowUI extends Component {
         this.container.addEventListener('contextmenu', function (e) {
             e.preventDefault();
         });
-
-        this.setState({ isReady: true })
     }
 
 
@@ -405,17 +372,8 @@ class WorkflowUI extends Component {
         return links;
     }
 
-    prepareWorkflow = async() => {
-        if (!this.state.isReady) {
-            return
-        }
 
-        await this.populateTasks();
-        this.populateLinks();
-    }
-
-
-    populateTasks = async() => {
+    populateTasks = () => {
 
         this.addTask(0, "START", "", "", "", 0, 4, "START_STOP_BOX");
         this.addTask(1, 'Rule: ', 'When Completed ?', '09-Nov-2020', '10-Nov-2020', 0, 2, "DECISION_BOX");
@@ -547,7 +505,7 @@ class WorkflowUI extends Component {
     }
 
 
-    deleteByLine = () => {
+    deleteSelectedLine = () => {
         if (this.selectedLine) {
             this.taskLinkFactory.deleteByLine(this.selectedLine)
             this.selectedLine = null;
@@ -555,7 +513,7 @@ class WorkflowUI extends Component {
         }
     }
 
-    deleteTask = () => {
+    deleteSelectedTask = () => {
         if (this.lockedTaskBar) {
             const taskId = this.lockedTaskBar.userData.id
             this.deleteTaskLinks(taskId);
@@ -582,57 +540,6 @@ class WorkflowUI extends Component {
             this.taskLinkFactory.delete(outboundLinks[i]);
         }
     }
-
-    renderControls = () => {
-
-        this.prepareWorkflow();
-
-        return (
-            <Row>
-                <Col span={20}>
-                    <Title level={4}>Planning</Title>
-                </Col>
-                <Col span={2}>
-                    <div style={{textAlign: "left", paddingRight: "10px" }}>
-                        <Space>
-                            <Tooltip title="Define A New Task">
-                                <Button key="defineTask" onClick={this.defineTask} type="primary" icon={<AimOutlined />} shape={"circle"} />
-                            </Tooltip>
-
-                            <Tooltip title="Pull Tasks">
-                                <Button key="pullTasks" onClick={this.pullTasks} style={{ border: "1px solid green", color: "green" }} icon={<PlusOutlined />} shape={"circle"} />
-                            </Tooltip>
-                        </Space>
-                    </div>
-                </Col>
-                <Col span={2}>
-                    <div style={{textAlign: "left", paddingRight: "10px" }}>
-                        <Space>
-                            <Tooltip title="Delete Selected Link">
-                                <Button key="deleteByLine" danger onClick={this.deleteByLine} type="primary" icon={<ScissorOutlined />} shape={"circle"} />
-                            </Tooltip>
-
-                            <Tooltip title="Delete Selected Task">
-                                <Button key="deleteTask" danger onClick={this.deleteTask} type="primary" icon={<CloseOutlined />} shape={"circle"} />
-                            </Tooltip>
-                        </Space>
-                    </div>
-                </Col>
-            </Row>
-        )
-    }
-
-    render() {
-        return (
-            <div>
-                {this.renderControls()}
-                <div key="graphPaper" style={graphPaperStyle}>
-                    <div key="container" style={containerStyle} id="container" ref={ref => (this.container = ref)} />
-                </div>
-            </div>
-        )
-    }
-
 }
 
-export default WorkflowUI;
+export default FlowComposer;

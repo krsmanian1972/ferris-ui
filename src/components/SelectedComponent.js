@@ -8,7 +8,7 @@ import Registration from './Registration';
 import About from './About';
 
 import PlanningUI from './guide/PlanningUI';
-import WorkflowUI from './guide/WorkflowUI';
+import MasterPlanUI from './guide/MasterPlanUI';
 import ProgramUI from './guide/ProgramUI';
 import ProgramDetailUI from './commons/ProgramDetailUI';
 import EditableProgramDetailUI from './guide/EditableProgramDetailUI';
@@ -48,7 +48,7 @@ class SelectedComponent extends Component {
                 return <PlanningUI />;
             }
             case 'masterPlan': {
-                return <WorkflowUI />;
+                return <MasterPlanUI />;
             }
             case 'login': {
                 return <Login />;
