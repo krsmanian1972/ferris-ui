@@ -202,6 +202,7 @@ class SessionDetailUI extends Component {
         return (
             <>
                 <PageHeader key="sessionDetail"
+                    style={{marginTop:0, marginBottom:0, paddingBottom:0, paddingTop:0}}
                     title={<Title level={3}>{session.name}</Title>}
                     subTitle={program.name}
                     extra={[

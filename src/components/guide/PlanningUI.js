@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { PageHeader, Typography, Button, Tooltip, List, Avatar, Tag, Spin } from 'antd';
-import { PlusCircleOutlined, UserOutlined } from '@ant-design/icons';
+import { NodeIndexOutlined, PlusCircleOutlined } from '@ant-design/icons';
 
 import PlanDrawer from './PlanDrawer';
 import PlanListStore from '../stores/PlanListStore';
@@ -62,18 +62,19 @@ class PlanningUI extends Component {
     render() {
         return (
             <>
-                <PageHeader title={<Title level={3}>Planning {this.countTag()}</Title>}
+                <PageHeader style={{marginBottom:5, paddingBottom:0, paddingTop:0}} title={<Title level={3}>Planning {this.countTag()}</Title>}
                     extra={[
                         this.newPlanButton()
                     ]}>
                 </PageHeader>
 
                 <List
+                    style={{paddingLeft: 5, paddingRight: 5}}
                     dataSource={this.planListStore.plans}
                     renderItem={item => (
-                        <List.Item key={item.id} style={{ background: "rgb(242,242,242)", color: 'black', marginBottom: 10, cursor:"pointer" }} onClick = {()=>this.showPlanDetail(item)}>
+                        <List.Item key={item.id} style={{ background: "white", borderRadius:12, color: 'black', marginBottom: 6, cursor:"pointer" }} onClick = {()=>this.showPlanDetail(item)}>
                             <List.Item.Meta
-                                avatar={<Avatar style={{ backgroundColor: '#87d068', margin: 10 }} icon={<UserOutlined />} />}
+                                avatar={<Avatar style={{ backgroundColor: '#87d068', margin: 10 }} icon={<NodeIndexOutlined />} />}
                                 title={item.name}
                                 description={item.description} />
                         </List.Item>

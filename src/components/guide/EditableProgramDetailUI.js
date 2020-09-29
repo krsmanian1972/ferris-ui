@@ -172,7 +172,7 @@ class EditableProgramDetailUI extends Component {
 
         return (
             <>
-                <PageHeader title={<Title level={3}>{program.name}</Title>}
+                <PageHeader style={{marginBottom:5, paddingBottom:0, paddingTop:0}} title={<Title level={3}>{program.name}</Title>}
                     extra={[
                         this.getActivationButton(),
                         this.getPosterButton(program)

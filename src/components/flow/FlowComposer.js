@@ -48,7 +48,15 @@ class FlowComposer {
         this.selectedTaskBar = null;
         this.selectedLine = null;
 
+        // Use for the canvas id
+        this.taskKey = 0;
+
         this.init();
+
+        this.addListeners();
+    }
+
+    addListeners = () => {
 
         window.addEventListener("resize", this.handleWindowResize);
 
@@ -73,6 +81,15 @@ class FlowComposer {
         });
     }
 
+    handleWindowResize = () => {
+        const width = this.container.clientWidth;
+        const height = this.container.clientHeight;
+
+        this.renderer.setSize(width, height);
+        this.camera.aspect = width / height;
+
+        this.camera.updateProjectionMatrix();
+    }
 
     onConnectorSelect = (event) => {
         const connector = event.object;
@@ -208,6 +225,24 @@ class FlowComposer {
         }
     }
 
+    getLinksByType = (taskId, linkType) => {
+        const { connectorLeft, connectorRight, connectorTop, connectorBottom } = this.connectorMap[taskId];
+        const links = [];
+        if (connectorLeft.userData.taskLinkDirection === linkType) {
+            links.push(connectorLeft.userData.taskLink);
+        }
+        if (connectorRight.userData.taskLinkDirection === linkType) {
+            links.push(connectorRight.userData.taskLink);
+        }
+        if (connectorTop.userData.taskLinkDirection === linkType) {
+            links.push(connectorTop.userData.taskLink);
+        }
+        if (connectorBottom.userData.taskLinkDirection === linkType) {
+            links.push(connectorBottom.userData.taskLink);
+        }
+        return links;
+    }
+
     onTaskSelect = (event) => {
         if (this.lockedTaskBar) {
             this.lockedTaskBar.material.color.set(sceneColor);
@@ -308,11 +343,6 @@ class FlowComposer {
         this.animate();
     }
 
-    animate = () => {
-        requestAnimationFrame(this.animate);
-        this.renderer.render(this.scene, this.camera);
-    }
-
     setupScene = () => {
         const width = this.container.clientWidth;
         const height = this.container.clientHeight;
@@ -354,93 +384,92 @@ class FlowComposer {
         this.scene.add(grid);
     }
 
-    getLinksByType = (taskId, linkType) => {
-        const { connectorLeft, connectorRight, connectorTop, connectorBottom } = this.connectorMap[taskId];
-        const links = [];
-        if (connectorLeft.userData.taskLinkDirection === linkType) {
-            links.push(connectorLeft.userData.taskLink);
-        }
-        if (connectorRight.userData.taskLinkDirection === linkType) {
-            links.push(connectorRight.userData.taskLink);
-        }
-        if (connectorTop.userData.taskLinkDirection === linkType) {
-            links.push(connectorTop.userData.taskLink);
-        }
-        if (connectorBottom.userData.taskLinkDirection === linkType) {
-            links.push(connectorBottom.userData.taskLink);
-        }
-        return links;
+    animate = () => {
+        requestAnimationFrame(this.animate);
+        this.renderer.render(this.scene, this.camera);
     }
 
+    // The Public APIs
 
-    populateTasks = () => {
+    populateTasks = (tasks) => {
 
-        this.addTask(0, "START", "", "", "", 0, 4, "START_STOP_BOX");
-        this.addTask(1, 'Rule: ', 'When Completed ?', '09-Nov-2020', '10-Nov-2020', 0, 2, "DECISION_BOX");
-        this.addTask(2, 'Work on it now', "", '09-Nov-2020', '09-Nov-2020', -2, 0, "");
-        this.addTask(3, 'Look at it later', "", '09-Nov-2020', '09-Nov-2020', 2, 0, "");
-
-        var i=4;
-        var x=-2;
-        var y=-2;
-        for(;i<200;i++) {
-            var taskName = `Task - ${i}`
-            this.addTask(i,taskName,"",'09-Nov-2020', '09-Nov-2020', x, y, "");
-            i++;
-
-            var taskName = `Task - ${i}`
-            this.addTask(i,taskName,"",'09-Nov-2020', '09-Nov-2020', x*(-1), y, "");
-            y=y-2;
+        for (var index = 0; index < tasks.length; index++) {
+            const task = tasks[index];
+            this.acceptTask(task);
         }
 
-        this.addTask(i, "STOP 1", "", "", "", x, y, "CIRCLE");
-        this.addTask(i+1, "STOP 2", "", "", "", x*(-1), y, "CIRCLE");
     }
 
-    populateLinks = async() => {
-        var i=6
-        for (;i<180;i++) {
-            var sourceId=i;
-            var targetId=i+3;
-            var sourcePort = this.connectorMap[sourceId].connectorBottom;
-            var targetPort = this.connectorMap[targetId].connectorLeft;
+    acceptTask = (task) => {
 
-            var points = []
-            points.push(sourcePort.position.clone());
-            points.push(targetPort.position.clone());
+        const taskId = task.id;
+        const shape = task.taskType;
+        const name = task.name;
+        const role = task.roleId;
+        const line1 = task.duration.toString();
+        const line2 = task.min + ' -> ' + task.max;
+        const task_pos = this.parse_coordinates(task.coordinates);
 
-            this.taskLinkFactory.buildFrom(sourcePort,targetPort,points);
-        }
+        const taskBar = this.buildTaskBarMesh(shape, name, role, line1, line2);
+        
+        this.arrangeTaskBar(taskBar, taskId, task_pos, shape);
     }
 
+    populateLinks = async () => {
+        //this.taskLinkFactory.buildFrom(sourcePort, targetPort, points);
+    }
 
-    addTask = (taskId, taskName, role, startDate, endDate, x, y, shape) => {
+    buildTaskBarMesh = (shape, taskName, role, line1, line2) => {
 
-        const period = startDate + ' - ' + endDate;
+        this.taskKey++;
 
-        var taskMaterial = null;
-        var taskBar = null;
+        if (shape === "activity") {
+            const taskMaterial = buildRectTextMaterial(this.taskKey, taskName, role, line1, line2);
+            return new THREE.Mesh(this.taskBarGeo, taskMaterial);
+        }
 
-        if (shape === "") {
-            taskMaterial = buildRectTextMaterial(1, taskName, role, period, period, shape);
-            taskBar = new THREE.Mesh(this.taskBarGeo, taskMaterial);
+        if (shape === "DECISION_BOX") {
+            const taskMaterial = buildSquareTextMaterial(this.taskKey, taskName, role, line1, line2);
+            return new THREE.Mesh(this.taskBarSquareGeo, taskMaterial);
         }
-        else if (shape === "DECISION_BOX") {
-            taskMaterial = buildSquareTextMaterial(2, taskName, role, period, period, shape);
-            taskBar = new THREE.Mesh(this.taskBarSquareGeo, taskMaterial);
+
+        if (shape === "CIRCLE") {
+            const taskMaterial = buildCircularTextMaterial(this.taskKey, taskName, role, line1, line2);
+            return new THREE.Mesh(this.taskBarGeo, taskMaterial);
         }
-        else if (shape === "CIRCLE") {
-            taskMaterial = buildCircularTextMaterial(3, taskName, role, period, period);
-            taskBar = new THREE.Mesh(this.taskBarGeo, taskMaterial);
+
+        if (shape === "START_STOP_BOX") {
+            const taskMaterial = buildStartStopTextMaterial(this.taskKey, taskName, role, line1, line2);
+            return new THREE.Mesh(this.taskBarGeo, taskMaterial);
         }
-        else if (shape === "START_STOP_BOX") {
-            taskMaterial = buildStartStopTextMaterial(3, taskName, role, period, period);
-            taskBar = new THREE.Mesh(this.taskBarGeo, taskMaterial);
+
+        const taskMaterial = buildRectTextMaterial(this.taskKey, taskName, role, line1, line2);
+        return new THREE.Mesh(this.taskBarGeo, taskMaterial);
+    }
+
+    parse_coordinates = (coordinates) => {
+
+        var task_pos;
+
+        try {
+            task_pos = JSON.parse(coordinates);
         }
+        catch (e) {
+            task_pos = { x: 0, y: 0, z: 0 };
+        }
+
+        return task_pos;
+    }
+
+    arrangeTaskBar = (taskBar, taskId, task_pos, shape) => {
+
+        const x = task_pos.x;
+        const y = task_pos.y;
+        const z = task_pos.z;
 
         // we need task_id and task_name
         taskBar.userData = { id: taskId, type: 'taskBar', shape: shape };
-        taskBar.position.set(x, y, 0);
+        taskBar.position.set(x, y, z);
         this.taskBars.push(taskBar);
 
         var xOffset = barWidth;
@@ -494,16 +523,6 @@ class FlowComposer {
         this.taskGroupMap.set(taskId, group);
     }
 
-    handleWindowResize = () => {
-        const width = this.container.clientWidth;
-        const height = this.container.clientHeight;
-
-        this.renderer.setSize(width, height);
-        this.camera.aspect = width / height;
-
-        this.camera.updateProjectionMatrix();
-    }
-
 
     deleteSelectedLine = () => {
         if (this.selectedLine) {
@@ -539,6 +558,22 @@ class FlowComposer {
         for (var i = 0; i < outboundLinks.length; i++) {
             this.taskLinkFactory.delete(outboundLinks[i]);
         }
+    }
+
+    getTaskPositions() {
+        const task_positions = [];
+
+        for (let [taskId, value] of this.taskGroupMap) {
+            if (value.taskBar) {
+                var pos = value.taskBar.position;
+                task_positions.push({id: taskId, coordinates:{ x: pos.x, y: pos.y, z: pos.z }});
+            }
+        }
+        return task_positions;
+    }
+
+    getTaskLinks() {
+
     }
 }
 

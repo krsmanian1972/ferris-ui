@@ -270,3 +270,24 @@ code {
   outline: none;
 }
 
+.slot-member {
+  display:flex;
+  flex-direction:column;
+  width:30%;
+  background-color: rgb(59,109,171);
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  padding: 5px;
+  color:white;
+  border-radius:12px 0 0 12px;
+}
+
+.slot-member-detail {
+  width:70%;
+  display: flex;
+  padding: 5px;
+  flex-direction: column;
+  background: white;
+  border-radius:0 12px 12px 0;
+}

@@ -1,6 +1,6 @@
 import { decorate, observable, computed, action } from 'mobx';
 import { apiHost } from './APIEndpoints';
-import { createMasterPlanQuery, updateMasterPlanQuery } from './Queries';
+import { createMasterPlanQuery, updatePlanInfoQuery,saveMasterPlanQuery } from './Queries';
 import { isBlank } from './Util';
 
 const INIT = "init";
@@ -51,7 +51,7 @@ export default class PlanStore {
     }
 
     asCurrent = (plan) => {
-        
+
         this.currentPlan = EMPTY_PLAN;
 
         if (plan) {
@@ -85,7 +85,7 @@ export default class PlanStore {
         }
 
         try {
-            const response = await this.apiProxy.mutate(apiHost, updateMasterPlanQuery, variables);
+            const response = await this.apiProxy.mutate(apiHost, updatePlanInfoQuery, variables);
             const data = await response.json();
 
             if (data.error == true) {
@@ -141,6 +141,36 @@ export default class PlanStore {
         }
     }
 
+    saveMasterPlan = async (master_plan_id,taskPositions) => {
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+
+        const variables = {
+            input: {
+                master_plan_id: master_plan_id,
+                tasks: taskPositions,
+                links: [],
+            }
+        }
+
+        try {
+            const response = await this.apiProxy.mutate(apiHost, saveMasterPlanQuery, variables);
+            const data = await response.json();
+
+            if (data.error == true) {
+                this.state = ERROR;
+                this.message = SAVING_ERROR;
+                return;
+            }
+            this.state = DONE;
+        }
+        catch (e) {
+            this.state = ERROR;
+            this.message = SAVING_ERROR;
+            console.log(e);
+        }
+    }
+
 }
 decorate(PlanStore, {
     state: observable,
@@ -158,4 +188,6 @@ decorate(PlanStore, {
     savePlan: action,
     setNewPlan: action,
     asCurrent: action,
+
+    saveMasterPlan: action,
 })

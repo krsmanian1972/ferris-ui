@@ -188,14 +188,6 @@ export const planEventsQuery = `query ($criteria: EventCriteria!) {
         status,
         description
       },
-      enrollment{
-        memberId
-      },
-      program {
-        name,
-        description,
-        coachName
-      }
     }
     error {
       message
@@ -462,10 +454,10 @@ export const createMasterPlanQuery = `mutation($input: NewMasterPlanRequest!) {
       message
     }
   }
-}`
+}`;
 
-export const updateMasterPlanQuery = `mutation($input: UpdateMasterPlanRequest!) {
-  updateMasterPlan(request: $input) {
+export const updatePlanInfoQuery = `mutation($input: UpdatePlanInfoRequest!) {
+  updatePlanInfo(request: $input) {
     masterPlan {
       id,
       name,
@@ -477,7 +469,7 @@ export const updateMasterPlanQuery = `mutation($input: UpdateMasterPlanRequest!)
       message
     }
   }
-}`
+}`;
 
 export const masterPlansQuery = `query ($criteria: MasterPlanCriteria!) {
   getMasterPlans(criteria:$criteria) {
@@ -487,4 +479,37 @@ export const masterPlansQuery = `query ($criteria: MasterPlanCriteria!) {
       description
     }
   }
-}`
+}`;
+
+export const saveMasterPlanQuery = `mutation($input: UpdateMasterPlanRequset!) {
+  saveMasterPlan(request: $input) {
+    rows
+    errors {
+      field
+      message
+    }
+  }
+}`;
+
+export const coachMembersQuery= `query ($criteria: CoachCriteria!) {
+  getCoachMembers(criteria:$criteria) {
+    members {
+    	enrollment {
+        id,
+        isNew,
+        createdAt,
+      }
+      user {
+        id,
+        email,
+        name
+      }
+      program {
+        name
+      }
+    }
+    error {
+      message
+    }
+  }
+}`;

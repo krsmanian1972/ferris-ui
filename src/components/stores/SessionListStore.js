@@ -253,11 +253,11 @@ export default class SessionListStore {
     fixPlanRoster = (roster, events) => {
         events.map(event => {
             
-            if(event.objective) {
+            if(!event.task) {
                 return;
             }
-            
-            const item = event.task  ? event.task : event.objective;
+
+            const item = event.task
 
             const eventStart = moment(item.scheduleStart*1000);
             const eventEnd = moment(item.scheduleEnd*1000);

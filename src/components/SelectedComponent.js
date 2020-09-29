@@ -14,6 +14,7 @@ import ProgramDetailUI from './commons/ProgramDetailUI';
 import EditableProgramDetailUI from './guide/EditableProgramDetailUI';
 import SessionDetailUI from './guide/SessionDetailUI';
 import HomeUI from './guide/HomeUI';
+import MemberList from './guide/MemberList';
 import Broadcast from './guide/Broadcast';
 
 
@@ -32,6 +33,9 @@ class SelectedComponent extends Component {
             case 'home' : {
                 return <HomeUI />;
             }
+            case 'coachMembers' : {
+                return <MemberList/>
+            }
             case 'programs': {
                 return <ProgramUI />;
             }
@@ -48,7 +52,7 @@ class SelectedComponent extends Component {
                 return <PlanningUI />;
             }
             case 'masterPlan': {
-                return <MasterPlanUI />;
+                return <MasterPlanUI params={currentComponent.params}/>;
             }
             case 'login': {
                 return <Login />;

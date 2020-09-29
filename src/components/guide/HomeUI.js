@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { PageHeader, Typography, Button, Tooltip } from 'antd';
-import { PlusCircleOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined,UserOutlined } from '@ant-design/icons';
 
 import TodaySessions from './TodaySessions';
 
@@ -44,6 +44,11 @@ class HomeUI extends Component {
         this.sessionStore.showDrawer = true;
     }
 
+    showMembers = () => {
+        const params = { event: {}, parentKey: "home" };
+        this.props.appStore.currentComponent = { label: "Coach Members", key: "coachMembers", params: params };
+    }
+
     newScheduleButton = () => {
         if (this.props.appStore.isCoach) {
             return (
@@ -54,12 +59,23 @@ class HomeUI extends Component {
         }
     }
 
+    membersButton = () => {
+        if (this.props.appStore.isCoach) {
+            return (
+                <Tooltip key="members_tip" title="Enrolled Members">
+                    <Button type="primary" icon={<UserOutlined />} onClick = {this.showMembers}>Members</Button>
+                </Tooltip>
+            )
+        }
+    }
+
     render() {
         return (
             <>
-                <PageHeader title={<Title level={3}>Moment 36</Title>}
+                <PageHeader style={{marginBottom:5, paddingBottom:0, paddingTop:0}} title={<Title level={3}>Moment 36</Title>}
                     extra={[
-                        this.newScheduleButton()
+                        this.newScheduleButton(),
+                        this.membersButton()
                     ]}>
                 </PageHeader>
 

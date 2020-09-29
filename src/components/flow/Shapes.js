@@ -114,11 +114,8 @@ const buildStartStopTextMaterial = function (taskId, taskName, role, plannedPeri
 
 }
 
-
-const buildRectTextMaterial = function (taskId, taskName, role, plannedPeriod, actualPeriod, shape) {
-    const canvas = buildTaskCanvas(taskId);
-
-    var y = 10;//10
+const buildRectTextMaterial = function (id, taskName, role, line1, line2) {
+    const canvas = buildTaskCanvas(id);
 
     const context = canvas.getContext('2d');
 
@@ -149,6 +146,7 @@ const buildRectTextMaterial = function (taskId, taskName, role, plannedPeriod, a
     context.fillStyle = "black";
     context.textAlign = "center";
 
+    var y = 10;
     y = y + vGap;
     context.font = boldFont;
     context.fillText(taskName, canvas.width / 2, y);
@@ -158,10 +156,10 @@ const buildRectTextMaterial = function (taskId, taskName, role, plannedPeriod, a
     context.fillText(role, (canvas.width) / 2, y);
 
     y = y + vGap + 5;
-    context.fillText(plannedPeriod, (canvas.width) / 2, y);
+    context.fillText(line1, (canvas.width) / 2, y);
 
     y = y + vGap + 2;
-    context.fillText(actualPeriod, (canvas.width) / 2, y);
+    context.fillText(line2, (canvas.width) / 2, y);
 
     const texture = new THREE.CanvasTexture(canvas)
     texture.minFilter = THREE.LinearFilter;
@@ -172,6 +170,7 @@ const buildRectTextMaterial = function (taskId, taskName, role, plannedPeriod, a
         side: THREE.DoubleSide,
         transparent: true
     });
+    
     return material;
 }
 
