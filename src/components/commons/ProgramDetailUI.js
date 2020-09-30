@@ -150,7 +150,7 @@ class ProgramDetailUI extends Component {
 
                     {this.renderActorCoachingPlan()}
 
-                    <ProgramSessions programId={program.id} apiProxy={this.props.appStore.apiProxy} showSessionDetail={this.showSessionDetail} />
+                    <ProgramSessions programId={program.id} userId={this.props.appStore.apiProxy.getUserFuzzyId()} apiProxy={this.props.appStore.apiProxy} showSessionDetail={this.showSessionDetail} />
                 </div>
 
                 <EnrollmentModal programStore={this.store} enrollmentStore={this.enrollmentStore} />

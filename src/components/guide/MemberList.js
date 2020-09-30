@@ -1,60 +1,82 @@
 import React, { Component } from 'react';
-import { inject, observer } from 'mobx-react';
+import { observer } from 'mobx-react';
 
-import { PageHeader, Typography, Result, Spin } from 'antd';
+import { Spin, Result, Typography, Tag } from 'antd';
 
-import MemberListStore from '../stores/MemberListStore';
 import MemberSlot from './MemberSlot';
 
 const { Title } = Typography;
 
-@inject("appStore")
 @observer
 class MemberList extends Component {
 
     constructor(props) {
         super(props);
-        this.store = new MemberListStore({ apiProxy: props.appStore.apiProxy });
     }
 
     componentDidMount() {
-        this.store.fetchMembers();
+        this.props.store.fetchMembers();
+    }
+
+    getTitle = () => {
+        return (
+            <div style={{ display: "flex", alignItems: "center", paddingLeft: 10, fontWeight: "bold" }}>
+                Members&nbsp;{this.countTag()}
+            </div>
+        )
+    }
+
+    countTag = () => {
+        if (this.props.store.isDone) {
+            return <Tag color="#108ee9">{this.props.store.rowCount} Total</Tag>
+        }
+
+        if (this.props.store.isError) {
+            return <Tag color="red">...</Tag>
+        }
     }
 
     render() {
 
+        const members = this.props.store.members;
+
         return (
-            <>
-                <PageHeader style={{ marginBottom: 5, paddingBottom: 0, paddingTop: 0 }} title={<Title level={3}>Enrollments</Title>} />
-                {this.renderList()}
-            </>
+            <div style={{ width: "50%", marginRight: "10px" }}>
+                <div style={{ background: "rgb(59,109,171)", marginBottom: "6px", color: "white", display: "flex", flexWrap: "wrap", height: 50, flexDirection: "row", justifyContent: "space-between" }}>
+                    {this.getTitle()}
+                </div>
+                {this.displayMessage()}
+                {this.renderMembers(members)}
+            </div>
         )
     }
 
-    renderList = () => {
+    displayMessage = () => {
+        const store = this.props.store;
 
-        if (this.store.isLoading) {
+        if (store.isLoading) {
             return (
-                <div className="loading-container"><Spin /></div>
+                <div className="loading-container">
+                    <Spin />
+                </div>
             )
         }
 
-        if (this.store.isError) {
+        if (store.isError) {
             return (
-                <Result status="warning" title={this.store.message.help} />
+                <Result status="warning" title={store.message.help} />
             )
         }
 
-        return this.renderMembers();
+        return (<></>)
     }
 
-    renderMembers = () => {
-        const members = this.store.members;
+    renderMembers = (members) => {
         const elements = [];
         if (members) {
             var index = 0
             for (let [email, details] of members) {
-                elements.push(<MemberSlot key={index++} email={email} details={details} />);
+                elements.push(<MemberSlot key={index++} email={email} details={details} showMemberSessions={this.props.showMemberSessions} />);
             }
         }
 

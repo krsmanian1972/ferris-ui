@@ -1,7 +1,7 @@
 import React from 'react';
 import moment from 'moment';
 
-function MemberSlot({ email, details }) {
+function MemberSlot({ email, details,showMemberSessions }) {
 
     const memberName = details.length > 0 ? details[0].user.name : "Unknown";
 
@@ -18,7 +18,7 @@ function MemberSlot({ email, details }) {
 
     const renderProgram = (item, index) => {
         return (
-            <div key={index} className="slot-item ">
+            <div key={index} className="slot-item " onClick={() => showMemberSessions(item)}>
                 <div className="slot-title">
                     <p style={{ float: 'left' }}>{item.program.name}</p>
                     {newText(item.enrollment.isNew)}
@@ -46,7 +46,7 @@ function MemberSlot({ email, details }) {
         <div className="slot">
             <div className={"slot-member"} >
                 <p style={{ fontWeight: "bold", marginBottom: '3px' }}>{memberName}</p>
-                <p style={{ fontSize: "14px" }}>{email}</p>
+                <p style={{ fontSize: "12px" }}>{email}</p>
             </div>
             {renderDetails(details)}
         </div>

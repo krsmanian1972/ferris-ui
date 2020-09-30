@@ -10,6 +10,8 @@ import { drawerStore } from './components/stores/DrawerStore';
 
 const { Content, Footer } = Layout;
 
+const minHeight = window.innerHeight * .89;
+
 export default class App extends Component {
 
 
@@ -52,7 +54,7 @@ export default class App extends Component {
       <>
         <ToolBar />
         <Content className="site-layout" style={{ padding: '0 0px', marginTop: 64 }}>
-          <div className="site-layout-background" style={{ padding: 5, minHeight: 450 }}>
+          <div className="site-layout-background" style={{ padding: 5, minHeight: minHeight }}>
             <SelectedComponent />
           </div>
         </Content>

@@ -10,13 +10,16 @@ import ProgramSessionSlot from './ProgramSessionSlot';
 const { Title } = Typography;
 
 @observer
-class ProgramSession extends Component {
+class ProgramSessions extends Component {
 
     constructor(props) {
         super(props);
+
         this.store = new SessionListStore({ apiProxy: props.apiProxy });
-        this.store.fetchProgramSessions(props.programId);
+
+        this.store.fetchProgramSessions(props.programId, props.userId);
     }
+
     countTag = () => {
         if (this.store.isDone) {
             return <Tag color="#108ee9">{this.store.rowCount} Total</Tag>
@@ -65,18 +68,18 @@ class ProgramSession extends Component {
 
         const sessions = this.store.sessions;
 
-        if(this.store.rowCount === 0) {
+        if (this.store.rowCount === 0) {
             return <></>
         }
-       
+
         return (
-                <Card style={{ borderRadius: "12px",marginTop: "10px",background:"rgb(242,242,242)"}} title={<Title level={4}>Your Sessions {this.countTag()}</Title>}>
-                    {this.displayMessage()}
-                    {this.renderSlots(sessions)}
-                </Card>
+            <Card style={{ borderRadius: "12px", marginTop: "10px", background: "white" }} title={<Title level={4}>Your Sessions {this.countTag()}</Title>}>
+                {this.displayMessage()}
+                {this.renderSlots(sessions)}
+            </Card>
         )
-        
+
     }
 
 }
-export default ProgramSession;
+export default ProgramSessions;

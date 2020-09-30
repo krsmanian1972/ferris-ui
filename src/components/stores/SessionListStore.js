@@ -15,7 +15,6 @@ const ERROR = 'error';
 const EMPTY_MESSAGE = { status: "", help: "" };
 const ERROR_MESSAGE = { status: ERROR, help: "We are very sorry, the service is unavailable at this moment. Please try again after some time." };
 
-
 export default class SessionListStore {
 
     state = INIT;
@@ -27,9 +26,14 @@ export default class SessionListStore {
 
     sessions = new Map();
     rowCount = 0;
+    selection = {};
 
     constructor(props) {
         this.apiProxy = props.apiProxy;
+    }
+
+    get isInit() {
+        return this.state === INIT;
     }
 
     get isLoading() {
@@ -69,17 +73,15 @@ export default class SessionListStore {
         return groupedResult;
     }
 
-    fetchProgramSessions = async(programId) => {
+    fetchProgramSessions = async(programId,userId,selection) => {
 
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
-        const userFuzzyId = this.apiProxy.getUserFuzzyId();
-
         const variables = {
             criteria: {
                 programId: programId,
-                userId: userFuzzyId
+                userId: userId,
             }
         }
 
@@ -89,11 +91,14 @@ export default class SessionListStore {
             const result =  data.data.getEvents.sessions;
             this.sessions = this.groupByDate(result)
             this.rowCount = result.length;
+            this.selection = selection;
             this.state = DONE;
         }
         catch (e) {
             this.state = ERROR;
             this.message = ERROR_MESSAGE;
+            this.selection = selection;
+            console.log(e);
         }
     }
 
@@ -284,7 +289,9 @@ decorate(SessionListStore, {
 
     sessions:observable,
     rowCount:observable,
+    selection:observable,
     
+    isInit:computed,
     isDone:computed,
     isError:computed,
     isLoading:computed,

@@ -44,9 +44,9 @@ class HomeUI extends Component {
         this.sessionStore.showDrawer = true;
     }
 
-    showMembers = () => {
+    showEnrollments = () => {
         const params = { event: {}, parentKey: "home" };
-        this.props.appStore.currentComponent = { label: "Coach Members", key: "coachMembers", params: params };
+        this.props.appStore.currentComponent = { label: "Enrollments", key: "enrollments", params: params };
     }
 
     newScheduleButton = () => {
@@ -63,7 +63,7 @@ class HomeUI extends Component {
         if (this.props.appStore.isCoach) {
             return (
                 <Tooltip key="members_tip" title="Enrolled Members">
-                    <Button type="primary" icon={<UserOutlined />} onClick = {this.showMembers}>Members</Button>
+                    <Button type="primary" icon={<UserOutlined />} onClick = {this.showEnrollments}>Enrollments</Button>
                 </Tooltip>
             )
         }

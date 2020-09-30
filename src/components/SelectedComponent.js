@@ -14,7 +14,7 @@ import ProgramDetailUI from './commons/ProgramDetailUI';
 import EditableProgramDetailUI from './guide/EditableProgramDetailUI';
 import SessionDetailUI from './guide/SessionDetailUI';
 import HomeUI from './guide/HomeUI';
-import MemberList from './guide/MemberList';
+import EnrollmentUI from './guide/EnrollmentUI';
 import Broadcast from './guide/Broadcast';
 
 
@@ -33,8 +33,8 @@ class SelectedComponent extends Component {
             case 'home' : {
                 return <HomeUI />;
             }
-            case 'coachMembers' : {
-                return <MemberList/>
+            case 'enrollments' : {
+                return <EnrollmentUI/>
             }
             case 'programs': {
                 return <ProgramUI />;
