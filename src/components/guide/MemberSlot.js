@@ -18,7 +18,7 @@ function MemberSlot({ email, details,showMemberSessions }) {
 
     const renderProgram = (item, index) => {
         return (
-            <div key={index} className="slot-item " onClick={() => showMemberSessions(item)}>
+            <div key={index} className="slot-member-item " onClick={() => showMemberSessions(item)}>
                 <div className="slot-title">
                     <p style={{ float: 'left' }}>{item.program.name}</p>
                     {newText(item.enrollment.isNew)}

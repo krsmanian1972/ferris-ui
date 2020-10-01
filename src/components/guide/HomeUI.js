@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { PageHeader, Typography, Button, Tooltip } from 'antd';
-import { PlusCircleOutlined,UserOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, UserOutlined } from '@ant-design/icons';
 
 import TodaySessions from './TodaySessions';
 
@@ -63,7 +63,7 @@ class HomeUI extends Component {
         if (this.props.appStore.isCoach) {
             return (
                 <Tooltip key="members_tip" title="Enrolled Members">
-                    <Button type="primary" icon={<UserOutlined />} onClick = {this.showEnrollments}>Enrollments</Button>
+                    <Button type="primary" icon={<UserOutlined />} onClick={this.showEnrollments}>Enrollments</Button>
                 </Tooltip>
             )
         }
@@ -72,17 +72,19 @@ class HomeUI extends Component {
     render() {
         return (
             <>
-                <PageHeader style={{marginBottom:5, paddingBottom:0, paddingTop:0}} title={<Title level={3}>Moment 36</Title>}
+                <PageHeader 
+                    style={{ marginBottom: 5, paddingBottom: 0, paddingTop: 0 }} 
+                    title={<Title level={3}>Moment 36</Title>}
                     extra={[
                         this.newScheduleButton(),
                         this.membersButton()
                     ]}>
+
+                    <div>
+                        <TodaySessions sessionListStore={this.sessionListStore} sessionStore={this.sessionStore} showSessionDetail={this.showSessionDetail} />
+                    </div>
                 </PageHeader>
 
-                <div style={{ paddingLeft: 5, paddingRight: 5 }}>
-                    <TodaySessions sessionListStore={this.sessionListStore} sessionStore={this.sessionStore} showSessionDetail={this.showSessionDetail} />
-                </div>
-                
                 <ScheduleDrawer sessionStore={this.sessionStore} />
             </>
         )

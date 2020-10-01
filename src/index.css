@@ -291,3 +291,13 @@ code {
   background: white;
   border-radius:0 12px 12px 0;
 }
+
+.slot-member-item {
+  border-left: 3px solid;
+  border-color: rgb(216,213,221);
+  margin-top:10px;
+  padding-left: 10px;
+  display:flex;
+  flex-direction: column;
+  cursor: pointer;
+}

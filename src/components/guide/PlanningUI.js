@@ -26,7 +26,7 @@ class PlanningUI extends Component {
     }
 
     showPlanDetail = (plan) => {
-        const params = { plan: {...plan}, parentKey: "planning" };
+        const params = { plan: { ...plan }, parentKey: "planning" };
         this.props.appStore.currentComponent = { label: "Master Plan", key: "masterPlan", params: params };
     }
 
@@ -62,30 +62,29 @@ class PlanningUI extends Component {
     render() {
         return (
             <>
-                <PageHeader style={{marginBottom:5, paddingBottom:0, paddingTop:0}} title={<Title level={3}>Planning {this.countTag()}</Title>}
+                <PageHeader style={{ marginBottom: 5, paddingBottom: 0, paddingTop: 0 }} title={<Title level={3}>Planning {this.countTag()}</Title>}
                     extra={[
                         this.newPlanButton()
                     ]}>
-                </PageHeader>
 
-                <List
-                    style={{paddingLeft: 5, paddingRight: 5}}
-                    dataSource={this.planListStore.plans}
-                    renderItem={item => (
-                        <List.Item key={item.id} style={{ background: "white", borderRadius:12, color: 'black', marginBottom: 6, cursor:"pointer" }} onClick = {()=>this.showPlanDetail(item)}>
-                            <List.Item.Meta
-                                avatar={<Avatar style={{ backgroundColor: '#87d068', margin: 10 }} icon={<NodeIndexOutlined />} />}
-                                title={item.name}
-                                description={item.description} />
-                        </List.Item>
-                    )}
-                >
-                    {this.planListStore.isLoading && (
-                        <div>
-                            <Spin />
-                        </div>
-                    )}
-                </List>
+                    <List
+                        dataSource={this.planListStore.plans}
+                        renderItem={item => (
+                            <List.Item key={item.id} style={{ background: "white", borderRadius: 12, color: 'black', marginBottom: 6, cursor: "pointer" }} onClick={() => this.showPlanDetail(item)}>
+                                <List.Item.Meta
+                                    avatar={<Avatar style={{ backgroundColor: '#87d068', margin: 10 }} icon={<NodeIndexOutlined />} />}
+                                    title={item.name}
+                                    description={item.description} />
+                            </List.Item>
+                        )}
+                    >
+                        {this.planListStore.isLoading && (
+                            <div>
+                                <Spin />
+                            </div>
+                        )}
+                    </List>
+                </PageHeader>
 
                 <PlanDrawer planStore={this.planStore} />
             </>

@@ -185,7 +185,7 @@ export default class SessionListStore {
     buildEmptyRoster = () => {
         const roster = new Map();
 
-        const start = moment().startOf('hour').subtract(6, 'hours');
+        const start = moment().startOf('hour').subtract(3, 'hours');
 
         var aDate = start;
         roster.set(aDate, []);

@@ -1,26 +1,19 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
-import { Spin, Result, Typography, Tag } from 'antd';
+import { Card, Spin, Result, Typography, Tag } from 'antd';
 import { SmileOutlined } from '@ant-design/icons';
 
 import ProgramSessionSlot from '../commons/ProgramSessionSlot';
 
 const { Text } = Typography;
+const { Title } = Typography;
 
 @observer
 class MemberSessions extends Component {
 
     constructor(props) {
         super(props);
-    }
-
-    getTitle = () => {
-        return (
-            <div style={{ display: "flex", alignItems: "center", paddingLeft: 10, fontWeight: "bold" }}>
-                Sessions&nbsp;{this.countTag()}
-            </div>
-        )
     }
 
     countTag = () => {
@@ -38,9 +31,9 @@ class MemberSessions extends Component {
 
         if (store.isInit) {
             return (
-                    <Result 
-                        icon={<SmileOutlined />} 
-                        subTitle={<Text style={{color:"blue"}}>Please select the program of an enrolled member.</Text>} />
+                <Result
+                    icon={<SmileOutlined />}
+                    subTitle={<Text>Please select the program of an enrolled member.</Text>} />
             )
         }
         if (store.isLoading) {
@@ -79,15 +72,12 @@ class MemberSessions extends Component {
         const sessions = this.props.store.sessions;
 
         return (
-            <div style={{ width: "50%", marginRight: "10px" }}>
-                <div style={{ background: "rgb(59,109,171)", marginBottom: "6px", color: "white", display: "flex", flexWrap: "wrap", height: 50, flexDirection: "row", justifyContent: "space-between" }}>
-                    {this.getTitle()}
-                </div>
+            <Card 
+                headStyle={{background:"#fafafa",borderBottom:"1px solid", borderColor: "rgb(216,213,221)", borderRadius:"12px 12px 0px 0px"}} style={{ marginTop: "10px", borderRadius:"12px" }} title={<Title level={4}>Sessions {this.countTag()}</Title>}>
                 {this.displayMessage()}
                 {this.renderSlots(sessions)}
-            </div>
+            </Card>
         )
-
     }
 
 }

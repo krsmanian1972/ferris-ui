@@ -127,31 +127,31 @@ class ProgramDetailUI extends Component {
 
         return (
             <>
-                <PageHeader style={{marginBottom:5, paddingBottom:0, paddingTop:0}} title={<Title level={3}>{program.name}</Title>}
+                <PageHeader style={{ marginBottom: 5, paddingBottom: 0, paddingTop: 0 }} title={<Title level={3}>{program.name}</Title>}
                     extra={[
                         this.getEnrollmentButton(),
                     ]}>
+
+                    <div>
+                        {this.getProgramPoster(program, change)}
+
+                        {this.getTrailer(program, change)}
+
+                        <Card style={{ borderRadius: "12px", marginTop: "10px", background: "rgb(40,40,40)" }} title={<Title style={{ color: "white" }} level={4}>Coach</Title>}>
+                            <Statistic value={coach.name} valueStyle={{ color: "rgb(100,218,225)", fontWeight: "bold" }} />
+                            <Paragraph style={{ color: "white", marginTop: 10 }}><MailOutlined /> {coach.email}</Paragraph>
+                            <Paragraph style={{ color: "white" }}><PhoneOutlined /> (91)99999 99999</Paragraph>
+                        </Card>
+
+                        <ProgramDescription program={program} programStore={this.store} />
+
+                        <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
+
+                        {this.renderActorCoachingPlan()}
+
+                        <ProgramSessions programId={program.id} userId={this.props.appStore.apiProxy.getUserFuzzyId()} apiProxy={this.props.appStore.apiProxy} showSessionDetail={this.showSessionDetail} />
+                    </div>
                 </PageHeader>
-                
-                <div style={{ paddingLeft: 5, paddingRight: 5 }}>
-                    {this.getProgramPoster(program, change)}
-
-                    {this.getTrailer(program, change)}
-
-                    <Card style={{ borderRadius: "12px", marginTop: "10px", background: "rgb(40,40,40)"}} title={<Title style={{color:"white"}} level={4}>Coach</Title>}>
-                        <Statistic value={coach.name} valueStyle={{color:"rgb(100,218,225)",fontWeight:"bold"}}/>
-                        <Paragraph style={{color:"white",marginTop:10}}><MailOutlined /> {coach.email}</Paragraph>
-                        <Paragraph style={{color:"white"}}><PhoneOutlined /> (91)99999 99999</Paragraph>
-                    </Card>
-
-                    <ProgramDescription program={program} programStore={this.store} />
-
-                    <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
-
-                    {this.renderActorCoachingPlan()}
-
-                    <ProgramSessions programId={program.id} userId={this.props.appStore.apiProxy.getUserFuzzyId()} apiProxy={this.props.appStore.apiProxy} showSessionDetail={this.showSessionDetail} />
-                </div>
 
                 <EnrollmentModal programStore={this.store} enrollmentStore={this.enrollmentStore} />
             </>

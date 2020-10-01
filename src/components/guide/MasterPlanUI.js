@@ -75,8 +75,7 @@ class MasterPlanUI extends Component {
     renderControls = () => {
         return (
             <Row style={{marginBottom:5, paddingBottom:0, paddingTop:0}}>
-                <Col span={1}/>
-                <Col span={17}>
+                <Col span={18}>
                     <Title level={4}>{this.plan.name}</Title>
                 </Col>
                 <Col span={2}>
