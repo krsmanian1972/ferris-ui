@@ -5,6 +5,7 @@ import { Card, Spin, Result, Typography, Tag } from 'antd';
 import { SmileOutlined } from '@ant-design/icons';
 
 import ProgramSessionSlot from '../commons/ProgramSessionSlot';
+import { cardHeaderStyle } from '../util/Style';
 
 const { Text } = Typography;
 const { Title } = Typography;
@@ -73,7 +74,9 @@ class MemberSessions extends Component {
 
         return (
             <Card 
-                headStyle={{background:"#fafafa",borderBottom:"1px solid", borderColor: "rgb(216,213,221)", borderRadius:"12px 12px 0px 0px"}} style={{ marginTop: "10px", borderRadius:"12px" }} title={<Title level={4}>Sessions {this.countTag()}</Title>}>
+                headStyle={cardHeaderStyle} 
+                style={{ marginTop: "10px", borderRadius:"12px" }} 
+                title={<Title level={4}>Sessions {this.countTag()}</Title>}>
                 {this.displayMessage()}
                 {this.renderSlots(sessions)}
             </Card>

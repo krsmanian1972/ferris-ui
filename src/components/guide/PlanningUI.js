@@ -6,6 +6,7 @@ import { NodeIndexOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import PlanDrawer from './PlanDrawer';
 import PlanListStore from '../stores/PlanListStore';
 import PlanStore from '../stores/PlanStore';
+import { pageHeaderStyle } from '../util/Style';
 
 const { Title } = Typography;
 
@@ -62,7 +63,9 @@ class PlanningUI extends Component {
     render() {
         return (
             <>
-                <PageHeader style={{ marginBottom: 5, paddingBottom: 0, paddingTop: 0 }} title={<Title level={3}>Planning {this.countTag()}</Title>}
+                <PageHeader 
+                    style={pageHeaderStyle} 
+                    title={<Title level={3}>Planning {this.countTag()}</Title>}
                     extra={[
                         this.newPlanButton()
                     ]}>

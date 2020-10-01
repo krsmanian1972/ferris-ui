@@ -11,6 +11,7 @@ import ProgramBanner from '../commons/ProgramBanner';
 import ProgramList from '../commons/ProgramList';
 import CoachProgramList from './CoachProgramList';
 import ProgramDrawer from './ProgramDrawer';
+import { cardHeaderStyle } from '../util/Style';
 
 const { Title } = Typography;
 
@@ -94,18 +95,25 @@ class ProgramUI extends Component {
                 <ProgramBanner programListStore={this.deckListStore} showProgramDetail={this.showProgramDetail} />
 
                 {this.props.appStore.isCoach && (
-                    <Card style={{ marginLeft: 10, marginRight:10, marginTop: "10px", background: "rgb(242,242,242)" }} title={<Title level={4}>Yours {this.countTag(this.yourListStore)} {this.addProgramButton()}</Title>}>
+                    <Card
+                        headStyle={cardHeaderStyle}
+                        style={{ marginLeft: 10, marginRight: 10, marginTop: "10px" }}
+                        title={<Title level={4}>Yours {this.countTag(this.yourListStore)} {this.addProgramButton()}</Title>}>
                         <CoachProgramList programListStore={this.yourListStore} showProgramDetail={this.showEditableProgramDetail} />
                     </Card>
                 )}
 
                 {this.enrolledListStore.rowCount > 0 && (
-                    <Card style={{  marginLeft: 10, marginRight:10, marginTop: "10px", background: "rgb(242,242,242)" }} title={<Title level={4}>Enrolled {this.countTag(this.enrolledListStore)} </Title>}>
+                    <Card
+                        headStyle={cardHeaderStyle}
+                        style={{ marginLeft: 10, marginRight: 10, marginTop: "10px" }} title={<Title level={4}>Enrolled {this.countTag(this.enrolledListStore)} </Title>}>
                         <ProgramList programListStore={this.enrolledListStore} showProgramDetail={this.showProgramDetail} />
                     </Card>
                 )}
 
-                <Card style={{ marginLeft: 10, marginRight:10,  marginTop: "10px", background: "rgb(242,242,242)" }} title={<Title level={4}>Explore</Title>}>
+                <Card
+                    headStyle={cardHeaderStyle}
+                    style={{ marginLeft: 10, marginRight: 10, marginTop: "10px" }} title={<Title level={4}>Explore</Title>}>
                     <ProgramList programListStore={this.exploreListStore} showProgramDetail={this.showProgramDetail} />
                 </Card>
 

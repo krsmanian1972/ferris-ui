@@ -6,6 +6,7 @@ import { LeftOutlined, RightOutlined, SmileOutlined } from '@ant-design/icons';
 
 import NoteListStore from "../stores/NoteListStore";
 import Reader from "../commons/Reader";
+import { cardHeaderStyle } from '../util/Style';
 
 const { Title } = Typography;
 
@@ -106,7 +107,10 @@ class NoteList extends Component {
         const rowCount = this.store.rowCount;
 
         return (
-            <Card key="notes" style={{ borderRadius: 12,marginTop:10 }} title={<Title level={4}>{this.props.title} {this.countTag()}</Title>}>
+            <Card key="notes" 
+                headStyle = {cardHeaderStyle}
+                style={{ borderRadius: 12,marginTop:10 }} 
+                title={<Title level={4}>{this.props.title} {this.countTag()}</Title>}>
                 {this.renderSlider(notes, rowCount)}
                 {this.displayMessage()}
             </Card>

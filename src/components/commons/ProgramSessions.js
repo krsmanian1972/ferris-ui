@@ -6,6 +6,7 @@ import { Spin, Card, Result, Typography, Tag } from 'antd';
 import SessionListStore from '../stores/SessionListStore';
 
 import ProgramSessionSlot from './ProgramSessionSlot';
+import { cardHeaderStyle } from '../util/Style';
 
 const { Title } = Typography;
 
@@ -73,7 +74,10 @@ class ProgramSessions extends Component {
         }
 
         return (
-            <Card style={{ borderRadius: "12px", marginTop: "10px", background: "white" }} title={<Title level={4}>Your Sessions {this.countTag()}</Title>}>
+            <Card 
+                headStyle = {cardHeaderStyle}
+                style={{ borderRadius: "12px", marginTop: "10px"}} 
+                title={<Title level={4}>Your Sessions {this.countTag()}</Title>}>
                 {this.displayMessage()}
                 {this.renderSlots(sessions)}
             </Card>

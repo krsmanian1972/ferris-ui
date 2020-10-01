@@ -4,6 +4,7 @@ import { Tooltip, Card, Button, Upload, message, Typography, Progress } from 'an
 
 import { assetHost } from '../stores/APIEndpoints';
 import { BuildOutlined } from '@ant-design/icons';
+import { cardHeaderStyle } from '../util/Style';
 
 const { Title } = Typography;
 
@@ -85,7 +86,10 @@ export default class Trailer extends Component {
 
     render() {
         return (
-            <Card style={{ borderRadius: "12px", marginTop: "10px" }} title={<Title level={4}>Trailer</Title>} extra={this.getTrailerButton()}>
+            <Card
+                headStyle = {cardHeaderStyle} 
+                style={{ borderRadius: "12px", marginTop: "10px" }}
+                title={<Title level={4}>Trailer</Title>} extra={this.getTrailerButton()}>
                 {this.renderProgress()}
                 {this.renderTrailer()}
             </Card>

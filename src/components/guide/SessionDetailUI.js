@@ -16,8 +16,9 @@ import SessionLauncher from './SessionLauncher';
 import GoldenTemplate from './GoldenTemplate';
 import NoteList from '../commons/NoteList';
 import ClosureDrawer from './ClosureDrawer';
+import { cardHeaderStyle, pageHeaderStyle, pageTitle,rustColor } from '../util/Style';
 
-const { Title, Paragraph } = Typography;
+const { Title, Paragraph,Text } = Typography;
 
 const { Countdown } = Statistic;
 
@@ -56,8 +57,9 @@ class SessionDetailUI extends Component {
 
         return (
 
-            <Card key="top_segment"
-                headStyle={{ background: "#fafafa", borderBottom: "1px solid", borderColor: "rgb(216,213,221)", borderRadius: "12px 12px 0px 0px" }}
+            <Card
+                key="top_segment"
+                headStyle={cardHeaderStyle}
                 style={{ borderRadius: "12px" }}
                 title={<Title level={4}>Schedule</Title>} >
 
@@ -115,10 +117,13 @@ class SessionDetailUI extends Component {
         const member = people.member;
 
         return (
-            <Card key="people" style={{ borderRadius: 12, marginTop: 10 }} title={<Title level={4}>People</Title>}>
+            <Card key="people"
+                headStyle={cardHeaderStyle}
+                style={{ borderRadius: 12, marginTop: 10 }}
+                title={<Title level={4}>People</Title>}>
                 <div style={{ display: "flex", marginTop: 10, flexDirection: "row", justifyContent: "space-between" }}>
                     <div key="coachId" style={{ width: "50%" }}>
-                        <Statistic title="Coach" value={coach.user.name} valueStyle={{ color: '#3f8600' }} />
+                        <Statistic title="Coach" value={coach.user.name} valueStyle={{ color: "rgb(0, 183, 235)", fontWeight: "bold" }} />
                         <Paragraph><MailOutlined /> {coach.user.email}</Paragraph>
                         <Paragraph><PhoneOutlined /> (91)99999 XXXXX</Paragraph>
                     </div>
@@ -206,11 +211,9 @@ class SessionDetailUI extends Component {
         return (
             <>
                 <PageHeader key="sessionDetail"
-                    backIcon={<CheckOutlined />}
-                    onBack={() => { }}
-                    style={{ marginBottom: 5, paddingBottom: 0, paddingTop: 0 }}
-                    title={<Title level={3}>{session.name}</Title>}
-                    subTitle={program.name}
+                    style={pageHeaderStyle}
+                    title={pageTitle(session.name)}
+                    subTitle={<Text style={rustColor}>{program.name}</Text>}
                     extra={[
                         this.renderStatus(session),
                         this.makeReadyButton(),
@@ -218,9 +221,6 @@ class SessionDetailUI extends Component {
                         this.completeEventButton(),
                     ]}
                 >
-                </PageHeader>
-
-                <div style={{ paddingLeft: 5, paddingRight: 5 }}>
                     {this.renderTopSegment(program, session, sessionUser, people)}
 
                     {people.coach && (
@@ -234,8 +234,7 @@ class SessionDetailUI extends Component {
                     )}
 
                     {this.renderPeople(people)}
-
-                </div>
+                </PageHeader>
 
                 <ClosureDrawer store={this.store} />
             </>

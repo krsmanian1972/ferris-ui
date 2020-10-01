@@ -5,6 +5,7 @@ import socket from '../stores/socket';
 import Editor from "../commons/Editor";
 
 import { Tooltip, Card, Switch,Typography } from 'antd';
+import { cardHeaderStyle } from '../util/Style';
 
 const {Title} = Typography;
 
@@ -68,7 +69,10 @@ export default class EditableProgramDescription extends Component {
     render() {
 
         return (
-            <Card style={{ borderRadius: "12px",marginTop: "10px" }} title={<Title level={4}>About</Title>} extra={this.getEditButton()}>
+            <Card
+                headStyle = {cardHeaderStyle} 
+                style={{ borderRadius: "12px",marginTop: "10px" }} 
+                title={<Title level={4}>About</Title>} extra={this.getEditButton()}>
                 {this.renderDescription()}
             </Card>
         );

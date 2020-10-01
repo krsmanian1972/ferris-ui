@@ -14,6 +14,7 @@ import ConstraintList from './ConstraintList';
 import ConstraintStore from '../stores/ConstraintStore';
 
 import { Typography,Card } from 'antd';
+import { cardHeaderStyle } from '../util/Style';
 
 const { Title } = Typography;
 
@@ -38,7 +39,10 @@ export default class GoldenTemplate extends Component {
 
     render() {
         return (
-            <Card style={{ borderRadius: "12px",marginTop: "10px" }} title={<Title level={4}>Plan</Title>}>
+            <Card 
+                headStyle = {cardHeaderStyle}
+                style={{ borderRadius: "12px",marginTop: "10px" }} 
+                title={<Title level={4}>Plan</Title>}>
                 <div style={{ display: "flex",flexDirection: "row", marginBottom:"10px"}}>
                     <TaskList key="onward" taskStore={this.taskStore} />
                     <ObjectiveList key="objectives" objectiveStore={this.objectiveStore} />

@@ -9,6 +9,8 @@ import SessionListStore from '../stores/SessionListStore';
 import MemberList from './MemberList';
 import MemberSessions from './MemberSessions';
 
+import { pageHeaderStyle,pageTitle } from '../util/Style';
+
 const { Title } = Typography;
 const { Panel } = Collapse;
 
@@ -55,7 +57,9 @@ class EnrollmentUI extends Component {
     render() {
 
         return (
-            <PageHeader style={{ marginBottom: 5, paddingBottom: 0, paddingTop: 0 }} title={<Title level={3}>Enrollments</Title>} >
+            <PageHeader 
+                style={pageHeaderStyle} 
+                title={pageTitle("Enrollments")}> 
                 <Collapse bordered={true} defaultActiveKey={['1']}>
                     <Panel key="1" header={<Title level={4}>Members {this.countTag()}</Title>}>
                         <MemberList key="members" store={this.memberListStore} showMemberSessions={this.showMemberSessions} />
@@ -63,7 +67,6 @@ class EnrollmentUI extends Component {
                 </Collapse>
                 <MemberSessions key="sessions" store={this.sessionListStore} showSessionDetail={this.showSessionDetail}/>
             </PageHeader>
-
         )
     }
 }

@@ -11,6 +11,7 @@ import SessionStore from '../stores/SessionStore';
 import ScheduleDrawer from './ScheduleDrawer';
 import ProgramListStore from '../stores/ProgramListStore';
 import EnrollmentListStore from '../stores/EnrollmentListStore';
+import { pageHeaderStyle,pageTitle } from '../util/Style';
 
 const { Title } = Typography;
 
@@ -73,8 +74,8 @@ class HomeUI extends Component {
         return (
             <>
                 <PageHeader 
-                    style={{ marginBottom: 5, paddingBottom: 0, paddingTop: 0 }} 
-                    title={<Title level={3}>Moment 36</Title>}
+                    style={pageHeaderStyle} 
+                    title={pageTitle("Moment 36")}
                     extra={[
                         this.newScheduleButton(),
                         this.membersButton()

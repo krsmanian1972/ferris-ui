@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Spin, List, Card, Typography, Radio, Tooltip, Tag,Avatar } from 'antd';
+import { Spin, List, Card, Typography, Radio, Tooltip, Tag, Avatar } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 
 import EnrollmentListStore from "../stores/EnrollmentListStore";
+import { cardHeaderStyle } from '../util/Style';
 
 const { Title } = Typography;
 
@@ -17,15 +18,15 @@ class EnrollmentList extends Component {
 
     constructor(props) {
         super(props);
-        this.state= {desire: NEW};
-        
+        this.state = { desire: NEW };
+
         this.store = new EnrollmentListStore({ apiProxy: props.appStore.apiProxy });
         this.store.fetchEnrollments(props.programId, this.state.desire);
     }
 
     onChange = (e) => {
         const desire = e.target.value;
-        this.setState({desire: desire});
+        this.setState({ desire: desire });
         this.store.fetchEnrollments(this.props.programId, desire);
     }
 
@@ -35,13 +36,13 @@ class EnrollmentList extends Component {
                 <Radio.Group onChange={this.onChange} value={this.state.desire}>
                     <Radio value={NEW}>NEW</Radio>
                     <Radio value={ALL}>ALL</Radio>
-                </Radio.Group>      
+                </Radio.Group>
             </Tooltip>
         );
     }
 
     countTag = () => {
-        
+
         if (this.store.isDone) {
             return <Tag color="#108ee9">{this.store.rowCount} Total</Tag>
         }
@@ -56,27 +57,30 @@ class EnrollmentList extends Component {
     }
 
     render() {
-        return(
-            <Card style={{ borderRadius: "12px",marginTop: "10px" }} title={<Title level={4}>Enrollments {this.countTag()}</Title>} extra={this.getEnrollmentOptions()}>
+        return (
+            <Card
+                headStyle={cardHeaderStyle}
+                style={{ borderRadius: "12px", marginTop: "10px" }}
+                title={<Title level={4}>Enrollments {this.countTag()}</Title>} extra={this.getEnrollmentOptions()}>
                 <List
                     dataSource={this.store.members}
                     renderItem={item => (
-                        <List.Item key={item.id} style={{background: "rgb(242,242,242)",color:'black',marginBottom:10}}>
-                            <List.Item.Meta 
-                                avatar={<Avatar style={{ backgroundColor: '#87d068',margin:10 }} icon={<UserOutlined />}/>}
-                                title={item.name} 
-                                description={item.email}/>
+                        <List.Item key={item.id} style={{ background: "rgb(242,242,242)", color: 'black', marginBottom: 10 }}>
+                            <List.Item.Meta
+                                avatar={<Avatar style={{ backgroundColor: '#87d068', margin: 10 }} icon={<UserOutlined />} />}
+                                title={item.name}
+                                description={item.email} />
                         </List.Item>
-                        )}
-                    >
+                    )}
+                >
                     {this.store.isLoading && (
-                    <div>
-                        <Spin />
-                    </div>
+                        <div>
+                            <Spin />
+                        </div>
                     )}
                 </List>
 
-          </Card>
+            </Card>
         )
     }
 

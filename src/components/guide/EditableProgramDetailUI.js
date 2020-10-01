@@ -13,6 +13,7 @@ import ActivationModal from './ActivationModal';
 import Milestones from './Milestones';
 import EnrollmentList from '../commons/EnrollmentList';
 import Trailer from './Trailer';
+import { cardHeaderStyle, pageHeaderStyle,pageTitle } from '../util/Style';
 
 const { Title, Paragraph } = Typography;
 
@@ -143,10 +144,12 @@ class EditableProgramDetailUI extends Component {
         const ver = new Date().getTime();
         const url = `${assetHost}/programs/${program.id}/poster/poster.png?nocache=${ver}`;
         return (
-            <div style={{ textAlign: "center", height: 350 }}>
-                <div style={{ display: "inline-block", verticalAlign: "middle", height: 350 }}></div>
-                <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={url} />
-            </div>
+            <Card>
+                <div style={{ textAlign: "center", height: 350 }}>
+                    <div style={{ display: "inline-block", verticalAlign: "middle", height: 350 }}></div>
+                    <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={url} />
+                </div>
+            </Card>
         )
     }
 
@@ -156,7 +159,11 @@ class EditableProgramDetailUI extends Component {
         const ver = new Date().getTime();
         const url = `${assetHost}/programs/${program.id}/banner/banner.png?nocache=${ver}`;
         return (
-            <Card style={{ borderRadius: "12px", marginTop: "10px" }} title={<Title level={4}>Banner</Title>} extra={this.getBannerButton(program)}>
+            <Card
+                headStyle={cardHeaderStyle}
+                style={{ borderRadius: "12px", marginTop: "10px" }}
+                title={<Title level={4}>Banner</Title>}
+                extra={this.getBannerButton(program)}>
                 <div style={{ textAlign: "center", height: 260 }}>
                     <div style={{ display: "inline-block", verticalAlign: "middle", height: 260 }}></div>
                     <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={url} />
@@ -172,31 +179,36 @@ class EditableProgramDetailUI extends Component {
 
         return (
             <>
-                <PageHeader style={{ marginBottom: 5, paddingBottom: 0, paddingTop: 0 }} title={<Title level={3}>{program.name}</Title>}
+                <PageHeader
+                    style={pageHeaderStyle}
+                    title={pageTitle(program.name)}
                     extra={[
                         this.getActivationButton(),
                         this.getPosterButton(program)
                     ]}>
 
-                    <div>
-                        {this.getProgramPoster(program, change)}
 
-                        <Trailer program_id={program.id} canEdit={this.store.canEdit} />
+                    {this.getProgramPoster(program, change)}
 
-                        <Card style={{ borderRadius: "12px", marginTop: "10px", background: "rgb(40,40,40)" }} title={<Title style={{ color: "white" }} level={4}>Coach</Title>}>
-                            <Statistic value={coach.name} valueStyle={{ color: "rgb(100,218,225)", fontWeight: "bold" }} />
-                            <Paragraph style={{ color: "white", marginTop: 10 }}><MailOutlined /> {coach.email}</Paragraph>
-                            <Paragraph style={{ color: "white" }}><PhoneOutlined /> (91)99999 99999</Paragraph>
-                        </Card>
+                    <Trailer program_id={program.id} canEdit={this.store.canEdit} />
 
-                        <ProgramDescription program={program} programStore={this.store} />
+                    <Card
+                        headStyle={cardHeaderStyle}
+                        style={{ borderRadius: "12px", marginTop: "10px" }}
+                        title={<Title level={4}>Coach</Title>}>
+                        <Statistic value={coach.name} valueStyle={{ color: "rgb(0, 183, 235)", fontWeight: "bold" }} />
+                        <Paragraph style={{ marginTop: 10 }}><MailOutlined /> {coach.email}</Paragraph>
+                        <Paragraph ><PhoneOutlined /> (91)99999 99999</Paragraph>
+                    </Card>
 
-                        <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
+                    <ProgramDescription program={program} programStore={this.store} />
 
-                        {this.getBanner(program, change)}
+                    <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
 
-                        <EnrollmentList programId={program.id} />
-                    </div>
+                    {this.getBanner(program, change)}
+
+                    <EnrollmentList programId={program.id} />
+
                 </PageHeader>
 
                 <ActivationModal programStore={this.store} />

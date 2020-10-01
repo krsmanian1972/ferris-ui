@@ -17,6 +17,7 @@ import EnrollmentModal from './EnrollmentModal';
 import Milestones from '../guide/Milestones';
 import GoldenTemplate from '../guide/GoldenTemplate';
 import ProgramSessions from './ProgramSessions';
+import { cardHeaderStyle, pageHeaderStyle,pageTitle } from '../util/Style';
 
 const { Title, Paragraph } = Typography;
 
@@ -82,7 +83,9 @@ class ProgramDetailUI extends Component {
     getTrailer = (program, change) => {
         const url = `${assetHost}/programs/${program.id}/trailer/trailer.mp4`;
         return (
-            <Card style={{ borderRadius: "12px", marginTop: "10px" }} title={<Title level={4}>Trailer</Title>}>
+            <Card
+                headStyle={cardHeaderStyle}
+                style={{ borderRadius: "12px", marginTop: "10px" }} title={<Title level={4}>Trailer</Title>}>
                 <div className='trailer-wrapper'>
                     <ReactPlayer width='100%' height='100%' controls className='trailer' url={url} />
                 </div>
@@ -93,10 +96,12 @@ class ProgramDetailUI extends Component {
     getProgramPoster = (program, change) => {
         const url = `${assetHost}/programs/${program.id}/poster/poster.png`;
         return (
-            <div style={{ textAlign: "center", height: 350 }}>
-                <div style={{ display: "inline-block", verticalAlign: "middle", height: 350 }}></div>
-                <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={url} />
-            </div>
+            <Card>
+                <div style={{ textAlign: "center", height: 350 }}>
+                    <div style={{ display: "inline-block", verticalAlign: "middle", height: 350 }}></div>
+                    <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={url} />
+                </div>
+            </Card>
         )
     }
 
@@ -127,30 +132,34 @@ class ProgramDetailUI extends Component {
 
         return (
             <>
-                <PageHeader style={{ marginBottom: 5, paddingBottom: 0, paddingTop: 0 }} title={<Title level={3}>{program.name}</Title>}
+                <PageHeader
+                    style={pageHeaderStyle}
+                    title={pageTitle(program.name)}
                     extra={[
                         this.getEnrollmentButton(),
                     ]}>
 
-                    <div>
-                        {this.getProgramPoster(program, change)}
+                    {this.getProgramPoster(program, change)}
 
-                        {this.getTrailer(program, change)}
+                    {this.getTrailer(program, change)}
 
-                        <Card style={{ borderRadius: "12px", marginTop: "10px", background: "rgb(40,40,40)" }} title={<Title style={{ color: "white" }} level={4}>Coach</Title>}>
-                            <Statistic value={coach.name} valueStyle={{ color: "rgb(100,218,225)", fontWeight: "bold" }} />
-                            <Paragraph style={{ color: "white", marginTop: 10 }}><MailOutlined /> {coach.email}</Paragraph>
-                            <Paragraph style={{ color: "white" }}><PhoneOutlined /> (91)99999 99999</Paragraph>
-                        </Card>
+                    <Card
+                        headStyle={cardHeaderStyle}
+                        style={{ borderRadius: "12px", marginTop: "10px" }}
+                        title={<Title level={4}>Coach</Title>}>
+                        <Statistic value={coach.name} valueStyle={{ color: "rgb(0, 183, 235)", fontWeight: "bold" }} />
+                        <Paragraph style={{ marginTop: 10 }}><MailOutlined /> {coach.email}</Paragraph>
+                        <Paragraph ><PhoneOutlined /> (91)99999 99999</Paragraph>
+                    </Card>
 
-                        <ProgramDescription program={program} programStore={this.store} />
+                    <ProgramDescription program={program} programStore={this.store} />
 
-                        <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
+                    <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
 
-                        {this.renderActorCoachingPlan()}
+                    {this.renderActorCoachingPlan()}
 
-                        <ProgramSessions programId={program.id} userId={this.props.appStore.apiProxy.getUserFuzzyId()} apiProxy={this.props.appStore.apiProxy} showSessionDetail={this.showSessionDetail} />
-                    </div>
+                    <ProgramSessions programId={program.id} userId={this.props.appStore.apiProxy.getUserFuzzyId()} apiProxy={this.props.appStore.apiProxy} showSessionDetail={this.showSessionDetail} />
+
                 </PageHeader>
 
                 <EnrollmentModal programStore={this.store} enrollmentStore={this.enrollmentStore} />

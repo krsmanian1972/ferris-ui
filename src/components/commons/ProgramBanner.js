@@ -70,7 +70,7 @@ class ProgramBanner extends Component {
         const programs = store.programs;
 
         return (
-            <Card bordered={false} style={{ background:"rgb(216,213,221)"}}>
+            <Card style={{ marginLeft: 10, marginRight: 10}}>
                 {this.renderSlider(programs, store.rowCount)}
             </Card>
         )
