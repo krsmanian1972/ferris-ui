@@ -4,6 +4,7 @@ import { PageHeader, Typography, Button, Tooltip } from 'antd';
 import { PlusCircleOutlined, UserOutlined } from '@ant-design/icons';
 
 import TodaySessions from './TodaySessions';
+import WeekSessions from './WeekSessions';
 
 import SessionListStore from '../stores/SessionListStore';
 import SessionStore from '../stores/SessionStore';
@@ -12,6 +13,7 @@ import ScheduleDrawer from './ScheduleDrawer';
 import ProgramListStore from '../stores/ProgramListStore';
 import EnrollmentListStore from '../stores/EnrollmentListStore';
 import { pageHeaderStyle,pageTitle } from '../util/Style';
+
 
 const { Title } = Typography;
 
@@ -81,9 +83,8 @@ class HomeUI extends Component {
                         this.membersButton()
                     ]}>
 
-                    <div>
-                        <TodaySessions sessionListStore={this.sessionListStore} sessionStore={this.sessionStore} showSessionDetail={this.showSessionDetail} />
-                    </div>
+                    <WeekSessions/>        
+                    <TodaySessions sessionListStore={this.sessionListStore} sessionStore={this.sessionStore} showSessionDetail={this.showSessionDetail} />
                 </PageHeader>
 
                 <ScheduleDrawer sessionStore={this.sessionStore} />
