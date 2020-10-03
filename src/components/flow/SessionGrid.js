@@ -1,20 +1,28 @@
 import * as THREE from 'three';
 
-const fov = 29;
-const near = 1;
+const fov = 29;//29
+const near = 1;//1
 const far = 100;
 
 const barWidth = 3;
 const barHeight = 1;
 const barDepth = 0;
 
+const borderGap = 10;
+const vGap = 20;
+const topLeftX = -7.3;
+const topLeftY = 3.7;
 const hLine = 26;
 const vLine = 9;
 const gridStep = 1;
 
+const boldFont = "bold 18px sans-serif";
+const regularFont = "18px sans-serif";
+
+const taskBarColor = "gray";
 const sceneColor = 0xffffff;
 const gridColor = "rgb(216,213,221)";
-
+const weekDayArray = ["","Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 export default class SessionGrid {
 
     constructor(container) {
@@ -31,14 +39,16 @@ export default class SessionGrid {
 
     init = () => {
         this.setupScene();
-        this.setGraphPaper();
+        //this.setGraphPaper();
+        //this.createTimePlane();
+        this.createWeekDays();
         this.animate();
     }
 
     setupScene = () => {
         const width = this.container.clientWidth;
         const height = this.container.clientHeight;
-
+        console.log(width, height);
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(fov, width / height, near, far);
 
@@ -53,6 +63,116 @@ export default class SessionGrid {
         this.container.appendChild(this.renderer.domElement);
     }
 
+    buildTaskCanvas =  (id, width, height) => {
+        const canvas = document.createElement('canvas');
+        canvas.id = 'calendar' + id;
+
+        if (width === undefined) {
+            canvas.width = 256;//256
+            canvas.height = 128;//128
+        }
+        else {
+            canvas.width = width;//256
+            canvas.height = height;//128
+        }
+        canvas.style.width = canvas.width + "px";
+        canvas.style.height = canvas.height + "px";
+
+        return canvas;
+    }
+
+     buildRectTextMaterial = (id, text) => {
+
+        const canvas = this.buildTaskCanvas(id);
+
+        const context = canvas.getContext('2d');
+
+        // Prepare the font to be able to measure
+        let fontSize = 96;
+        context.font = `${fontSize}px monospace`;
+        const textMetrics = context.measureText(text);
+        let width = textMetrics.width;
+        let height = fontSize * 7;
+
+        // Re-apply font since canvas is resized.
+        context.font = `${fontSize}px monospace`;
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+
+        // Make the canvas transparent for simplicity
+        context.fillStyle = "transparent";
+        context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+        context.fillStyle = taskBarColor;
+
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        context.fillStyle = "white";
+        context.fillRect(borderGap / 2, borderGap / 2, canvas.width - borderGap, canvas.height - borderGap);
+
+        context.fillStyle = "black";
+        context.textAlign = "center";
+
+        var y = 20;
+        y = y + vGap;
+        context.font = boldFont;
+        context.fillText(text, canvas.width / 2, y);
+
+        const texture = new THREE.CanvasTexture(canvas)
+        texture.minFilter = THREE.LinearFilter;
+        texture.needsUpdate = true;
+
+        const material = new THREE.MeshBasicMaterial({
+            map: texture,
+            side: THREE.DoubleSide,
+            transparent: true
+        });
+
+        return material;
+    }
+
+    createWeekDays = () => {
+      for(var i = 0; i <= 7; i++ ){
+          for(var j = 0; j <= 24; j++){
+              if(i === 0 && j === 0){
+                const timeMaterial = this.buildRectTextMaterial(i, "SET CONTEXT");
+                const timeMesh = new THREE.Mesh(this.taskBarGeo, timeMaterial);
+                timeMesh.position.set(topLeftX+ (barWidth/2) + i*barWidth, topLeftY-(barHeight), 2);
+                this.scene.add(timeMesh);
+
+              }
+
+              if(j === 1) {
+                const timeMaterial = this.buildRectTextMaterial(i, weekDayArray[i]);
+                const timeMesh = new THREE.Mesh(this.taskBarGeo, timeMaterial);
+                timeMesh.position.set(topLeftX+ (barWidth/2) + i*barWidth, topLeftY-(barHeight), 2);
+                this.scene.add(timeMesh);
+
+              }
+
+              if(i === 0){
+                const timeMaterial = this.buildRectTextMaterial(j, j-1);
+                const timeMesh = new THREE.Mesh(this.taskBarGeo, timeMaterial);
+                timeMesh.position.set(topLeftX+ (barWidth/2) + i*barWidth, topLeftY-(barHeight)-j*barHeight, 2);
+                this.scene.add(timeMesh);
+
+              }
+
+          }
+      }
+
+    }
+    createTimePlane = () => {
+         var timeMaterial = this.buildRectTextMaterial("1", "Monday");
+         var timeMesh = new THREE.Mesh(this.taskBarGeo, timeMaterial);
+         timeMesh.position.set(0,0, 0);
+         this.scene.add(timeMesh);
+
+         var timeMaterial = this.buildRectTextMaterial("2", "Tuesday");
+         var timeMesh = new THREE.Mesh(this.taskBarGeo, timeMaterial);
+         timeMesh.position.set(-7, 3.5, 0);
+         this.scene.add(timeMesh);
+
+    }
     setGraphPaper = () => {
 
         const geometry = new THREE.Geometry();
@@ -79,6 +199,8 @@ export default class SessionGrid {
 
     addListeners = () => {
         this.renderer.domElement.addEventListener("wheel", this.scroll);
+        this.renderer.domElement.addEventListener("click", this.mouseClick);
+
         window.addEventListener("resize", this.handleWindowResize);
     }
 
@@ -91,7 +213,10 @@ export default class SessionGrid {
 
         this.camera.updateProjectionMatrix();
     }
-
+    mouseClick = (event) => {
+      var point = this.getClickPoint(event);
+      console.log(point);
+    }
     getClickPoint = (event) => {
 
         var rect = this.renderer.domElement.getBoundingClientRect();
