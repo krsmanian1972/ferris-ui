@@ -1,22 +1,26 @@
 import * as THREE from 'three';
+import OrbitControls from 'three-orbitcontrols';
 
 const fov = 29;//29
 const near = 1;//1
 const far = 100;
 
-const barWidth = 3;
-const barHeight = 1;
-const barDepth = 0;
+const barWidth = 1;
+const barHeight = 0.4;
+const barDepth = 4;
 
 const borderGap = 10;
 const vGap = 20;
-const topLeftX = -7.3;
-const topLeftY = 3.7;
+var topLeftX = -10;
+var topLeftY = 5.5;
 const hLine = 26;
 const vLine = 9;
 const gridStep = 1;
 
-const boldFont = "bold 18px sans-serif";
+const xGap = 0;
+const yGap = 0;
+
+const boldFont = "bold 26px sans-serif";
 const regularFont = "18px sans-serif";
 
 const taskBarColor = "gray";
@@ -28,7 +32,7 @@ export default class SessionGrid {
     constructor(container) {
         this.container = container;
 
-        this.taskBarGeo = new THREE.PlaneGeometry(barWidth, barHeight, barDepth);
+        this.taskBarGeo = new THREE.BoxGeometry(barWidth, barHeight, barDepth);
         this.gridLineMaterial = new THREE.LineBasicMaterial({ color: gridColor });
 
         this.taskBars = [];
@@ -52,15 +56,16 @@ export default class SessionGrid {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(fov, width / height, near, far);
 
-        this.camera.position.x = 0;
-        this.camera.position.y = 0.1;
-        this.camera.position.z = 15;
+        this.camera.position.x = 0;//0
+        this.camera.position.y = 0.1;//0,1
+        this.camera.position.z = 9;//10
 
         this.scene.background = new THREE.Color(sceneColor);
 
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(width, height);
         this.container.appendChild(this.renderer.domElement);
+        this.orbitControls = new OrbitControls( this.camera, this.renderer.domElement );
     }
 
     buildTaskCanvas =  (id, width, height) => {
@@ -131,12 +136,20 @@ export default class SessionGrid {
     }
 
     createWeekDays = () => {
+      var rect = this.renderer.domElement.getBoundingClientRect();
+      console.log(rect);
+      var data = {clientX:0, clientY:0};
+      var point = this.getClickPoint(data);
+      console.log(point);
+      topLeftX = point.x+1.3;
+      topLeftY = point.y-1.6;
+
       for(var i = 0; i <= 7; i++ ){
           for(var j = 0; j <= 24; j++){
               if(i === 0 && j === 0){
                 const timeMaterial = this.buildRectTextMaterial(i, "SET CONTEXT");
                 const timeMesh = new THREE.Mesh(this.taskBarGeo, timeMaterial);
-                timeMesh.position.set(topLeftX+ (barWidth/2) + i*barWidth, topLeftY-(barHeight), 2);
+                timeMesh.position.set(topLeftX + (barWidth/2) + i*(barWidth) + xGap, topLeftY-(barHeight)+yGap, 2);
                 this.scene.add(timeMesh);
 
               }
@@ -144,7 +157,7 @@ export default class SessionGrid {
               if(j === 1) {
                 const timeMaterial = this.buildRectTextMaterial(i, weekDayArray[i]);
                 const timeMesh = new THREE.Mesh(this.taskBarGeo, timeMaterial);
-                timeMesh.position.set(topLeftX+ (barWidth/2) + i*barWidth, topLeftY-(barHeight), 2);
+                timeMesh.position.set(topLeftX+ (barWidth/2) + i*(barWidth) + xGap, topLeftY-(barHeight)+yGap, 2);
                 this.scene.add(timeMesh);
 
               }
@@ -152,7 +165,7 @@ export default class SessionGrid {
               if(i === 0){
                 const timeMaterial = this.buildRectTextMaterial(j, j-1);
                 const timeMesh = new THREE.Mesh(this.taskBarGeo, timeMaterial);
-                timeMesh.position.set(topLeftX+ (barWidth/2) + i*barWidth, topLeftY-(barHeight)-j*barHeight, 2);
+                timeMesh.position.set(topLeftX+ (barWidth/2) + i*(barWidth), topLeftY-(barHeight)-j*barHeight, 2);
                 this.scene.add(timeMesh);
 
               }
@@ -195,6 +208,7 @@ export default class SessionGrid {
     animate = () => {
         requestAnimationFrame(this.animate);
         this.renderer.render(this.scene, this.camera);
+        this.orbitControls.update();
     }
 
     addListeners = () => {
