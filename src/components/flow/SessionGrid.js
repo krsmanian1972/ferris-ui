@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-const fov = 29;
+const fov = 30;
 const near = 1;
 const far = 100;
 
@@ -31,7 +31,8 @@ export default class SessionGrid {
 
     init = () => {
         this.setupScene();
-        this.setGraphPaper();
+        //this.setGraphPaper();
+        this.setBoard();
         this.animate();
     }
 
@@ -43,7 +44,7 @@ export default class SessionGrid {
         this.camera = new THREE.PerspectiveCamera(fov, width / height, near, far);
 
         this.camera.position.x = 0;
-        this.camera.position.y = 0.1;
+        this.camera.position.y = 0;
         this.camera.position.z = 15;
 
         this.scene.background = new THREE.Color(sceneColor);
@@ -51,6 +52,54 @@ export default class SessionGrid {
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(width, height);
         this.container.appendChild(this.renderer.domElement);
+    }
+
+    buildTimePillers = (texture) => {
+        const x_left = -6.0;
+        const y_lower = -1.75;
+        const yGap = 1.02;
+
+        const material = new THREE.MeshBasicMaterial( { map: texture } );
+        const geometry = new THREE.BoxBufferGeometry(1.618, 1, 0.1 );
+
+        var y = 0;
+        for (var i=0;i<5;i++) {
+            var mesh = new THREE.Mesh( geometry, material );
+            
+            y = y_lower+(i*yGap);
+            mesh.position.set(x_left,y,0);
+
+            this.scene.add(mesh)
+        }
+    }
+
+    buildTopSlab = (texture) => {
+        const x_left = -6.0;
+        const y_top = 2.33+1.02;
+
+        const material = new THREE.MeshBasicMaterial( { map: texture } );
+        const geometry = new THREE.PlaneBufferGeometry(1.618, 1, 0.1 );
+
+        var tilted = new THREE.Mesh( geometry, material );
+        tilted.position.set(x_left,y_top,0);
+        this.scene.add(tilted);
+
+        tilted.rotateX(-Math.PI/4);
+        tilted.translateX(1-1.618/2);
+        tilted.translateY(-0.25);
+        tilted.translateZ(-0.1/2);
+    }
+
+    onTextureError = (error) => {
+        console.log(error);
+    }
+
+    /**
+     * plate_material.png, stair.png
+     */
+    setBoard = () => {
+        new THREE.TextureLoader().load( './rusted_iron.jpg',this.buildTimePillers,null,this.onTextureError);
+        new THREE.TextureLoader().load( './rusted_iron.jpg',this.buildTopSlab,null,this.onTextureError);
     }
 
     setGraphPaper = () => {

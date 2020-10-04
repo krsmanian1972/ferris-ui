@@ -15,12 +15,15 @@ const ACTIVATION_ERROR = { status: "error", help: "Unable to activate the progra
 const LOADING_ERROR = { status: "error", help: "Unable to load the program." };
 const NO_MATCHING_RECORD = { status: "error", help: "Unable to find a matching program" };
 
+export const PUBLIC_PROGRAM_INFO = "This program will be open for public enrollment after you activate this program. The program will be in draft till you activate it.";
+export const PRIVATE_PROGRAM_INFO = "This program will be visible to you and to the members invited by you. The program will be in draft till you activate it."
 
 export default class ProgramStore {
 
     state = INIT;
     message = EMPTY_MESSAGE;
 
+    isPrivate = false;
     showDrawer=false;
     showActivationModal = false;
     showActivationResultModal = false;
@@ -177,7 +180,8 @@ export default class ProgramStore {
             input: {
                 name: programRequest.name,
                 description: programRequest.description,
-                coachId: this.apiProxy.getUserFuzzyId()
+                coachId: this.apiProxy.getUserFuzzyId(),
+                isPrivate: this.isPrivate,
             }
         }
 
@@ -245,6 +249,7 @@ decorate(ProgramStore, {
     editMode: observable,
     message: observable,
     change:observable,
+    isPrivate:observable,
 
     showDrawer:observable,
     showActivationModal: observable,

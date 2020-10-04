@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Typography, Tooltip, Button, Tag, Card } from 'antd';
-import { PlusCircleOutlined } from '@ant-design/icons';
+import { Typography, Tooltip, Button, Tag, Card, Space } from 'antd';
+import { LockOutlined, PlusCircleOutlined } from '@ant-design/icons';
 
 import ProgramListStore from '../stores/ProgramListStore';
-import ProgramStore from '../stores/ProgramStore';
+import ProgramStore, { PRIVATE_PROGRAM_INFO, PUBLIC_PROGRAM_INFO } from '../stores/ProgramStore';
 
 import ProgramBanner from '../commons/ProgramBanner';
 import ProgramList from '../commons/ProgramList';
@@ -47,7 +47,13 @@ class ProgramUI extends Component {
         this.exploreListStore.fetchPrograms(EXPLORE);
     }
 
-    new = () => {
+    newPrivateProgram = () => {
+        this.store.isPrivate = true;
+        this.store.showDrawer = true;
+    }
+
+    newPublicProgram = () => {
+        this.store.isPrivate = false;
         this.store.showDrawer = true;
     }
 
@@ -81,9 +87,17 @@ class ProgramUI extends Component {
     addProgramButton = () => {
         if (this.props.appStore.isCoach) {
             return (
-                <Tooltip key="new_program_tip" title="Create New Program">
-                    <Button style={{ float: "right" }} key="add" onClick={this.new} type="primary" icon={<PlusCircleOutlined />}>New</Button>
-                </Tooltip>
+                <div style={{ float: "right" }}>
+                    <Space>
+                        <Tooltip key="public_program_tip" title={PUBLIC_PROGRAM_INFO}>
+                            <Button key="add_public" onClick={this.newPublicProgram} type="primary" icon={<PlusCircleOutlined />}>New Public Program</Button>
+                        </Tooltip>
+
+                        <Tooltip key="private_program_tip" title={PRIVATE_PROGRAM_INFO}>
+                            <Button key="add_private" onClick={this.newPrivateProgram} type="primary" icon={<LockOutlined />} style={{ background: "green" }}>New Private Program</Button>
+                        </Tooltip>
+                    </Space>
+                </div>
             );
         }
     }

@@ -7,8 +7,9 @@ import Registration from './Registration';
 
 import About from './About';
 
-import PlanningUI from './guide/PlanningUI';
-import MasterPlanUI from './guide/MasterPlanUI';
+import PlanHomeUI from './plan/PlanHomeUI';
+import MasterPlanUI from './plan/MasterPlanUI';
+
 import ProgramUI from './guide/ProgramUI';
 import ProgramDetailUI from './commons/ProgramDetailUI';
 import EditableProgramDetailUI from './guide/EditableProgramDetailUI';
@@ -49,7 +50,7 @@ class SelectedComponent extends Component {
                 return <SessionDetailUI params={currentComponent.params}/>
             }
             case 'planning': {
-                return <PlanningUI />;
+                return <PlanHomeUI />;
             }
             case 'masterPlan': {
                 return <MasterPlanUI params={currentComponent.params}/>;

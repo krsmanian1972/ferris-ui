@@ -55,6 +55,7 @@ class CoachProgramList extends ProgramList {
         if (program.active) {
             return (
                 <Space>
+                    {this.getIcon(program)}
                     <Text style={{ textAlign: "center" }}>{program.name}</Text>
                     {this.uploadCover(program)}
                 </Space>
@@ -63,6 +64,7 @@ class CoachProgramList extends ProgramList {
 
         return (
             <Space>
+                {this.getIcon(program)}
                 <Tooltip title="This is a Draft Program, pending activation.">
                     <Tag onClick={() => this.props.showProgramDetail(program.id)} color="geekblue" style={{ textAlign: "center" }}>{program.name}</Tag>
                 </Tooltip>

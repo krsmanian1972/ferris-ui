@@ -67,7 +67,7 @@ class ProgramForm extends Component {
                     label="Short Description">
                     <div style={{ display: "none" }}><TextArea rows={1} /></div>
                     <div style={{ border: "1px solid lightgray" }}>
-                        <Editor id="prog_desc" value={this.description} onChange={this.handleDescription} height={300} />
+                        <Editor id="prog_desc" value={this.description} onChange={this.handleDescription} height={250} />
                     </div>
                 </Form.Item>
 

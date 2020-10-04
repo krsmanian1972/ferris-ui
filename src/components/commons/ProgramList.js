@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
-import { Spin, Result, Carousel, Typography, Button } from 'antd';
-import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import { Spin, Result, Carousel, Typography, Button,Space,Tooltip } from 'antd';
+import { LeftOutlined, RightOutlined, LockOutlined } from '@ant-design/icons';
 
 import { assetHost } from '../stores/APIEndpoints';
 
@@ -13,11 +13,27 @@ class ProgramList extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {imageBorder:"none"}
+        this.state = { imageBorder: "none" }
+    }
+
+    getIcon = (program) => {
+        if (program.isPrivate === true) {
+            return (
+                <Tooltip title="This is a Private Program.">
+                    <LockOutlined />
+                </Tooltip>
+            )
+        }
+        return <></>
     }
 
     getName = (program) => {
-        return <Text style={{ textAlign: "center" }}>{program.name}</Text>
+        return (
+            <Space>
+                {this.getIcon(program)}
+                <Text style={{ textAlign: "center" }}>{program.name}</Text>
+            </Space>
+        )
     }
 
     displayMessage = () => {
@@ -53,9 +69,9 @@ class ProgramList extends Component {
         return url;
     }
 
-    
-    renderSlider = (programs,rowCount) => {
-        if(rowCount == 0){
+
+    renderSlider = (programs, rowCount) => {
+        if (rowCount == 0) {
             return <></>
         }
 
@@ -68,16 +84,16 @@ class ProgramList extends Component {
         };
 
         return (
-            <div style={{display: "flex", flexDirection: "row", justifyContent:"center", textAlign:"center", alignItems:"center"}}>
+            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", textAlign: "center", alignItems: "center" }}>
                 <Button key="back" onClick={this.previous} icon={<LeftOutlined />} shape="square"></Button>
                 <div style={{ width: "94%" }}>
                     <Carousel ref={ref => (this.carousel = ref)} {...props}>
                         {programs && programs.map(({ program }) => {
                             return (
                                 <div key={program.id} style={{ display: "flex", flexDirection: "column" }}>
-                                     <div style={{ textAlign: "center", height: 175, marginRight: 10, marginLeft: 10, cursor:'pointer', border:this.state.imageBorder}}  onClick={() => this.props.showProgramDetail(program.id)}>
+                                    <div style={{ textAlign: "center", height: 175, marginRight: 10, marginLeft: 10, cursor: 'pointer', border: this.state.imageBorder }} onClick={() => this.props.showProgramDetail(program.id)}>
                                         <div style={{ display: "inline-block", verticalAlign: "middle", height: 175 }}></div>
-                                        <img style={{ maxHeight: "100%", maxWidth: "100%", verticalAlign: "middle", display: "inline-block", border:this.state.imageBorder, borderRadius:"12px"}} src={this.getCoverUrl(program)} />
+                                        <img style={{ maxHeight: "100%", maxWidth: "100%", verticalAlign: "middle", display: "inline-block", border: this.state.imageBorder, borderRadius: "12px" }} src={this.getCoverUrl(program)} />
                                     </div>
                                     {this.getName(program)}
                                 </div>
@@ -97,7 +113,7 @@ class ProgramList extends Component {
 
         return (
             <div>
-                {this.renderSlider(programs,store.rowCount)}
+                {this.renderSlider(programs, store.rowCount)}
                 {this.displayMessage()}
             </div>
         )
