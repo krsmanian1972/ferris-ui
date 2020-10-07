@@ -12,7 +12,7 @@ import SessionStore from '../stores/SessionStore';
 import ScheduleDrawer from './ScheduleDrawer';
 import ProgramListStore from '../stores/ProgramListStore';
 import EnrollmentListStore from '../stores/EnrollmentListStore';
-import { pageHeaderStyle,pageTitle } from '../util/Style';
+import { pageHeaderStyle, pageTitle } from '../util/Style';
 
 
 const { Title } = Typography;
@@ -75,15 +75,15 @@ class HomeUI extends Component {
     render() {
         return (
             <>
-                <PageHeader 
-                    style={pageHeaderStyle} 
+                <PageHeader
+                    style={pageHeaderStyle}
                     title={pageTitle("Moment 36")}
                     extra={[
                         this.newScheduleButton(),
                         this.membersButton()
                     ]}>
-                        
-                    <WeekSessions/>    
+
+                    <WeekSessions />
                     <TodaySessions sessionListStore={this.sessionListStore} sessionStore={this.sessionStore} showSessionDetail={this.showSessionDetail} />
                 </PageHeader>
 
