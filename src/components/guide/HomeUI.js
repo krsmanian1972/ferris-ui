@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { PageHeader, Typography, Button, Tooltip } from 'antd';
-import { PlusCircleOutlined, UserOutlined } from '@ant-design/icons';
+import { CalendarOutlined, PlusCircleOutlined, UserOutlined } from '@ant-design/icons';
 
 import TodaySessions from './TodaySessions';
 import WeekSessions from './WeekSessions';
@@ -52,6 +52,11 @@ class HomeUI extends Component {
         this.props.appStore.currentComponent = { label: "Enrollments", key: "enrollments", params: params };
     }
 
+    showWeeklySchedule = () => {
+        const params = { event: {}, parentKey: "home" };
+        this.props.appStore.currentComponent = { label: "Weekly", key: "weekly", params: params };
+    }
+
     newScheduleButton = () => {
         if (this.props.appStore.isCoach) {
             return (
@@ -72,6 +77,14 @@ class HomeUI extends Component {
         }
     }
 
+    weeklySchedule = () => {
+        return (
+            <Tooltip key="week_tip" title="The weekly view of schedule.">
+                <Button type="primary" icon={<CalendarOutlined />} onClick={this.showWeeklySchedule}>Weekly</Button>
+            </Tooltip>
+        )
+    }
+
     render() {
         return (
             <>
@@ -80,9 +93,10 @@ class HomeUI extends Component {
                     title={pageTitle("Moment 36")}
                     extra={[
                         this.newScheduleButton(),
-                        this.membersButton()
+                        this.membersButton(),
+                        this.weeklySchedule()
                     ]}>
-                    <WeekSessions />
+                    <TodaySessions sessionListStore={this.sessionListStore} sessionStore={this.sessionStore} showSessionDetail={this.showSessionDetail} />
                 </PageHeader>
 
                 <ScheduleDrawer sessionStore={this.sessionStore} />

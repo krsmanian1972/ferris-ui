@@ -17,6 +17,7 @@ import SessionDetailUI from './guide/SessionDetailUI';
 import HomeUI from './guide/HomeUI';
 import EnrollmentUI from './guide/EnrollmentUI';
 import Broadcast from './guide/Broadcast';
+import WeekSessions from './guide/WeekSessions';
 
 
 
@@ -26,46 +27,48 @@ class SelectedComponent extends Component {
 
     evaluateComponent() {
         const currentComponent = this.props.appStore.currentComponent;
-        if(!currentComponent)
-        {
+        if (!currentComponent) {
             return <Login />;
         }
         switch (currentComponent.key) {
-            case 'home' : {
+            case 'home': {
                 return <HomeUI />;
             }
-            case 'enrollments' : {
-                return <EnrollmentUI/>
+            case 'enrollments': {
+                return <EnrollmentUI />
+            }
+            case 'weekly': {
+                return <WeekSessions />
             }
             case 'programs': {
                 return <ProgramUI />;
             }
-            case 'programDetail' : {
-                return <ProgramDetailUI params={currentComponent.params}/>
+            case 'programDetail': {
+                return <ProgramDetailUI params={currentComponent.params} />
             }
-            case 'editableProgramDetail' : {
-                return <EditableProgramDetailUI params={currentComponent.params}/>
+            case 'editableProgramDetail': {
+                return <EditableProgramDetailUI params={currentComponent.params} />
             }
-            case 'sessionDetail' : {
-                return <SessionDetailUI params={currentComponent.params}/>
+            case 'sessionDetail': {
+                return <SessionDetailUI params={currentComponent.params} />
             }
             case 'planning': {
                 return <PlanHomeUI />;
             }
             case 'masterPlan': {
-                return <MasterPlanUI params={currentComponent.params}/>;
+                return <MasterPlanUI params={currentComponent.params} />;
             }
             case 'login': {
                 return <Login />;
             }
-            case 'passwordReset' : {
+            case 'passwordReset': {
                 return <PasswordReset />;
             }
-            case 'registration' : {
+            case 'registration': {
                 return <Registration />;
             }
-            case 'broadcast' : {
-                return <Broadcast params={currentComponent.params}/>
+            case 'broadcast': {
+                return <Broadcast params={currentComponent.params} />
             }
             case 'about': {
                 return <About />;

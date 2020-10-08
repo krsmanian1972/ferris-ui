@@ -10,14 +10,14 @@ import PlanStore from '../stores/PlanStore';
 const { Title } = Typography;
 
 const containerStyle = {
-    height: window.innerHeight,
+    height: window.innerHeight * 0.81,
     width: window.innerWidth
 };
 
 const graphPaperStyle = {
     border: "1px solid black",
     borderRadius: "12px",
-    maxHeight: window.innerHeight * .81,
+    maxHeight: window.innerHeight * 0.81,
     overflowY: "auto"
 }
 

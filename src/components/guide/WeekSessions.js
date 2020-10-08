@@ -1,20 +1,21 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 
-import { Result, Spin,Typography,Button } from 'antd';
+import { PageHeader,Button } from 'antd';
+
+import { pageHeaderStyle,pageTitle } from '../util/Style';
+
 import SessionGrid from '../flow/SessionGrid';
 
-const { Title } = Typography;
-
 const containerStyle = {
-    height: window.innerHeight,
+    height: window.innerHeight * .80,
     width: window.innerWidth
 };
 
 const graphPaperStyle = {
     border: "1px solid black",
     borderRadius: "12px",
-    maxHeight: window.innerHeight * .79,
+    maxHeight: window.innerHeight * .80,
     overflowY: "auto"
 }
 
@@ -27,6 +28,7 @@ class WeekSessions extends Component {
 
     componentDidMount() {
         this.sessionGrid = new SessionGrid(this.container);
+        window.addEventListener("resize", this.sessionGrid.handleWindowResize);
     }
 
     changeDates = () => {
@@ -41,12 +43,16 @@ class WeekSessions extends Component {
 
     render() {
         return (
-            <div>
-                {this.testButton()}
+            <PageHeader 
+                style={pageHeaderStyle} 
+                title={pageTitle("Weekly Schedule")}
+                extra={[
+                    this.testButton()
+                ]}>
                 <div key="graphPaper" style={graphPaperStyle}>
                     <div key="container" style={containerStyle} id="container" ref={ref => (this.container = ref)} />
                 </div>
-            </div>
+            </PageHeader>
         )
     }
 }
