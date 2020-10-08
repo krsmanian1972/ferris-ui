@@ -82,9 +82,7 @@ class HomeUI extends Component {
                         this.newScheduleButton(),
                         this.membersButton()
                     ]}>
-
                     <WeekSessions />
-                    <TodaySessions sessionListStore={this.sessionListStore} sessionStore={this.sessionStore} showSessionDetail={this.showSessionDetail} />
                 </PageHeader>
 
                 <ScheduleDrawer sessionStore={this.sessionStore} />

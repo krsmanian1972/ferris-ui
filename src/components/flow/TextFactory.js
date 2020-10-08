@@ -11,7 +11,7 @@ export default class TextFactory {
 
     build = (text, size, height, color) => {
         const material = new MeshBasicMaterial({ color: color });
-        const textGeo = new TextGeometry(text, { font: font_regular, size: size, height: height });
+        const textGeo = new TextGeometry(text, { font: font_regular, size: size, height: height, bevelEnabled: false, bevelSize: 0 });
         return new Mesh(textGeo, material);
     }
 }

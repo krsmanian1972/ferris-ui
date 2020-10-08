@@ -54,7 +54,7 @@ export default class App extends Component {
       <>
         <ToolBar />
         <Content className="site-layout" style={{ padding: '0 0px', marginTop: 64 }}>
-          <div className="site-layout-background" style={{ padding: 5, minHeight: minHeight }}>
+          <div className="site-layout-background" style={{ padding: 2, minHeight: minHeight }}>
             <SelectedComponent />
           </div>
         </Content>

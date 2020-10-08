@@ -14,7 +14,7 @@ const containerStyle = {
 const graphPaperStyle = {
     border: "1px solid black",
     borderRadius: "12px",
-    maxHeight: window.innerHeight * .80,
+    maxHeight: window.innerHeight * .79,
     overflowY: "auto"
 }
 
