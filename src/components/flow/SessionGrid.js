@@ -16,7 +16,7 @@ const gapX = 0.01;
 const unitSize = 6;
 
 const unitLength = 2.50;
-const unitHeight = 1.50;
+const unitHeight = 1.40;
 const unitDepth = 0.5;
 
 const boardWidth = 4 * unitLength;
@@ -223,7 +223,7 @@ export default class SessionGrid {
             for (var j = 0; j < unitSize; j++) {
                 var y = this.bottomY + (j * unitHeight);
 
-                var material = this.buildSessionText(i + "-" + j, ["Line-12-00", "Line-23-00", "Line-34-00", "Line-45-00"]);
+                var material = this.buildSessionText(i + "-" + j, ["Line-12-00-abcdefhg", "Line-23-00-abcdefhg", "Line-34-00-abcdefhg", "Line-45-00-abcdefhg"]);
 
                 var cell = new THREE.Mesh(geometry, material);
                 cell.position.set(x, y, -1 / 2);
@@ -366,11 +366,11 @@ export default class SessionGrid {
         context.fillStyle = "white";
         context.fillRect(0, 0, context.canvas.width, context.canvas.height);
 
-        context.font = "bold 18px sans-serif";
+        context.font = "bold 20px sans-serif";
         context.fillStyle = "black";
 
-        var y = 20;
-        var vGap = 20;
+        var y = 22;
+        var vGap = 22;
 
         for (var i = 0; i < lines.length; i++) {
             context.fillText(lines[i], canvas.width / 8, y);

@@ -8,8 +8,8 @@ import { pageHeaderStyle,pageTitle } from '../util/Style';
 import SessionGrid from '../flow/SessionGrid';
 
 const containerStyle = {
-    height: window.innerHeight * .80,
-    width: window.innerWidth
+    height: window.innerHeight * .79,
+    width: window.innerWidth * 0.95,
 };
 
 const graphPaperStyle = {
