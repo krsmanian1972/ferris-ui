@@ -9,7 +9,7 @@ import SessionGrid from '../flow/SessionGrid';
 
 const containerStyle = {
     height: window.innerHeight * .79,
-    width: window.innerWidth * 0.95,
+    width: window.innerWidth,
 };
 
 const graphPaperStyle = {

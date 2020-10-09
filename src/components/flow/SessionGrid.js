@@ -4,12 +4,10 @@ import TextFactory from './TextFactory';
 
 const fov = 28;
 const near = 1;
-const far = 100;
+const far = 2000;
 
 const sceneColor = "rgb(216,213,221)";
-
-//const _leftX = -6.50;
-//const bottomY = -1.75;
+const cyan = "#00b7eb";
 
 const gapX = 0.01;
 
@@ -36,6 +34,8 @@ export default class SessionGrid {
 
         this.setupScene();
 
+        this.setLight();
+
         this.setBoundary();
 
         this.setBoard();
@@ -52,25 +52,26 @@ export default class SessionGrid {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(fov, width / height, near, far);
 
-        this.camera.position.x = 0;
-        this.camera.position.y = 0;
-        this.camera.position.z = 20;
-
+        this.camera.position.set( 0, 0, 20 );
+        
         this.scene.background = new THREE.Color(sceneColor);
 
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(width, height);
+        this.renderer.setPixelRatio( window.devicePixelRatio );
         this.container.appendChild(this.renderer.domElement);
 
         this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.orbitControls.maxPolarAngle = Math.PI * 0.5;
+        this.orbitControls.screenSpacePanning = true;
     }
 
     setBoundary = () => {
-     
+
         var rect = this.renderer.domElement.getBoundingClientRect();
-  
-        const x = ((rect.x - rect.left) / rect.width) * 2 - 1;
-        const y = - 1; 
+
+        const x = - 1;
+        const y = - 1;
 
         var vector = new THREE.Vector3(x, y, 0);
         vector.unproject(this.camera);
@@ -81,21 +82,21 @@ export default class SessionGrid {
 
         var point = this.camera.position.clone().add(direction);
 
-        this.leftX = point.x+1;
+        this.leftX = point.x;
         this.bottomY = point.y;
         this.maxY = this.bottomY + (unitSize * unitHeight);
 
-        const material = new THREE.MeshBasicMaterial({ color:"black" });
+        const material = new THREE.MeshStandardMaterial({ color: "black" });
         const geometry = new THREE.BoxBufferGeometry(1, 1, 0.1);
-        const mesh  = new THREE.Mesh(geometry,material);
-        mesh.position.set(point.x,point.y,0);
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(point.x, point.y, 0);
 
-        //this.scene.add(mesh);
+        //  this.scene.add(mesh);
     }
 
     setGround = (texture) => {
 
-        const material = new THREE.MeshBasicMaterial({ map: texture });
+        const material = new THREE.MeshStandardMaterial({ map: texture });
         const geometry = new THREE.BoxBufferGeometry(unitLength * 29, unitHeight * 29, 0.1);
 
         var ground = new THREE.Mesh(geometry, material);
@@ -107,8 +108,8 @@ export default class SessionGrid {
 
     animate = () => {
         requestAnimationFrame(this.animate);
-        this.renderer.render(this.scene, this.camera);
         this.orbitControls.update();
+        this.renderer.render(this.scene, this.camera);
     }
 
     handleWindowResize = () => {
@@ -149,8 +150,8 @@ export default class SessionGrid {
 
         const geometry = new THREE.BoxBufferGeometry(unitLength, unitHeight, unitDepth);
 
-        const transparent = new THREE.MeshBasicMaterial({ transparent: true, opacity: 1, color: "black", side: THREE.FrontSide });
-        const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
+        const transparent = new THREE.MeshStandardMaterial({ transparent: true, opacity: 1, color: "black", side: THREE.FrontSide });
+        const material = new THREE.MeshStandardMaterial({ map: texture, side: THREE.DoubleSide });
 
         const materials = [material, material, transparent, material, material, material];
 
@@ -171,7 +172,7 @@ export default class SessionGrid {
 
     buildRoller = (texture) => {
 
-        const material = new THREE.MeshBasicMaterial({ map: texture });
+        const material = new THREE.MeshLambertMaterial({ map: texture });
         const geometry = new THREE.CylinderBufferGeometry(1 / 2, 1 / 2, 0.25 / 2);
 
         const roller = new THREE.Mesh(geometry, material);
@@ -186,7 +187,7 @@ export default class SessionGrid {
 
         const v1 = new THREE.Vector3(0, 0, 0);
         const v2 = new THREE.Vector3(dist, 0, 0);
-        const v3 = new THREE.Vector3(dist/2, dist/2, 0);
+        const v3 = new THREE.Vector3(dist / 2, dist / 2, 0);
 
         const triangle = new THREE.Triangle(v1, v2, v3);
 
@@ -200,18 +201,16 @@ export default class SessionGrid {
 
         const mesh = new THREE.Mesh(triGeo, material);
 
-        const y = this.maxY-unitHeight/2
-        const x = this.leftX-unitLength/2;
+        const y = this.maxY - unitHeight / 2
+        const x = this.leftX - unitLength / 2;
         mesh.position.set(x, y, 0);
         mesh.rotateOnAxis(new THREE.Vector3(0, 1, 0), -Math.PI / 2);
-        mesh.position.z = mesh.position.z-(dist-0.25-0.25);
-        mesh.position.x = mesh.position.x+0.25;
+        mesh.position.z = mesh.position.z - (dist - 0.25 - 0.25);
+        mesh.position.x = mesh.position.x + 0.25;
         this.scene.add(mesh);
     }
 
     buildCabins = (texture) => {
-
-        //const material = new THREE.MeshBasicMaterial({ map: texture });
 
         const geometry = new THREE.BoxBufferGeometry(unitLength, unitHeight, unitDepth);
 
@@ -223,7 +222,7 @@ export default class SessionGrid {
             for (var j = 0; j < unitSize; j++) {
                 var y = this.bottomY + (j * unitHeight);
 
-                var material = this.buildSessionText(i + "-" + j, ["Line-12-00-abcdefhg", "Line-23-00-abcdefhg", "Line-34-00-abcdefhg", "Line-45-00-abcdefhg"]);
+                var material = this.buildSessionText(i + "-" + j, ["Line-12-00-abcdefhg", "", "Line-34-00-abcdefhg", ""], i);
 
                 var cell = new THREE.Mesh(geometry, material);
                 cell.position.set(x, y, -1 / 2);
@@ -231,6 +230,8 @@ export default class SessionGrid {
             }
         }
 
+
+        const boardMaterial = new THREE.MeshStandardMaterial({ map: texture });
 
         const boardX = this.leftX + (9 * (unitLength + gapX)) + (boardWidth - unitLength) / 2;
         const boardY = this.bottomY + unitHeight / 2 - 0.5;
@@ -240,7 +241,7 @@ export default class SessionGrid {
         var y = boardY;
 
         for (var i = 0; i < unitSize; i++) {
-            var board = new THREE.Mesh(boardGeo, material);
+            var board = new THREE.Mesh(boardGeo, boardMaterial);
 
             board.position.set(boardX, y, -1 / 2);
             board.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
@@ -259,7 +260,7 @@ export default class SessionGrid {
         this.monthGroup.length = 0;
         this.dayGroup.length = 0;
 
-        const material = new THREE.MeshBasicMaterial({ map: texture });
+        const material = new THREE.MeshStandardMaterial({ map: texture });
         const geometry = new THREE.BoxBufferGeometry(unitLength, unitHeight, 0.1);
 
         var x = this.leftX;
@@ -269,7 +270,7 @@ export default class SessionGrid {
             var tilted = new THREE.Mesh(geometry, material);
             tilted.position.set(x, this.maxY, 0);
             tilted.rotateOnAxis(new THREE.Vector3(1, 0, 0), -Math.PI / 4);
-            tilted.translateZ(-1/4);
+            tilted.translateZ(-1 / 4);
             this.scene.add(tilted);
 
             var day = this.textFactory.build("", 0.3, 0.1, "#fae78f");
@@ -277,7 +278,7 @@ export default class SessionGrid {
             group.add(day);
             group.position.set(x - 0.3, this.maxY, 0);
             group.rotateOnAxis(new THREE.Vector3(1, 0, 0), -Math.PI / 4);
-            group.translateZ(-1/4);
+            group.translateZ(-1 / 4);
             group.translateY(-0.3);
             this.scene.add(group);
             this.dayGroup.push(group);
@@ -285,7 +286,7 @@ export default class SessionGrid {
             var backTilted = new THREE.Mesh(geometry, material);
             backTilted.position.set(x, this.maxY, 0);
             backTilted.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 4);
-            backTilted.translateZ(1/4);
+            backTilted.translateZ(1 / 4);
             backTilted.position.z -= 1;
             this.scene.add(backTilted);
 
@@ -317,7 +318,7 @@ export default class SessionGrid {
         }
     }
 
-    
+
 
     /**
      * Remember that the dateGroup, monthGroup and dayGroup has a head and tail.
@@ -327,6 +328,9 @@ export default class SessionGrid {
      */
     changeDates = () => {
 
+        this.orbitControls.target.set( 3, 0, 0);
+        this.orbitControls.update();
+        
         const dates = ["6", "7", "8", "9", "10", "11", "12"];
         const months = ["Oct", "Oct", "Oct", "Oct", "Oct", "Oct", "Oct"];
         const days = ["Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Mon"];
@@ -354,36 +358,61 @@ export default class SessionGrid {
     }
 
 
-    buildSessionText = function (id, lines) {
+    buildSessionText = function (id, lines, rowIndex) {
         const canvas = document.createElement('canvas');
+        const borderGap = 1;
 
         canvas.id = id;
         canvas.width = 200;
-        canvas.height = 100;
-    
-        const context = canvas.getContext('2d');
+        canvas.height = 110;
 
+        const context = canvas.getContext('2d');
         context.fillStyle = "white";
         context.fillRect(0, 0, context.canvas.width, context.canvas.height);
 
-        context.font = "bold 20px sans-serif";
-        context.fillStyle = "black";
+        if (rowIndex <= 2) {
+            context.fillStyle = "rgb(29,30,32)";
+            context.fillRect(borderGap / 2, borderGap / 2, canvas.width - borderGap, canvas.height - borderGap);
 
-        var y = 22;
-        var vGap = 22;
+            context.fillStyle = "#fae78f";
+        }
+        else if (rowIndex > 2 && rowIndex < 6) {
+            context.fillStyle = "rgb(29,30,32)";
+            context.fillRect(borderGap / 2, borderGap / 2, canvas.width - borderGap, canvas.height - borderGap);
 
+            context.fillStyle = cyan;
+        }
+        else {
+            context.fillStyle = "rgb(29,30,32)";
+            context.fillRect(borderGap / 2, borderGap / 2, canvas.width - borderGap, canvas.height - borderGap);
+
+            context.fillStyle = "white";
+        }
+
+        var y = 25;
+        var vGap = 25;
+
+        context.font = "bold 25px sans-serif";
         for (var i = 0; i < lines.length; i++) {
             context.fillText(lines[i], canvas.width / 8, y);
             y = y + vGap;
         }
 
         const texture = new THREE.CanvasTexture(canvas)
-        const material = new THREE.MeshBasicMaterial({
+
+        const material = new THREE.MeshStandardMaterial({
             map: texture,
-            side: THREE.FrontSide,
+            side: THREE.DoubleSide,
             transparent: false,
         });
 
         return material;
+    }
+
+    setLight = () => {
+        const color = "0xFFFFFF";
+        const intensity = 2;
+        const light = new THREE.AmbientLight(color, intensity);
+        this.scene.add(light);
     }
 }
