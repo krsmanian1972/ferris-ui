@@ -52,13 +52,13 @@ export default class SessionGrid {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(fov, width / height, near, far);
 
-        this.camera.position.set( 0, 0, 20 );
-        
+        this.camera.position.set(0, 0, 20);
+
         this.scene.background = new THREE.Color(sceneColor);
 
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(width, height);
-        this.renderer.setPixelRatio( window.devicePixelRatio );
+        this.renderer.setPixelRatio(window.devicePixelRatio);
         this.container.appendChild(this.renderer.domElement);
 
         this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -222,7 +222,7 @@ export default class SessionGrid {
             for (var j = 0; j < unitSize; j++) {
                 var y = this.bottomY + (j * unitHeight);
 
-                var material = this.buildSessionText(i + "-" + j, ["Line-12-00-abcdefhg", "", "Line-34-00-abcdefhg", ""], i);
+                var material = this.buildSessionText(i + "-" + j, ["Raja Subramanian K", "abcdef", "Line-34-00-abcdefhg", "abcdef"], i);
 
                 var cell = new THREE.Mesh(geometry, material);
                 cell.position.set(x, y, -1 / 2);
@@ -328,9 +328,9 @@ export default class SessionGrid {
      */
     changeDates = () => {
 
-        this.orbitControls.target.set( 3, 0, 0);
+        this.orbitControls.target.set(3, 0, 0);
         this.orbitControls.update();
-        
+
         const dates = ["6", "7", "8", "9", "10", "11", "12"];
         const months = ["Oct", "Oct", "Oct", "Oct", "Oct", "Oct", "Oct"];
         const days = ["Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Mon"];
@@ -359,42 +359,49 @@ export default class SessionGrid {
 
 
     buildSessionText = function (id, lines, rowIndex) {
-        const canvas = document.createElement('canvas');
-        const borderGap = 1;
 
+        const vGap = 46;
+        const width = 300;
+        const height = 200;
+        const borderGap = 1;
+        const fontSize = 34;
+
+        const canvas = document.createElement('canvas');
         canvas.id = id;
-        canvas.width = 200;
-        canvas.height = 110;
+        canvas.width = width;
+        canvas.height = height;
 
         const context = canvas.getContext('2d');
+        context.font = `normal ${fontSize}px sans-serif`;
+
         context.fillStyle = "white";
-        context.fillRect(0, 0, context.canvas.width, context.canvas.height);
-
-        if (rowIndex <= 2) {
-            context.fillStyle = "rgb(29,30,32)";
-            context.fillRect(borderGap / 2, borderGap / 2, canvas.width - borderGap, canvas.height - borderGap);
-
+        context.fillRect(0, 0, width, height);
+        
+        if (rowIndex <= 1) {
+            context.fillStyle = "rgb(37,56,74)";
+            context.fillRect(borderGap / 2, borderGap / 2, width - borderGap, height - borderGap);
+            context.fillStyle = "white";
+        }
+        else if (rowIndex >= 2 && rowIndex <=3) {
+            context.fillStyle = "rgb(29,34,39)";
+            context.fillRect(borderGap / 2, borderGap / 2, width - borderGap, height - borderGap);
             context.fillStyle = "#fae78f";
         }
-        else if (rowIndex > 2 && rowIndex < 6) {
-            context.fillStyle = "rgb(29,30,32)";
-            context.fillRect(borderGap / 2, borderGap / 2, canvas.width - borderGap, canvas.height - borderGap);
-
-            context.fillStyle = cyan;
+        else if (rowIndex >= 4 && rowIndex <= 5) {
+            context.fillStyle = "black";
+            context.fillRect(borderGap / 2, borderGap / 2, width - borderGap, height - borderGap);
+            context.fillStyle = "#fae78f";
         }
         else {
-            context.fillStyle = "rgb(29,30,32)";
-            context.fillRect(borderGap / 2, borderGap / 2, canvas.width - borderGap, canvas.height - borderGap);
-
+            context.fillStyle = "rgb(29,34,39)";
+            context.fillRect(borderGap / 2, borderGap / 2, width - borderGap, height - borderGap);
             context.fillStyle = "white";
         }
 
-        var y = 25;
-        var vGap = 25;
 
-        context.font = "bold 25px sans-serif";
+        var y = vGap;
         for (var i = 0; i < lines.length; i++) {
-            context.fillText(lines[i], canvas.width / 8, y);
+            context.fillText(lines[i], 20, y);
             y = y + vGap;
         }
 
@@ -404,6 +411,7 @@ export default class SessionGrid {
             map: texture,
             side: THREE.DoubleSide,
             transparent: false,
+            opacity: 0,
         });
 
         return material;
