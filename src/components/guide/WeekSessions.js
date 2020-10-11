@@ -26,13 +26,18 @@ class WeekSessions extends Component {
         super(props);
     }
 
+
     componentDidMount() {
-        this.sessionGrid = new SessionGrid(this.container);
+        this.sessionGrid = new SessionGrid(this.container,this.requestData);
         window.addEventListener("resize", this.sessionGrid.handleWindowResize);
     }
 
+    requestData= () => {
+        this.sessionGrid.updateEventMatrix();
+    }
+
     changeDates = () => {
-        this.sessionGrid.changeDates();
+        this.sessionGrid.updateEventMatrix();
     }
 
     testButton = () => {

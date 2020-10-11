@@ -106,16 +106,20 @@ export default class SessionListStore {
      * @param {} startDate 
      * @param {*} endDate 
      */
-    fetchEvents = async (startDate, endDate) => {
+    fetchEvents = async (startTime, endTime) => {
 
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
         const userFuzzyId = this.apiProxy.getUserFuzzyId();
+        const startDate = moment(startTime).format('YYYY-MM-DD');
+        const endDate = moment(endTime).format('YYYY-MM-DD');
 
         const variables = {
             criteria: {
-                userId: userFuzzyId
+                userId: userFuzzyId,
+                startDate: startDate,
+                endDate: endDate,
             }
         }
 
@@ -136,16 +140,20 @@ export default class SessionListStore {
     }
 
 
-    fetchPlanEventsQuery = async (startDate, endDate) => {
+    fetchPlanEventsQuery = async (startTime, endTime) => {
 
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
         const userFuzzyId = this.apiProxy.getUserFuzzyId();
+        const startDate = moment(startTime).format('YYYY-MM-DD');
+        const endDate = moment(endTime).format('YYYY-MM-DD');
 
         const variables = {
             criteria: {
-                userId: userFuzzyId
+                userId: userFuzzyId,
+                startDate: startDate,
+                endDate: endDate,
             }
         }
 

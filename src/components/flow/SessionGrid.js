@@ -19,13 +19,20 @@ const unitDepth = 0.5;
 
 const boardWidth = 4 * unitLength;
 
+const numberOfDays = 7;
+
+/**
+ * The structure of event matrix 
+ */
 
 export default class SessionGrid {
 
     dateGroup = [];
     monthGroup = [];
     dayGroup = [];
+    eventMaterialMatrix = new Map();
 
+    renderRequested = false;
 
     constructor(container) {
         this.container = container;
@@ -38,11 +45,9 @@ export default class SessionGrid {
 
         this.setBoundary();
 
-        this.setBoard();
+        this.setCalendarBoard();
 
-        this.animate();
-
-        //this.addListeners();
+        this.render();
     }
 
     setupScene = () => {
@@ -64,7 +69,23 @@ export default class SessionGrid {
         this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
         this.orbitControls.maxPolarAngle = Math.PI * 0.5;
         this.orbitControls.screenSpacePanning = true;
+
+        this.orbitControls.addEventListener('change', this.renderAgain);
     }
+
+    renderAgain = () => {
+        if (!this.renderRequested) {
+            this.renderRequested = true;
+            requestAnimationFrame(this.render);
+        }
+    }
+
+    render = () => {
+        this.renderRequested = undefined;
+        this.orbitControls.update();
+        this.renderer.render(this.scene, this.camera);
+    }
+
 
     setBoundary = () => {
 
@@ -104,14 +125,11 @@ export default class SessionGrid {
         ground.rotateOnAxis(new THREE.Vector3(1, 0, 0), -Math.PI / 2);
         ground.translateX(unitLength * 4);
         this.scene.add(ground);
+
+        this.scene.translateZ(-unitLength * 2);
     }
 
-    animate = () => {
-        requestAnimationFrame(this.animate);
-        this.orbitControls.update();
-        this.renderer.render(this.scene, this.camera);
-    }
-
+    
     handleWindowResize = () => {
         const width = this.container.clientWidth;
         const height = this.container.clientHeight;
@@ -120,15 +138,17 @@ export default class SessionGrid {
         this.camera.aspect = width / height;
 
         this.camera.updateProjectionMatrix();
-        this.animate();
+        this.render();
     }
 
-    setBoard = () => {
+    setCalendarBoard = () => {
         new THREE.TextureLoader().load('./piano.png', this.onPillarTexture);
         new THREE.TextureLoader().load('./piano.png', this.buildTopSlab);
         new THREE.TextureLoader().load('./silver_sheet.jpg', this.buildRoller);
-        new THREE.TextureLoader().load('./cabin.png', this.buildCabins);
         new THREE.TextureLoader().load("./black_top.png", this.setGround);
+
+        this.buildCabins();
+        this.buildSessionDetailBoard();
     }
 
 
@@ -139,6 +159,8 @@ export default class SessionGrid {
 
         this.buildTimePillars(this.leftX, texture);
         this.buildTimePillars(next_x_left, texture)
+
+        this.render();
     }
 
     /**
@@ -208,21 +230,27 @@ export default class SessionGrid {
         mesh.position.z = mesh.position.z - (dist - 0.25 - 0.25);
         mesh.position.x = mesh.position.x + 0.25;
         this.scene.add(mesh);
+
+        this.render();
     }
 
-    buildCabins = (texture) => {
+    buildCabins = () => {
 
         const geometry = new THREE.BoxBufferGeometry(unitLength, unitHeight, unitDepth);
 
         var x = this.leftX;
 
-        for (var i = 0; i < 7; i++) {
+        for (var i = 0; i < numberOfDays; i++) {
             x = x + (unitLength + gapX);
 
             for (var j = 0; j < unitSize; j++) {
                 var y = this.bottomY + (j * unitHeight);
 
-                var material = this.buildSessionText(i + "-" + j, ["Raja Subramanian K", "abcdef", "Line-34-00-abcdefhg", "abcdef"], i);
+                var textureKey = "fgrid_" + i + "_" + j;
+                var canvasTexture = this.buildSessionTexture(textureKey, ["", "", "", ""], i);
+                var material = this.buildCanvasMaterial(canvasTexture);
+
+                this.eventMaterialMatrix.set(textureKey, material);
 
                 var cell = new THREE.Mesh(geometry, material);
                 cell.position.set(x, y, -1 / 2);
@@ -230,6 +258,12 @@ export default class SessionGrid {
             }
         }
 
+        this.render();
+    }
+
+    buildSessionDetailBoard = () => {
+
+        const texture = this.buildSessionTexture("sessionBoard", ["", "", "", ""], 6);
 
         const boardMaterial = new THREE.MeshStandardMaterial({ map: texture });
 
@@ -252,6 +286,8 @@ export default class SessionGrid {
 
             y = y + unitHeight;
         }
+
+        this.render();
     }
 
     buildTopSlab = (texture) => {
@@ -316,6 +352,10 @@ export default class SessionGrid {
 
             x = x + unitLength;
         }
+
+        this.updateEventMatrix();
+
+        this.render();
     }
 
 
@@ -326,10 +366,8 @@ export default class SessionGrid {
      * We have 9 UI elements, but will always receive 7 days.
      * 
      */
-    changeDates = () => {
+    updateEventMatrix = () => {
 
-        this.orbitControls.target.set(3, 0, 0);
-        this.orbitControls.update();
 
         const dates = ["6", "7", "8", "9", "10", "11", "12"];
         const months = ["Oct", "Oct", "Oct", "Oct", "Oct", "Oct", "Oct"];
@@ -355,10 +393,26 @@ export default class SessionGrid {
             group.remove(...group.children);
             group.add(day);
         }
+
+        for (var i = 0; i < numberOfDays; i++) {
+            for (var j = 0; j < unitSize; j++) {
+                var textureKey = "fgrid_" + i + "_" + j;
+                var texture = this.buildSessionTexture(textureKey, ["Harini", "Raja", "Line-34-00-abcdefhg", "Savithri"], i);
+                var material = this.eventMaterialMatrix.get(textureKey);
+                material.map = texture;
+            }
+        }
+
+        this.render();
     }
 
 
-    buildSessionText = function (id, lines, rowIndex) {
+    buildSessionTexture = (id, lines, rowIndex) => {
+
+        const oldCanvas = document.getElementById(id);
+        if (oldCanvas) {
+            oldCanvas.remove();
+        }
 
         const vGap = 46;
         const width = 300;
@@ -376,13 +430,13 @@ export default class SessionGrid {
 
         context.fillStyle = "white";
         context.fillRect(0, 0, width, height);
-        
+
         if (rowIndex <= 1) {
             context.fillStyle = "rgb(37,56,74)";
             context.fillRect(borderGap / 2, borderGap / 2, width - borderGap, height - borderGap);
             context.fillStyle = "white";
         }
-        else if (rowIndex >= 2 && rowIndex <=3) {
+        else if (rowIndex >= 2 && rowIndex <= 3) {
             context.fillStyle = "rgb(29,34,39)";
             context.fillRect(borderGap / 2, borderGap / 2, width - borderGap, height - borderGap);
             context.fillStyle = "#fae78f";
@@ -398,14 +452,16 @@ export default class SessionGrid {
             context.fillStyle = "white";
         }
 
-
         var y = vGap;
         for (var i = 0; i < lines.length; i++) {
             context.fillText(lines[i], 20, y);
             y = y + vGap;
         }
 
-        const texture = new THREE.CanvasTexture(canvas)
+        return new THREE.CanvasTexture(canvas)
+    }
+
+    buildCanvasMaterial = (texture) => {
 
         const material = new THREE.MeshStandardMaterial({
             map: texture,

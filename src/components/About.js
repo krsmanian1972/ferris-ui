@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { Card, Row, Col } from 'antd';
 import { CaretRightOutlined } from '@ant-design/icons';
 import { cardHeaderStyle, pageTitle } from "./util/Style";
-import WeekSessions from "./guide/WeekSessions";
 
 const aboutStyle = {
     marginBottom: 5,
@@ -49,8 +48,6 @@ class About extends Component {
                     <p>Raja Subramanian K</p>
                     <p>krsmanian1972@gmail.com</p>
                 </Card>
-
-                <WeekSessions/>
             </>
         )
     }

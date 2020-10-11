@@ -146,6 +146,8 @@ export default class SessionStore {
 
     validateDate = (start) => {
 
+        console.log(start.utc().format());
+
         this.startTime = start;
         this.startTimeMsg = EMPTY_MESSAGE;
 
