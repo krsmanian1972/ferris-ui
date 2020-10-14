@@ -4,7 +4,6 @@ import { PageHeader, Typography, Button, Tooltip } from 'antd';
 import { CalendarOutlined, PlusCircleOutlined, UserOutlined } from '@ant-design/icons';
 
 import TodaySessions from './TodaySessions';
-import WeekSessions from './WeekSessions';
 
 import SessionListStore from '../stores/SessionListStore';
 import SessionStore from '../stores/SessionStore';

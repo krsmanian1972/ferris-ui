@@ -46,6 +46,7 @@ export const programsQuery = `query ($criteria: ProgramCriteria!) {
         name
         description
         coachName
+        isPrivate
       }
       coach {
         id
@@ -89,6 +90,18 @@ export const alterProgramStateQuery = `mutation($input: ChangeProgramStateReques
 
 export const createEnrollmentQuery = `mutation ($input: NewEnrollmentRequest!) {
   createEnrollment(newEnrollmentRequest: $input) {
+    errors {
+      field,
+      message
+    }
+    enrollment {
+      id
+    }
+  }
+}`;
+
+export const managedEnrollmentQuery = `mutation ($input: ManagedEnrollmentRequest!) {
+  managedEnrollment(managedEnrollmentRequest: $input) {
     errors {
       field,
       message

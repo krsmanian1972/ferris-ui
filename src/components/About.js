@@ -3,6 +3,8 @@ import { Card, Row, Col } from 'antd';
 import { CaretRightOutlined } from '@ant-design/icons';
 import { cardHeaderStyle, pageTitle } from "./util/Style";
 
+import moment from 'moment';
+
 const aboutStyle = {
     marginBottom: 5,
 };
@@ -18,6 +20,7 @@ const commentsStyle = {
 
 
 class About extends Component {
+
     render() {
         return (
             <>

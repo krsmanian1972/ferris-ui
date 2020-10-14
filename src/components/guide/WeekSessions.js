@@ -1,11 +1,14 @@
 import React, { Component } from 'react';
-import { observer } from 'mobx-react';
+import { observer,inject } from 'mobx-react';
+import moment from 'moment';
 
 import { PageHeader,Button } from 'antd';
 
 import { pageHeaderStyle,pageTitle } from '../util/Style';
 
 import SessionGrid from '../flow/SessionGrid';
+
+import SessionListStore from '../stores/SessionListStore';
 
 const containerStyle = {
     height: window.innerHeight * .79,
@@ -19,11 +22,13 @@ const graphPaperStyle = {
     overflowY: "auto"
 }
 
+@inject("appStore")
 @observer
 class WeekSessions extends Component {
 
     constructor(props) {
         super(props);
+        this.store = new SessionListStore({ apiProxy: props.appStore.apiProxy });
     }
 
 
@@ -36,8 +41,12 @@ class WeekSessions extends Component {
         this.sessionGrid.updateEventMatrix();
     }
 
-    changeDates = () => {
+    changeDates = async() => {
         this.sessionGrid.updateEventMatrix();
+
+        const refDate = moment("2020-08-11","YYYY-MM-DD");
+        const result = await this.store.buildWeeklyRoster(refDate);
+
     }
 
     testButton = () => {

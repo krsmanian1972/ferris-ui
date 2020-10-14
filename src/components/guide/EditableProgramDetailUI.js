@@ -11,13 +11,14 @@ import ProgramStore from '../stores/ProgramStore';
 import ProgramDescription from './EditableProgramDescription';
 import ActivationModal from './ActivationModal';
 import Milestones from './Milestones';
-import EnrollmentList from '../commons/EnrollmentList';
+import EnrollmentList from './EnrollmentList';
 import Trailer from './Trailer';
+
 import { cardHeaderStyle, pageHeaderStyle,pageTitle } from '../util/Style';
 
 const { Title, Paragraph } = Typography;
 
-@inject("appStore")
+@inject("appStore") 
 @observer
 class EditableProgramDetailUI extends Component {
 
@@ -153,9 +154,19 @@ class EditableProgramDetailUI extends Component {
         )
     }
 
-
-
+    /**
+     * We do not want banner for Private Programs
+     * 
+     * 
+     * @param {*} program 
+     * @param {*} change 
+     */
     getBanner = (program, change) => {
+
+        if(program.isPrivate === true) {
+            return (<></>)
+        }
+
         const ver = new Date().getTime();
         const url = `${assetHost}/programs/${program.id}/banner/banner.png?nocache=${ver}`;
         return (
@@ -207,7 +218,7 @@ class EditableProgramDetailUI extends Component {
 
                     {this.getBanner(program, change)}
 
-                    <EnrollmentList programId={program.id} />
+                    <EnrollmentList programId={program.id} programName={program.name} />
 
                 </PageHeader>
 

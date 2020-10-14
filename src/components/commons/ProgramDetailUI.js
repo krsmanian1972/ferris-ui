@@ -13,10 +13,10 @@ import EnrollmentStore from '../stores/EnrollmentStore';
 
 import ProgramDescription from './ProgramDescription';
 import EnrollmentModal from './EnrollmentModal';
-
 import Milestones from '../guide/Milestones';
 import GoldenTemplate from '../guide/GoldenTemplate';
 import ProgramSessions from './ProgramSessions';
+
 import { cardHeaderStyle, pageHeaderStyle,pageTitle } from '../util/Style';
 
 const { Title, Paragraph } = Typography;
