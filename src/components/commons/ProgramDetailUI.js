@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
 import { Spin, Result, PageHeader, Tooltip, Card, Button, Statistic } from 'antd';
-import { PlusCircleOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, MailOutlined, PhoneOutlined, BookOutlined } from '@ant-design/icons';
 import { Typography } from 'antd';
 
 import ReactPlayer from 'react-player';
@@ -48,14 +48,30 @@ class ProgramDetailUI extends Component {
             return;
         }
         return (
-            <Tooltip key="new_program_tip" title="Enroll into this program">
-                <Button key="add" onClick={this.onEnroll} type="primary" icon={<PlusCircleOutlined />}>Enroll</Button>
+            <Tooltip key="new_enrollment_tip" title="Enroll into this program">
+                <Button key="enroll" onClick={this.onEnroll} type="primary" icon={<PlusCircleOutlined />}>Enroll</Button>
             </Tooltip>
         );
     }
 
+    getProgramNotesButton = () => {
+        if (!this.store.isEnrolled) {
+            return;
+        }
+
+        return (
+            <Tooltip key="program_notes_tip" title="List of all the notes across your sessions">
+                <Button key="program_note" onClick={this.showProgramNotes} type="primary" icon={<BookOutlined />}>Your Notes</Button>
+            </Tooltip>
+        )
+    }
+
     onEnroll = () => {
         this.enrollmentStore.showEnrollmentModal = true;
+    }
+
+    showProgramNotes = () => {
+        
     }
 
     showSessionDetail = (event) => {
@@ -137,6 +153,7 @@ class ProgramDetailUI extends Component {
                     title={pageTitle(program.name)}
                     extra={[
                         this.getEnrollmentButton(),
+                        this.getProgramNotesButton(),
                     ]}>
 
                     {this.getProgramPoster(program, change)}
