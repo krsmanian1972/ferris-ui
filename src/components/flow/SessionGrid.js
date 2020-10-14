@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import OrbitControls from 'three-orbitcontrols';
 import TextFactory from './TextFactory';
+import moment from 'moment';
 
 const fov = 28;
 const near = 1;
@@ -22,7 +23,7 @@ const boardWidth = 4 * unitLength;
 const numberOfDays = 7;
 
 /**
- * The structure of event matrix 
+ * The structure of event matrix
  */
 
 export default class SessionGrid {
@@ -34,8 +35,12 @@ export default class SessionGrid {
 
     renderRequested = false;
 
-    constructor(container) {
+    constructor(container, requestDataCallBack) {
         this.container = container;
+
+        this.requestDataCallBack = requestDataCallBack
+
+        this.dates = [];
 
         this.textFactory = new TextFactory();
 
@@ -129,7 +134,7 @@ export default class SessionGrid {
         this.scene.translateZ(-unitLength * 2);
     }
 
-    
+
     handleWindowResize = () => {
         const width = this.container.clientWidth;
         const height = this.container.clientHeight;
@@ -165,8 +170,8 @@ export default class SessionGrid {
 
     /**
      * Let us build two set of pillers (front and back)
-     * @param {*} x_left 
-     * @param {*} texture 
+     * @param {*} x_left
+     * @param {*} texture
      */
     buildTimePillars = (x_left, texture) => {
 
@@ -204,7 +209,7 @@ export default class SessionGrid {
 
         this.scene.add(roller);
 
-        // The distance between the two pillars 
+        // The distance between the two pillars
         const dist = 1 + 0.25 + 0.25 + 0.25 + 0.25
 
         const v1 = new THREE.Vector3(0, 0, 0);
@@ -358,26 +363,26 @@ export default class SessionGrid {
         this.render();
     }
 
-
-
     /**
      * Remember that the dateGroup, monthGroup and dayGroup has a head and tail.
-     * 
+     *
      * We have 9 UI elements, but will always receive 7 days.
-     * 
+     *
      */
     updateEventMatrix = () => {
 
+         var startValue = -1;
+         for(var i = 0; i < 7; i++){
+           this.dates.push(moment().add(startValue + i, 'days'));
+         }
 
-        const dates = ["6", "7", "8", "9", "10", "11", "12"];
-        const months = ["Oct", "Oct", "Oct", "Oct", "Oct", "Oct", "Oct"];
-        const days = ["Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Mon"];
-
-        for (var i = 0; i < dates.length; i++) {
-
-            var date = this.textFactory.build(dates[i], 0.4, 0.1, "#fae78f");
-            var month = this.textFactory.build(months[i], 0.25, 0.1, "white");
-            var day = this.textFactory.build(days[i], 0.4, 0.1, "#fae78f");
+        for (var i = 0; i < this.dates.length; i++) {
+            var dateText = this.dates[i].format('D');
+            var date = this.textFactory.build(dateText, 0.4, 0.1, "#fae78f");
+            var monthText = this.dates[i].format('MMM');
+            var month = this.textFactory.build(monthText, 0.25, 0.1, "white");
+            var dayText = this.dates[i].format('ddd');
+            var day = this.textFactory.build(dayText, 0.4, 0.1, "#fae78f");
 
             var groupIndex = i + 1;
 
