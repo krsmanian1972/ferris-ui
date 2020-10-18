@@ -94,7 +94,6 @@ class HomeUI extends Component {
                     extra={[
                         this.newScheduleButton(),
                         this.membersButton(),
-                        this.weeklySchedule()
                     ]}>
                     <TodaySessions sessionListStore={this.sessionListStore} sessionStore={this.sessionStore} showSessionDetail={this.showSessionDetail} />
                 </PageHeader>
