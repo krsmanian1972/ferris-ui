@@ -29,6 +29,11 @@ class WeekSessions extends Component {
     constructor(props) {
         super(props);
         this.store = new SessionListStore({ apiProxy: props.appStore.apiProxy });
+        this.refDate = null;
+        this.visibleDate = null;
+        this.refTime = null;
+        this.currentDisplayTime = null;
+
     }
 
 
@@ -42,23 +47,51 @@ class WeekSessions extends Component {
     }
 
     changeDates = async() => {
-        this.sessionGrid.updateEventMatrix();
 
-        const refDate = moment("2020-08-11","YYYY-MM-DD");
-        const result = await this.store.buildWeeklyRoster(refDate);
+        this.refDate = moment("2020-10-16","YYYY-MM-DD");
+        this.visibleDate = moment("2020-10-16","YYYY-MM-DD");
+        this.refTime = moment().subtract(3,'hours');
+        this.currentDisplayTime = moment().subtract(3,'hours');
+        this.sessionData = await this.store.buildWeeklyRoster(this.refDate);
+        this.sessionGrid.updateEventMatrixWithDate(this.sessionData, this.visibleDate, this.refTime);
+
+    }
+
+    incrementTime = () =>{
+      this.currentDisplayTime = moment(this.currentDisplayTime).add(1,'hours');
+      this.sessionGrid.updateEventMatrixWithDate(this.sessionData, this.visibleDate, this.currentDisplayTime);
+    }
+
+    decrementTime = () =>{
+      this.currentDisplayTime = moment(this.currentDisplayTime).subtract(1,'hours');
+      this.sessionGrid.updateEventMatrixWithDate(this.sessionData, this.visibleDate, this.currentDisplayTime);
+
+    }
+
+    increaseDate = async() =>{
+
+    }
+
+    decreaseDate = async() =>{
 
     }
 
     testButton = () => {
         return (
+            <>
             <Button type="primary" onClick={this.changeDates}>Test</Button>
+            <Button type="primary" onClick={this.incrementTime}>Time Up</Button>
+            <Button type="primary" onClick={this.decrementTime}>Time Down</Button>
+            <Button type="primary" onClick={this.increaseDate}>Next Day</Button>
+            <Button type="primary" onClick={this.DecreaseDate}>Prev Day</Button>
+            </>
         )
     }
 
     render() {
         return (
-            <PageHeader 
-                style={pageHeaderStyle} 
+            <PageHeader
+                style={pageHeaderStyle}
                 title={pageTitle("Weekly Schedule")}
                 extra={[
                     this.testButton()

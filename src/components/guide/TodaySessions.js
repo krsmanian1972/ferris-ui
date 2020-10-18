@@ -16,16 +16,16 @@ class TodaySessions extends Component {
      * Let us re-build the roster for every 60 seconds
      */
     componentDidMount() {
-        this.props.sessionListStore.buildRoster();
-        this.interval = setInterval(() => this.props.sessionListStore.buildRoster(), 60 * 1000);
+        //this.props.sessionListStore.buildRoster();
+        //this.interval = setInterval(() => this.props.sessionListStore.buildRoster(), 60 * 1000);
     }
 
     componentWillUnmount() {
         clearInterval(this.interval);
     }
 
-    
-   
+
+
     render() {
         const listStore = this.props.sessionListStore;
 
