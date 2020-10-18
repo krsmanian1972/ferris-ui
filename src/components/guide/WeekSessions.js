@@ -40,6 +40,7 @@ class WeekSessions extends Component {
     componentDidMount() {
         this.sessionGrid = new SessionGrid(this.container,this.requestData);
         window.addEventListener("resize", this.sessionGrid.handleWindowResize);
+        this.changeDates();
     }
 
     requestData= () => {
@@ -48,7 +49,7 @@ class WeekSessions extends Component {
 
     changeDates = async() => {
 
-        this.refDate = moment("2020-10-16","YYYY-MM-DD");
+        this.refDate = moment();
         this.currentDisplayDate = moment(this.refDate);
 
         this.refTime = moment().subtract(3,'hours');

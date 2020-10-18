@@ -261,17 +261,11 @@ export default class SessionListStore {
      * Pass a moment object to the refDate.
      */
     buildWeeklyRoster = async (refDate) => {
-        console.log("Build Weekly");
         const range = this.getWeekRange(refDate);
 
         const weeklyRoster = this.buildEmptyWeekGrid(range);
-        console.log("Range");
-        console.log(range);
         const events = await this.fetchEvents(range[0], range[6]);
-        console.log("Events");
-        console.log(events);
         this.fixWeeklyRoster(weeklyRoster, events);
-        //console.log(weeklyRoster);
         return { range: range, roster: weeklyRoster };
     }
 

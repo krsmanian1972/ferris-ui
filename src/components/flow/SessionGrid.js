@@ -385,12 +385,12 @@ export default class SessionGrid {
       if(timeStart){
 
         time = moment(timeStart);
-        console.log("Given Time", time)
+
       }
       else{
 
           time = moment();
-          console.log("Current Time", time);
+
       }
       var timeInHrs = parseInt(time.format('HH'));
       if ( timeInHrs >= 19){
@@ -406,7 +406,7 @@ export default class SessionGrid {
             var timeText = this.times[i];
             var time = this.textFactory.build(timeText, 0.3, 0.1, "#fae78f");
             var groupIndex = i;
-            console.log(timeText, groupIndex);
+
 
             var group = this.timeGroup[groupIndex];
             group.remove(...group.children);
@@ -417,7 +417,6 @@ export default class SessionGrid {
              var timeText = this.times[i-6];
              var time = this.textFactory.build(timeText, 0.3, 0.1, "#fae78f");
              var groupIndex = i;
-             console.log(timeText, groupIndex);
 
              var group = this.timeGroup[groupIndex];
              group.remove(...group.children);
@@ -488,7 +487,6 @@ export default class SessionGrid {
         if(timeOffset >= 18){
              timeOffset = 18;
         }
-        console.log("TimeOffset ::" ,timeOffset);
         for (var i = 0; i < this.dates.length; i++) {
             var dateText = this.dates[i].format('D');
             var date = this.textFactory.build(dateText, 0.4, 0.1, "#fae78f");
@@ -517,7 +515,7 @@ export default class SessionGrid {
              for (var j = 0; j < 6; j++) {
                  var textureKey = "fgrid_" + i + "_" + j;
                  var text0Text = "", text1Text ="", text2Text ="", text3Text="";
-                 console.log(result.roster);
+
                  var text0 = result.roster.get(j + 1 + timeOffset).get(day).get(0);
                  var text1 = result.roster.get(j + 1 + timeOffset).get(day).get(15);
                  var text2 = result.roster.get(j + 1 + timeOffset).get(day).get(30);
