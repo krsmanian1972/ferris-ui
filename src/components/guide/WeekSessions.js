@@ -49,30 +49,37 @@ class WeekSessions extends Component {
     changeDates = async() => {
 
         this.refDate = moment("2020-10-16","YYYY-MM-DD");
-        this.visibleDate = moment("2020-10-16","YYYY-MM-DD");
+        this.currentDisplayDate = moment(this.refDate);
+
         this.refTime = moment().subtract(3,'hours');
-        this.currentDisplayTime = moment().subtract(3,'hours');
+        this.currentDisplayTime = moment(this.refTime);
+
         this.sessionData = await this.store.buildWeeklyRoster(this.refDate);
-        this.sessionGrid.updateEventMatrixWithDate(this.sessionData, this.visibleDate, this.refTime);
+        this.sessionGrid.updateEventMatrixWithDate(this.sessionData, this.refDate, this.refTime);
 
     }
 
-    incrementTime = () =>{
+    incrementTime = () => {
       this.currentDisplayTime = moment(this.currentDisplayTime).add(1,'hours');
-      this.sessionGrid.updateEventMatrixWithDate(this.sessionData, this.visibleDate, this.currentDisplayTime);
+      this.sessionGrid.updateEventMatrixWithDate(this.sessionData, this.currentDisplayDate, this.currentDisplayTime);
     }
 
-    decrementTime = () =>{
+    decrementTime = () => {
       this.currentDisplayTime = moment(this.currentDisplayTime).subtract(1,'hours');
-      this.sessionGrid.updateEventMatrixWithDate(this.sessionData, this.visibleDate, this.currentDisplayTime);
-
+      this.sessionGrid.updateEventMatrixWithDate(this.sessionData, this.currentDisplayDate, this.currentDisplayTime);
     }
 
     increaseDate = async() =>{
+        this.currentDisplayDate = moment(this.currentDisplayDate).add(1,'days');
+        this.sessionData = await this.store.buildWeeklyRoster(this.currentDisplayDate);
+        this.sessionGrid.updateEventMatrixWithDate(this.sessionData, this.currentDisplayDate, this.currentDisplayTime);
 
     }
 
     decreaseDate = async() =>{
+        this.currentDisplayDate = moment(this.currentDisplayDate).subtract(1,'days');
+        this.sessionData = await this.store.buildWeeklyRoster(this.currentDisplayDate);
+        this.sessionGrid.updateEventMatrixWithDate(this.sessionData, this.currentDisplayDate, this.currentDisplayTime);
 
     }
 
@@ -83,7 +90,7 @@ class WeekSessions extends Component {
             <Button type="primary" onClick={this.incrementTime}>Time Up</Button>
             <Button type="primary" onClick={this.decrementTime}>Time Down</Button>
             <Button type="primary" onClick={this.increaseDate}>Next Day</Button>
-            <Button type="primary" onClick={this.DecreaseDate}>Prev Day</Button>
+            <Button type="primary" onClick={this.decreaseDate}>Prev Day</Button>
             </>
         )
     }
