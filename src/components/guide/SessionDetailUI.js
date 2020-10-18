@@ -224,7 +224,7 @@ class SessionDetailUI extends Component {
                     {this.renderTopSegment(program, session, sessionUser, people)}
 
                     {people.coach && (
-                        <div key="assets">
+                        <div key="assets" style={{marginTop:10}}>
                             <GoldenTemplate key="gt" enrollmentId={session.enrollmentId} memberId={people.member.user.id} apiProxy={this.props.appStore.apiProxy} />
                             <BoardList key="cb" title="Coach Boards" sessionUserId={people.coach.sessionUser.id} />
                             <BoardList key="ab" title="Actor Boards" sessionUserId={people.member.sessionUser.id} />

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
 import { Spin, Result, PageHeader, Tooltip, Card, Button, Statistic } from 'antd';
-import { PlusCircleOutlined, MailOutlined, PhoneOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, MailOutlined, PhoneOutlined, AccountBookOutlined } from '@ant-design/icons';
 import { Typography } from 'antd';
 
 import ReactPlayer from 'react-player';
@@ -14,10 +14,9 @@ import EnrollmentStore from '../stores/EnrollmentStore';
 import ProgramDescription from './ProgramDescription';
 import EnrollmentModal from './EnrollmentModal';
 import Milestones from '../guide/Milestones';
-import GoldenTemplate from '../guide/GoldenTemplate';
-import ProgramSessions from './ProgramSessions';
 
-import { cardHeaderStyle, pageHeaderStyle,pageTitle } from '../util/Style';
+
+import { cardHeaderStyle, pageHeaderStyle, pageTitle } from '../util/Style';
 
 const { Title, Paragraph } = Typography;
 
@@ -54,13 +53,38 @@ class ProgramDetailUI extends Component {
         );
     }
 
+    /**
+     * Show the Journal Button Only to the Enrolled member. 
+     * The Journal is at the enrollment level. 
+     */
+    getJournalButton = () => {
+        if (this.store.isOwner) {
+            return;
+        }
+
+        if (!this.store.isEnrolled) {
+            return;
+        }
+
+        return (
+            <Tooltip key="journal_ip" title="View all your sessions and notes.">
+                <Button key="journ" onClick={this.showJournalUI} type="primary" icon={<AccountBookOutlined />}>Journal</Button>
+            </Tooltip>
+        );
+    }
+
     onEnroll = () => {
         this.enrollmentStore.showEnrollmentModal = true;
     }
 
-    showSessionDetail = (event) => {
-        const params = { event: event, parentKey: "programDetailUI" };
-        this.props.appStore.currentComponent = { label: "Session Detail", key: "sessionDetail", params: params };
+    showJournalUI = () => {
+        const {program, coach, enrollmentId } = this.store.programModel;
+        const memberId = this.props.appStore.apiProxy.getUserFuzzyId();
+
+        const journalContext = { programId: program.id, programName: program.name, people: coach.name, memberName:"", enrollmentId: enrollmentId, memberId: memberId };
+        const params = { journalContext: {...journalContext}, parentKey: "programDetailUI" };
+
+        this.props.appStore.currentComponent = { label: "Journal", key: "journal", params: params };
     }
 
     render() {
@@ -105,26 +129,6 @@ class ProgramDetailUI extends Component {
         )
     }
 
-    /**
-     * Let us show the coaching plan to the actor, if enrolled.
-     */
-    renderActorCoachingPlan = () => {
-        if (this.store.isOwner) {
-            return;
-        }
-
-        if (!this.store.isEnrolled) {
-            return;
-        }
-
-        const { enrollmentId } = this.store.programModel;
-        const memberId = this.props.appStore.apiProxy.getUserFuzzyId();
-
-        return (
-            <GoldenTemplate key="gt" enrollmentId={enrollmentId} memberId={memberId} apiProxy={this.props.appStore.apiProxy} />
-        )
-    }
-
     renderProgramModel = () => {
 
         const { program, coach } = this.store.programModel;
@@ -137,6 +141,7 @@ class ProgramDetailUI extends Component {
                     title={pageTitle(program.name)}
                     extra={[
                         this.getEnrollmentButton(),
+                        this.getJournalButton(),
                     ]}>
 
                     {this.getProgramPoster(program, change)}
@@ -155,10 +160,6 @@ class ProgramDetailUI extends Component {
                     <ProgramDescription program={program} programStore={this.store} />
 
                     <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
-
-                    {this.renderActorCoachingPlan()}
-
-                    <ProgramSessions programId={program.id} userId={this.props.appStore.apiProxy.getUserFuzzyId()} apiProxy={this.props.appStore.apiProxy} showSessionDetail={this.showSessionDetail} />
 
                 </PageHeader>
 

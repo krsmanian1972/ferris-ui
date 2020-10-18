@@ -41,7 +41,7 @@ export default class GoldenTemplate extends Component {
         return (
             <Card 
                 headStyle = {cardHeaderStyle}
-                style={{ borderRadius: "12px",marginTop: "10px" }} 
+                style={{ borderRadius: "12px"}} 
                 title={<Title level={4}>Plan</Title>}>
                 <div style={{ display: "flex",flexDirection: "row", marginBottom:"10px"}}>
                     <TaskList key="onward" taskStore={this.taskStore} />

@@ -24,8 +24,13 @@ class EnrollmentUI extends Component {
         this.sessionListStore = new SessionListStore({ apiProxy: props.appStore.apiProxy });
     }
 
+    /**
+     * Let us mark the event as read-only to avoid confusion
+     * @param {*} event 
+     */
     showSessionDetail = (event) => {
-        const params = { event: event, parentKey: "programDetailUI" };
+        event.readOnly=true;
+        const params = { event: event, parentKey: "enrollmentUI" };
         this.props.appStore.currentComponent = { label: "Session Detail", key: "sessionDetail", params: params };
     }
 

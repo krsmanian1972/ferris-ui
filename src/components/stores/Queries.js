@@ -254,6 +254,24 @@ export const notesQuery = `query ($criteria: NoteCriteria!) {
   }
 }`;
 
+export const enrollmentNotesQuery = `query ($criteria: PlanCriteria!) {
+  getEnrollmentNotes(criteria: $criteria) {
+    notes {
+      session {
+        name,
+      }
+      note {
+        description,
+        updatedAt,
+      }
+      by
+    }
+    error {
+      message
+    }
+  }
+}`;
+
 export const createObjectiveQuery = `mutation($input: NewObjectiveRequest!) {
   createObjective(newObjectiveRequest:$input){
     objective {

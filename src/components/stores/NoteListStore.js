@@ -1,7 +1,7 @@
-import { decorate, observable, computed,action } from 'mobx';
+import { decorate, observable, computed, action } from 'mobx';
 import { apiHost } from './APIEndpoints';
-import {notesQuery} from './Queries'
-import {isBlank} from './Util';
+import { notesQuery,enrollmentNotesQuery } from './Queries'
+import { isBlank } from './Util';
 
 const PENDING = 'pending';
 const DONE = 'done';
@@ -16,8 +16,8 @@ export default class NoteListStore {
     message = EMPTY_MESSAGE;
 
     notes = [];
-    rowCount=0;
- 
+    rowCount = 0;
+
     constructor(props) {
         this.apiProxy = props.apiProxy;
     }
@@ -38,9 +38,9 @@ export default class NoteListStore {
      * Obtain the List of Boards for the given sessionUserFuzzyId
      *
      */
-    load = async(sessionUserId,closingNotes) => {
-        
-        this.state  = PENDING;
+    load = async (sessionUserId, closingNotes) => {
+
+        this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
         const variables = {
@@ -70,7 +70,6 @@ export default class NoteListStore {
             this.message = ERROR_MESSAGE;
             console.log(e);
         }
-    
     }
 
     /**
@@ -78,25 +77,60 @@ export default class NoteListStore {
      * it as one of her notes.
      */
     append = (closingNotes) => {
-        if(closingNotes && !isBlank(closingNotes)) {
-            this.rowCount = this.rowCount+1;
-            this.notes.push({id:"closing",description:closingNotes,remindAt:""});
+        if (closingNotes && !isBlank(closingNotes)) {
+            this.rowCount = this.rowCount + 1;
+            this.notes.push({ id: "closing", description: closingNotes, remindAt: "" });
         }
     }
 
+    /**
+     * To fetch all the notes of a particular Enrollment
+     */
+    fetchEnrollmentNotes = async (enrollmentId) => {
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+
+        const variables = {
+            criteria: {
+                enrollmentId:enrollmentId,
+            }
+        }
+
+        try {
+            const response = await this.apiProxy.query(apiHost, enrollmentNotesQuery, variables);
+            const data = await response.json();
+
+            if (data.data.getEnrollmentNotes.error != null) {
+                this.state = ERROR;
+                this.message = ERROR_MESSAGE;
+                return;
+            }
+
+            const result = data.data.getEnrollmentNotes.notes;
+            this.notes = result;
+            this.rowCount = result.length;
+            this.state = DONE;
+        }
+        catch (e) {
+            this.state = ERROR;
+            this.message = ERROR_MESSAGE;
+            console.log(e);
+        }
+    }
 }
 
-decorate(NoteListStore,{
-    state:observable,
+decorate(NoteListStore, {
+    state: observable,
     message: observable,
 
-    notes:observable,
-    rowCount:observable,
+    notes: observable,
+    rowCount: observable,
 
-    isLoading:computed,
-    isError:computed,
-    isDone:computed,
-    
-    load:action,
-    append:action,
+    isLoading: computed,
+    isError: computed,
+    isDone: computed,
+
+    load: action,
+    append: action,
+    fetchEnrollmentNotes:action
 });

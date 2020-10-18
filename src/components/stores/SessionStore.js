@@ -17,6 +17,8 @@ const ERROR_MESSAGE = { status: ERROR, help: "We are very sorry, the service is 
 const LOADING_ERROR = { status: "error", help: "Unable to load the people." };
 const COACH_LAUNCH_HELP = "You may activate this session, as Ready, 5 minutes ahead of the starting time.";
 const ACTOR_LAUNCH_HELP = "Waiting for the coach to activate this session as Ready.";
+const READONLY_LAUNCH_HELP = "This is a journal view of the session. The session detail is read-only. ";
+
 
 const READY = "READY";
 const OVERDUE = "OVERDUE";
@@ -238,6 +240,7 @@ export default class SessionStore {
         return this.isCoach
             && this.event.session
             && !this.event.session.isClosed
+            && !this.event.readOnly
             && (this.event.session.status === PLANNED || this.event.session.status === OVERDUE)
 
     }
@@ -246,6 +249,7 @@ export default class SessionStore {
         return this.isCoach
             && this.event.session
             && !this.event.session.isClosed
+            && !this.event.readOnly
 
     }
 
@@ -258,10 +262,15 @@ export default class SessionStore {
     get canBroadcast() {
         return this.event.session
             && !this.event.session.isClosed
+            && !this.event.readOnly
             && (this.event.session.status === READY || this.event.session.status === PROGRESS)
     }
 
     get broadcastHelp() {
+
+        if(this.event.readOnly===true) {
+            return READONLY_LAUNCH_HELP;
+        }
 
         if (this.event && this.event.session && (this.event.session.status === PLANNED || this.event.session.status === OVERDUE)) {
             if (this.isCoach) {

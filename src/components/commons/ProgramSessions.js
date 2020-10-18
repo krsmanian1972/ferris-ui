@@ -76,7 +76,7 @@ class ProgramSessions extends Component {
         return (
             <Card 
                 headStyle = {cardHeaderStyle}
-                style={{ borderRadius: "12px", marginTop: "10px"}} 
+                style={{ borderRadius: "12px"}} 
                 title={<Title level={4}>Your Sessions {this.countTag()}</Title>}>
                 {this.displayMessage()}
                 {this.renderSlots(sessions)}
