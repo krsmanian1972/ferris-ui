@@ -201,6 +201,11 @@ export const planEventsQuery = `query ($criteria: EventCriteria!) {
         status,
         description
       },
+      program {
+        name,
+        description,
+        coachName
+      },
     }
     error {
       message
