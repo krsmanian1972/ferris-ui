@@ -47,8 +47,8 @@ class ProgramDetailUI extends Component {
             return;
         }
         return (
-            <Tooltip key="new_program_tip" title="Enroll into this program">
-                <Button key="add" onClick={this.onEnroll} type="primary" icon={<PlusCircleOutlined />}>Enroll</Button>
+            <Tooltip key="new_enrollment_tip" title="Enroll into this program">
+                <Button key="enroll" onClick={this.onEnroll} type="primary" icon={<PlusCircleOutlined />}>Enroll</Button>
             </Tooltip>
         );
     }

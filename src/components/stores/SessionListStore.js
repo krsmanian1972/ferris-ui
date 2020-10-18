@@ -53,8 +53,8 @@ export default class SessionListStore {
     /**
      * The key of the map is Date.
      * The value is an Array;
-     * 
-     * @param {*} result 
+     *
+     * @param {*} result
      */
     groupByDate = (result) => {
         const groupedResult = new Map();
@@ -105,8 +105,8 @@ export default class SessionListStore {
     }
 
     /**
-     * @param {} startDate 
-     * @param {*} endDate 
+     * @param {} startDate
+     * @param {*} endDate
      */
     fetchEvents = async (startTime, endTime) => {
 
@@ -197,12 +197,12 @@ export default class SessionListStore {
 
     /**
      * The seven days of the Grid Period.
-     * 
+     *
      * Hours are in Row
-     * The Days are column 
-     * 
-     * 
-     * @param {*} dates 
+     * The Days are column
+     *
+     *
+     * @param {*} dates
      */
     buildEmptyWeekGrid = (dateRange) => {
 
@@ -248,7 +248,7 @@ export default class SessionListStore {
                 const row = weeklyRoster.get(hour);
                 var hourCell = row.get(date);
                 var minCell = hourCell.get(min);
-                minCell.set(event.sessionId, event);
+                minCell.set(event.id, event);
 
                 localeStart.add(15, 'minutes');
             }
@@ -257,19 +257,15 @@ export default class SessionListStore {
 
      /**
      * The 7 days are relative to the date before the given date.
-     * 
+     *
      * Pass a moment object to the refDate.
      */
     buildWeeklyRoster = async (refDate) => {
-
         const range = this.getWeekRange(refDate);
 
         const weeklyRoster = this.buildEmptyWeekGrid(range);
-
         const events = await this.fetchEvents(range[0], range[6]);
-
         this.fixWeeklyRoster(weeklyRoster, events);
-
         return { range: range, roster: weeklyRoster };
     }
 
@@ -330,18 +326,18 @@ export default class SessionListStore {
     }
 
     /**
-     * The events are marked in utc time. 
-     * 
+     * The events are marked in utc time.
+     *
      * We receive the the Number of Leap Seconds from the server.
-     *  
-     * Hence we need to translate the time in seconds to local time 
+     *
+     * Hence we need to translate the time in seconds to local time
      * in order to fix into the respective event slot.
-     * 
-     * We wrot an inefficient for-loop to find the matching SLOTS 
+     *
+     * We wrot an inefficient for-loop to find the matching SLOTS
      * for the event.
-     * 
-     * @param {*} roster 
-     * @param {*} events 
+     *
+     * @param {*} roster
+     * @param {*} events
      */
     fixSessionRoster = (roster, events) => {
         events.map(event => {
