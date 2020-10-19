@@ -81,7 +81,15 @@ class ProgramDetailUI extends Component {
         const {program, coach, enrollmentId } = this.store.programModel;
         const memberId = this.props.appStore.apiProxy.getUserFuzzyId();
 
-        const journalContext = { programId: program.id, programName: program.name, people: coach.name, memberName:"", enrollmentId: enrollmentId, memberId: memberId };
+        const journalContext = { 
+            programId: program.id, 
+            programName: program.name, 
+            coachName: coach.name, 
+            memberName:"", 
+            memberId: memberId,
+            enrollmentId: enrollmentId
+        };
+
         const params = { journalContext: {...journalContext}, parentKey: "programDetailUI" };
 
         this.props.appStore.currentComponent = { label: "Journal", key: "journal", params: params };

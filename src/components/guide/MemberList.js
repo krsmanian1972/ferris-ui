@@ -56,7 +56,7 @@ class MemberList extends Component {
         if (members) {
             var index = 0
             for (let [email, details] of members) {
-                elements.push(<MemberSlot key={index++} email={email} details={details} showMemberSessions={this.props.showMemberSessions} />);
+                elements.push(<MemberSlot key={index++} email={email} details={details} showJournalUI={this.props.showJournalUI} />);
             }
         }
 

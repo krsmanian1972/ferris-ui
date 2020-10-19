@@ -47,7 +47,8 @@ export default class MemberListStore {
 
         const variables = {
             criteria: {
-                coachId: this.apiProxy.getUserFuzzyId()
+                coachId: this.apiProxy.getUserFuzzyId(),
+                desire: 'ALL'
             }
         }
 

@@ -7,9 +7,8 @@ import MemberListStore from '../stores/MemberListStore';
 import SessionListStore from '../stores/SessionListStore';
 
 import MemberList from './MemberList';
-import MemberSessions from './MemberSessions';
 
-import { pageHeaderStyle,pageTitle } from '../util/Style';
+import { pageHeaderStyle, pageTitle } from '../util/Style';
 
 const { Title } = Typography;
 const { Panel } = Collapse;
@@ -21,36 +20,29 @@ class EnrollmentUI extends Component {
     constructor(props) {
         super(props);
         this.memberListStore = new MemberListStore({ apiProxy: props.appStore.apiProxy });
-        this.sessionListStore = new SessionListStore({ apiProxy: props.appStore.apiProxy });
     }
 
-    /**
-     * Let us mark the event as read-only to avoid confusion
-     * @param {*} event 
-     */
-    showSessionDetail = (event) => {
-        event.readOnly=true;
-        const params = { event: event, parentKey: "enrollmentUI" };
-        this.props.appStore.currentComponent = { label: "Session Detail", key: "sessionDetail", params: params };
-    }
+    showJournalUI = (memberItem) => {
 
-    showMemberSessions = (memberItem) => {
-
-        const selection = {
-            userName: memberItem.user.name,
-            userId: memberItem.user.Id,
-            email: memberItem.user.email,
+        const journalContext = {
+            programId: memberItem.program.id,
             programName: memberItem.program.name,
-            programId: memberItem.program.id
+            coachName: memberItem.program.coachName,
+            memberName: memberItem.user.name,
+            memberId: memberItem.user.id,
+            enrollmentId: memberItem.enrollment.id,
         };
 
-        this.sessionListStore.fetchProgramSessions(memberItem.program.id, memberItem.user.id, selection);
+        const params = { journalContext: { ...journalContext }, parentKey: "enrollmentUI" };
+
+        this.props.appStore.currentComponent = { label: "Journal", key: "journal", params: params };
     }
+
 
     countTag = () => {
         const store = this.memberListStore
         if (store.isDone) {
-            return <Tag color="#108ee9">{store.rowCount} Total</Tag>
+            return <Tag color="#108ee9">{store.rowCount} Members</Tag>
         }
 
         if (store.isError) {
@@ -62,15 +54,13 @@ class EnrollmentUI extends Component {
     render() {
 
         return (
-            <PageHeader 
-                style={pageHeaderStyle} 
-                title={pageTitle("Enrollments")}> 
-                <Collapse bordered={true} defaultActiveKey={['1']}>
-                    <Panel key="1" header={<Title level={4}>Members {this.countTag()}</Title>}>
-                        <MemberList key="members" store={this.memberListStore} showMemberSessions={this.showMemberSessions} />
-                    </Panel>
-                </Collapse>
-                <MemberSessions key="sessions" store={this.sessionListStore} showSessionDetail={this.showSessionDetail}/>
+            <PageHeader
+                style={pageHeaderStyle}
+                title={pageTitle("Enrollments")}
+                extra={[
+                    this.countTag()
+                ]}>
+                <MemberList key="members" store={this.memberListStore} showJournalUI={this.showJournalUI} />
             </PageHeader>
         )
     }

@@ -1,7 +1,7 @@
 import React from 'react';
 import moment from 'moment';
 
-function MemberSlot({ email, details,showMemberSessions }) {
+function MemberSlot({ email, details,showJournalUI }) {
 
     const memberName = details.length > 0 ? details[0].user.name : "Unknown";
 
@@ -18,7 +18,7 @@ function MemberSlot({ email, details,showMemberSessions }) {
 
     const renderProgram = (item, index) => {
         return (
-            <div key={index} className="slot-member-item " onClick={() => showMemberSessions(item)}>
+            <div key={index} className="slot-member-item " onClick={() => showJournalUI(item)}>
                 <div className="slot-title">
                     <p style={{ float: 'left' }}>{item.program.name}</p>
                     {newText(item.enrollment.isNew)}

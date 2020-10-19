@@ -27,10 +27,12 @@ class JournalUI extends Component {
     }
 
     showPeople = () => {
+        const people = `${this.journalContext.coachName}::${this.journalContext.memberName}`;
         return (
-            <Tag>{this.journalContext.people}</Tag>
+            <Tag color="rgb(69,49,28)">{people}</Tag>
         )
     }
+
     render() {
 
         return (

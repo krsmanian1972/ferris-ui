@@ -30,6 +30,8 @@ const formItemLayout = {
     },
 };
 
+const MEMBER_LABEL = "We offer you the list of members enrolled in the selected program. If no members are listed here, probably you need to check if you have selected a Program in the first place :)";
+
 const failureNotification = () => {
     const args = {
         message: 'Unable to Create Schedule',
@@ -125,6 +127,17 @@ class ScheduleForm extends Component {
         );
     }
 
+    getMemberLabel = () => {
+        return (
+            <span>
+                Enrolled Member&nbsp;
+                <Tooltip title={MEMBER_LABEL}>
+                    <QuestionCircleOutlined />
+                </Tooltip>
+            </span>
+        );
+    }
+
     getDurationLabel = () => {
         return (
             <span>
@@ -196,7 +209,7 @@ class ScheduleForm extends Component {
 
                 <Form.Item name="memberId"
                     rules={[{ required: true, message: 'Please select an enrolled member for the Program' }]}
-                    label="Enrolled Member"
+                    label={this.getMemberLabel()}
                     validateStatus={memberMsg.status}
                     help={memberMsg.help}>
 
