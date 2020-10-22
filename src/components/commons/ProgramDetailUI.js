@@ -14,7 +14,7 @@ import EnrollmentStore from '../stores/EnrollmentStore';
 import ProgramDescription from './ProgramDescription';
 import EnrollmentModal from './EnrollmentModal';
 import Milestones from '../guide/Milestones';
-
+import AboutMentor from '../guide/AboutMentor';
 
 import { cardHeaderStyle, pageHeaderStyle, pageTitle } from '../util/Style';
 
@@ -156,6 +156,8 @@ class ProgramDetailUI extends Component {
 
                     {this.getTrailer(program, change)}
 
+                    <ProgramDescription program={program} programStore={this.store} />
+
                     <Card
                         headStyle={cardHeaderStyle}
                         style={{ borderRadius: "12px", marginTop: "10px" }}
@@ -165,7 +167,7 @@ class ProgramDetailUI extends Component {
                         <Paragraph ><PhoneOutlined /> (91)99999 99999</Paragraph>
                     </Card>
 
-                    <ProgramDescription program={program} programStore={this.store} />
+                    <AboutMentor program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy}/>
 
                     <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
 
