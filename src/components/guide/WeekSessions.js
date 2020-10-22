@@ -33,14 +33,13 @@ class WeekSessions extends Component {
         this.visibleDate = null;
         this.refTime = null;
         this.currentDisplayTime = null;
-
     }
 
 
     componentDidMount() {
         this.sessionGrid = new SessionGrid(this.container,this.requestData);
         window.addEventListener("resize", this.sessionGrid.handleWindowResize);
-        this.changeDates();
+        //this.changeDates();
     }
 
     requestData= () => {
@@ -74,14 +73,12 @@ class WeekSessions extends Component {
         this.currentDisplayDate = moment(this.currentDisplayDate).add(1,'days');
         this.sessionData = await this.store.buildWeeklyRoster(this.currentDisplayDate);
         this.sessionGrid.updateEventMatrixWithDate(this.sessionData, this.currentDisplayDate, this.currentDisplayTime);
-
     }
 
     decreaseDate = async() =>{
         this.currentDisplayDate = moment(this.currentDisplayDate).subtract(1,'days');
         this.sessionData = await this.store.buildWeeklyRoster(this.currentDisplayDate);
         this.sessionGrid.updateEventMatrixWithDate(this.sessionData, this.currentDisplayDate, this.currentDisplayTime);
-
     }
 
     testButton = () => {
