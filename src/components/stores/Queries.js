@@ -166,6 +166,8 @@ export const eventsQuery = `query ($criteria: EventCriteria!) {
         duration,
         scheduleStart,
         scheduleEnd,
+        actualStart,
+        actualEnd,
         status,
         isClosed,
         closingNotes,
