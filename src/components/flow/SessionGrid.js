@@ -201,7 +201,7 @@ export default class SessionGrid {
             var group = new THREE.Group();
             group.add(time);
             group.position.copy(front.position.clone());
-            group.position.x = group.position.x-0.8;
+            group.position.x = group.position.x - 0.8;
             group.position.y = group.position.y - 0.3;
             group.position.z = group.position.z + 0.2;
 
@@ -374,53 +374,62 @@ export default class SessionGrid {
             x = x + unitLength;
         }
 
-        this.updateEventMatrix();
+        this.setEventMatrix();
+        this.setTime();
 
         this.render();
     }
+    
+    setTime = () => {
+        time = moment();
+        var timeInHrs = parseInt(time.format('HH'));
+        if (timeInHrs >= 19) {
+            var diff = timeInHrs - 19;
+            time.subtract(diff, 'hours');
+        }
+    }
 
     updateTime = (timeStart) => {
-      this.times.length = 0;
-      var time;
-      if(timeStart){
+        this.times.length = 0;
+        var time;
+        if (timeStart) {
+            time = moment(timeStart);
+        }
+        else {
+            time = moment();
+        }
+       
+        var timeInHrs = parseInt(time.format('HH'));
+        if (timeInHrs >= 19) {
+            var diff = timeInHrs - 19;
+            time.subtract(diff, 'hours');
+        }
 
-        time = moment(timeStart);
+        for (var i = 0; i < 6; i++) {
 
-      }
-      else{
+            var newTime = moment(time).add(i + 1, 'hours')
+            this.times[i] = (newTime.format('hh') + ":00" + newTime.format('A'));
+        }
 
-          time = moment();
-
-      }
-      var timeInHrs = parseInt(time.format('HH'));
-      if ( timeInHrs >= 19){
-          var diff = timeInHrs - 19;
-          time.subtract(diff, 'hours');
-      }
-      for(var i = 0; i < 6; i++){
-
-        var newTime = moment(time).add(i+1, 'hours')
-        this.times[i] = (newTime.format('hh')+":00"+newTime.format('A'));
-      }
-      for (var i = 0; i < 6 ; i++) {
+        for (var i = 0; i < 6; i++) {
             var timeText = this.times[i];
             var time = this.textFactory.build(timeText, 0.3, 0.1, "#fae78f");
             var groupIndex = i;
 
+            var group = this.timeGroup[groupIndex];
+            group.remove(...group.children);
+            group.add(time);
+        }
+
+        //update the other side of the pillar
+        for (var i = 6; i < 12; i++) {
+            var timeText = this.times[i - 6];
+            var time = this.textFactory.build(timeText, 0.3, 0.1, "#fae78f");
+            var groupIndex = i;
 
             var group = this.timeGroup[groupIndex];
             group.remove(...group.children);
             group.add(time);
-       }
-       //update the other side of the pillar
-       for (var i = 6; i < 12 ; i++) {
-             var timeText = this.times[i-6];
-             var time = this.textFactory.build(timeText, 0.3, 0.1, "#fae78f");
-             var groupIndex = i;
-
-             var group = this.timeGroup[groupIndex];
-             group.remove(...group.children);
-             group.add(time);
         }
 
     }
@@ -431,14 +440,12 @@ export default class SessionGrid {
      * We have 9 UI elements, but will always receive 7 days.
      *
      */
-    updateEventMatrix = () => {
+    setEventMatrix = () => {
 
-         var startValue = -1;
-         for(var i = 0; i < 7; i++){
-           this.dates[i] = (moment().add(startValue + i, 'days'));
-         }
-
-        this.updateTime();
+        var startValue = -1;
+        for (var i = 0; i < 7; i++) {
+            this.dates[i] = (moment().add(startValue + i, 'days'));
+        }
 
         for (var i = 0; i < this.dates.length; i++) {
             var dateText = this.dates[i].format('D');
@@ -465,7 +472,7 @@ export default class SessionGrid {
         for (var i = 0; i < numberOfDays; i++) {
             for (var j = 0; j < unitSize; j++) {
                 var textureKey = "fgrid_" + i + "_" + j;
-                var texture = this.buildSessionTexture(textureKey, ["Harini", "Raja", "Line-34-00-abcdefhg", "Savithri"], i);
+                var texture = this.buildSessionTexture(textureKey, ["", "", "", ""], i);
                 var material = this.eventMaterialMatrix.get(textureKey);
                 material.map = texture;
             }
@@ -476,16 +483,16 @@ export default class SessionGrid {
 
     updateEventMatrixWithDate = (result, dateStart, timeStart) => {
 
-         var startValue = -1;
-         for(var i = 0; i < 7; i++){
-           this.dates[i] = (moment(dateStart).add(startValue + i, 'days'));
-         }
+        var startValue = -1;
+        for (var i = 0; i < 7; i++) {
+            this.dates[i] = (moment(dateStart).add(startValue + i, 'days'));
+        }
 
         this.updateTime(timeStart);
 
         var timeOffset = parseInt(timeStart.format("HH"));
-        if(timeOffset >= 18){
-             timeOffset = 18;
+        if (timeOffset >= 18) {
+            timeOffset = 18;
         }
         for (var i = 0; i < this.dates.length; i++) {
             var dateText = this.dates[i].format('D');
@@ -510,50 +517,50 @@ export default class SessionGrid {
         }
 
 
-         for (var i = 0; i < numberOfDays; i++) {
-             var day = moment(dateStart).add(startValue + i, 'days').format("YYYY-MM-DD");
-             for (var j = 0; j < 6; j++) {
-                 var textureKey = "fgrid_" + i + "_" + j;
-                 var text0Text = "", text1Text ="", text2Text ="", text3Text="";
+        for (var i = 0; i < numberOfDays; i++) {
+            var day = moment(dateStart).add(startValue + i, 'days').format("YYYY-MM-DD");
+            for (var j = 0; j < 6; j++) {
+                var textureKey = "fgrid_" + i + "_" + j;
+                var text0Text = "", text1Text = "", text2Text = "", text3Text = "";
 
-                 var text0 = result.roster.get(j + 1 + timeOffset).get(day).get(0);
-                 var text1 = result.roster.get(j + 1 + timeOffset).get(day).get(15);
-                 var text2 = result.roster.get(j + 1 + timeOffset).get(day).get(30);
-                 var text3 = result.roster.get(j + 1 + timeOffset).get(day).get(45);
+                var text0 = result.roster.get(j + 1 + timeOffset).get(day).get(0);
+                var text1 = result.roster.get(j + 1 + timeOffset).get(day).get(15);
+                var text2 = result.roster.get(j + 1 + timeOffset).get(day).get(30);
+                var text3 = result.roster.get(j + 1 + timeOffset).get(day).get(45);
 
-                 var text0Keys = text0.keys();
-                 var text1Keys = text1.keys();
-                 var text2Keys = text2.keys();
-                 var text3Keys = text3.keys();
-                 //prepare text for 1st row
-                 for(var i0 = 0; i0 < text0.size; i0++){
-                     var textDisplay = text0.get(text0Keys.next().value).name;
-                     text0Text = text0Text + " :::" + textDisplay;
-                 }
-                 //prepare text for 2nd row
-                 for(var i1 = 0; i1 < text1.size; i1++){
-                     var textDisplay = text1.get(text1Keys.next().value).name;
-                     text1Text = text1Text + " :::" + textDisplay;
-                 }
+                var text0Keys = text0.keys();
+                var text1Keys = text1.keys();
+                var text2Keys = text2.keys();
+                var text3Keys = text3.keys();
+                //prepare text for 1st row
+                for (var i0 = 0; i0 < text0.size; i0++) {
+                    var textDisplay = text0.get(text0Keys.next().value).name;
+                    text0Text = text0Text + " :::" + textDisplay;
+                }
+                //prepare text for 2nd row
+                for (var i1 = 0; i1 < text1.size; i1++) {
+                    var textDisplay = text1.get(text1Keys.next().value).name;
+                    text1Text = text1Text + " :::" + textDisplay;
+                }
 
-                 //prepare text for 3rd row
-                 for(var i2 = 0; i2 < text2.size; i2++){
-                     var textDisplay = text2.get(text2Keys.next().value).name;
-                     text2Text = text2Text + " :::" + textDisplay;
-                 }
-                 //prepare text for 4th row
-                 for(var i3 = 0; i3 < text3.size; i3++){
-                     var textDisplay = text3.get(text3Keys.next().value).name;
-                     text3Text = text3Text + " :::" + textDisplay;
-                 }
+                //prepare text for 3rd row
+                for (var i2 = 0; i2 < text2.size; i2++) {
+                    var textDisplay = text2.get(text2Keys.next().value).name;
+                    text2Text = text2Text + " :::" + textDisplay;
+                }
+                //prepare text for 4th row
+                for (var i3 = 0; i3 < text3.size; i3++) {
+                    var textDisplay = text3.get(text3Keys.next().value).name;
+                    text3Text = text3Text + " :::" + textDisplay;
+                }
 
                 var texture = this.buildSessionTexture(textureKey, [text0Text, text1Text, text2Text, text3Text], i);
                 var material = this.eventMaterialMatrix.get(textureKey);
                 material.map = texture;
-             }
-         }
+            }
+        }
 
-         this.render();
+        this.render();
     }
 
 

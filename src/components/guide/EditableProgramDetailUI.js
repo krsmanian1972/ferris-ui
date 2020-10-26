@@ -11,6 +11,7 @@ import ProgramStore from '../stores/ProgramStore';
 import ProgramDescription from './EditableProgramDescription';
 import ActivationModal from './ActivationModal';
 import Milestones from './Milestones';
+import AboutMentor from './AboutMentor';
 import EnrollmentList from './EnrollmentList';
 import Trailer from './Trailer';
 
@@ -203,6 +204,8 @@ class EditableProgramDetailUI extends Component {
 
                     <Trailer program_id={program.id} canEdit={this.store.canEdit} />
 
+                    <ProgramDescription program={program} programStore={this.store} />
+
                     <Card
                         headStyle={cardHeaderStyle}
                         style={{ borderRadius: "12px", marginTop: "10px" }}
@@ -212,7 +215,7 @@ class EditableProgramDetailUI extends Component {
                         <Paragraph ><PhoneOutlined /> (91)99999 99999</Paragraph>
                     </Card>
 
-                    <ProgramDescription program={program} programStore={this.store} />
+                    <AboutMentor program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy}/>
 
                     <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
 

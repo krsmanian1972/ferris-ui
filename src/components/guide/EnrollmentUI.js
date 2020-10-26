@@ -42,11 +42,11 @@ class EnrollmentUI extends Component {
     countTag = () => {
         const store = this.memberListStore
         if (store.isDone) {
-            return <Tag color="#108ee9">{store.rowCount} Members</Tag>
+            return <Tag key="count" color="#108ee9">{store.rowCount} Members</Tag>
         }
 
         if (store.isError) {
-            return <Tag color="red">...</Tag>
+            return <Tag key="count" color="red">...</Tag>
         }
     }
 

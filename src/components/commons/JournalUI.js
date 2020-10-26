@@ -4,6 +4,7 @@ import { PageHeader, Typography, Tabs,Tag } from 'antd';
 
 import GoldenTemplate from '../guide/GoldenTemplate';
 import ProgramSessions from './ProgramSessions';
+import SessionReport from './SessionReport';
 import NoteMatrix from './NoteMatrix';
 import BoardMatrix from './BoardMatrix';
 
@@ -30,7 +31,7 @@ class JournalUI extends Component {
     showPeople = () => {
         const people = `${this.journalContext.coachName}::${this.journalContext.memberName}`;
         return (
-            <Tag color="rgb(69,49,28)">{people}</Tag>
+            <Tag key="people" color="rgb(69,49,28)">{people}</Tag>
         )
     }
 
@@ -52,11 +53,15 @@ class JournalUI extends Component {
                         <ProgramSessions programId={this.journalContext.programId} userId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} showSessionDetail={this.showSessionDetail} />
                     </TabPane>
 
-                    <TabPane tab="Notes" key="3">
+                    <TabPane tab="Report" key="3">
+                        <SessionReport programId={this.journalContext.programId} userId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} showSessionDetail={this.showSessionDetail} />
+                    </TabPane>
+
+                    <TabPane tab="Notes" key="4">
                         <NoteMatrix key="note_matrix" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
                     </TabPane>
 
-                    <TabPane tab="Boards" key="4">
+                    <TabPane tab="Boards" key="5">
                         <p>Please use the session to access the boards.</p>
                         <p>We are working on offering the consolidated boards.</p>
                         <BoardMatrix key="journal_board" programId={this.journalContext.programId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
