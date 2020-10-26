@@ -62,8 +62,6 @@ class JournalUI extends Component {
                     </TabPane>
 
                     <TabPane tab="Boards" key="5">
-                        <p>Please use the session to access the boards.</p>
-                        <p>We are working on offering the consolidated boards.</p>
                         <BoardMatrix key="journal_board" programId={this.journalContext.programId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
                     </TabPane>
                 </Tabs>
