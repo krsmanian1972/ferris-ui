@@ -5,6 +5,7 @@ import { PageHeader, Typography, Tabs,Tag } from 'antd';
 import GoldenTemplate from '../guide/GoldenTemplate';
 import ProgramSessions from './ProgramSessions';
 import NoteMatrix from './NoteMatrix';
+import BoardMatrix from './BoardMatrix';
 
 import { pageHeaderStyle, pageTitle } from '../util/Style';
 
@@ -58,6 +59,7 @@ class JournalUI extends Component {
                     <TabPane tab="Boards" key="4">
                         <p>Please use the session to access the boards.</p>
                         <p>We are working on offering the consolidated boards.</p>
+                        <BoardMatrix key="journal_board" programId={this.journalContext.programId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
                     </TabPane>
                 </Tabs>
 
