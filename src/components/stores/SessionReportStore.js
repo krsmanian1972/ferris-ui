@@ -135,7 +135,10 @@ export default class SessionReportStore {
 
         for (var i = 0; i < this.events.length; i++) {
 
-            var session = this.events[i].session;
+            const event = this.events[i];
+
+            var session = event.session;
+            var program = event.program;
 
             var result = this.preferredDate(session.scheduleStart, session.actualStart);
             var duration = this.calcActualDuration(session);
@@ -145,6 +148,8 @@ export default class SessionReportStore {
             rowData.id = session.id;
             rowData.date = result.dt;
             rowData.time = result.hm;
+            rowData.programName = program.name;
+            rowData.people = session.people;
             rowData.sessionName = session.name;
             rowData.status = session.status;
             rowData.plannedDuration = session.duration;
@@ -165,25 +170,53 @@ export default class SessionReportStore {
     }
 
     /**
+     * If ProgramId does not present let us request all the events
+     * for the user.
+     */
+    getFilterCriteria = (programId,userId) => {
+
+        const startDt = moment(this.startTime).format('YYYY-MM-DD');
+        const endDt = moment(this.endTime).format('YYYY-MM-DD');
+        
+        let userFuzzyId = userId;
+
+        if (!userFuzzyId) {
+            userFuzzyId = this.apiProxy.getUserFuzzyId();
+        }
+  
+        if (programId && programId.length > 1) {
+            const variables = {
+                criteria: {
+                    userId: userFuzzyId,
+                    programId: programId,
+                    startDate: startDt,
+                    endDate: endDt,
+                }
+            }
+            return variables;
+        }
+
+        const variables = {
+            criteria: {
+                userId: userFuzzyId,
+                startDate: startDt,
+                endDate: endDt,
+            }
+        }
+        return variables;
+    }
+    
+    /**
     * Talk to ferris to fetch events matching the given criteria.
+    * If we know the programId and the UserId together.
     */
     fetchEvents = async (programId, userId) => {
 
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
-        const startDt = moment(this.startTime).format('YYYY-MM-DD');
-        const endDt = moment(this.endTime).format('YYYY-MM-DD');
-
-        const variables = {
-            criteria: {
-                userId: userId,
-                programId: programId,
-                startDate: startDt,
-                endDate: endDt,
-            }
-        }
-
+        const variables = this.getFilterCriteria(programId,userId)
+    
         try {
             const response = await this.apiProxy.query(apiHost, eventsQuery, variables);
             const data = await response.json();

@@ -16,6 +16,7 @@ import EditableProgramDetailUI from './guide/EditableProgramDetailUI';
 import SessionDetailUI from './guide/SessionDetailUI';
 import HomeUI from './guide/HomeUI';
 import EnrollmentUI from './guide/EnrollmentUI';
+import UserEventsUI from './commons/UserEventsUI';
 import Broadcast from './guide/Broadcast';
 import WeekSessions from './guide/WeekSessions';
 import JournalUI from './commons/JournalUI';
@@ -37,6 +38,9 @@ class SelectedComponent extends Component {
             }
             case 'enrollments': {
                 return <EnrollmentUI />
+            }
+            case 'userEvents': {
+                return <UserEventsUI />
             }
             case 'journal' : {
                 return <JournalUI params={currentComponent.params}/>

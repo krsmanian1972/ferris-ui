@@ -1,16 +1,13 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { PageHeader, Typography, Collapse, Tag } from 'antd';
+import { PageHeader, Tag } from 'antd';
 
 import MemberListStore from '../stores/MemberListStore';
 
 import MemberList from './MemberList';
 
 import { pageHeaderStyle, pageTitle } from '../util/Style';
-
-const { Title } = Typography;
-const { Panel } = Collapse;
 
 @inject("appStore")
 @observer

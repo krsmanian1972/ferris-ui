@@ -51,6 +51,11 @@ class HomeUI extends Component {
         this.props.appStore.currentComponent = { label: "Enrollments", key: "enrollments", params: params };
     }
 
+    showUserEvents = () => {
+        const params = { event: {}, parentKey: "home" };
+        this.props.appStore.currentComponent = { label: "UserEvents", key: "userEvents", params: params };
+    }
+
     showWeeklySchedule = () => {
         const params = { event: {}, parentKey: "home" };
         this.props.appStore.currentComponent = { label: "Weekly", key: "weekly", params: params };
@@ -76,6 +81,16 @@ class HomeUI extends Component {
         }
     }
 
+    eventsButton = () => {
+        if (this.props.appStore.isCoach) {
+            return (
+                <Tooltip key="ev_tp" title="All your events">
+                    <Button type="primary" icon={<CalendarOutlined />} onClick={this.showUserEvents}>Events</Button>
+                </Tooltip>
+            )
+        }
+    }
+
     weeklySchedule = () => {
         return (
             <Tooltip key="week_tip" title="The weekly view of schedule.">
@@ -93,6 +108,7 @@ class HomeUI extends Component {
                     extra={[
                         this.newScheduleButton(),
                         this.membersButton(),
+                        this.eventsButton(),
                     ]}>
                     <TodaySessions sessionListStore={this.sessionListStore} sessionStore={this.sessionStore} showSessionDetail={this.showSessionDetail} />
                 </PageHeader>

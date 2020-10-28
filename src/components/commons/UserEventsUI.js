@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { observer } from 'mobx-react';
+import { inject, observer } from 'mobx-react';
 import moment from 'moment';
 
-import { Card, Button, Typography, Tag, Table, Space, Tooltip } from 'antd';
+import { PageHeader, Button, Typography, Tag, Table, Space, Tooltip } from 'antd';
 import { FilterOutlined, ArrowRightOutlined } from '@ant-design/icons';
-import { cardHeaderStyle } from '../util/Style';
+import { pageHeaderStyle } from '../util/Style';
 
 import SessionReportStore from '../stores/SessionReportStore';
 import SessionFilterDrawer from './SessionFilterDrawer';
@@ -30,13 +30,13 @@ const status_color = {
     "PLANNED": "blue"
 };
 
+@inject("appStore")
 @observer
-class SessionReport extends Component {
-
+class UserEventsUI extends Component {
 
     constructor(props) {
         super(props);
-        this.store = new SessionReportStore({ apiProxy: props.apiProxy });
+        this.store = new SessionReportStore({ apiProxy: props.appStore.apiProxy });
 
         this.state = {
             filteredInfo: null,
@@ -45,7 +45,7 @@ class SessionReport extends Component {
     }
 
     componentDidMount() {
-        this.store.generateDefaultReport(this.props.programId, this.props.userId);
+        this.store.generateDefaultReport();
     }
 
 
@@ -56,9 +56,14 @@ class SessionReport extends Component {
         });
     };
 
+    showSessionDetail = (event) => {
+        const params = { event: event, parentKey: "userEvents" };
+        this.props.appStore.currentComponent = { label: "Session Detail", key: "sessionDetail", params: params };
+    }
+
     onRowSelected = (record) => {
         const event = this.store.eventAt(record.key);
-        this.props.showSessionDetail(event);
+        this.showSessionDetail(event);
     }
 
     displayPeriod = () => {
@@ -129,7 +134,7 @@ class SessionReport extends Component {
                 title: 'Date',
                 dataIndex: 'date',
                 key: 'date',
-                width: 50,
+                width: 75,
                 fixed: 'left',
                 sorter: (a, b) => moment(a.date, DATE_PATTERN).unix() - moment(b.date, DATE_PATTERN).unix(),
                 sortOrder: sortedInfo.columnKey === 'date' && sortedInfo.order,
@@ -139,6 +144,20 @@ class SessionReport extends Component {
                 dataIndex: 'time',
                 key: 'time',
                 width: 50,
+                fixed: 'left',
+            },
+            {
+                title: 'Program',
+                dataIndex: 'programName',
+                key: 'time',
+                width: 100,
+                fixed: 'left',
+            },
+            {
+                title: 'People',
+                dataIndex: 'people',
+                key: 'time',
+                width: 100,
                 fixed: 'left',
             },
             {
@@ -165,14 +184,14 @@ class SessionReport extends Component {
                         dataIndex: 'plannedDuration',
                         key: 'planned',
                         width: 50,
-                        align: 'right'
+                        align: 'right',
                     },
                     {
                         title: 'Actual',
                         dataIndex: 'actualDuration',
                         key: 'actual',
                         width: 50,
-                        align: 'right'
+                        align: 'right',
                     },
                 ]
             },
@@ -199,17 +218,17 @@ class SessionReport extends Component {
 
         return (
             <>
-                <Card
-                    headStyle={cardHeaderStyle}
-                    style={{ borderRadius: "12px" }}
+                <PageHeader
+                    style={pageHeaderStyle}
                     extra={this.getDateFilter()}
-                    title={<Title level={4}>Sessions &nbsp;{this.countTag()}</Title>}>
-                    <Table bordered size="middle" columns={columns} dataSource={data} onChange={this.handleChange} pagination={{ pageSize: 5 }} />
-                </Card>
-                <SessionFilterDrawer programId={this.props.programId} userId={this.props.userId} store={this.store} />
+                    title={<Title level={4}>Your Events &nbsp;{this.countTag()}</Title>}>
+                    <Table bordered size="middle" columns={columns} dataSource={data} onChange={this.handleChange} pagination={{ pageSize: 6 }} />
+                </PageHeader>
+
+                <SessionFilterDrawer store={this.store} />
             </>
         )
     }
 }
 
-export default SessionReport
+export default UserEventsUI

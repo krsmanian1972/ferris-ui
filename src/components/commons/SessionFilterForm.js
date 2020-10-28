@@ -87,7 +87,7 @@ class SessionFilterForm extends Component {
                 </Form.Item>
 
                 <Form.Item>
-                    <Button type="primary" disabled={store.isLoading} htmlType="submit" >Generate Report</Button>
+                    <Button type="primary" disabled={store.isLoading} htmlType="submit" >Apply Parameters</Button>
                 </Form.Item>
             </Form>
         );
