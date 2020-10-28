@@ -82,13 +82,11 @@ class HomeUI extends Component {
     }
 
     eventsButton = () => {
-        if (this.props.appStore.isCoach) {
-            return (
-                <Tooltip key="ev_tp" title="All your events">
-                    <Button type="primary" icon={<CalendarOutlined />} onClick={this.showUserEvents}>Events</Button>
-                </Tooltip>
-            )
-        }
+        return (
+            <Tooltip key="ev_tp" title="All your events">
+                <Button type="primary" icon={<CalendarOutlined />} onClick={this.showUserEvents}>Events</Button>
+            </Tooltip>
+        )
     }
 
     weeklySchedule = () => {
