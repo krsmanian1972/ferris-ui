@@ -119,7 +119,7 @@ export default class SessionReportStore {
         if (session.actualEnd && session.actualStart) {
             const startDate = moment(session.actualStart * 1000);
             const endDate = moment(session.actualEnd * 1000);
-            return startDate.diff(endDate, 'minutes');
+            return endDate.diff(startDate, 'minutes');
         }
         return 0
     }
