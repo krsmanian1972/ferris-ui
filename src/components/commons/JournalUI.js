@@ -3,7 +3,6 @@ import { inject, observer } from 'mobx-react';
 import { PageHeader, Typography, Tabs,Tag } from 'antd';
 
 import GoldenTemplate from '../guide/GoldenTemplate';
-import ProgramSessions from './ProgramSessions';
 import SessionReport from './SessionReport';
 import NoteMatrix from './NoteMatrix';
 import BoardMatrix from './BoardMatrix';
@@ -23,7 +22,7 @@ class JournalUI extends Component {
     }
 
     showSessionDetail = (event) => {
-        event.readOnly = true;
+        event.coachId = this.journalContext.coachId;
         const params = { event: event, parentKey: "JournalUI" };
         this.props.appStore.currentComponent = { label: "Session Detail", key: "sessionDetail", params: params };
     }
@@ -50,18 +49,14 @@ class JournalUI extends Component {
                     </TabPane>
 
                     <TabPane tab="Sessions" key="2">
-                        <ProgramSessions programId={this.journalContext.programId} userId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} showSessionDetail={this.showSessionDetail} />
+                        <SessionReport key="sr" programId={this.journalContext.programId} userId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} showSessionDetail={this.showSessionDetail} />
                     </TabPane>
 
-                    <TabPane tab="Report" key="3">
-                        <SessionReport programId={this.journalContext.programId} userId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} showSessionDetail={this.showSessionDetail} />
-                    </TabPane>
-
-                    <TabPane tab="Notes" key="4">
+                    <TabPane tab="Notes" key="3">
                         <NoteMatrix key="note_matrix" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
                     </TabPane>
 
-                    <TabPane tab="Boards" key="5">
+                    <TabPane tab="Boards" key="4">
                         <BoardMatrix key="journal_board" programId={this.journalContext.programId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
                     </TabPane>
                 </Tabs>

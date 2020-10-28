@@ -36,7 +36,6 @@ class HomeUI extends Component {
     }
 
     showSessionDetail = (event) => {
-        event.readOnly=false;
         const params = { event: event, parentKey: "home" };
         this.props.appStore.currentComponent = { label: "Session Detail", key: "sessionDetail", params: params };
     }

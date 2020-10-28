@@ -4,7 +4,6 @@ import { inject, observer } from 'mobx-react';
 import { PageHeader, Typography, Collapse, Tag } from 'antd';
 
 import MemberListStore from '../stores/MemberListStore';
-import SessionListStore from '../stores/SessionListStore';
 
 import MemberList from './MemberList';
 
@@ -28,6 +27,7 @@ class EnrollmentUI extends Component {
             programId: memberItem.program.id,
             programName: memberItem.program.name,
             coachName: memberItem.program.coachName,
+            coachId: memberItem.program.coachId,
             memberName: memberItem.user.name,
             memberId: memberItem.user.id,
             enrollmentId: memberItem.enrollment.id,

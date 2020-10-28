@@ -84,10 +84,11 @@ class ProgramDetailUI extends Component {
         const journalContext = { 
             programId: program.id, 
             programName: program.name, 
-            coachName: coach.name, 
+            coachName: coach.name,
+            coachId: coach.coachId, 
             memberName:"", 
             memberId: memberId,
-            enrollmentId: enrollmentId
+            enrollmentId: enrollmentId,
         };
 
         const params = { journalContext: {...journalContext}, parentKey: "programDetailUI" };

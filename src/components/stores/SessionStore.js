@@ -232,7 +232,16 @@ export default class SessionStore {
         }
     }
 
+    /**
+     * It is possible for us to get an event through the 
+     * enrolled members of a coach. We expect the event object to have
+     * the coachId during such usecases.
+     * Refer EnrollmentUI.
+     */
     get isCoach() {
+        if(this.event && this.event.coachId && this.event.coachId===this.apiProxy.getUserFuzzyId()) {
+            return true;
+        }
         return this.event && this.event.sessionUser && this.event.sessionUser.userType === COACH;
     }
 
@@ -240,17 +249,13 @@ export default class SessionStore {
         return this.isCoach
             && this.event.session
             && !this.event.session.isClosed
-            && !this.event.readOnly
             && (this.event.session.status === PLANNED || this.event.session.status === OVERDUE)
-
     }
 
     get canCancelEvent() {
         return this.isCoach
             && this.event.session
             && !this.event.session.isClosed
-            && !this.event.readOnly
-
     }
 
     get canCompleteEvent() {
@@ -262,15 +267,10 @@ export default class SessionStore {
     get canBroadcast() {
         return this.event.session
             && !this.event.session.isClosed
-            && !this.event.readOnly
             && (this.event.session.status === READY || this.event.session.status === PROGRESS)
     }
 
     get broadcastHelp() {
-
-        if(this.event.readOnly===true) {
-            return READONLY_LAUNCH_HELP;
-        }
 
         if (this.event && this.event.session && (this.event.session.status === PLANNED || this.event.session.status === OVERDUE)) {
             if (this.isCoach) {

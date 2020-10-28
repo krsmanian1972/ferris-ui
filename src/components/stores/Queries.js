@@ -545,7 +545,8 @@ export const coachMembersQuery= `query ($criteria: CoachCriteria!) {
       program {
         name,
         id,
-        coachName
+        coachName,
+        coachId
       }
     }
     error {

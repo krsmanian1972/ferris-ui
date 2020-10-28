@@ -23,6 +23,9 @@ export default class SessionReportStore {
     events = [];
     tableData = [];
     rowCount = 0;
+    totalActualDuration = 0;
+    totalPlannedDuration = 0;
+
 
     startTimeMsg = {};
     startTime = null;
@@ -127,6 +130,9 @@ export default class SessionReportStore {
     formatReport = () => {
         const table = []
 
+        var totalActual = 0;
+        var totalPlanned = 0;
+
         for (var i = 0; i < this.events.length; i++) {
 
             var session = this.events[i].session;
@@ -136,6 +142,7 @@ export default class SessionReportStore {
 
             var rowData = {};
             rowData.key = i;
+            rowData.id = session.id;
             rowData.date = result.dt;
             rowData.time = result.hm;
             rowData.sessionName = session.name;
@@ -144,12 +151,16 @@ export default class SessionReportStore {
             rowData.actualDuration = duration;
 
             table.push(rowData);
+            totalActual = totalActual+duration;
+            totalPlanned = totalPlanned+session.duration;
         }
 
         this.tableData = table;
         this.rowCount = table.length;
         this.reportStartTime = this.startTime;
         this.reportEndTime = this.endTime;
+        this.totalActualDuration = totalActual;
+        this.totalPlannedDuration = totalPlanned;
         this.showDrawer = false;
     }
 
@@ -191,8 +202,8 @@ export default class SessionReportStore {
      */
     setDefaultPeriod = () => {
 
-        const start = moment().subtract(30, "days");
-        const end = moment();
+        const start = moment().subtract(15, 'days');
+        const end = moment().add(15, 'days');
 
         this.startTimeMsg = EMPTY_MESSAGE;
         this.startTime = moment(start).startOf('day')
@@ -252,6 +263,15 @@ export default class SessionReportStore {
         }
     }
 
+    /**
+     * As we are exposing a decorated, tableData, we need to
+     * offer the actual event at the row index. 
+     * @param {*} index 
+     */
+    eventAt = (index) => {
+        return this.events[index];
+    }
+
 }
 
 decorate(SessionReportStore, {
@@ -261,6 +281,8 @@ decorate(SessionReportStore, {
     change: observable,
     reportStartTime: observable,
     reportEndTime: observable,
+    totalActualDuration: observable,
+    totalPlannedDuration: observable,
     showDrawer: observable,
 
     isLoading: computed,
@@ -274,4 +296,5 @@ decorate(SessionReportStore, {
     generateReport: action,
     validateStartDate: action,
     validateEndDate: action,
+    eventAt: action,
 });

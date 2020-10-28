@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 
 import moment from 'moment';
 
-import { DatePicker, Button, Form, notification,message } from 'antd';
+import { DatePicker, Button, Form, notification, message } from 'antd';
 
 const failureNotification = () => {
     const args = {
@@ -16,9 +16,14 @@ const failureNotification = () => {
     notification.open(args);
 };
 
+const layout = {
+    labelCol: { span: 8 },
+    wrapperCol: { span: 16 },
+};
+
 @observer
 class SessionFilterForm extends Component {
-    
+
     formRef = React.createRef();
 
     validateStartDate = (date) => {
@@ -34,13 +39,13 @@ class SessionFilterForm extends Component {
         const localeStart = store.startTime;
         const localeEnd = store.endTime;
 
-        this.formRef.current && this.formRef.current.setFieldsValue({startTime: localeStart, endTime: localeEnd});
-        store.change=moment();
+        this.formRef.current && this.formRef.current.setFieldsValue({ startTime: localeStart, endTime: localeEnd });
+        store.change = moment();
     }
 
     onFinish = async (values) => {
         const store = this.props.store;
-        await store.generateReport(this.props.programId,this.props.userId,values);
+        await store.generateReport(this.props.programId, this.props.userId, values);
 
         if (store.isError) {
             failureNotification();
@@ -59,7 +64,7 @@ class SessionFilterForm extends Component {
         const change = store.change;
 
         return (
-            <Form layout="vertical" ref={this.formRef} onFinish={this.onFinish} >
+            <Form {...layout} ref={this.formRef} onFinish={this.onFinish} >
 
                 <Form.Item
                     name="startTime"
@@ -68,7 +73,7 @@ class SessionFilterForm extends Component {
                     validateStatus={startTimeMsg.status}
                     help={startTimeMsg.help}>
 
-                    <DatePicker format="DD-MMM-YYYY" onChange={this.validateStartDate}/>
+                    <DatePicker format="DD-MMM-YYYY" onChange={this.validateStartDate} />
                 </Form.Item>
 
                 <Form.Item
@@ -78,7 +83,7 @@ class SessionFilterForm extends Component {
                     validateStatus={endTimeMsg.status}
                     help={endTimeMsg.help}>
 
-                    <DatePicker format="DD-MMM-YYYY" onChange={this.validateEndDate}/>
+                    <DatePicker format="DD-MMM-YYYY" onChange={this.validateEndDate} />
                 </Form.Item>
 
                 <Form.Item>
