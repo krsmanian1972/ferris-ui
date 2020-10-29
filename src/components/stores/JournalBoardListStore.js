@@ -1,6 +1,6 @@
 import { decorate, observable, computed, action } from 'mobx';
 import { apiHost } from './APIEndpoints';
-import { notesQuery,enrollmentNotesQuery,sessionUsersQuery } from './Queries'
+import { notesQuery, enrollmentNotesQuery, sessionUsersQuery, getBoardsQuery } from './Queries'
 import { isBlank } from './Util';
 import SessionListStore from './SessionListStore'
 import SessionStore from './SessionStore'
@@ -21,12 +21,9 @@ export default class JournalBoardListStore {
     boards = [];
     rowCount = 0;
     people = [];
+    boardResults = [];
     constructor(props) {
         this.apiProxy = props.apiProxy;
-        this.sessionListStore = new SessionListStore({ apiProxy: props.apiProxy });
-        this.sessionStore = new SessionStore({ apiProxy: props.apiProxy });
-        console.log("SessionListStore called");
-
     }
 
     get isLoading() {
@@ -41,31 +38,37 @@ export default class JournalBoardListStore {
         return this.state === ERROR;
     }
 
-    loadPeople = async (event) => {
-
+    fetchBoardList = async(programId, userId) => {
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
-
+        console.log("ProgramID", programId)
         const variables = {
             criteria: {
-                id: event.session.id,
+                programId: programId,
+                userId: userId,
             }
         }
-
         try {
-            const response = await this.apiProxy.query(apiHost, sessionUsersQuery, variables);
+            const response = await this.apiProxy.query(apiHost, getBoardsQuery, variables);
             const data = await response.json();
+            console.log(data)
+            this.boards = data.data.getBoards.boards;
+            this.boardResults = [];
+            console.log("Board Length", this.boards.length)
+            for (var i = 0; i < this.boards.length; i++){
+                 console.log(i)
+                  for(var j = 0; j < this.boards[i].urls.length; j++){
+                    console.log(j)
+                    this.boardResults.push({userSessionId: this.boards[i].sessionUser.id,
+                      sessionName: this.boards[i].session.name, url:this.boards[i].urls[j],
+                      userType: this.boards[i].sessionUser.userType,
+                    });
+                  }
+            }
 
-            const users = data.data.getSessionUsers.users;
-            var people = {}
-            if (users[0].sessionUser.userType === COACH) {
-                people = { coach: users[0], member: users[1], event: event }
-            }
-            else {
-                people = { coach: users[1], member: users[0], event: event }
-            }
-            this.people.push(people);
+            console.log("This.boards on store", toJS(this.boards));
             this.state = DONE;
+
         }
 
         catch (e) {
@@ -73,32 +76,7 @@ export default class JournalBoardListStore {
             //this.message = LOADING_ERROR;
             console.log(e);
         }
-    }
 
-    processEvent = async (event, date) => {
-         await this.loadPeople(event);
-
-    }
-    /**
-     * To fetch all the notes of a particular Enrollment
-     */
-    fetchSessionUserIdList = async (memberId, programId) => {
-        this.state = PENDING;
-        this.message = EMPTY_MESSAGE;
-        await this.sessionListStore.fetchProgramSessions(programId, memberId);
-        console.log(this.sessionListStore.rowCount);
-
-        var sessions = (this.sessionListStore.sessions);
-
-        for (let [date, events] of sessions) {
-           console.log(toJS(events));
-           events.map((event, index) =>
-              this.processEvent(event, index)
-           );
-           // for (let [event, index] of events) {
-           //      this.processEvent(event, index);
-           // }
-        }
 
     }
 }
@@ -108,13 +86,11 @@ decorate(JournalBoardListStore, {
     message: observable,
 
     boards: observable,
+    boardResults:observable,
     rowCount: observable,
-    people: observable,
     isLoading: computed,
     isError: computed,
     isDone: computed,
 
-    load: action,
-    append: action,
-    fetchBoards:action
+    fetchBoardList:action
 });

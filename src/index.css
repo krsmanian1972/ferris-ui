@@ -125,6 +125,11 @@ code {
   height:240px;
 }
 
+.miniBoardFrameJournal {
+  text-align: center;
+  height:500px;
+}
+
 .miniBoard {
   background-color: #646464;
   height:100%;
@@ -132,7 +137,7 @@ code {
 
 .activeBoardBG {
   background-color: rgba(100,100,100,0.5);
-  z-index: 1;  
+  z-index: 1;
 }
 
 
@@ -145,7 +150,7 @@ code {
 
 .slot-container {
   display: flex;
-  flex-direction: column;                                                            
+  flex-direction: column;
 }
 
 .slot {
@@ -194,7 +199,7 @@ code {
 }
 
 .slot-title {
-  font-weight: bold; 
+  font-weight: bold;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -254,8 +259,8 @@ code {
 
 .notes-matrix-container {
   display: flex;
-  flex-direction: row;  
-  flex-wrap:wrap;                                                          
+  flex-direction: row;
+  flex-wrap:wrap;
 }
 
 .notes-matrix-item {
@@ -266,12 +271,27 @@ code {
   margin-right:2%;
 }
 
+.board-matrix-item {
+  border:1px solid rgb(216,213,221);
+  min-width:100%;
+  max-width:100%;
+  margin-bottom:2%;
+  margin-right:2%;
+}
+
 .notes-session {
   text-align:left;
   padding-left:5;
   font-size: 10px;
   color:rgb(69,49,28)
 }
+.journal-boards {
+  text-align: left;
+  padding-left:5;
+  font-size: 10px;
+
+}
+
 
 .coach-note {
   text-align:right;

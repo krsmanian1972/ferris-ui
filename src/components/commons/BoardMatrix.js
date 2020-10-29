@@ -11,7 +11,7 @@ import Reader from "../commons/Reader";
 import JournalBoardListStore from "../stores/JournalBoardListStore"
 import BoardList from "../commons/BoardList";
 import { cardHeaderStyle } from '../util/Style';
-
+import MiniBoardJournal from './MiniBoardJournal'
 const { Title } = Typography;
 const DATE_PATTERN = 'DD-MMM-YYYY';
 
@@ -24,7 +24,8 @@ class BoardMatrix extends Component {
     }
 
     componentDidMount() {
-        this.store.fetchSessionUserIdList(this.props.memberId, this.props.programId);
+        //this.store.fetchSessionUserIdList(this.props.memberId, this.props.programId);
+        this.store.fetchBoardList( this.props.programId, this.props.memberId);
     }
 
     countTag = (rowCount) => {
@@ -53,40 +54,42 @@ class BoardMatrix extends Component {
                 <Result status="warning" title={store.message.help} />
             )
         }
-        console.log(toJS(this.store.people));
-        return this.renderMatrix(notes);
+        return this.renderMatrix(this.store.boardResults);
     }
 
 
-    renderMatrix = (peoples) => {
+    renderMatrix = (boards) => {
         return (
             <div className="Board-Matrix-container">
                 {
-                    peoples && peoples.map((people) => {
-                        const key = `board_${people.event.session.id}`;
-                        const key_cb = `board_${people.coach.sessionUser.id}`;
-                        const key_ab = `board_${people.member.sessionUser.id}`;
-                        return (
-                            <div key={key} className="boards-matrix-item">
-                                <p className="board-session">{people.event.session.name}</p>
-                                <BoardList key={key_cb} title="Coach Boards" sessionUserId={people.coach.sessionUser.id} />
-                                <BoardList key={key_ab} title="Actor Boards" sessionUserId={people.member.sessionUser.id} />
-                            </div>
-                        )
-                    })
+                    boards && boards.map((board) => {
+                         const key = `board_${board.userSessionId}`;
+                         const sessionUserId = `board_${board.userSesionId}`;
+                         const urlBoard = board.url.slice(1, -1);
+                         const boardId = urlBoard;
+                         const cn = board.userType === 'coach' ? "coach-note" : "member-note";
+
+                            return (
+                                <div key={key} className="board-matrix-item">
+                                    <p className={cn}>{board.sessionName} {board.userType} {boardId}</p>
+                                    <MiniBoardJournal key={sessionUserId} apiProxy={this.props.apiProxy} boardId={boardId} sessionUserId={board.userSessionId} height={200}/>
+                                </div>
+                            )
+                      }
+                    )
                 }
             </div>
         )
     }
 
     render() {
-      const people = this.store.people;
+      const boards = this.store.boardResults;
       return(
              <Card key="boards"
                  headStyle={cardHeaderStyle}
                  style={{ borderRadius: 12}}
-                 title={<Title level={4}>Board from {people.length} sessions</Title>}>
-                 {this.displayMatrix(people)}
+                 title={<Title level={4}>Board from sessions</Title>}>
+                 {this.displayMatrix(boards)}
              </Card>
 
       )

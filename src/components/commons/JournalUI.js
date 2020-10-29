@@ -5,6 +5,7 @@ import { PageHeader, Typography, Tabs,Tag } from 'antd';
 import GoldenTemplate from '../guide/GoldenTemplate';
 import SessionReport from './SessionReport';
 import NoteMatrix from './NoteMatrix';
+import BoardMatrix from './BoardMatrix';
 
 import { pageHeaderStyle, pageTitle } from '../util/Style';
 
@@ -53,6 +54,10 @@ class JournalUI extends Component {
 
                     <TabPane tab="Notes" key="3">
                         <NoteMatrix key="note_matrix" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
+                    </TabPane>
+
+                    <TabPane tab="Boards" key="4">
+                        <BoardMatrix key="board_matrix" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} programId={this.journalContext.programId}/>
                     </TabPane>
 
                 </Tabs>

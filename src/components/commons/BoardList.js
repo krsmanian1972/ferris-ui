@@ -51,7 +51,7 @@ class BoardList extends Component {
         if(this.store.isError) {
             return <></>
         }
-        
+
         if (boardCount == 0) {
             return <Result icon={<SmileOutlined />}/>
         }
@@ -98,7 +98,7 @@ class BoardList extends Component {
         const boardCount = this.store.boardCount;
 
         return (
-            <Card key="board" 
+            <Card key="board"
                 headStyle={cardHeaderStyle}
                 style={{ borderRadius: 12,marginTop:10 }} title={<Title level={4}>{this.props.title} {this.countTag()}</Title>}>
                 {this.renderSlider(boards, boardCount)}
