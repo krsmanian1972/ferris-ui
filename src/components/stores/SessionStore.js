@@ -4,7 +4,7 @@ import moment from 'moment';
 import { isBlank } from './Util';
 
 import { apiHost } from './APIEndpoints';
-import { createSessionQuery, alterSessionStateQuery, sessionUsersQuery } from './Queries';
+import { createSessionQuery, alterSessionStateQuery, sessionUsersQuery, findSessionQuery } from './Queries';
 
 const INIT = "init";
 const PENDING = 'pending';
@@ -17,7 +17,6 @@ const ERROR_MESSAGE = { status: ERROR, help: "We are very sorry, the service is 
 const LOADING_ERROR = { status: "error", help: "Unable to load the people." };
 const COACH_LAUNCH_HELP = "You may activate this session, as Ready, 5 minutes ahead of the starting time.";
 const ACTOR_LAUNCH_HELP = "Waiting for the coach to activate this session as Ready.";
-const READONLY_LAUNCH_HELP = "This is a journal view of the session. The session detail is read-only. ";
 
 
 const READY = "READY";
@@ -49,6 +48,7 @@ export default class SessionStore {
     event = {};
     people = {};
     change = null;
+    pollStatus = null;
 
     showClosureDrawer = false;
     targetState = "";
@@ -76,6 +76,7 @@ export default class SessionStore {
     get isInvalid() {
         return this.state === INVALID;
     }
+
 
     /**
      * Creating a New Session. 
@@ -239,7 +240,7 @@ export default class SessionStore {
      * Refer EnrollmentUI.
      */
     get isCoach() {
-        if(this.event && this.event.coachId && this.event.coachId===this.apiProxy.getUserFuzzyId()) {
+        if (this.event && this.event.coachId && this.event.coachId === this.apiProxy.getUserFuzzyId()) {
             return true;
         }
         return this.event && this.event.sessionUser && this.event.sessionUser.userType === COACH;
@@ -346,6 +347,56 @@ export default class SessionStore {
         }
     }
 
+    getSessionStatus = async() => {
+        
+        const sessionId = this.event.session.id;
+
+        const variables = {
+            criteria: {
+                id: sessionId,
+            }
+        };
+
+        try {
+            const response = await this.apiProxy.query(apiHost, findSessionQuery, variables);
+            const result = await response.json();
+
+            if (result.data == null) {
+                return { status: null };
+            
+            }
+            return { status: result.data.getSession.status };
+        }
+        catch (e) {
+            return { status: null };
+        }
+    }
+
+    startPolling = async() => {
+
+        if (!this.shouldRefresh()) {
+            return;
+        }
+
+        const result = await this.getSessionStatus();
+        if (!result.status) {
+            return;
+        }
+
+        if (this.event.session.status !== result.status) {
+            this.event.session.status = result.status;
+            this.pollStatus = result.status;
+        }
+      
+        setTimeout(() => this.startPolling(), 5000);
+    }
+
+    shouldRefresh = () => {
+        return this.event.session
+        && !this.isCoach
+        && !this.event.session.isClosed
+        && (this.event.session.status === PLANNED || this.event.session.status === OVERDUE) 
+    }
 }
 
 decorate(SessionStore, {
@@ -391,4 +442,9 @@ decorate(SessionStore, {
     updateSessionProgress: action,
     performClosure: action,
     doAlterSessionState: action,
+
+    pollStatus: observable,
+    startPolling: action,
+    shouldRefresh: action,
+    getSessionStatus: action,
 });

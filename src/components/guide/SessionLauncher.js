@@ -16,6 +16,8 @@ class SessionLauncher extends Component {
 
         this.closeWindowPortal = this.closeWindowPortal.bind(this);
         this.openWindow = this.openWindow.bind(this);
+        
+        props.store.startPolling();
     }
 
     componentDidMount() {
@@ -71,7 +73,7 @@ class SessionLauncher extends Component {
         return "Join Session";
     }
 
-    renderButton = () => {
+    renderButton = (status) => {
         const store = this.props.store;
 
         if (store.canBroadcast) {
@@ -89,9 +91,12 @@ class SessionLauncher extends Component {
     }
 
     render() {
+        
+        const pollStatus = this.props.store.pollStatus;
+
         return (
             <div style={{wordWrap:"break-word",width:"20%"}}>
-                {this.renderButton()}
+                {this.renderButton(pollStatus)}
                 {this.state.showWindowPortal && (
                     this.openWindow()
                 )}

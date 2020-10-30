@@ -13,13 +13,13 @@ export const registrationQuery = `mutation($input: Registration!) {
     id
     email
     name
-    userType
+    userType 
     }
     errors {
       field
       message
     }
-  }
+  } 
 }`
 
 export const resetPasswordQuery = `mutation($input: ResetPasswordRequest!) {
@@ -28,13 +28,13 @@ export const resetPasswordQuery = `mutation($input: ResetPasswordRequest!) {
     id
     email
     name
-    userType
+    userType 
     }
     errors {
       field
       message
     }
-  }
+  } 
 }`
 
 export const programsQuery = `query ($criteria: ProgramCriteria!) {
@@ -59,7 +59,7 @@ export const programsQuery = `query ($criteria: ProgramCriteria!) {
     error {
       message
     }
-  }
+  }   
 }`
 
 
@@ -69,7 +69,7 @@ export const createProgramQuery = `mutation ($input: NewProgramRequest!) {
       field,
       message
     }
-
+   
     program{
       id,
       name
@@ -130,7 +130,7 @@ export const createSessionQuery = `mutation($input: NewSessionRequest!) {
     errors {
       field,
       message
-    }
+    } 
   }
 }`;
 
@@ -292,7 +292,7 @@ export const createObjectiveQuery = `mutation($input: NewObjectiveRequest!) {
     errors {
       field,
       message
-    }
+    } 
   }
 }`;
 
@@ -341,7 +341,7 @@ export const createTaskQuery = `mutation($input: NewTaskRequest!) {
     errors {
       field,
       message
-    }
+    } 
   }
 }`;
 
@@ -373,11 +373,11 @@ export const createObservationQuery = `mutation($input: NewObservationRequest!) 
     errors {
       field,
       message
-    }
+    } 
   }
 }`;
 
-export const updateObservationQuery =`mutation ($input: UpdateObservationRequest!) {
+export const updateObservationQuery = `mutation ($input: UpdateObservationRequest!) {
   updateObservation(updateObservationRequest:$input) {
     observation {
       id
@@ -441,7 +441,7 @@ export const createConstraintQuery = `mutation($input: NewOptionRequest!) {
     errors {
       field,
       message
-    }
+    } 
   }
 }`;
 
@@ -468,13 +468,13 @@ export const createAbstractTaskQuery = `mutation($input: NewAbstractTaskRequest!
       field
       message
     }
-  }
+  } 
 }`;
 
 export const abstractTasksQuery = `query ($criteria: AbstractTaskCriteria!) {
   getAbstractTasks(criteria:$criteria) {
     abstractTasks {
-    	name,
+        name,
     }
   }
 }`;
@@ -529,10 +529,10 @@ export const saveMasterPlanQuery = `mutation($input: UpdateMasterPlanRequset!) {
   }
 }`;
 
-export const coachMembersQuery= `query ($criteria: CoachCriteria!) {
+export const coachMembersQuery = `query ($criteria: CoachCriteria!) {
   getCoachMembers(criteria:$criteria) {
     members {
-    	enrollment {
+        enrollment {
         id,
         isNew,
         createdAt,
@@ -571,4 +571,17 @@ export const getBoardsQuery = `query($criteria: EventCriteria!){
       urls
     }
   }
+}`
+
+export const findSessionQuery = `query ($criteria: SessionCriteria!) {
+  getSession(criteria: $criteria) {
+        id
+        name
+        duration
+        scheduleStart
+        scheduleEnd
+        actualStart
+        actualEnd
+        status
+  } 
 }`

@@ -36,9 +36,13 @@ class MiniBoard extends Component {
     render() {
         const boardKey = `mini-canvas-${this.props.boardId}`;
 
+        var cssKlass = this.props.cssKlass;
+        if (!cssKlass) {
+            cssKlass = "miniBoardFrame"
+        }
         return (
-            <div className="miniBoardFrame">
-                {this.getName()}
+            <div className={cssKlass}>
+                {this.props.cssKlass && this.getName()}
                 <canvas height={screen.height * 0.80} width={screen.width * 0.94} className="miniBoard" key={boardKey} ref={ref => (this.canvas = ref)} />
             </div>
         )
