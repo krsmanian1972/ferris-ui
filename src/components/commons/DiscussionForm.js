@@ -43,11 +43,11 @@ class DiscussionForm extends Component {
                         style={{width:"75%"}}
                         name="description"
                         rules={[{ required: true, message: 'Please type a message to deliver' }]}>
-                        <TextArea placeholder="Your message" autoSize={{ minRows: 3, maxRows: 3 }} />
+                        <TextArea placeholder="Type your message here..." autoSize={{ minRows: 3, maxRows: 3 }} />
                     </Form.Item>
 
                     <Form.Item>
-                        <Button type="primary" disabled={store.isLoading} htmlType="submit" >Send</Button>
+                        <Button style={{marginTop:"33.3%"}} type="primary" disabled={store.isLoading} htmlType="submit" >Send</Button>
                     </Form.Item>
                 </Form>
             </div>

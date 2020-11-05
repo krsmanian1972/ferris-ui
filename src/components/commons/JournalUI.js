@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { PageHeader, Tabs, Tag } from 'antd';
 
-import GoldenTemplate from '../guide/GoldenTemplate';
+import LegacyPlan from '../plan/LegacyPlan';
 import SessionReport from './SessionReport';
 import NoteMatrix from './NoteMatrix';
 import BoardMatrix from './BoardMatrix';
@@ -51,7 +51,7 @@ class JournalUI extends Component {
                 <div className="journal-container">
                     <Tabs tabBarStyle={tabBarStyle} tabPosition="left">
                         <TabPane tab="Plan" key="1">
-                            <GoldenTemplate key="gt" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
+                            <LegacyPlan key="gt" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
                         </TabPane>
 
                         <TabPane tab="Sessions" key="2">
