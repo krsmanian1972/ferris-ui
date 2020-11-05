@@ -1,17 +1,22 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
-import { PageHeader, Typography, Tabs,Tag } from 'antd';
+import { PageHeader, Tabs, Tag } from 'antd';
 
 import GoldenTemplate from '../guide/GoldenTemplate';
 import SessionReport from './SessionReport';
 import NoteMatrix from './NoteMatrix';
 import BoardMatrix from './BoardMatrix';
+import MessageBoard from './MessageBoard';
 
 import { pageHeaderStyle, pageTitle } from '../util/Style';
 
-const { Title } = Typography;
 
 const { TabPane } = Tabs;
+
+const tabBarStyle = {
+    color: "rgb(69,49,28)",
+    fontWeight: "bold",
+}
 
 @inject("appStore")
 @observer
@@ -43,25 +48,30 @@ class JournalUI extends Component {
                 extra={[
                     this.showPeople()
                 ]}>
-                <Tabs type="card">
-                    <TabPane tab="Plan" key="1">
-                        <GoldenTemplate key="gt" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
-                    </TabPane>
+                <div className="journal-container">
+                    <Tabs tabBarStyle={tabBarStyle} tabPosition="left">
+                        <TabPane tab="Plan" key="1">
+                            <GoldenTemplate key="gt" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
+                        </TabPane>
 
-                    <TabPane tab="Sessions" key="2">
-                        <SessionReport key="sr" programId={this.journalContext.programId} userId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} showSessionDetail={this.showSessionDetail} />
-                    </TabPane>
+                        <TabPane tab="Sessions" key="2">
+                            <SessionReport key="sr" programId={this.journalContext.programId} userId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} showSessionDetail={this.showSessionDetail} />
+                        </TabPane>
 
-                    <TabPane tab="Notes" key="3">
-                        <NoteMatrix key="note_matrix" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
-                    </TabPane>
+                        <TabPane tab="Notes" key="3">
+                            <NoteMatrix key="note_matrix" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
+                        </TabPane>
 
-                    <TabPane tab="Boards" key="4">
-                        <BoardMatrix key="board_matrix" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} programId={this.journalContext.programId}/>
-                    </TabPane>
+                        <TabPane tab="Boards" key="4">
+                            <BoardMatrix key="board_matrix" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} programId={this.journalContext.programId} />
+                        </TabPane>
 
-                </Tabs>
+                        <TabPane tab="Messages" key="5">
+                            <MessageBoard key="message" journalContext={this.journalContext} apiProxy={this.props.appStore.apiProxy} />
+                        </TabPane>
 
+                    </Tabs>
+                </div>
             </PageHeader>
         )
     }

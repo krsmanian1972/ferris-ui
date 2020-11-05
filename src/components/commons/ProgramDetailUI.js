@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
 import { Spin, Result, PageHeader, Tooltip, Card, Button, Statistic } from 'antd';
-import { PlusCircleOutlined, MailOutlined, PhoneOutlined, AccountBookOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, MailOutlined, PhoneOutlined, AccountBookOutlined, CompassOutlined } from '@ant-design/icons';
 import { Typography } from 'antd';
 
 import ReactPlayer from 'react-player';
@@ -73,14 +73,37 @@ class ProgramDetailUI extends Component {
         );
     }
 
+    /**
+     * A mmeber can request a session with the coach from this page.
+     * 
+     * The Prerequisite is that the user should be 
+     * enrolled into the program.
+     */
+    getDiscussionButton = () => {
+        if (this.store.isOwner) {
+            return;
+        }
+
+        if (!this.store.isEnrolled) {
+            return;
+        }
+
+        return (
+            <Tooltip key="req_tip" title="Request a session with the coach of this program">
+                <Button key="ses_req" onClick={this.showDiscussionUI} type="primary" icon={<CompassOutlined />}>Discussion</Button>
+            </Tooltip>
+        );
+    }
+
     onEnroll = () => {
         this.enrollmentStore.showEnrollmentModal = true;
     }
 
-    showJournalUI = () => {
+    getJournalContext = () => {
+
         const {program, coach, enrollmentId } = this.store.programModel;
         const memberId = this.props.appStore.apiProxy.getUserFuzzyId();
-
+     
         const journalContext = { 
             programId: program.id, 
             programName: program.name, 
@@ -91,7 +114,22 @@ class ProgramDetailUI extends Component {
             enrollmentId: enrollmentId,
         };
 
-        const params = { journalContext: {...journalContext}, parentKey: "programDetailUI" };
+        return journalContext;
+    }
+
+    showDiscussionUI = () => {
+
+        const context = this.getJournalContext();
+        const params = { journalContext: {...context}, parentKey: "programDetailUI" };
+
+        this.props.appStore.currentComponent = { label: "Discussion", key: "discussion", params: params }; 
+    }
+
+
+    showJournalUI = () => {
+      
+        const context = this.getJournalContext();
+        const params = { journalContext: {...context}, parentKey: "programDetailUI" };
 
         this.props.appStore.currentComponent = { label: "Journal", key: "journal", params: params };
     }
@@ -151,6 +189,7 @@ class ProgramDetailUI extends Component {
                     extra={[
                         this.getEnrollmentButton(),
                         this.getJournalButton(),
+                        this.getDiscussionButton(),
                     ]}>
 
                     {this.getProgramPoster(program, change)}

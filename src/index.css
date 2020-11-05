@@ -360,3 +360,80 @@ code {
   flex-direction: column;
   cursor: pointer;
 }
+
+
+.discussion-container {
+  height:100%;
+  width:100%;
+  flex-direction: column;
+}
+
+.discussion-list {
+  width: 100%;
+  height: 80%;
+  max-height:80%;
+  overflow-y: auto;
+  display:flex;
+  flex-direction: column;
+}
+
+.discussion-form {
+  margin-top: 10px;
+  padding-top: 10px;
+  height: 20%;
+  width: 100%;
+}
+
+
+.chat-item {
+  display:flex;
+  flex-direction: row;
+}
+
+.my-chat {
+  background-color: rgb(59,109,171);
+  color:white;
+  border-radius: 12px;
+  margin:5px;
+  width:100%;
+}
+
+.other-chat {
+  background-color: white;
+  color:black;
+  border-radius: 12px;
+  margin:5px;
+  width:100%;
+}
+
+
+.chat-content {
+  padding-left:8px;
+  padding-top:0px;
+}
+
+.chat-stamp {
+  display:flex;
+  flex-direction: row;
+}
+
+.chat-date {
+  font-size: smaller;
+  padding-top:4px;
+  padding-left:8px;
+  width:50%;
+  color:lightcyan;
+}
+
+.chat-who {
+  font-size: smaller;
+  padding-top:4px;
+  padding-right:4px;
+  text-align: right;
+  width:50%;
+  color:lightcyan;
+}
+
+.journal-container .ant-tabs-tab-active {
+  background: white;
+}

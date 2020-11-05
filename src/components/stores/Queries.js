@@ -571,7 +571,7 @@ export const getBoardsQuery = `query($criteria: EventCriteria!){
       urls
     }
   }
-}`
+}`;
 
 export const findSessionQuery = `query ($criteria: SessionCriteria!) {
   getSession(criteria: $criteria) {
@@ -584,4 +584,31 @@ export const findSessionQuery = `query ($criteria: SessionCriteria!) {
         actualEnd
         status
   } 
-}`
+}`;
+
+export const getDiscussionsQuery = `query ($criteria: DiscussionCriteria!) {
+  getDiscussions(criteria: $criteria) {
+    discussions{
+      description,
+      createdById,
+      createdAt
+    }
+    error{
+      message
+    }
+  }
+}`;
+
+export const createDiscussionQuery = `mutation ($input: NewDiscussionRequest!) {
+  createDiscussion(newDiscussionRequest:$input) {
+    discussion{
+      enrollmentId,
+      description,
+      createdById,
+      createdAt
+    }
+    errors{
+      message
+    }
+  }
+}`;
