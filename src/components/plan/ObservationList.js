@@ -69,8 +69,8 @@ class ObservationList extends Component {
         const key = `obs_${index}`
         return (
             <div key={key}>
-                <Reader value={observation.description} height={350} />
                 {this.renderStat(observation)}
+                <Reader value={observation.description} height={350} />
             </div>
         )
     }
@@ -101,7 +101,7 @@ class ObservationList extends Component {
         return (
             <div style={sliderStyle}>
                 <Button style={{ width: "3%" }} key="back" onClick={this.previous} icon={<LeftOutlined />} shape="circle"></Button>
-                <div style={{ width: "94%" }}>
+                <div style={{marginTop:"1%", width: "94%" }}>
                     <Carousel ref={ref => (this.carousel = ref)} {...settings}>
                         {observations && observations.map((observation, index) => {
                             return (

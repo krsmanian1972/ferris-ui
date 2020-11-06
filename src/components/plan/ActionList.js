@@ -5,34 +5,38 @@ import Moment from 'react-moment';
 import moment from 'moment';
 import 'moment-timezone';
 
-import { Spin, Result, Carousel, Button, Steps, Tooltip, Tag, Space,Statistic } from 'antd';
-import { LeftOutlined, RightOutlined, PlusOutlined, EditOutlined,ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
+import { Card, Typography, Spin, Result, Carousel, Button, Steps, Tooltip, Tag, Space, Statistic } from 'antd';
+import { LeftOutlined, RightOutlined, PlusOutlined, EditOutlined, ArrowDownOutlined, ArrowUpOutlined, CarryOutOutlined } from '@ant-design/icons';
 
+import TaskStore from '../stores/TaskStore';
 import TaskDrawer from '../guide/TaskDrawer';
 import Reader from "../commons/Reader";
 
+import { cardHeaderStyle } from '../util/Style';
+
+const { Title } = Typography;
 const { Step } = Steps;
 const { Countdown } = Statistic;
 
-const contentStyle = { background: "rgb(242,242,242)", width: "100%", marginBottom: "10px" };
-const titleBarStyle = { background: "rgb(59,109,171)", color: "white", display: "flex", flexWrap: "wrap", height: 50, flexDirection: "row", justifyContent: "space-between" };
-const titleStyle = { display: "flex", alignItems: "center", paddingLeft: 10, fontWeight: "bold" };
+const labelStyle = { marginTop: 10, marginBottom: 2, fontWeight: "bold", textAlign: "left",color:"rgb(59,109,171)" };
+const taskStyle = { background: "rgb(242,242,242)", width: "100%", marginBottom: "10px" };
 const controlStyle = { display: "flex", flexWrap: "wrap", flexDirection: "row", alignItems: "center", paddingRight: 10 };
 const sliderStyle = { display: "flex", flexDirection: "row", justifyContent: "center", textAlign: "center", alignItems: "center" };
 
 @observer
-class TaskList extends Component {
+class ActionList extends Component {
 
     index = 0;
 
     constructor(props) {
         super(props);
+        this.store = new TaskStore({ apiProxy: props.apiProxy, enrollmentId: props.enrollmentId, memberId: props.memberId });
+        this.store.fetchTasks();
     }
 
     displayMessage = () => {
-        const store = this.props.taskStore;
 
-        if (store.isLoading) {
+        if (this.store.isLoading) {
             return (
                 <div className="loading-container">
                     <Spin />
@@ -40,9 +44,9 @@ class TaskList extends Component {
             )
         }
 
-        if (store.isError) {
+        if (this.store.isError) {
             return (
-                <Result status="warning" title={store.message.help} />
+                <Result status="warning" title={this.store.message.help} />
             )
         }
 
@@ -59,7 +63,7 @@ class TaskList extends Component {
         const endEl = <Moment format="llll" style={{ fontWeight: "bold" }}>{localeEnd}</Moment>
 
         const createdAt = moment(task.createdAt * 1000).format("DD-MMM-YYYY");
-        const dateEl = <Statistic title="Created On" value={createdAt} valueStyle={{fontSize: "12px", fontWeight: "bold"}}/>
+        const dateEl = <Statistic title="Created On" value={createdAt} valueStyle={{ fontSize: "12px", fontWeight: "bold" }} />
 
         var hoursEl;
 
@@ -71,9 +75,9 @@ class TaskList extends Component {
         }
 
         return (
-            <div className="plan-stat-style">
+            <div className="task-stat">
                 <div style={{ textAlign: "left", width: "30%" }}>{hoursEl}</div>
-                <div style={{ textAlign: "center", width: "50%" }}>
+                <div style={{ textAlign: "center", width: "50%"}}>
                     <Steps progressDot current={1} size="small">
                         <Step title={startEl} description="Start" />
                         <Step title={endEl} description="End" />
@@ -84,14 +88,25 @@ class TaskList extends Component {
         )
     }
 
-    renderTask = (task,index) => {
-        const key = `task_${index}`
+    renderTask = (task, index) => {
+        const key = `action_${index}`
 
         return (
             <div key={key}>
-                <p style={{ fontWeight: "bold" }}>{task.name}</p>
-                <Reader id={task.id} value={task.description} readOnly={true} height={350} />
+                <Title level={5} style={{color:"rgb(59,109,171)", textAlign: "center" }}>{task.name}</Title>
+
                 {this.renderStat(task)}
+
+                <p style={labelStyle}>Suggested Activity</p>
+                <div style={taskStyle}>
+                    <Reader value={task.description} readOnly={true} height={350} />
+                </div>
+
+                <p style={labelStyle}>Response</p>
+                <div style={taskStyle}>
+                    <Reader value={task.description} readOnly={true} height={350} />
+                </div>
+
             </div>
         )
     }
@@ -119,68 +134,63 @@ class TaskList extends Component {
         };
 
         return (
-            <div style={sliderStyle}>
-                <Button key="back" style={{ width: "3%" }} onClick={this.previous} icon={<LeftOutlined />} shape="circle"></Button>
-                <div style={{ width: "94%" }}>
-                    <Carousel ref={ref => (this.carousel = ref)} {...settings}>
-                        {tasks && tasks.map((task,index) => {
-                            return (
-                                this.renderTask(task,index)
-                            )
-                        })}
-                    </Carousel>
+            <div>
+                <div style={sliderStyle}>
+                    <Button key="back" style={{ width: "5%" }} onClick={this.previous} icon={<LeftOutlined />} shape="circle"></Button>
+                    <p style={{width:"90%"}}></p>
+                    <Button key="forward" style={{ width: "5%" }} onClick={this.next} icon={<RightOutlined />} shape="circle"></Button>
                 </div>
-                <Button key="forward" style={{ width: "3%" }} onClick={this.next} icon={<RightOutlined />} shape="circle"></Button>
-            </div>
-        )
-    }
-
-    getTitle = () => {
-        return (
-            <div style={titleStyle}>
-                Onwards&nbsp;{this.countTag()}
+               
+                <Carousel ref={ref => (this.carousel = ref)} {...settings}>
+                    {tasks && tasks.map((task, index) => {
+                        return (
+                            this.renderTask(task, index)
+                        )
+                    })}
+                </Carousel>
+        
             </div>
         )
     }
 
     countTag = () => {
-        const store = this.props.taskStore;
 
-        if (store.isDone) {
-            return <Tag color="#108ee9">{store.rowCount} Total</Tag>
+        if (this.store.isDone) {
+            return <Tag color="#108ee9">{this.store.rowCount} Total</Tag>
         }
 
-        if (store.isError) {
+        if (this.store.isError) {
             return <Tag color="red">...</Tag>
         }
 
-        if (store.isLoading) {
+        if (this.store.isLoading) {
             return <Tag color="blue">...</Tag>
         }
     }
 
     showNewTask = () => {
-        const store = this.props.taskStore;
-        store.setNewTask();
-        store.showDrawer = true;
+        this.store.setNewTask();
+        this.store.showDrawer = true;
     }
 
     showEditTask = () => {
-        const store = this.props.taskStore;
-        const flag = store.asCurrent(this.index);
-        store.showDrawer = flag;
+        const flag = this.store.asCurrent(this.index);
+        this.store.showDrawer = flag;
     }
 
 
     getControls = () => {
 
-        const rowCount = this.props.taskStore.rowCount;
+        const rowCount = this.store.rowCount;
 
         return (
             <div style={controlStyle}>
                 <Space>
-                    <Tooltip key="ed_tip" title="To edit this activity">
+                    <Tooltip key="ed_act_tip" title="To edit the suggested activity">
                         <Button key="edit_task" icon={<EditOutlined />} disabled={rowCount === 0} shape="circle" onClick={() => this.showEditTask()}></Button>
+                    </Tooltip>
+                    <Tooltip key="ed_resp_tip" title="Response to the suggested activity ">
+                        <Button key="edit_resp" icon={<CarryOutOutlined />} disabled={rowCount === 0} shape="circle" onClick={() => this.showEditResponse()}></Button>
                     </Tooltip>
                     <Tooltip key="add_task_tip" title="To Add New Activity">
                         <Button key="add_task" icon={<PlusOutlined />} shape="circle" onClick={() => this.showNewTask()}></Button>
@@ -190,30 +200,24 @@ class TaskList extends Component {
         );
     }
 
-    renderTitle = () => {
-        return (
-            <div style={titleBarStyle}>
-                {this.getTitle()}
-                {this.getControls()}
-            </div>
-        )
-    }
-
     render() {
-        const store = this.props.taskStore;
-        const tasks = store.tasks;
-        const change = store.change;
+        const tasks = this.store.tasks;
+        const change = this.store.change;
+        const rowCount = this.store.rowCount;
 
         return (
-            <div style={contentStyle}>
-                {this.renderTitle()}
-                {this.renderSlider(tasks, store.rowCount)}
+            <Card
+                headStyle={cardHeaderStyle}
+                style={{ borderRadius: "12px" }}
+                extra={this.getControls()}
+                title={<Title level={4}>Actions &nbsp;{this.countTag()}</Title>}>
+                {this.renderSlider(tasks, rowCount)}
                 {this.displayMessage()}
-                <TaskDrawer taskStore={store} />
-            </div>
+                <TaskDrawer taskStore={this.store} />
+            </Card>
         )
     }
 
 }
 
-export default TaskList;
+export default ActionList;

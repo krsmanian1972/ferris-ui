@@ -438,8 +438,20 @@ code {
   background: white;
 }
 
+.task-stat { 
+  display:flex;
+  flex-direction: row;
+  width: "100%";
+  background:rgb(250,231,143);
+  padding: 10px;
+  border-radius: 12px; 
+}
+
 .plan-stat-style { 
   display:flex;
   flex-direction: row;
-  width: "100%"; 
-};
+  width: "100%";
+  background:lightgray;
+  padding: 10px;
+  border-radius: 12px; 
+}

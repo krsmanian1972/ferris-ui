@@ -3,6 +3,7 @@ import { inject, observer } from 'mobx-react';
 import { PageHeader, Tabs, Tag } from 'antd';
 
 import LegacyPlan from '../plan/LegacyPlan';
+import ActionList from '../plan/ActionList';
 import SessionReport from './SessionReport';
 import NoteMatrix from './NoteMatrix';
 import BoardMatrix from './BoardMatrix';
@@ -54,19 +55,23 @@ class JournalUI extends Component {
                             <LegacyPlan key="gt" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
                         </TabPane>
 
-                        <TabPane tab="Sessions" key="2">
+                        <TabPane tab="Actions" key="2">
+                            <ActionList key="tt" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
+                        </TabPane>
+
+                        <TabPane tab="Sessions" key="3">
                             <SessionReport key="sr" programId={this.journalContext.programId} userId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} showSessionDetail={this.showSessionDetail} />
                         </TabPane>
 
-                        <TabPane tab="Notes" key="3">
+                        <TabPane tab="Notes" key="4">
                             <NoteMatrix key="note_matrix" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
                         </TabPane>
 
-                        <TabPane tab="Boards" key="4">
+                        <TabPane tab="Boards" key="5">
                             <BoardMatrix key="board_matrix" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} programId={this.journalContext.programId} />
                         </TabPane>
 
-                        <TabPane tab="Messages" key="5">
+                        <TabPane tab="Messages" key="6">
                             <MessageBoard key="message" journalContext={this.journalContext} apiProxy={this.props.appStore.apiProxy} />
                         </TabPane>
 

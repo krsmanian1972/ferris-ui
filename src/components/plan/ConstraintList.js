@@ -67,8 +67,8 @@ class ConstraintList extends Component {
         const key = `opt_${index}`
         return (
             <div key={key}>
-                <Reader value={option.description} height={350} />
                 {this.renderStat(option)}
+                <Reader value={option.description} height={350} />
             </div>
         )
     }
@@ -99,7 +99,7 @@ class ConstraintList extends Component {
         return (
             <div style={sliderStyle}>
                 <Button key="back" style={{ width: "3%" }} onClick={this.previous} icon={<LeftOutlined />} shape="circle"></Button>
-                <div style={{ width: "94%" }}>
+                <div style={{marginTop:"1%", width: "94%" }}>
                     <Carousel ref={ref => (this.carousel = ref)} {...settings}>
                         {options && options.map((option) => {
                             return (

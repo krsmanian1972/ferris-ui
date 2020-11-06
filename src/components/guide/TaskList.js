@@ -147,7 +147,7 @@ class TaskList extends Component {
             <div style={{ display: "flex", flexWrap: "wrap", flexDirection: "row", alignItems: "center", paddingRight: 10 }}>
                 <Space>
                     <Tooltip key="ed_tip" title="To edit this activity">
-                        <Button key="edit_objective" icon={<EditOutlined />} disabled={rowCount === 0} shape="circle" onClick={() => this.showEditTask()}></Button>
+                        <Button key="edit_task" icon={<EditOutlined />} disabled={rowCount === 0} shape="circle" onClick={() => this.showEditTask()}></Button>
                     </Tooltip>
                     <Tooltip key="add_task_tip" title="To Add New Activity">
                         <Button key="add_task" icon={<PlusOutlined />} shape="circle" onClick={() => this.showNewTask()}></Button>
