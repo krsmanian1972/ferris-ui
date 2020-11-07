@@ -18,6 +18,11 @@
         "label": "About",
         "key":  "about",
         "isLandingPage": false
+    },
+    {
+        "label": "About Coach",
+        "key":  "aboutCoach",
+        "isLandingPage": false
     }
 
 ]
