@@ -37,6 +37,16 @@ export const resetPasswordQuery = `mutation($input: ResetPasswordRequest!) {
   } 
 }`
 
+export const findUserQuery = `query ($criteria: UserCriteria!) {
+  getUser(criteria: $criteria) {
+        id
+        email
+        name
+        userType
+  } 
+}`;
+
+
 export const programsQuery = `query ($criteria: ProgramCriteria!) {
   getPrograms(criteria: $criteria) {
     programs {

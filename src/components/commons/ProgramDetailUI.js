@@ -2,11 +2,8 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
 import { Spin, Result, PageHeader, Tooltip, Card, Button, Statistic } from 'antd';
-import { PlusCircleOutlined, MailOutlined, PhoneOutlined, AccountBookOutlined, CompassOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, MailOutlined, AccountBookOutlined, CompassOutlined, ProfileOutlined } from '@ant-design/icons';
 import { Typography } from 'antd';
-
-import { toJS } from 'mobx'
-
 
 import ReactPlayer from 'react-player';
 
@@ -17,7 +14,6 @@ import EnrollmentStore from '../stores/EnrollmentStore';
 import ProgramDescription from './ProgramDescription';
 import EnrollmentModal from './EnrollmentModal';
 import Milestones from '../guide/Milestones';
-import AboutMentor from '../guide/AboutMentor';
 
 import { cardHeaderStyle, pageHeaderStyle, pageTitle } from '../util/Style';
 
@@ -70,7 +66,7 @@ class ProgramDetailUI extends Component {
         }
 
         return (
-            <Tooltip key="journal_ip" title="View all your sessions and notes.">
+            <Tooltip key="journal_tip" title="View all your sessions and notes.">
                 <Button key="journ" onClick={this.showJournalUI} type="primary" icon={<AccountBookOutlined />}>Journal</Button>
             </Tooltip>
         );
@@ -97,21 +93,6 @@ class ProgramDetailUI extends Component {
             </Tooltip>
         );
     }
-    getCoachDescriptionButton = () => {
-        if (this.store.isOwner) {
-            return;
-        }
-
-        if (!this.store.isEnrolled) {
-            return;
-        }
-
-        return (
-            <Tooltip key="Coach Bio" title="Go to the Coach Bio page">
-                <Button key="ses_req" onClick={this.showCoachBioUI} type="primary" icon={<CompassOutlined />}>Coach Bio</Button>
-            </Tooltip>
-        );
-    }
 
     onEnroll = () => {
         this.enrollmentStore.showEnrollmentModal = true;
@@ -119,7 +100,7 @@ class ProgramDetailUI extends Component {
 
     getJournalContext = () => {
 
-        const {program, coach, enrollmentId } = this.store.programModel;
+        const { program, coach, enrollmentId } = this.store.programModel;
         const memberId = this.props.appStore.apiProxy.getUserFuzzyId();
 
         const journalContext = {
@@ -127,7 +108,7 @@ class ProgramDetailUI extends Component {
             programName: program.name,
             coachName: coach.name,
             coachId: coach.coachId,
-            memberName:"",
+            memberName: "",
             memberId: memberId,
             enrollmentId: enrollmentId,
         };
@@ -139,29 +120,33 @@ class ProgramDetailUI extends Component {
     showDiscussionUI = () => {
 
         const context = this.getJournalContext();
-        const params = { journalContext: {...context}, parentKey: "programDetailUI" };
+        const params = { journalContext: { ...context }, parentKey: "programDetailUI" };
 
         this.props.appStore.currentComponent = { label: "Discussion", key: "discussion", params: params };
     }
 
-
     showJournalUI = () => {
 
         const context = this.getJournalContext();
-        const params = { journalContext: {...context}, parentKey: "programDetailUI" };
+        const params = { journalContext: { ...context }, parentKey: "programDetailUI" };
 
         this.props.appStore.currentComponent = { label: "Journal", key: "journal", params: params };
     }
 
-    showCoachBioUI = () => {
+    coachProfileButton = () => {
+        return (
+            <Tooltip key="profile_tip" title="To view the profile of the Coach">
+                <Button key="coach_profile" onClick={this.showCoachUI} type="primary" icon={<ProfileOutlined />}>Profile</Button>
+            </Tooltip>
+        );
+    }
 
-      const {program, coach, enrollmentId } = this.store.programModel;
-      const coachContext = {
-          programId: program.id,
-          coachId: coach.id,
-      };
 
-        const params = { coachContext: {...coachContext}, parentKey: "programDetailUI" };
+    showCoachUI = () => {
+
+        const { coach } = this.store.programModel;
+       
+        const params = { coachId: coach.id, parentKey: "programDetailUI" };
 
         this.props.appStore.currentComponent = { label: "AboutCoach", key: "aboutCoach", params: params };
     }
@@ -222,7 +207,6 @@ class ProgramDetailUI extends Component {
                         this.getEnrollmentButton(),
                         this.getJournalButton(),
                         this.getDiscussionButton(),
-                        this.getCoachDescriptionButton(),
                     ]}>
 
                     {this.getProgramPoster(program, change)}
@@ -234,13 +218,11 @@ class ProgramDetailUI extends Component {
                     <Card
                         headStyle={cardHeaderStyle}
                         style={{ borderRadius: "12px", marginTop: "10px" }}
-                        title={<Title level={4}>Coach</Title>}>
+                        title={<Title level={4}>Coach</Title>}
+                        extra={this.coachProfileButton()}>
                         <Statistic value={coach.name} valueStyle={{ color: "rgb(0, 183, 235)", fontWeight: "bold" }} />
                         <Paragraph style={{ marginTop: 10 }}><MailOutlined /> {coach.email}</Paragraph>
-                        <Paragraph ><PhoneOutlined /> (91)99999 99999</Paragraph>
-                    </Card>
-
-                    <AboutMentor program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy}/>
+                     </Card>
 
                     <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
 

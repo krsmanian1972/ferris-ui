@@ -54,7 +54,7 @@ class SessionLauncher extends Component {
         const t = (screen.height - h) / 2;
 
         const url = `${baseUrl}?featureKey=${FEATURE_KEY}&sessionId=${sessionId}&sessionUserId=${sessionUserId}&sessionUserType=${sessionUserType}&enrollmentId=${enrollmentId}&memberId=${memberId}`;
-        const specs = `'toolbar=yes ,location=0, status=no,titlebar=no,menubar=yes,width=${w},height=${h},left=${l},top=${t}`;
+        const specs = `toolbar=0 ,location=0, status=no,titlebar=1,menubar=0,width=${w},height=${h},left=${l},top=${t}`;
 
         this.externalWindow = window.open(url, title, specs);
     }
