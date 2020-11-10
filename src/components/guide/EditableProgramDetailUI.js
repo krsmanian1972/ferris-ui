@@ -1,24 +1,24 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Spin, Result, PageHeader, Tooltip, Card, Button, Statistic, Upload, message } from 'antd';
-import { RocketOutlined, MailOutlined, BuildOutlined, ProfileOutlined } from '@ant-design/icons';
-import { Typography } from 'antd';
+import { Spin, Result, Typography, PageHeader, Tooltip, Card, Button, Upload, message } from 'antd';
+import { RocketOutlined, BuildOutlined } from '@ant-design/icons';
 
 import { assetHost } from '../stores/APIEndpoints';
 import ProgramStore from '../stores/ProgramStore';
 
 import ProgramDescription from './EditableProgramDescription';
 import ActivationModal from './ActivationModal';
+import AboutCoach from '../commons/AboutCoach';
 import Milestones from './Milestones';
 import EnrollmentList from './EnrollmentList';
 import Trailer from './Trailer';
 
-import { cardHeaderStyle, pageHeaderStyle,pageTitle } from '../util/Style';
+import { cardHeaderStyle, pageHeaderStyle, pageTitle } from '../util/Style';
 
-const { Title, Paragraph } = Typography;
+const { Title } = Typography;
 
-@inject("appStore") 
+@inject("appStore")
 @observer
 class EditableProgramDetailUI extends Component {
 
@@ -154,7 +154,7 @@ class EditableProgramDetailUI extends Component {
         )
     }
 
-    
+
     /**
      * We do not want banner for Private Programs
      * 
@@ -164,7 +164,7 @@ class EditableProgramDetailUI extends Component {
      */
     getBanner = (program, change) => {
 
-        if(program.isPrivate === true) {
+        if (program.isPrivate === true) {
             return (<></>)
         }
 
@@ -183,25 +183,6 @@ class EditableProgramDetailUI extends Component {
             </Card>
         )
     }
-
-    coachProfileButton = () => {
-        return (
-            <Tooltip key="profile_tip" title="To view the profile of the Coach">
-                <Button key="coach_profile" onClick={this.showCoachUI} type="primary" icon={<ProfileOutlined />}>Profile</Button>
-            </Tooltip>
-        );
-    }
-
-
-    showCoachUI = () => {
-
-        const { coach } = this.store.programModel;
-       
-        const params = { coachId: coach.id, parentKey: "programDetailUI" };
-
-        this.props.appStore.currentComponent = { label: "AboutCoach", key: "aboutCoach", params: params };
-    }
-
 
     renderProgramModel = () => {
 
@@ -224,16 +205,8 @@ class EditableProgramDetailUI extends Component {
 
                     <ProgramDescription program={program} programStore={this.store} />
 
-                    <Card
-                        headStyle={cardHeaderStyle}
-                        style={{ borderRadius: "12px", marginTop: "10px" }}
-                        title={<Title level={4}>Coach</Title>}
-                        extra={this.coachProfileButton()}
-                    >
-                        <Statistic value={coach.name} valueStyle={{ color: "rgb(0, 183, 235)", fontWeight: "bold" }} />
-                        <Paragraph style={{ marginTop: 10 }}><MailOutlined /> {coach.email}</Paragraph>
-                    </Card>
-
+                    <AboutCoach coach={coach} appStore={this.props.appStore}/>
+                    
                     <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
 
                     {this.getBanner(program, change)}

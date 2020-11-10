@@ -9,18 +9,18 @@ const DONE = 'done';
 const ERROR = 'error';
 
 const EMPTY_MESSAGE = { status: "", help: "" };
-const ERROR_MESSAGE = { status: ERROR, help: "Please check if you have provided a valid link to access the profile of the coach." };
+const ERROR_MESSAGE = { status: ERROR, help: "Please check if you have provided a valid link to access the profile." };
 
 const ABOUT_FILE = "about.html";
 const EXPERIENCE_FILE = "experience.html";
 
-export default class CoachStore {
+export default class ProfileStore {
 
     state = PENDING;
     message = EMPTY_MESSAGE;
     change = null;
 
-    coach = null;
+    user = null;
     about = null;
     experience = null;
 
@@ -40,18 +40,18 @@ export default class CoachStore {
         return this.state === ERROR;
     }
 
-    fetchCoachDetails = async (givenCoachId) => {
+    fetchUserDetails = async (givenUserId) => {
 
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
-        this.coach = null;
+        this.user = null;
         this.about = null;
         this.experience = null;
 
         const variables = {
             criteria: {
-                id: givenCoachId,
+                id: givenUserId,
             }
         }
 
@@ -67,7 +67,7 @@ export default class CoachStore {
 
             const result = data.data.getUser;
 
-            this.coach = result;
+            this.user = result;
 
             await this.loadContent(ABOUT_FILE);
             await this.loadContent(EXPERIENCE_FILE);
@@ -83,13 +83,13 @@ export default class CoachStore {
 
     loadContent = async (fileName) => {
 
-        if (!this.coach) {
+        if (!this.user) {
             return;
         }
 
         const ver = new Date().getTime();
 
-        const url = `${assetHost}/mentors/${this.coach.id}/${fileName}?nocache=${ver}`;
+        const url = `${assetHost}/users/${this.user.id}/${fileName}?nocache=${ver}`;
 
         const response = await this.apiProxy.getAsync(url);
         if (response.status === 404) {
@@ -106,28 +106,28 @@ export default class CoachStore {
     }
 
     saveAbout = () => {
-        socket.emit('coachContent', {
+        socket.emit('userContent', {
             content: this.about,
-            fuzzyId: this.coach.id,
+            fuzzyId: this.user.id,
             name: ABOUT_FILE
         });
     }
 
     saveExperience = () => {
-        socket.emit('coachContent', {
+        socket.emit('userContent', {
             content: this.experience,
-            fuzzyId: this.coach.id,
+            fuzzyId: this.user.id,
             name: EXPERIENCE_FILE
         });
     }
 }
 
-decorate(CoachStore, {
+decorate(ProfileStore, {
     state: observable,
     message: observable,
     change: observable,
 
-    coach: observable,
+    user: observable,
     about: observable,
     experience: observable,
 
@@ -135,7 +135,7 @@ decorate(CoachStore, {
     isDone: computed,
     isError: computed,
 
-    fetchCoachDetails: action,
+    fetchUserDetails: action,
     saveAbout: action,
     saveExperience: action,
 });

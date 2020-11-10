@@ -16,6 +16,13 @@ export const cardHeaderStyle = {
     borderRadius: "12px 12px 0px 0px"
 };
 
+export const headerMenuStyle = {
+    background: "#f5f5f5",
+    color: "rgb(69,49,28)",
+    borderBottom: "1px solid",
+    borderColor: "rgb(216,213,221)",
+};
+
 export const rustColor = {
     color: "rgb(69,49,28)",
     fontWeight: "bold"

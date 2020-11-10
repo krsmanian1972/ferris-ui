@@ -6,7 +6,7 @@ import PasswordReset from './PasswordReset';
 import Registration from './Registration';
 
 import About from './About';
-import CoachUI from './guide/CoachUI';
+import ProfileUI from './commons/ProfileUI';
 
 import PlanHomeUI from './plan/PlanHomeUI';
 import MasterPlanUI from './plan/MasterPlanUI';
@@ -83,8 +83,8 @@ class SelectedComponent extends Component {
             case 'broadcast': {
                 return <Broadcast params={currentComponent.params} />
             }
-            case 'aboutCoach':{
-                return <CoachUI params={currentComponent.params} />
+            case 'profile':{
+                return <ProfileUI params={currentComponent.params} />
             }
             case 'about': {
                 return <About />;

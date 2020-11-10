@@ -13,7 +13,7 @@ const { Content, Footer } = Layout;
 const minHeight = window.innerHeight * .89;
 
 const BROADCAST_FEATURE_KEY = "broadcast";
-const COACH_FEATURE_KEY = "coach";
+const PROFILE_FEATURE_KEY = "profile";
 
 export default class App extends Component {
 
@@ -30,8 +30,8 @@ export default class App extends Component {
       this.broadcastRoute(params);
     }
 
-    if (featureKey && featureKey === COACH_FEATURE_KEY) {
-      this.coachProfileRoute(params);
+    if (featureKey && featureKey === PROFILE_FEATURE_KEY) {
+      this.profileRoute(params);
     }
 
   }
@@ -56,11 +56,11 @@ export default class App extends Component {
 
   }
 
-  coachProfileRoute = (params) => {
-    const coachId = params.get("fuzzyId");
-    if (coachId) {
-      const compParams = { coachId: coachId, parentKey: "login" };
-      appStore.currentComponent = { label: "AboutCoach", key: "aboutCoach", params: compParams };
+  profileRoute = (params) => {
+    const userId = params.get("fuzzyId");
+    if (userId) {
+      const compParams = { userId: userId, parentKey: "login" };
+      appStore.currentComponent = { label: "Profile", key: "profile", params: compParams };
     }
   }
 
