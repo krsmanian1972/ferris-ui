@@ -1,7 +1,7 @@
 import { decorate, observable, computed,action } from 'mobx';
 
 import { assetHost } from '../stores/APIEndpoints';
-import { toJS } from 'mobx'
+
 const PENDING = 'pending';
 const DONE = 'done';
 const ERROR = 'error';
@@ -55,7 +55,6 @@ export default class BoardListStore {
             const data = await response.json();
             this.boards = data;
             this.boardCount = data.length;
-            console.log("This boards", toJS(this.boards));
             this.state = DONE;
         }
         catch (e) {

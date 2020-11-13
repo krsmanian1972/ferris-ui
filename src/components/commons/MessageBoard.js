@@ -16,7 +16,7 @@ class MessageBoard extends Component {
     }
 
     componentDidMount() {
-        this.store.fetchDiscussions(this.journalContext.enrollmentId);
+        this.store.fetchDiscussions(this.journalContext);
     }
 
     render() {

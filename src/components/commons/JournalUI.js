@@ -50,7 +50,7 @@ class JournalUI extends Component {
                     this.showPeople()
                 ]}>
                 <div className="journal-container">
-                    <Tabs tabBarStyle={tabBarStyle} tabPosition="left">
+                    <Tabs defaultActiveKey = '6' tabBarStyle={tabBarStyle} tabPosition="left">
                         <TabPane tab="Plan" key="1">
                             <LegacyPlan key="gt" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
                         </TabPane>

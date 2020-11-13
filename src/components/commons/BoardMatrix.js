@@ -65,8 +65,9 @@ class BoardMatrix extends Component {
 
                             return (
                                 <div key={key} className="board-matrix-item">
-                                    <p className={cn}>{board.sessionName} {board.userType} {boardId}</p>
+                                    <p className="journal-boards">{board.sessionName}</p>
                                     <MiniBoard key={sessionUserId} apiProxy={this.props.apiProxy} boardId={boardId} sessionUserId={board.userSessionId} cssKlass="miniBoardFrameJournal"/>
+                                    <p className={cn}>{board.userType} {boardId}</p>
                                 </div>
                             )
                       }

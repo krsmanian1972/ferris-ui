@@ -103,13 +103,14 @@ class ProgramDetailUI extends Component {
 
         const { program, coach, enrollmentId } = this.store.programModel;
         const memberId = this.props.appStore.apiProxy.getUserFuzzyId();
+        const memberName = this.props.appStore.credentials.username;
 
         const journalContext = {
             programId: program.id,
             programName: program.name,
             coachName: coach.name,
-            coachId: coach.coachId,
-            memberName: "",
+            coachId: coach.id,
+            memberName: memberName,
             memberId: memberId,
             enrollmentId: enrollmentId,
         };

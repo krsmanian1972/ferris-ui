@@ -281,28 +281,29 @@ code {
 
 .notes-session {
   text-align:left;
-  padding-left:5;
+  padding:5px;
   font-size: 10px;
   color:rgb(69,49,28)
 }
+
 .journal-boards {
   text-align: left;
-  padding-left:5;
+  padding:5px;
   font-size: 10px;
-
+  color:rgb(69,49,28)
 }
 
 
 .coach-note {
   text-align:right;
-  padding-right:5;
+  padding:5px;
   font-size: 10px;
   color:rgb(69,49,28)
 }
 
 .member-note {
   text-align:right;
-  padding-right:5;
+  padding:5px;
   font-size: 10px;
   color:blue;
 }
@@ -454,4 +455,12 @@ code {
   background:lightgray;
   padding: 10px;
   border-radius: 12px; 
+}
+
+.digest {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: left;
+  justify-content:space-between;
 }

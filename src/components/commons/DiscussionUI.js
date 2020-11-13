@@ -20,11 +20,15 @@ class DiscussionUI extends Component {
     constructor(props) {
         super(props);
         this.journalContext = props.params.journalContext;
-        this.store = new DiscussionStore({ apiProxy: props.appStore.apiProxy })
+        
+        this.store = new DiscussionStore({ 
+            apiProxy: props.appStore.apiProxy,
+            feedStore: props.appStore.feedStore
+         })
     }
 
     componentDidMount() {
-        this.store.fetchDiscussions(this.journalContext.enrollmentId);
+        this.store.fetchDiscussions(this.journalContext);
     }
 
     showPeople = () => {

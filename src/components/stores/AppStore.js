@@ -1,6 +1,9 @@
 import { action, decorate, observable, computed } from 'mobx';
 import APIProxy from './APIProxy';
+
 import LoginStore from './LoginStore';
+import FeedStore from './FeedStore';
+
 import { isBlank } from './Util';
 import socket from './socket';
 
@@ -28,6 +31,8 @@ class AppStore {
 
     apiProxy = new APIProxy();
     loginStore = new LoginStore({ apiProxy: this.apiProxy });
+    feedStore = new FeedStore({apiProxy: this.apiProxy});
+
     menus = [];
 
     sessionInfo = null;

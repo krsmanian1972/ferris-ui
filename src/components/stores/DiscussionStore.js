@@ -1,4 +1,5 @@
 import { decorate, observable, computed, action } from 'mobx';
+import socket from '../stores/socket';
 
 import moment from 'moment';
 
@@ -20,6 +21,7 @@ export default class DiscussionStore {
     message = EMPTY_MESSAGE;
 
     discussions = [];
+    ids = new Set();
 
     constructor(props) {
         this.apiProxy = props.apiProxy;
@@ -38,7 +40,13 @@ export default class DiscussionStore {
         return this.state === ERROR;
     }
 
+    createSubscription = () => {
+        socket.on("feedIn",(data) => this.handleFeed(data.feed));
+    }
+
     classify = (result) => {
+
+        this.ids.clear();
 
         const userId = this.apiProxy.getUserFuzzyId();
 
@@ -48,6 +56,8 @@ export default class DiscussionStore {
             const localeTime = moment(item.createdAt * 1000);
             const date = localeTime.format(DATE_PATTERN);
 
+            this.ids.add(item.id);
+
             item.date = date;
             item.by = item.createdById === userId ? "me" : "other";
         }
@@ -55,7 +65,35 @@ export default class DiscussionStore {
         this.discussions = result;
     }
 
+    /**
+     * Ignore those feeds meant for a different enrollment
+     * 
+     * Dedupe, by ignoring the message with the same message id.
+     * 
+     * @param {*} feed 
+     */
+    handleFeed = (feed) => {
+   
+        if(feed.enrollmentId !== this.enrollmentId) {
+            return;
+        }
+
+        this.populate(feed);
+    }
+
+    /**
+     * Dedupe, by ignoring the message with the same message id.
+     * 
+     * @param {*} newDiscussion 
+     */
+
     populate = (newDiscussion) => {
+
+        if(this.ids.has(newDiscussion.id)) {
+            return;
+        }
+
+        this.ids.add(newDiscussion.id);
 
         const userId = this.apiProxy.getUserFuzzyId();
             
@@ -76,9 +114,15 @@ export default class DiscussionStore {
      * 
      * @param {*} id 
      */
-    fetchDiscussions = async(enrollmentId) => {
+    fetchDiscussions = async(journalContext) => {
+
+        const {enrollmentId,memberId,coachId} = journalContext;
+
+        this.journalContext = journalContext;
 
         this.enrollmentId = enrollmentId;
+        this.memberId = memberId;
+        this.coachId = coachId;
 
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
@@ -93,7 +137,10 @@ export default class DiscussionStore {
             const response = await this.apiProxy.query(apiHost, getDiscussionsQuery, variables);
             const data = await response.json();
             const result = data.data.getDiscussions.discussions;
+            
             this.classify(result);
+            this.createSubscription();
+
             this.state = DONE;
         }
         catch (e) {
@@ -107,11 +154,20 @@ export default class DiscussionStore {
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
+        const toId = this.apiProxy.getUserFuzzyId()===this.coachId ? this.memberId : this.coachId;
+
         const variables = {
             input: {
                 description: request.description,
-                enrollmentId: this.enrollmentId,
                 createdById: this.apiProxy.getUserFuzzyId(),
+                toId: toId,
+                enrollmentId: this.journalContext.enrollmentId,
+                programId: this.journalContext.programId,
+                programName: this.journalContext.programName,
+                coachId: this.journalContext.coachId,
+                coachName: this.journalContext.coachName,
+                memberId: this.journalContext.memberId,
+                memberName: this.journalContext.memberName,
             }
         }
 
@@ -126,8 +182,11 @@ export default class DiscussionStore {
             }
 
             const result = data.data.createDiscussion.discussion;
-
             this.populate(result);
+
+            const feedOut = {to:toId,feed:result};
+            socket.emit("sendTo",feedOut);
+            
             this.state = DONE;
         }
         catch (e) {

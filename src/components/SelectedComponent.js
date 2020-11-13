@@ -22,6 +22,7 @@ import Broadcast from './guide/Broadcast';
 import WeekSessions from './guide/WeekSessions';
 import JournalUI from './commons/JournalUI';
 import DiscussionUI from './commons/DiscussionUI';
+import DigestUI from './commons/DigestUI';
 
 
 
@@ -49,6 +50,9 @@ class SelectedComponent extends Component {
             }
             case 'discussion' : {
                 return <DiscussionUI params={currentComponent.params}/>
+            }
+            case 'digest' : {
+                return <DigestUI/>
             }
             case 'weekly': {
                 return <WeekSessions />

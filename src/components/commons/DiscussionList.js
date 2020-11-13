@@ -15,6 +15,10 @@ class DiscussionList extends Component {
         super(props);
     }
 
+    componentWillUnmount() {
+        console.log("Discussion List Destroyed");
+    }
+
     render() {
         const store = this.props.store;
 

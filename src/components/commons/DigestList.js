@@ -3,28 +3,29 @@ import { observer } from 'mobx-react';
 
 import { Spin, Result } from 'antd';
 
-import MemberSlot from './MemberSlot';
+import DigestSlot from './DigestSlot';
+import { SmileOutlined } from '@ant-design/icons';
 
 @observer
-class MemberList extends Component {
+class DigestList extends Component {
 
     constructor(props) {
         super(props);
     }
 
     componentDidMount() {
-        this.props.store.fetchMembers();
+        this.props.store.fetchPendingFeeds();
     }
 
     
     render() {
 
-        const members = this.props.store.members;
+        const feeds = this.props.store.feeds;
 
         return (
             <div style={{ marginRight: "10px" }}>
                 {this.displayMessage()}
-                {this.renderMembers(members)}
+                {this.renderFeeds(feeds)}
             </div>
         )
     }
@@ -49,19 +50,25 @@ class MemberList extends Component {
         return (<></>)
     }
 
-    renderMembers = (members) => {
+    renderFeeds = (feeds) => {
         const elements = [];
-        if (members) {
-            var index = 0
-            for (let [email, details] of members) {
-                elements.push(<MemberSlot key={index++} email={email} details={details} showJournalUI={this.props.showJournalUI} />);
+        var index = 0;
+        if (feeds) {
+            for (let [email, details] of feeds) {
+                elements.push(<DigestSlot key={index++} email={email} details={details}  showJournalUI={this.props.showJournalUI}/>);
             }
         }
 
-        return (
-            <>{elements}</>
-        )
+        if(elements.length == 0) {
+            return <Result 
+                icon={<SmileOutlined />}
+                title="Your message board is clean"
+                subTitle="You do not have any unread or pending messages."
+            />
+        }
+
+        return (<>{elements}</>)
     }
 }
 
-export default MemberList
+export default DigestList

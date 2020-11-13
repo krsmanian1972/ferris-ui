@@ -599,6 +599,7 @@ export const findSessionQuery = `query ($criteria: SessionCriteria!) {
 export const getDiscussionsQuery = `query ($criteria: DiscussionCriteria!) {
   getDiscussions(criteria: $criteria) {
     discussions{
+      id,
       description,
       createdById,
       createdAt
@@ -612,12 +613,41 @@ export const getDiscussionsQuery = `query ($criteria: DiscussionCriteria!) {
 export const createDiscussionQuery = `mutation ($input: NewDiscussionRequest!) {
   createDiscussion(newDiscussionRequest:$input) {
     discussion{
+      id,
       enrollmentId,
       description,
       createdById,
       createdAt
     }
     errors{
+      message
+    }
+  }
+}`;
+
+export const getPendingDiscussionsQuery = `query ($criteria: UserCriteria!) {
+  getPendingDiscussions(criteria: $criteria) {
+    feeds{
+      feed {
+        id,
+        createdAt,
+        enrollmentId,
+        programId,
+        programName,
+        coachId,
+        coachName,
+        memberId,
+        memberName
+      },
+      description,
+      user {
+        id,
+        name,
+        email,
+        userType
+      }
+    }
+    error{
       message
     }
   }

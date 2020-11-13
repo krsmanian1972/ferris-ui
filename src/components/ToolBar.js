@@ -1,9 +1,13 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
-import AccountMenu from './AccountMenu';
-import { Dropdown, Menu, Layout, Typography, Row, Col } from 'antd';
+
+import { Dropdown, Menu, Layout, Typography, Row, Col, Space } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
+
 import ownerLogo from '../images/krscode.png';
+
+import AccountMenu from './AccountMenu';
+import MessageButton from './MessageButton';
 
 const { Text } = Typography;
 const { Header } = Layout;
@@ -42,14 +46,17 @@ export default class ToolBar extends Component {
         )
     }
 
-    renderRightMenu() {
+    renderRightMenu = () => {
         const appStore = this.props.appStore;
         if (appStore.isLoggedIn()) {
             return (
                 <Col span={6} style={{ textAlign: "right" }}>
-                    <Dropdown.Button overlay={<AccountMenu />} trigger={['click']} icon={<UserOutlined />}>
-                        {appStore.credentials.username}
-                    </Dropdown.Button>
+                    <Space>
+                        <MessageButton appStore = {appStore}/>
+                        <Dropdown.Button overlay={<AccountMenu />} trigger={['click']} icon={<UserOutlined />}>
+                            {appStore.credentials.username}
+                        </Dropdown.Button>
+                    </Space>
                 </Col>
             )
         }
