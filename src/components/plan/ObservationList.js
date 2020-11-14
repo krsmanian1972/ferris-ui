@@ -7,7 +7,7 @@ import 'moment-timezone';
 import { Spin, Result, Carousel, Button, Tag, Tooltip, Space, Statistic } from 'antd';
 import { LeftOutlined, RightOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';
 
-import ObservationDrawer from '../guide/ObservationDrawer';
+import ObservationDrawer from './ObservationDrawer';
 import Reader from "../commons/Reader";
 
 
@@ -152,6 +152,11 @@ class ObservationList extends Component {
     }
 
     getControls = () => {
+
+        if(!this.props.observationStore.isCoach) {
+            return <></>
+        }
+
         const rowCount = this.props.observationStore.rowCount;
 
         return (
@@ -177,6 +182,14 @@ class ObservationList extends Component {
         )
     }
 
+    getContentStyle = () => {
+        const style = this.props.contentStyle;
+        if (!style) {
+            return contentStyle;
+        }
+        return style;
+    }
+
     render() {
         const store = this.props.observationStore;
         const observations = store.observations;
@@ -184,7 +197,7 @@ class ObservationList extends Component {
 
         return (
 
-            <div style={contentStyle}>
+            <div style={this.getContentStyle()}>
                 {this.renderTitle()}
                 {this.renderSlider(observations, store.rowCount)}
                 {this.displayMessage()}

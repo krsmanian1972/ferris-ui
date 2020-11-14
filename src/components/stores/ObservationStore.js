@@ -35,6 +35,8 @@ export default class ObservationStore {
     rowCount = 0;
     currentObservation = {};
 
+    isCoach = false;
+
     /**
      * The section id can be any one of
      * 

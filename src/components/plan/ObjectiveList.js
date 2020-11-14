@@ -8,7 +8,7 @@ import 'moment-timezone';
 import { Spin, Result, Carousel, Button, Steps, Space, Tag, Tooltip, Statistic } from 'antd';
 import { LeftOutlined, RightOutlined, PlusOutlined, EditOutlined, ArrowDownOutlined, ArrowUpOutlined } from '@ant-design/icons';
 
-import ObjectiveDrawer from '../guide/ObjectiveDrawer';
+import ObjectiveDrawer from './ObjectiveDrawer';
 import Reader from "../commons/Reader";
 
 const { Step } = Steps;
@@ -173,6 +173,10 @@ class ObjectiveList extends Component {
     }
 
     getControls = () => {
+
+        if(!this.props.objectiveStore.isCoach) {
+            return <></>
+        }
 
         const rowCount = this.props.objectiveStore.rowCount;
 

@@ -44,6 +44,8 @@ export default class ObjectiveStore {
     objectives = [];
     rowCount = 0;
     currentObjective = {};
+    
+    isCoach = false;
 
 
     /**

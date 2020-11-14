@@ -11,7 +11,6 @@ import MessageBoard from './MessageBoard';
 
 import { pageHeaderStyle, pageTitle } from '../util/Style';
 
-
 const { TabPane } = Tabs;
 
 const tabBarStyle = {
@@ -25,6 +24,7 @@ class JournalUI extends Component {
     constructor(props) {
         super(props);
         this.journalContext = props.params.journalContext;
+        this.isCoach = (props.params.journalContext.coachId === props.appStore.apiProxy.getUserFuzzyId());
     }
 
     showSessionDetail = (event) => {
@@ -52,11 +52,11 @@ class JournalUI extends Component {
                 <div className="journal-container">
                     <Tabs defaultActiveKey = '6' tabBarStyle={tabBarStyle} tabPosition="left">
                         <TabPane tab="Plan" key="1">
-                            <LegacyPlan key="gt" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
+                            <LegacyPlan key="gt" isCoach = {this.isCoach} enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
                         </TabPane>
 
                         <TabPane tab="Actions" key="2">
-                            <ActionList key="tt" enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
+                            <ActionList key="tt" isCoach = {this.isCoach} enrollmentId={this.journalContext.enrollmentId} memberId={this.journalContext.memberId} apiProxy={this.props.appStore.apiProxy} />
                         </TabPane>
 
                         <TabPane tab="Sessions" key="3">

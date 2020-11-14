@@ -9,7 +9,7 @@ import { Card, Typography, Spin, Result, Carousel, Button, Steps, Tooltip, Tag, 
 import { LeftOutlined, RightOutlined, PlusOutlined, EditOutlined, ArrowDownOutlined, ArrowUpOutlined, CarryOutOutlined } from '@ant-design/icons';
 
 import TaskStore from '../stores/TaskStore';
-import TaskDrawer from '../guide/TaskDrawer';
+import TaskDrawer from './TaskDrawer';
 import Reader from "../commons/Reader";
 
 import { cardHeaderStyle } from '../util/Style';
@@ -18,7 +18,8 @@ const { Title } = Typography;
 const { Step } = Steps;
 const { Countdown } = Statistic;
 
-const labelStyle = { marginTop: 10, marginBottom: 2, fontWeight: "bold", textAlign: "left",color:"rgb(59,109,171)" };
+const taskTitleStyle = { color: "rgb(59,109,171)", textAlign: "center" };
+const labelStyle = { marginTop: 10, marginBottom: 2, fontWeight: "bold", textAlign: "left", color: "rgb(59,109,171)" };
 const taskStyle = { background: "rgb(242,242,242)", width: "100%", marginBottom: "10px" };
 const controlStyle = { display: "flex", flexWrap: "wrap", flexDirection: "row", alignItems: "center", paddingRight: 10 };
 const sliderStyle = { display: "flex", flexDirection: "row", justifyContent: "center", textAlign: "center", alignItems: "center" };
@@ -30,7 +31,10 @@ class ActionList extends Component {
 
     constructor(props) {
         super(props);
+
         this.store = new TaskStore({ apiProxy: props.apiProxy, enrollmentId: props.enrollmentId, memberId: props.memberId });
+        this.store.isCoach = props.isCoach;
+
         this.store.fetchTasks();
     }
 
@@ -77,7 +81,7 @@ class ActionList extends Component {
         return (
             <div className="task-stat">
                 <div style={{ textAlign: "left", width: "30%" }}>{hoursEl}</div>
-                <div style={{ textAlign: "center", width: "50%"}}>
+                <div style={{ textAlign: "center", width: "50%" }}>
                     <Steps progressDot current={1} size="small">
                         <Step title={startEl} description="Start" />
                         <Step title={endEl} description="End" />
@@ -93,7 +97,7 @@ class ActionList extends Component {
 
         return (
             <div key={key}>
-                <Title level={5} style={{color:"rgb(59,109,171)", textAlign: "center" }}>{task.name}</Title>
+                <Title level={5} style={taskTitleStyle}>{task.name}</Title>
 
                 {this.renderStat(task)}
 
@@ -137,10 +141,10 @@ class ActionList extends Component {
             <div>
                 <div style={sliderStyle}>
                     <Button key="back" style={{ width: "5%" }} onClick={this.previous} icon={<LeftOutlined />} shape="circle"></Button>
-                    <p style={{width:"90%"}}></p>
+                    <p style={{ width: "90%" }}></p>
                     <Button key="forward" style={{ width: "5%" }} onClick={this.next} icon={<RightOutlined />} shape="circle"></Button>
                 </div>
-               
+
                 <Carousel ref={ref => (this.carousel = ref)} {...settings}>
                     {tasks && tasks.map((task, index) => {
                         return (
@@ -148,7 +152,6 @@ class ActionList extends Component {
                         )
                     })}
                 </Carousel>
-        
             </div>
         )
     }
@@ -178,8 +181,33 @@ class ActionList extends Component {
         this.store.showDrawer = flag;
     }
 
+    showEditResponse = () => {
+
+    }
 
     getControls = () => {
+        if (this.store.isCoach) {
+            return this.getCoachControls();
+        }
+        return this.getMemberControls();
+    }
+
+    getMemberControls = () => {
+
+        const rowCount = this.store.rowCount;
+
+        return (
+            <div style={controlStyle}>
+                <Space>
+                    <Tooltip key="ed_resp_tip" title="Response to the suggested activity ">
+                        <Button key="edit_resp" icon={<CarryOutOutlined />} disabled={rowCount === 0} shape="circle" onClick={() => this.showEditResponse()}></Button>
+                    </Tooltip>
+                </Space>
+            </div>
+        );
+    }
+
+    getCoachControls = () => {
 
         const rowCount = this.store.rowCount;
 
@@ -188,9 +216,6 @@ class ActionList extends Component {
                 <Space>
                     <Tooltip key="ed_act_tip" title="To edit the suggested activity">
                         <Button key="edit_task" icon={<EditOutlined />} disabled={rowCount === 0} shape="circle" onClick={() => this.showEditTask()}></Button>
-                    </Tooltip>
-                    <Tooltip key="ed_resp_tip" title="Response to the suggested activity ">
-                        <Button key="edit_resp" icon={<CarryOutOutlined />} disabled={rowCount === 0} shape="circle" onClick={() => this.showEditResponse()}></Button>
                     </Tooltip>
                     <Tooltip key="add_task_tip" title="To Add New Activity">
                         <Button key="add_task" icon={<PlusOutlined />} shape="circle" onClick={() => this.showNewTask()}></Button>

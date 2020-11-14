@@ -34,7 +34,9 @@ export default class TaskStore {
     tasks = [];
     rowCount = 0;
     currentTask = {};
-
+    
+    isCoach = false;
+    
     constructor(props) {
         this.apiProxy = props.apiProxy;
         this.enrollmentId = props.enrollmentId;

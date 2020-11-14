@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
+import moment from 'moment';
 
 import { Button, Form, Input, notification, message } from 'antd';
 import { PlusCircleOutlined,EditOutlined } from '@ant-design/icons';
-import moment from 'moment';
 
 import Editor from "../commons/Editor";
 

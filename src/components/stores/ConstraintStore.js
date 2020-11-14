@@ -35,6 +35,7 @@ export default class ConstraintStore {
     rowCount = 0;
     currentOption = {};
     
+    isCoach = false;
 
     /**
      * The section id can be any one of

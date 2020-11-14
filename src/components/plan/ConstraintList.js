@@ -6,7 +6,7 @@ import 'moment-timezone';
 import { Spin, Result, Carousel, Button, Tag, Tooltip, Space, Statistic } from 'antd';
 import { LeftOutlined, RightOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';
 
-import ConstraintDrawer from '../guide/ConstraintDrawer';
+import ConstraintDrawer from './ConstraintDrawer';
 import Reader from "../commons/Reader";
 
 const contentStyle = { background: "rgb(242,242,242)", width: "100%", marginBottom: "10px" };
@@ -151,6 +151,10 @@ class ConstraintList extends Component {
 
     getControls = () => {
 
+        if(!this.props.constraintStore.isCoach) {
+            return <></>
+        }
+
         const rowCount = this.props.constraintStore.rowCount;
 
         return (
@@ -176,13 +180,21 @@ class ConstraintList extends Component {
         )
     }
 
+    getContentStyle = () => {
+        const style = this.props.contentStyle;
+        if (!style) {
+            return contentStyle;
+        }
+        return style;
+    }
+
     render() {
         const store = this.props.constraintStore;
         const options = store.options;
         const change = store.change;
-
+        
         return (
-            <div style={contentStyle}>
+            <div style={this.getContentStyle()}>
                 {this.renderTitle()}
                 {this.renderSlider(options, store.rowCount)}
                 {this.displayMessage()}

@@ -3,7 +3,7 @@ import { inject, observer } from 'mobx-react';
 import { assetHost } from '../stores/APIEndpoints';
 
 import { Typography, Card, Statistic, PageHeader, Button, Tag, Popconfirm, notification, message } from 'antd';
-import { MailOutlined, PhoneOutlined, CaretRightOutlined, CloseOutlined, CheckOutlined } from '@ant-design/icons';
+import { MailOutlined, CaretRightOutlined, CloseOutlined, CheckOutlined } from '@ant-design/icons';
 
 import Moment from 'react-moment';
 import moment from 'moment';
@@ -13,9 +13,9 @@ import SessionStore from '../stores/SessionStore';
 
 import BoardList from "../commons/BoardList";
 import SessionLauncher from './SessionLauncher';
-import GoldenTemplate from './GoldenTemplate';
 import NoteList from '../commons/NoteList';
 import ClosureDrawer from './ClosureDrawer';
+
 import { cardHeaderStyle, pageHeaderStyle, pageTitle,rustColor } from '../util/Style';
 
 const { Title, Paragraph,Text } = Typography;
@@ -125,13 +125,11 @@ class SessionDetailUI extends Component {
                     <div key="coachId" style={{ width: "50%" }}>
                         <Statistic title="Coach" value={coach.user.name} valueStyle={{ color: "rgb(0, 183, 235)", fontWeight: "bold" }} />
                         <Paragraph><MailOutlined /> {coach.user.email}</Paragraph>
-                        <Paragraph><PhoneOutlined /> (91)99999 XXXXX</Paragraph>
                     </div>
 
                     <div key="actorId" style={{ width: "50%", borderLeft: "1px solid lightgray", paddingLeft: 20 }}>
                         <Statistic title="Actor" value={member.user.name} />
                         <Paragraph><MailOutlined /> {member.user.email}</Paragraph>
-                        <Paragraph><PhoneOutlined /> (91)99999 xxxx</Paragraph>
                     </div>
                 </div>
             </Card>
@@ -225,7 +223,6 @@ class SessionDetailUI extends Component {
 
                     {people.coach && (
                         <div key="assets" style={{marginTop:10}}>
-                            <GoldenTemplate key="gt" enrollmentId={session.enrollmentId} memberId={people.member.user.id} apiProxy={this.props.appStore.apiProxy} />
                             <BoardList key="cb" title="Coach Boards" sessionUserId={people.coach.sessionUser.id} />
                             <BoardList key="ab" title="Actor Boards" sessionUserId={people.member.sessionUser.id} />
                             <NoteList key="cn" title="Coach Notes" sessionUserId={people.coach.sessionUser.id} closingNotes={session.closingNotes} />

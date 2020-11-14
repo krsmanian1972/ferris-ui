@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import _ from 'lodash';
 
+import { Button, Row, Col, Tooltip, Space,message } from 'antd';
+import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutlined, AudioMutedOutlined, EyeInvisibleOutlined, VerticalAlignTopOutlined, VerticalAlignBottomOutlined } from '@ant-design/icons';
+
 import socket from '../stores/socket';
 import VideoStreamTransceiver from '../webrtc/VideoStreamTransceiver';
 import ScreenStreamTransceiver from '../webrtc/ScreenStreamTransceiver';
@@ -14,11 +17,8 @@ import NotesDrawer from './NotesDrawer';
 import VideoBoard from './VideoBoard';
 import Board from './Board';
 
-import { Button, Row, Col, Tooltip, Space } from 'antd';
-import { message } from 'antd';
-import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutlined, AudioMutedOutlined, EyeInvisibleOutlined, VerticalAlignTopOutlined, VerticalAlignBottomOutlined } from '@ant-design/icons';
-import SharedCoachingPlan from './SharedCoachingPlan';
-
+import SharedCoachingPlan from '../plan/SharedCoachingPlan';
+import SharedActionList from '../plan/SharedActionList';
 
 const CONNECTION_KEY_VIDEO_STREAM = "peerVideoStream";
 const CONNECTION_KEY_SCREEN_STREAM = "peerScreenStream";
@@ -70,11 +70,13 @@ class Broadcast extends Component {
         const sessionUserId = this.props.params.sessionUserId;
         const enrollmentId = this.props.params.enrollmentId;
         const memberId = this.props.params.memberId;
+        const isCoach = this.props.params.sessionUserType === 'coach';
 
         this.initializeNotesStore(sessionUserId);
 
         this.myBoard = <Board key={MY_BOARD_KEY} boardId={MY_BOARD_KEY} sessionUserId={sessionUserId} onCanvasStream={this.onCanvasStream} />
-        this.coachingPlan = <SharedCoachingPlan key="gt" enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
+        this.coachingPlan = <SharedCoachingPlan key="gt" isCoach = {isCoach} enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
+        this.actionList = <SharedActionList key="tt" isCoach = {isCoach} enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
     }
 
     initializeNotesStore = (sessionUserId) => {
@@ -386,7 +388,7 @@ class Broadcast extends Component {
         return (
             <div style={{ padding: 2, height: viewHeight }}>
 
-                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} boardSrc={boardSrc} myBoard={this.myBoard} coachingPlan={this.coachingPlan} isMinimized={isMinimized} />
+                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} boardSrc={boardSrc} myBoard={this.myBoard} coachingPlan={this.coachingPlan} actionList = {this.actionList} isMinimized={isMinimized} />
 
                 <Row style={{ marginTop: 8 }}>
                     <Col span={12}>

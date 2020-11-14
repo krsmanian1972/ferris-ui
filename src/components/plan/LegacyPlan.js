@@ -22,12 +22,15 @@ export default class LegacyPlan extends Component {
         super(props);
 
         this.objectiveStore = new ObjectiveStore({ apiProxy: props.appStore.apiProxy, enrollmentId: props.enrollmentId });
+        this.objectiveStore.isCoach = props.isCoach;
         this.objectiveStore.fetchObjectives();
 
         this.constraintStore = new ConstraintStore({ apiProxy: props.appStore.apiProxy, enrollmentId: props.enrollmentId });
+        this.constraintStore.isCoach = props.isCoach;
         this.constraintStore.fetchOptions();
 
         this.observationStore = new ObservationStore({ apiProxy: props.appStore.apiProxy, enrollmentId: props.enrollmentId });
+        this.observationStore.isCoach = props.isCoach;
         this.observationStore.fetchObservations();
     }
 
