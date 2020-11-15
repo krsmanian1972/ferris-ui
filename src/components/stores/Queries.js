@@ -355,6 +355,92 @@ export const createTaskQuery = `mutation($input: NewTaskRequest!) {
   }
 }`;
 
+export const updateTaskQuery = `mutation ($input: UpdateTaskRequest!) {
+  updateTask(updateTaskRequest:$input) {
+    task {
+      id
+      name
+      description
+      duration
+      scheduleStart
+    }
+    errors {
+      message
+    }
+  }
+}`;
+
+export const alterMemberTaskStateQuery = `mutation($input: ChangeMemberTaskStateRequest!) {
+  alterMemberTaskState(request: $input) {
+    task {
+      id,
+      name,
+      enrollmentId,
+      description,
+      actorId,
+      duration,
+      min,
+      max,
+      scheduleStart,
+      scheduleEnd,
+      createdAt,
+      actualStart,
+      response,
+      respondedDate,
+      closingNotes,
+      actualEnd,
+      cancelledDate,
+      status,
+      canStart,
+      canRespond,
+      canFinish,
+      canComplete,
+      canCancel,
+      canReopen
+    }
+    errors {
+      field
+      message
+    }
+  }
+}`;
+
+export const updateTaskResponseQuery = `mutation($input: UpdateResponseRequest!) {
+  updateTaskResponse(request: $input) {
+    task {
+      id,
+      name,
+      enrollmentId,
+      description,
+      actorId,
+      duration,
+      min,
+      max,
+      scheduleStart,
+      scheduleEnd,
+      createdAt,
+      actualStart,
+      response,
+      respondedDate,
+      closingNotes,
+      actualEnd,
+      cancelledDate,
+      status,
+      canStart,
+      canRespond,
+      canFinish,
+      canComplete,
+      canCancel,
+      canReopen
+    }
+    errors {
+      field
+      message
+    }
+  }
+}`;
+
+
 export const tasksQuery = `query ($criteria: PlanCriteria!) {
   getTasks(criteria: $criteria) {
     tasks {
@@ -362,11 +448,26 @@ export const tasksQuery = `query ($criteria: PlanCriteria!) {
         name,
         enrollmentId,
         description,
+        actorId,
         duration,
+        min,
+        max,
         scheduleStart,
         scheduleEnd,
+        createdAt,
+        actualStart,
+        response,
+        respondedDate,
+        closingNotes,
+        actualEnd,
+        cancelledDate,
         status,
-        createdAt
+        canStart,
+        canRespond,
+        canFinish,
+        canComplete,
+        canCancel,
+        canReopen
     }
     error{
       message
@@ -413,20 +514,6 @@ export const updateOptionQuery = `mutation ($input: UpdateOptionRequest!) {
   }
 }`;
 
-export const updateTaskQuery = `mutation ($input: UpdateTaskRequest!) {
-  updateTask(updateTaskRequest:$input) {
-    task {
-      id
-      name
-      description
-      duration
-      scheduleStart
-    }
-    errors {
-      message
-    }
-  }
-}`;
 
 export const observationsQuery = `query ($criteria: PlanCriteria!) {
   getObservations(criteria: $criteria) {

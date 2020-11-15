@@ -1,8 +1,8 @@
 import { decorate, observable, computed, action } from 'mobx';
 import { apiHost } from './APIEndpoints';
-import { createTaskQuery,tasksQuery,updateTaskQuery } from './Queries';
+import { createTaskQuery, tasksQuery, updateTaskQuery,alterMemberTaskStateQuery,updateTaskResponseQuery } from './Queries';
 import moment from 'moment';
-import {isBlank} from './Util';
+import { isBlank } from './Util';
 
 const INIT = "init";
 const PENDING = 'pending';
@@ -10,11 +10,13 @@ const INVALID = "invalid";
 const DONE = 'done';
 const ERROR = 'error';
 
-const EMPTY_TASK = {id:"",description:"",scheduleStart:null,duration:0};
+const EMPTY_TASK = { id: "", description: "", scheduleStart: null, duration: 0 };
 
 const EMPTY_MESSAGE = { status: "", help: "" };
 const SAVING_ERROR = { status: "error", help: "We are very sorry. Unable to store the Planning Information." };
 const ERROR_MESSAGE = { status: ERROR, help: "Unable to fetch the onward activities" };
+
+const START_ERROR = { status: "error", help: "Unable to to start the task." };
 
 export default class TaskStore {
 
@@ -22,10 +24,11 @@ export default class TaskStore {
     message = EMPTY_MESSAGE;
 
     showDrawer = false;
+    showResponseDrawer = false;
 
     startTime = null;
     startTimeMsg = {};
-    
+
     duration = 0;
     durationMsg = {};
 
@@ -34,9 +37,10 @@ export default class TaskStore {
     tasks = [];
     rowCount = 0;
     currentTask = {};
-    
+    currentIndex = -1;
+
     isCoach = false;
-    
+
     constructor(props) {
         this.apiProxy = props.apiProxy;
         this.enrollmentId = props.enrollmentId;
@@ -73,15 +77,17 @@ export default class TaskStore {
         this.duration = 0;
     }
 
-    asCurrent =(index) => {
+    asCurrent = (index) => {
 
         this.startTimeMsg = {};
         this.durationMsg = {};
         this.startTime = null;
         this.duration = 0;
+        this.currentIndex = -1;
 
-        if(index >= 0 && index < this.rowCount) {
+        if (index >= 0 && index < this.rowCount) {
             this.currentTask = this.tasks[index];
+            this.currentIndex = index;
             return true;
         }
 
@@ -120,8 +126,8 @@ export default class TaskStore {
         }
     }
 
-    saveTask = async(planRequest) => {
-        if(this.isNewTask) {
+    saveTask = async (planRequest) => {
+        if (this.isNewTask) {
             await this.createTask(planRequest);
         }
         else {
@@ -129,7 +135,7 @@ export default class TaskStore {
         }
     }
 
-    updateTask = async(planRequest) => {
+    updateTask = async (planRequest) => {
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
@@ -137,16 +143,16 @@ export default class TaskStore {
             this.state = INVALID;
             return;
         }
-        
+
         const startTime = planRequest.startTime.startOf('hour');
 
         const variables = {
             input: {
                 id: this.currentTask.id,
-                name:planRequest.name,
-                description:planRequest.description,
+                name: planRequest.name,
+                description: planRequest.description,
                 startTime: startTime.utc().format(),
-                duration:planRequest.duration,
+                duration: planRequest.duration,
             }
         }
 
@@ -174,7 +180,7 @@ export default class TaskStore {
     createTask = async (planRequest) => {
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
-        
+
         if (!this.isValid(planRequest)) {
             this.state = INVALID;
             return;
@@ -184,10 +190,10 @@ export default class TaskStore {
 
         const variables = {
             input: {
-                name:planRequest.name,
-                description:planRequest.description,
+                name: planRequest.name,
+                description: planRequest.description,
                 enrollmentId: this.enrollmentId,
-                actorId:this.memberId,
+                actorId: this.memberId,
                 startTime: startTime.utc().format(),
                 duration: planRequest.duration
             }
@@ -208,7 +214,7 @@ export default class TaskStore {
         }
         catch (e) {
             this.state = ERROR;
-            this.message = ENROLLMENT_ERROR;
+            this.message = SAVING_ERROR;
             console.log(e);
         }
     }
@@ -217,7 +223,7 @@ export default class TaskStore {
 
         this.validateDate(request.startTime);
         this.validateDuration(request.duration);
-   
+
         return this.startTimeMsg.status !== ERROR
             && this.startTimeMsg.status !== ERROR
             && this.durationMsg.status !== ERROR;
@@ -255,6 +261,85 @@ export default class TaskStore {
 
     }
 
+    startTask = async(index) => {
+        this.alterMemberTaskState(index,"START");
+    }
+
+    finishTask = async(index) => {
+        this.alterMemberTaskState(index,"FINISH");
+    }
+
+    alterMemberTaskState = async(index,targetState) => {
+
+        if (!(index >= 0 && index < this.rowCount)) {
+            return 
+        }
+
+        const task = this.tasks[index];
+
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+
+        const variables = {
+            input: {
+                id: task.id,
+                targetState: targetState
+            }
+        };
+
+        try {
+            const response = await this.apiProxy.mutate(apiHost, alterMemberTaskStateQuery, variables);
+            const data = await response.json();
+
+            if (data.error == true) {
+                this.state = ERROR;
+                this.message = START_ERROR;
+                return;
+            }
+            this.tasks[index] = data.data.alterMemberTaskState.task;
+            this.state = DONE;
+        }
+        catch (e) {
+            this.state = ERROR;
+            this.message = START_ERROR;
+            console.log(e);
+        }
+    }
+
+    updateResponse = async (taskResponse) => {
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+
+        const variables = {
+            input: {
+                id: this.currentTask.id,
+                response: taskResponse.response,
+           }
+        }
+
+        try {
+            const response = await this.apiProxy.mutate(apiHost, updateTaskResponseQuery, variables);
+            const data = await response.json();
+
+            if (data.error == true) {
+                this.state = ERROR;
+                this.message = SAVING_ERROR;
+                return;
+            }
+
+            this.tasks[this.currentIndex] = data.data.updateTaskResponse.task;
+            
+            this.state = DONE;
+            this.showResponseDrawer = false;
+        }
+        catch (e) {
+            this.state = ERROR;
+            this.message = SAVING_ERROR;
+            console.log(e);
+        }
+    }
+
+
 }
 
 decorate(TaskStore, {
@@ -263,11 +348,11 @@ decorate(TaskStore, {
     change: observable,
     showDrawer: observable,
 
-    startTime:observable,
+    startTime: observable,
     startTimeMsg: observable,
 
-    duration:observable,
-    durationMsg:observable,
+    duration: observable,
+    durationMsg: observable,
 
     tasks: observable,
     currentTask: observable,
@@ -279,10 +364,15 @@ decorate(TaskStore, {
     isError: computed,
     isNewTask: computed,
 
-    saveTask:action,
+    saveTask: action,
     fetchTasks: action,
-    setNewTask:action,
-    asCurrent:action,
+    setNewTask: action,
+    asCurrent: action,
     validateDate: action,
-    validateDuration:action,
+    validateDuration: action,
+
+    startTask: action,
+    showResponseDrawer: observable,
+    updateResponse: action,
+    finishTask: action,
 })

@@ -16,7 +16,7 @@ class DiscussionList extends Component {
     }
 
     componentWillUnmount() {
-        console.log("Discussion List Destroyed");
+    
     }
 
     render() {

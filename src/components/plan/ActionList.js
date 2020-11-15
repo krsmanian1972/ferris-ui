@@ -6,13 +6,17 @@ import moment from 'moment';
 import 'moment-timezone';
 
 import { Card, Typography, Spin, Result, Carousel, Button, Steps, Tooltip, Tag, Space, Statistic } from 'antd';
-import { LeftOutlined, RightOutlined, PlusOutlined, EditOutlined, ArrowDownOutlined, ArrowUpOutlined, CarryOutOutlined } from '@ant-design/icons';
-
-import TaskStore from '../stores/TaskStore';
-import TaskDrawer from './TaskDrawer';
-import Reader from "../commons/Reader";
+import { LeftOutlined, RightOutlined, PlusOutlined, EditOutlined, ArrowDownOutlined, ArrowUpOutlined, LikeOutlined } from '@ant-design/icons';
 
 import { cardHeaderStyle } from '../util/Style';
+
+import TaskStore from '../stores/TaskStore';
+
+import Reader from "../commons/Reader";
+
+import TaskDrawer from './TaskDrawer';
+import ActionResponse from './ActionResponse';
+import ActionResponseDrawer from './ActionResponseDrawer';
 
 const { Title } = Typography;
 const { Step } = Steps;
@@ -71,11 +75,17 @@ class ActionList extends Component {
 
         var hoursEl;
 
-        if (diff >= 0) {
-            hoursEl = <Countdown title="Hours Ahead" value={localeEnd} format="HH:mm" valueStyle={{ color: 'green' }} prefix={<ArrowUpOutlined />} suffix="hours" />
+        if (task.respondedDate) {
+            const respondedDate = moment(task.respondedDate * 1000).format("DD-MMM-YYYY");
+            hoursEl = <Statistic title="Responded On" value={respondedDate} valueStyle={{ fontSize: "12px", fontWeight: "bold", color: "green" }} prefix={<LikeOutlined />}/>
         }
         else {
-            hoursEl = <Statistic title="Overdue" value={diff * (-1)} precision={0} valueStyle={{ color: '#cf1322' }} prefix={<ArrowDownOutlined />} suffix="hours" />
+            if (diff >= 0) {
+                hoursEl = <Countdown title="Hours Ahead" value={localeEnd} format="HH:mm" valueStyle={{ color: 'green' }} prefix={<ArrowUpOutlined />} suffix="hours" />
+            }
+            else {
+                hoursEl = <Statistic title="Overdue" value={diff * (-1)} precision={0} valueStyle={{ color: '#cf1322' }} prefix={<ArrowDownOutlined />} suffix="hours" />
+            }
         }
 
         return (
@@ -93,7 +103,8 @@ class ActionList extends Component {
     }
 
     renderTask = (task, index) => {
-        const key = `action_${index}`
+        const key = `action_${index}`;
+        const resp_key = `action_resp_${index}`;
 
         return (
             <div key={key}>
@@ -106,11 +117,7 @@ class ActionList extends Component {
                     <Reader value={task.description} readOnly={true} height={350} />
                 </div>
 
-                <p style={labelStyle}>Response</p>
-                <div style={taskStyle}>
-                    <Reader value={task.description} readOnly={true} height={350} />
-                </div>
-
+                <ActionResponse key={resp_key} task={task} index={index} store={this.store} />
             </div>
         )
     }
@@ -181,31 +188,12 @@ class ActionList extends Component {
         this.store.showDrawer = flag;
     }
 
-    showEditResponse = () => {
-
-    }
-
     getControls = () => {
         if (this.store.isCoach) {
             return this.getCoachControls();
         }
-        return this.getMemberControls();
     }
 
-    getMemberControls = () => {
-
-        const rowCount = this.store.rowCount;
-
-        return (
-            <div style={controlStyle}>
-                <Space>
-                    <Tooltip key="ed_resp_tip" title="Response to the suggested activity ">
-                        <Button key="edit_resp" icon={<CarryOutOutlined />} disabled={rowCount === 0} shape="circle" onClick={() => this.showEditResponse()}></Button>
-                    </Tooltip>
-                </Space>
-            </div>
-        );
-    }
 
     getCoachControls = () => {
 
@@ -238,7 +226,9 @@ class ActionList extends Component {
                 title={<Title level={4}>Actions &nbsp;{this.countTag()}</Title>}>
                 {this.renderSlider(tasks, rowCount)}
                 {this.displayMessage()}
+
                 <TaskDrawer taskStore={this.store} />
+                <ActionResponseDrawer taskStore={this.store} />
             </Card>
         )
     }
