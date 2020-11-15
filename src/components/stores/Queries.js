@@ -149,6 +149,7 @@ export const alterSessionStateQuery = `mutation($input: ChangeSessionStateReques
     session{
       id,
       people,
+      enrollmentId,
       name,
       description,
       duration,
