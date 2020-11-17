@@ -1,32 +1,36 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-
-import Moment from 'react-moment';
 import moment from 'moment';
-import 'moment-timezone';
 
-import { Card, Typography, Spin, Result, Carousel, Button, Steps, Tooltip, Tag, Space, Statistic } from 'antd';
-import { LeftOutlined, RightOutlined, PlusOutlined, EditOutlined, ArrowDownOutlined, ArrowUpOutlined, LikeOutlined } from '@ant-design/icons';
+import { Card, Typography, Spin, Result, Carousel, Button, Tooltip, Tag, Space, Statistic } from 'antd';
+import { LeftOutlined, RightOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';
 
 import { cardHeaderStyle } from '../util/Style';
 
-import TaskStore from '../stores/TaskStore';
-
 import Reader from "../commons/Reader";
 
+import TaskStore from '../stores/TaskStore';
 import TaskDrawer from './TaskDrawer';
+
+import ActionStat from './ActionStat';
+
 import ActionResponse from './ActionResponse';
 import ActionResponseDrawer from './ActionResponseDrawer';
 
+import ActionClosure from './ActionClosure';
+import ActionClosureDrawer from './ActionClosureDrawer';
+
 const { Title } = Typography;
-const { Step } = Steps;
-const { Countdown } = Statistic;
 
 const taskTitleStyle = { color: "rgb(59,109,171)", textAlign: "center" };
-const labelStyle = { marginTop: 10, marginBottom: 2, fontWeight: "bold", textAlign: "left", color: "rgb(59,109,171)" };
 const taskStyle = { background: "rgb(242,242,242)", width: "100%", marginBottom: "10px" };
 const controlStyle = { display: "flex", flexWrap: "wrap", flexDirection: "row", alignItems: "center", paddingRight: 10 };
 const sliderStyle = { display: "flex", flexDirection: "row", justifyContent: "center", textAlign: "center", alignItems: "center" };
+
+const activityBarStyle = { background: "rgb(36,39,84)", display: "flex", flexWrap: "wrap", height: 50, flexDirection: "row", justifyContent: "space-between" };
+const activityTitleStyle = { display: "flex", alignItems: "center", paddingLeft: 10, fontWeight: "bold", color: "white" };
+const valueStyle = { fontSize: "12px", fontWeight: "bold", color: "white",paddingRight: 10 };
+const labelStyle = { fontSize: "10px", color: "white", textAlign:"right",paddingRight: 10 };
 
 @observer
 class ActionList extends Component {
@@ -61,63 +65,42 @@ class ActionList extends Component {
         return (<></>)
     }
 
-    renderStat = (task) => {
 
-        const localeStart = moment(task.scheduleStart * 1000);
-        const localeEnd = moment(task.scheduleEnd * 1000);
-        const diff = localeEnd.diff(moment(), 'hours');
-
-        const startEl = <Moment format="llll" style={{ fontWeight: "bold" }}>{localeStart}</Moment>
-        const endEl = <Moment format="llll" style={{ fontWeight: "bold" }}>{localeEnd}</Moment>
-
-        const createdAt = moment(task.createdAt * 1000).format("DD-MMM-YYYY");
-        const dateEl = <Statistic title="Created On" value={createdAt} valueStyle={{ fontSize: "12px", fontWeight: "bold" }} />
-
-        var hoursEl;
-
-        if (task.respondedDate) {
-            const respondedDate = moment(task.respondedDate * 1000).format("DD-MMM-YYYY");
-            hoursEl = <Statistic title="Responded On" value={respondedDate} valueStyle={{ fontSize: "12px", fontWeight: "bold", color: "green" }} prefix={<LikeOutlined />}/>
-        }
-        else {
-            if (diff >= 0) {
-                hoursEl = <Countdown title="Hours Ahead" value={localeEnd} format="HH:mm" valueStyle={{ color: 'green' }} prefix={<ArrowUpOutlined />} suffix="hours" />
-            }
-            else {
-                hoursEl = <Statistic title="Overdue" value={diff * (-1)} precision={0} valueStyle={{ color: '#cf1322' }} prefix={<ArrowDownOutlined />} suffix="hours" />
-            }
-        }
+    renderSuggestedActivity = (task) => {
+        const dueDate = moment(task.scheduleEnd * 1000).format("DD-MMM-YYYY");
+        const title = <Title level={5} style={labelStyle}>Due on</Title>
 
         return (
-            <div className="task-stat">
-                <div style={{ textAlign: "left", width: "30%" }}>{hoursEl}</div>
-                <div style={{ textAlign: "center", width: "50%" }}>
-                    <Steps progressDot current={1} size="small">
-                        <Step title={startEl} description="Start" />
-                        <Step title={endEl} description="End" />
-                    </Steps>
+            <>
+                <div style={activityBarStyle}>
+                    <div style={activityTitleStyle}>Suggested Activity</div>
+                    <Statistic title={title} value={dueDate} valueStyle={valueStyle} />
                 </div>
-                <div style={{ textAlign: "right", width: "20%" }}>{dateEl}</div>
-            </div >
+
+                <div style={taskStyle}>
+                    <Reader value={task.description} readOnly={true} height={350} />
+                </div>
+            </>
         )
     }
 
     renderTask = (task, index) => {
         const key = `action_${index}`;
         const resp_key = `action_resp_${index}`;
+        const clos_key = `clos_resp_${index}`;
+        const stat_key = `action_stat_${index}`;
 
         return (
             <div key={key}>
                 <Title level={5} style={taskTitleStyle}>{task.name}</Title>
 
-                {this.renderStat(task)}
+                <ActionStat key={stat_key} task={task} />
 
-                <p style={labelStyle}>Suggested Activity</p>
-                <div style={taskStyle}>
-                    <Reader value={task.description} readOnly={true} height={350} />
-                </div>
+                {this.renderSuggestedActivity(task)}
 
                 <ActionResponse key={resp_key} task={task} index={index} store={this.store} />
+
+                <ActionClosure key={clos_key} task={task} index={index} store={this.store} />
             </div>
         )
     }
@@ -229,6 +212,7 @@ class ActionList extends Component {
 
                 <TaskDrawer taskStore={this.store} />
                 <ActionResponseDrawer taskStore={this.store} />
+                <ActionClosureDrawer taskStore={this.store} />
             </Card>
         )
     }

@@ -441,6 +441,76 @@ export const updateTaskResponseQuery = `mutation($input: UpdateResponseRequest!)
   }
 }`;
 
+export const alterCoachTaskStateQuery = `mutation($input: ChangeCoachTaskStateRequest!) {
+  alterCoachTaskState(request: $input) {
+    task {
+      id,
+      name,
+      enrollmentId,
+      description,
+      actorId,
+      duration,
+      min,
+      max,
+      scheduleStart,
+      scheduleEnd,
+      createdAt,
+      actualStart,
+      response,
+      respondedDate,
+      closingNotes,
+      actualEnd,
+      cancelledDate,
+      status,
+      canStart,
+      canRespond,
+      canFinish,
+      canComplete,
+      canCancel,
+      canReopen
+    }
+    errors {
+      field
+      message
+    }
+  }
+}`;
+
+export const updateTaskClosingNotesQuery = `mutation($input: UpdateClosingNoteRequest!) {
+  updateTaskClosingNotes(request: $input) {
+    task {
+      id,
+      name,
+      enrollmentId,
+      description,
+      actorId,
+      duration,
+      min,
+      max,
+      scheduleStart,
+      scheduleEnd,
+      createdAt,
+      actualStart,
+      response,
+      respondedDate,
+      closingNotes,
+      actualEnd,
+      cancelledDate,
+      status,
+      canStart,
+      canRespond,
+      canFinish,
+      canComplete,
+      canCancel,
+      canReopen
+    }
+    errors {
+      field
+      message
+    }
+  }
+}`;
+
 
 export const tasksQuery = `query ($criteria: PlanCriteria!) {
   getTasks(criteria: $criteria) {

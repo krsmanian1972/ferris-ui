@@ -445,8 +445,10 @@ code {
   width: "100%";
   background:rgb(250,231,143);
   padding: 10px;
-  border-radius: 12px; 
+  margin-bottom: 10px;
 }
+
+
 
 .plan-stat-style { 
   display:flex;

@@ -1,6 +1,6 @@
 import { decorate, observable, computed, action } from 'mobx';
 import { apiHost } from './APIEndpoints';
-import { createTaskQuery, tasksQuery, updateTaskQuery,alterMemberTaskStateQuery,updateTaskResponseQuery } from './Queries';
+import { createTaskQuery, tasksQuery, updateTaskQuery,alterMemberTaskStateQuery,updateTaskResponseQuery, updateTaskClosingNotesQuery, alterCoachTaskStateQuery} from './Queries';
 import moment from 'moment';
 import { isBlank } from './Util';
 
@@ -25,6 +25,7 @@ export default class TaskStore {
 
     showDrawer = false;
     showResponseDrawer = false;
+    showClosureDrawer = false;
 
     startTime = null;
     startTimeMsg = {};
@@ -262,11 +263,11 @@ export default class TaskStore {
     }
 
     startTask = async(index) => {
-        this.alterMemberTaskState(index,"START");
+        await this.alterMemberTaskState(index,"START");
     }
 
     finishTask = async(index) => {
-        this.alterMemberTaskState(index,"FINISH");
+        await this.alterMemberTaskState(index,"FINISH");
     }
 
     alterMemberTaskState = async(index,targetState) => {
@@ -339,7 +340,79 @@ export default class TaskStore {
         }
     }
 
+    closeTask = async(index) => {
+        await this.alterCoachTaskState(index,"DONE");
+    }
 
+    alterCoachTaskState = async(index,targetState) => {
+
+        if (!(index >= 0 && index < this.rowCount)) {
+            return 
+        }
+
+        const task = this.tasks[index];
+
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+
+        const variables = {
+            input: {
+                id: task.id,
+                targetState: targetState,
+            }
+        };
+
+        try {
+            const response = await this.apiProxy.mutate(apiHost, alterCoachTaskStateQuery, variables);
+            const data = await response.json();
+
+            if (data.error == true) {
+                this.state = ERROR;
+                this.message = START_ERROR;
+                return;
+            }
+            this.tasks[index] = data.data.alterCoachTaskState.task;
+            this.state = DONE;
+        }
+        catch (e) {
+            this.state = ERROR;
+            this.message = START_ERROR;
+            console.log(e);
+        }
+    }
+
+    updateClosingNotes = async (request) => {
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+
+        const variables = {
+            input: {
+                id: this.currentTask.id,
+                notes: request.closingNotes,
+           }
+        }
+
+        try {
+            const response = await this.apiProxy.mutate(apiHost, updateTaskClosingNotesQuery, variables);
+            const data = await response.json();
+
+            if (data.error == true) {
+                this.state = ERROR;
+                this.message = SAVING_ERROR;
+                return;
+            }
+
+            this.tasks[this.currentIndex] = data.data.updateTaskClosingNotes.task;
+            
+            this.state = DONE;
+            this.showClosureDrawer = false;
+        }
+        catch (e) {
+            this.state = ERROR;
+            this.message = SAVING_ERROR;
+            console.log(e);
+        }
+    }
 }
 
 decorate(TaskStore, {
@@ -375,4 +448,8 @@ decorate(TaskStore, {
     showResponseDrawer: observable,
     updateResponse: action,
     finishTask: action,
+
+    showClosureDrawer: observable,
+    updateClosingNotes: action,
+    closeTask: action,
 })
