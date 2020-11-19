@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
+
 
 import { Button, Tooltip, Space, Popconfirm, Statistic, Typography } from 'antd';
 import { CarryOutOutlined, CheckOutlined } from '@ant-design/icons';
@@ -30,7 +30,7 @@ export default function ActionClosure({ task, index, store }) {
 
     const closureText = () => {
         if (task.actualEnd) {
-            const actualEnd = moment(task.actualEnd * 1000).format("DD-MMM-YYYY");
+            const actualEnd = task.actualEnd.format("DD-MMM-YYYY");
 
             const title = <Title level={5} style={{ fontSize: "10px", color: "white", textAlign: "right" }}>Closed on</Title>
 

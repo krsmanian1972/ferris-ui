@@ -1,8 +1,10 @@
 import { decorate, observable, computed, action } from 'mobx';
 import { apiHost } from './APIEndpoints';
-import { createTaskQuery, tasksQuery, updateTaskQuery,alterMemberTaskStateQuery,updateTaskResponseQuery, updateTaskClosingNotesQuery, alterCoachTaskStateQuery} from './Queries';
+
 import moment from 'moment';
 import { isBlank } from './Util';
+
+import { createTaskQuery, tasksQuery, updateTaskQuery, alterMemberTaskStateQuery, updateTaskResponseQuery, updateTaskClosingNotesQuery, alterCoachTaskStateQuery } from './Queries';
 
 const INIT = "init";
 const PENDING = 'pending';
@@ -17,6 +19,13 @@ const SAVING_ERROR = { status: "error", help: "We are very sorry. Unable to stor
 const ERROR_MESSAGE = { status: ERROR, help: "Unable to fetch the onward activities" };
 
 const START_ERROR = { status: "error", help: "Unable to to start the task." };
+
+const as_locale = (rustDate) => {
+    if (!rustDate) {
+        return undefined
+    }
+    return moment(rustDate * 1000);
+};
 
 export default class TaskStore {
 
@@ -36,6 +45,9 @@ export default class TaskStore {
     change = null;
 
     tasks = [];
+    totalActualDuration = 0;
+    totalPlannedDuration = 0;
+
     rowCount = 0;
     currentTask = {};
     currentIndex = -1;
@@ -95,6 +107,79 @@ export default class TaskStore {
         return false;
     }
 
+    /**
+     * Let us return zero when the session is not completed.
+     * @param {*} task 
+     */
+    calcActualDuration = (task) => {
+        if (task.respondedDate && task.actualStart) {
+            return task.respondedDate.diff(task.actualStart, 'hours');
+        }
+        return 0;
+    }
+
+    calcNetDuration = () => {
+
+        var totalActual = 0;
+        var totalPlanned = 0;
+
+        if (this.tasks) {
+            for (var index = 0; index < this.tasks.length; index++) {
+                totalActual = totalActual + this.tasks[index].actualDuration;
+                totalPlanned = totalPlanned + this.tasks[index].duration;
+            }
+        }
+
+        this.totalActualDuration = totalActual;
+        this.totalPlannedDuration = totalPlanned;
+    }
+
+    /**
+     * Transform the task event we received from ferris into table data.
+     * 
+     * Esp the date we receive from Ferris needs to be localized
+     *  
+     */
+    formatResult = (result) => {
+        if(!result) {
+            return;
+        }
+
+        for (var index = 0; index < result.length; index++) {
+            var rowData = result[index];
+            this.formatRowData(rowData,index);
+        }
+    }
+
+    /**
+     * If the attribute Key is present in the rowData, it is an indication
+     * that we have already formatted the data.
+     *  
+     * @param {*} rowData 
+     * @param {*} index 
+     */
+    formatRowData = (rowData, index) => {
+
+        if (rowData.key) {
+            return;
+        }
+
+        rowData.key = index;
+
+        rowData.createdAt = as_locale(rowData.createdAt);
+
+        rowData.scheduleStart = as_locale(rowData.scheduleStart);
+        rowData.scheduleEnd = as_locale(rowData.scheduleEnd);
+
+        rowData.actualStart = as_locale(rowData.actualStart);
+        rowData.respondedDate = as_locale(rowData.respondedDate);
+        rowData.actualEnd = as_locale(rowData.actualEnd);
+
+        rowData.cancelledDate = as_locale(rowData.cancelledDate);
+
+        rowData.actualDuration = this.calcActualDuration(rowData);
+    }
+
     fetchTasks = async () => {
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
@@ -116,8 +201,13 @@ export default class TaskStore {
             }
 
             const result = data.data.getTasks.tasks;
+            this.formatResult(result);
+
             this.tasks = result;
             this.rowCount = result.length;
+            
+            this.calcNetDuration();
+            
             this.state = DONE;
         }
         catch (e) {
@@ -262,18 +352,18 @@ export default class TaskStore {
 
     }
 
-    startTask = async(index) => {
-        await this.alterMemberTaskState(index,"START");
+    startTask = async (index) => {
+        await this.alterMemberTaskState(index, "START");
     }
 
-    finishTask = async(index) => {
-        await this.alterMemberTaskState(index,"FINISH");
+    finishTask = async (index) => {
+        await this.alterMemberTaskState(index, "FINISH");
     }
 
-    alterMemberTaskState = async(index,targetState) => {
+    alterMemberTaskState = async (index, targetState) => {
 
         if (!(index >= 0 && index < this.rowCount)) {
-            return 
+            return
         }
 
         const task = this.tasks[index];
@@ -297,7 +387,14 @@ export default class TaskStore {
                 this.message = START_ERROR;
                 return;
             }
-            this.tasks[index] = data.data.alterMemberTaskState.task;
+            
+            const task = data.data.alterMemberTaskState.task;
+            this.formatRowData(task);
+
+            this.tasks[index] = task;
+
+            this.calcNetDuration();
+            
             this.state = DONE;
         }
         catch (e) {
@@ -315,7 +412,7 @@ export default class TaskStore {
             input: {
                 id: this.currentTask.id,
                 response: taskResponse.response,
-           }
+            }
         }
 
         try {
@@ -328,8 +425,11 @@ export default class TaskStore {
                 return;
             }
 
-            this.tasks[this.currentIndex] = data.data.updateTaskResponse.task;
-            
+            const task = data.data.updateTaskResponse.task;
+            this.formatRowData(task);
+
+            this.tasks[this.currentIndex] = task;
+    
             this.state = DONE;
             this.showResponseDrawer = false;
         }
@@ -340,14 +440,14 @@ export default class TaskStore {
         }
     }
 
-    closeTask = async(index) => {
-        await this.alterCoachTaskState(index,"DONE");
+    closeTask = async (index) => {
+        await this.alterCoachTaskState(index, "DONE");
     }
 
-    alterCoachTaskState = async(index,targetState) => {
+    alterCoachTaskState = async (index, targetState) => {
 
         if (!(index >= 0 && index < this.rowCount)) {
-            return 
+            return
         }
 
         const task = this.tasks[index];
@@ -371,7 +471,12 @@ export default class TaskStore {
                 this.message = START_ERROR;
                 return;
             }
-            this.tasks[index] = data.data.alterCoachTaskState.task;
+
+            const task = data.data.alterCoachTaskState.task;
+            this.formatRowData(task);
+
+            this.tasks[index] = task;
+
             this.state = DONE;
         }
         catch (e) {
@@ -389,7 +494,7 @@ export default class TaskStore {
             input: {
                 id: this.currentTask.id,
                 notes: request.closingNotes,
-           }
+            }
         }
 
         try {
@@ -402,7 +507,10 @@ export default class TaskStore {
                 return;
             }
 
-            this.tasks[this.currentIndex] = data.data.updateTaskClosingNotes.task;
+            const task = data.data.updateTaskClosingNotes.task;
+            this.formatRowData(task);
+
+            this.tasks[this.currentIndex] = task;
             
             this.state = DONE;
             this.showClosureDrawer = false;

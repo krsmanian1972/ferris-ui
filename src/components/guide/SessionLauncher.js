@@ -62,7 +62,7 @@ class SessionLauncher extends Component {
     getButtonLabel = () => {
    
         if (this.state.showWindowPortal) {
-            return "Intermission";
+            return "Live";
         }
 
         const store = this.props.store

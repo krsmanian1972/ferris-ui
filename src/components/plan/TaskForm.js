@@ -54,9 +54,8 @@ class TaskForm extends Component {
         }
 
         const {description, name, scheduleStart, duration} = store.currentTask;
-        const localeStart = moment(scheduleStart*1000);
 
-        this.formRef.current && this.formRef.current.setFieldsValue({ description: description, name:name, startTime: localeStart, duration: duration });
+        this.formRef.current && this.formRef.current.setFieldsValue({ description: description, name:name, startTime: scheduleStart, duration: duration });
         this.description = description;
         store.change=moment();
     }

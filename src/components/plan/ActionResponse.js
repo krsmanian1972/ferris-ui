@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import moment from 'moment';
+
 
 import { Button, Tooltip, Space, Popconfirm, Statistic,Typography } from 'antd';
 import { CaretRightOutlined, CarryOutOutlined, CheckOutlined } from '@ant-design/icons';
@@ -32,7 +32,7 @@ export default function ActionResponse({ task, index, store }) {
 
     const respondedText = () => {
         if (task.respondedDate) {
-            const respondedDate = moment(task.respondedDate * 1000).format("DD-MMM-YYYY");
+            const respondedDate = task.respondedDate.format("DD-MMM-YYYY");
             const title = <Title level={5} style={{ fontSize: "10px",color:"black",textAlign:"right" }}>Responded on</Title>
 
             return (

@@ -41,13 +41,26 @@ code {
   background: rgb(216,213,221);
 }
 
+
 .ant-page-header .ant-page-header-heading {
   margin-bottom: -15px;
+}
+
+.ant-menu.ant-menu-light {
+  color: black;
+  font-weight:normal;
+}
+
+.ant-menu.ant-menu-light .ant-menu-item-selected.customclass {
+  color: rgb(69,49,28); 
+  font-weight: bold;
+  border-bottom: 2px solid rgb(69,49,28);
 }
 
 .ant-carousel .slick-dots li {
   background: gray;
 }
+
 .ant-steps-item-process .ant-steps-item-tail::after {
   background: rgb(216,213,221) !important;
 }
@@ -438,6 +451,8 @@ code {
 .journal-container .ant-tabs-tab-active {
   background: white;
 }
+
+
 
 .task-stat { 
   display:flex;

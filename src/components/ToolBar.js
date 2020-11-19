@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Dropdown, Menu, Layout, Typography, Row, Col, Space } from 'antd';
-import { UserOutlined } from '@ant-design/icons';
+import { Dropdown, Menu, Layout, Typography, Row, Col, Space,Tooltip,Button } from 'antd';
+import { ClockCircleFilled, GroupOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
 
 import ownerLogo from '../images/krscode.png';
 
@@ -35,15 +35,30 @@ export default class ToolBar extends Component {
 
         return (
             <Col span={14}>
-                <Menu mode="horizontal" defaultSelectedKeys={['0']} style={{ borderStyle: "none" }}>
+                <Menu mode="horizontal" defaultSelectedKeys={['0']}>
                     {
                         appStore.menus.map((item, index) => (
-                            <Menu.Item key={index} onClick={this.handleEvent} >{item.label}</Menu.Item>)
+                            <Menu.Item key={index} className="customclass" onClick={this.handleEvent} >{item.label}</Menu.Item>)
                         )
                     }
                 </Menu>
             </Col>
         )
+    }
+
+    showEnrollments = () => {
+        const params = { event: {}, parentKey: "home" };
+        this.props.appStore.currentComponent = { label: "Enrollments", key: "enrollments", params: params };
+    }
+
+    membersButton = () => {
+        if (this.props.appStore.isCoach) {
+            return (
+                <Tooltip key="members_tip" title="Enrolled Members">
+                    <Button type="primary" icon={<TeamOutlined />} onClick={this.showEnrollments}>Team</Button>
+                </Tooltip>
+            )
+        }
     }
 
     renderRightMenu = () => {
@@ -52,6 +67,7 @@ export default class ToolBar extends Component {
             return (
                 <Col span={6} style={{ textAlign: "right" }}>
                     <Space>
+                        {this.membersButton()}
                         <MessageButton appStore = {appStore}/>
                         <Dropdown.Button overlay={<AccountMenu />} trigger={['click']} icon={<UserOutlined />}>
                             {appStore.credentials.username}

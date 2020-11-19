@@ -2,11 +2,12 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Carousel, Button,Card } from 'antd';
+import { Carousel, Button } from 'antd';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 
 import { assetHost } from '../stores/APIEndpoints';
 
+const contentStyle = { display: "flex", flexDirection: "row", justifyContent: "center", textAlign: "center", alignItems: "center",marginRight:10,marginLeft:10,marginTop:10};
 
 @inject("appStore")
 @observer
@@ -19,8 +20,8 @@ class ProgramBanner extends Component {
     getProgramBanner = (program) => {
         const url = `${assetHost}/programs/${program.id}/banner/banner.png`;
         return (
-            <div style={{ textAlign: "center", height: 260 }}>
-                <div style={{ display: "inline-block", verticalAlign: "middle", height: 260 }}></div>
+            <div style={{ textAlign: "center", height: 300 }}>
+                <div style={{ display: "inline-block", verticalAlign: "middle", height: 300 }}></div>
                 <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px", cursor: 'pointer' }} src={url} onClick={() => this.props.showProgramDetail(program.id)} />
             </div>
         )
@@ -46,9 +47,9 @@ class ProgramBanner extends Component {
         };
 
         return (
-            <div style={{ display: "flex", flexDirection: "row", justifyContent: "center", textAlign: "center", alignItems: "center" }}>
-                <Button key="back" onClick={this.previous} icon={<LeftOutlined />} shape="square"></Button>
-                <div style={{ width: "94%" }}>
+            <div style={contentStyle}>
+                <Button style={{width:"1%"}} key="back" onClick={this.previous} icon={<LeftOutlined />} shape="circle"></Button>
+                <div style={{ width: "96%" }}>
                     <Carousel ref={ref => (this.carousel = ref)} {...props}>
                         {programs && programs.map(({ program }) => {
                             return (
@@ -59,7 +60,7 @@ class ProgramBanner extends Component {
                         })}
                     </Carousel>
                 </div>
-                <Button key="forward" onClick={this.next} icon={<RightOutlined />} shape="square"></Button>
+                <Button style={{width:"1%"}} key="forward" onClick={this.next} icon={<RightOutlined />} shape="circle"></Button>
             </div>
         )
     }
@@ -70,9 +71,9 @@ class ProgramBanner extends Component {
         const programs = store.programs;
 
         return (
-            <Card style={{ marginLeft: 10, marginRight: 10}}>
+            <>
                 {this.renderSlider(programs, store.rowCount)}
-            </Card>
+            </>
         )
     }
 }

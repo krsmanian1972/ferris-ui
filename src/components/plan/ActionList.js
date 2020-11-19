@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import moment from 'moment';
 
 import { Card, Typography, Spin, Result, Carousel, Button, Tooltip, Tag, Space, Statistic } from 'antd';
-import { LeftOutlined, RightOutlined, PlusOutlined, EditOutlined } from '@ant-design/icons';
+import { LeftOutlined, RightOutlined, PlusOutlined, EditOutlined, ReconciliationOutlined } from '@ant-design/icons';
 
 import { cardHeaderStyle } from '../util/Style';
 
@@ -20,6 +19,8 @@ import ActionResponseDrawer from './ActionResponseDrawer';
 import ActionClosure from './ActionClosure';
 import ActionClosureDrawer from './ActionClosureDrawer';
 
+import ActionSummary from './ActionSummary';
+
 const { Title } = Typography;
 
 const taskTitleStyle = { color: "rgb(59,109,171)", textAlign: "center" };
@@ -29,8 +30,8 @@ const sliderStyle = { display: "flex", flexDirection: "row", justifyContent: "ce
 
 const activityBarStyle = { background: "rgb(36,39,84)", display: "flex", flexWrap: "wrap", height: 50, flexDirection: "row", justifyContent: "space-between" };
 const activityTitleStyle = { display: "flex", alignItems: "center", paddingLeft: 10, fontWeight: "bold", color: "white" };
-const valueStyle = { fontSize: "12px", fontWeight: "bold", color: "white",paddingRight: 10 };
-const labelStyle = { fontSize: "10px", color: "white", textAlign:"right",paddingRight: 10 };
+const valueStyle = { fontSize: "12px", fontWeight: "bold", color: "white", paddingRight: 10 };
+const labelStyle = { fontSize: "10px", color: "white", textAlign: "right", paddingRight: 10 };
 
 @observer
 class ActionList extends Component {
@@ -50,7 +51,7 @@ class ActionList extends Component {
 
         if (this.store.isLoading) {
             return (
-                <div className="loading-container">
+                <div key="loading" className="loading-container">
                     <Spin />
                 </div>
             )
@@ -67,7 +68,7 @@ class ActionList extends Component {
 
 
     renderSuggestedActivity = (task) => {
-        const dueDate = moment(task.scheduleEnd * 1000).format("DD-MMM-YYYY");
+        const dueDate = task.scheduleEnd.format("DD-MMM-YYYY");
         const title = <Title level={5} style={labelStyle}>Due on</Title>
 
         return (
@@ -84,15 +85,27 @@ class ActionList extends Component {
         )
     }
 
+    geEditButton = (task) => {
+        if (this.store.isCoach && !task.respondedDate) {
+            return (
+                <Tooltip key="ed_act_tip" title="To edit this activity">
+                    <Button key="edit_task" icon={<EditOutlined />} shape="circle" onClick={() => this.showEditTask()}></Button>
+                </Tooltip>
+            )
+        }
+    }
+
     renderTask = (task, index) => {
         const key = `action_${index}`;
         const resp_key = `action_resp_${index}`;
         const clos_key = `clos_resp_${index}`;
         const stat_key = `action_stat_${index}`;
-
+  
         return (
             <div key={key}>
-                <Title level={5} style={taskTitleStyle}>{task.name}</Title>
+                <Title level={5} style={taskTitleStyle}>
+                    {task.name} &nbsp; {this.geEditButton(task)}
+                </Title>
 
                 <ActionStat key={stat_key} task={task} />
 
@@ -111,6 +124,10 @@ class ActionList extends Component {
 
     previous = () => {
         this.carousel.prev();
+    }
+
+    slideTo = (index) => {
+        this.carousel.goTo(index);
     }
 
     renderSlider = (tasks, rowCount) => {
@@ -136,11 +153,8 @@ class ActionList extends Component {
                 </div>
 
                 <Carousel ref={ref => (this.carousel = ref)} {...settings}>
-                    {tasks && tasks.map((task, index) => {
-                        return (
-                            this.renderTask(task, index)
-                        )
-                    })}
+                    {tasks && tasks.map((task, index) => this.renderTask(task, index))}
+                    <ActionSummary key="car_as" store={this.store} slideTo={this.slideTo} />
                 </Carousel>
             </div>
         )
@@ -149,7 +163,13 @@ class ActionList extends Component {
     countTag = () => {
 
         if (this.store.isDone) {
-            return <Tag color="#108ee9">{this.store.rowCount} Total</Tag>
+            return (
+                <Space>
+                    <Tag color="#108ee9">{this.store.rowCount} Total</Tag>
+                    <Tag key="plan_tot" color="blue">{this.store.totalPlannedDuration} Planned Hours</Tag>
+                    <Tag key="act_tot" color="#87d068">{this.store.totalActualDuration} Actual Hours</Tag>
+                </Space>
+            )
         }
 
         if (this.store.isError) {
@@ -175,8 +195,22 @@ class ActionList extends Component {
         if (this.store.isCoach) {
             return this.getCoachControls();
         }
+        else {
+            return this.getMemberControls();
+        }
     }
 
+    getMemberControls = () => {
+        const rowCount = this.store.rowCount;
+
+        return (
+            <div style={controlStyle}>
+                <Tooltip key="sum_tip" title="To view the execution summary">
+                    <Button key="sum_but" icon={<ReconciliationOutlined />} shape="circle" onClick={() => this.slideTo(rowCount)}></Button>
+                </Tooltip>
+            </div>
+        )
+    }
 
     getCoachControls = () => {
 
@@ -185,8 +219,8 @@ class ActionList extends Component {
         return (
             <div style={controlStyle}>
                 <Space>
-                    <Tooltip key="ed_act_tip" title="To edit the suggested activity">
-                        <Button key="edit_task" icon={<EditOutlined />} disabled={rowCount === 0} shape="circle" onClick={() => this.showEditTask()}></Button>
+                    <Tooltip key="sum_tip" title="To view the execution summary">
+                        <Button key="sum_but" icon={<ReconciliationOutlined />} shape="circle" onClick={() => this.slideTo(rowCount)}></Button>
                     </Tooltip>
                     <Tooltip key="add_task_tip" title="To Add New Activity">
                         <Button key="add_task" icon={<PlusOutlined />} shape="circle" onClick={() => this.showNewTask()}></Button>

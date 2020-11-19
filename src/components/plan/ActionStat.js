@@ -10,7 +10,7 @@ import { ArrowDownOutlined, ArrowUpOutlined, LikeOutlined } from '@ant-design/ic
 
 const { Step } = Steps;
 const { Countdown } = Statistic;
-const { Title } = Typography;
+const {Text, Title } = Typography;
 
 const indicatorStyle = { display: "flex", flexDirection: "column", width: "20%", textAlign: "left" };
 const planStyle = { display: "flex", flexDirection: "column", textAlign: "center", width: "20%" };
@@ -27,7 +27,7 @@ export default function ActionState({ task }) {
 
     const createdOn = () => {
         const title = <Title level={5} style={labelStyle}>Created On</Title>
-        const createdAt = moment(task.createdAt * 1000).format("DD-MMM-YYYY");
+        const createdAt = task.createdAt.format("DD-MMM-YYYY");
         return (
             <div style={createdAtStyle}>
                 <Statistic title={title} value={createdAt} valueStyle={valueStyle} />
@@ -35,8 +35,15 @@ export default function ActionState({ task }) {
         )
     }
 
-    const dateEl = (rustDate) => {
-        const dt = moment(rustDate * 1000);
+    const dateEl = (dt) => {
+        if (!dt) {
+            return (
+            <div style={dateStyle}>
+                <Text>-</Text>
+                <Text>Awaiting</Text>
+            </div>
+            )
+        }
         return (
             <div style={dateStyle}>
                 <Moment format="DD-MMM-YYYY">{dt}</Moment>
@@ -56,10 +63,10 @@ export default function ActionState({ task }) {
 
     const progress = () => {
 
-        const plannedEl = task.scheduleStart ? dateEl(task.scheduleStart) : ""
-        const startEl = task.actualStart ? dateEl(task.actualStart) : "Awaiting"
-        const respEl = task.respondedDate ? dateEl(task.respondedDate) : "Awaiting"
-        const doneEl = task.actualEnd ? dateEl(task.actualEnd) : "Awaiting"
+        const plannedEl = dateEl(task.scheduleStart);
+        const startEl = dateEl(task.actualStart);
+        const respEl = dateEl(task.respondedDate);
+        const doneEl = dateEl(task.actualEnd);
 
         var stage = 0;
         if (task.actualStart) stage = 1;
@@ -81,21 +88,21 @@ export default function ActionState({ task }) {
     const indicator = () => {
 
         if (task.actualEnd) {
-            const actualEnd = moment(task.actualEnd * 1000).format("DD-MMM-YYYY");
+            const actualEnd = task.actualEnd.format("DD-MMM-YYYY");
             return (
                 <Statistic title="Closed On" value={actualEnd} valueStyle={indBlue} prefix={<LikeOutlined />} />
             )
         }
 
         if (task.respondedDate) {
-            const respondedDate = moment(task.respondedDate * 1000);
+            const respondedDate = task.respondedDate;
             const diff = respondedDate.diff(moment(), 'hours');
             return (
                 <Statistic title="Awaiting Closure" value={diff * (-1)} precision={0} valueStyle={{ color: '#cf1322' }} prefix={<ArrowDownOutlined />} suffix="hours" />
             )
         }
 
-        const localeEnd = moment(task.scheduleEnd * 1000);
+        const localeEnd = task.scheduleEnd;
         const diff = localeEnd.diff(moment(), 'hours');
         if (diff >= 0) {
             return <Countdown title="Hours Ahead" value={localeEnd} format="HH:mm" valueStyle={{ color: 'green' }} prefix={<ArrowUpOutlined />} suffix="hours" />
