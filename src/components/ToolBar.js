@@ -27,14 +27,14 @@ export default class ToolBar extends Component {
         const appStore = this.props.appStore;
         if (!appStore.isLoggedIn()) {
             return (
-                <Col span={20} style={{ textAlign: "right" }}>
+                <Col span={22} style={{ textAlign: "right" }}>
                     <Text strong={true}>Ferris - The Coaching Assistant</Text>
                 </Col>
             )
         }
 
         return (
-            <Col span={14}>
+            <Col span={13}>
                 <Menu mode="horizontal" defaultSelectedKeys={['0']}>
                     {
                         appStore.menus.map((item, index) => (
@@ -82,7 +82,7 @@ export default class ToolBar extends Component {
         return (
             <Header style={{ position: 'fixed', zIndex: 1, width: '100%', background: '#fff', padding: "0px 5px 0px 5px" }}>
                 <Row>
-                    <Col style={{ paddingTop: 5 }} span={4}>
+                    <Col style={{ paddingTop: 5 }} span={2}>
                         <img src={ownerLogo} align="left" width="26" height="52" title={caption} />
                     </Col>
                     {this.renderRoleTabs()}

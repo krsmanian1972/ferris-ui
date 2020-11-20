@@ -20,7 +20,7 @@ class BoardMatrix extends Component {
     }
 
     componentDidMount() {
-        this.store.fetchBoardList( this.props.programId, this.props.memberId);
+        this.store.fetchBoardList(this.props.programId, this.props.memberId);
     }
 
     countTag = (rowCount) => {
@@ -58,19 +58,19 @@ class BoardMatrix extends Component {
             <div>
                 {
                     boards && boards.map((board) => {
-                         const key = `board_${board.userSessionId}`;
-                         const sessionUserId = `board_${board.userSesionId}`;
-                         const boardId = board.url.slice(1, -1);
-                         const cn = board.userType === 'coach' ? "coach-note" : "member-note";
+                        const key = `board_${board.userSessionId}`;
+                        const sessionUserId = `board_${board.userSesionId}`;
+                        const boardId = board.url.slice(1, -1);
+                        const cn = board.userType === 'coach' ? "coach-note" : "member-note";
 
-                            return (
-                                <div key={key} className="board-matrix-item">
-                                    <p className="journal-boards">{board.sessionName}</p>
-                                    <MiniBoard key={sessionUserId} apiProxy={this.props.apiProxy} boardId={boardId} sessionUserId={board.userSessionId} cssKlass="miniBoardFrameJournal"/>
-                                    <p className={cn}>{board.userType} {boardId}</p>
-                                </div>
-                            )
-                      }
+                        return (
+                            <div key={key} className="board-matrix-item">
+                                <p className="journal-boards">{board.sessionName}</p>
+                                <MiniBoard key={sessionUserId} apiProxy={this.props.apiProxy} boardId={boardId} sessionUserId={board.userSessionId} listType="matrix" />
+                                <p className={cn}>{board.userType} {boardId}</p>
+                            </div>
+                        )
+                    }
                     )
                 }
             </div>
@@ -78,16 +78,16 @@ class BoardMatrix extends Component {
     }
 
     render() {
-      const boards = this.store.boardResults;
-      return(
-             <Card key="boards"
-                 headStyle={cardHeaderStyle}
-                 style={{ borderRadius: 12}}
-                 title={<Title level={4}>Boards</Title>}>
-                 {this.displayMatrix(boards)}
-             </Card>
+        const boards = this.store.boardResults;
+        return (
+            <Card key="boards"
+                headStyle={cardHeaderStyle}
+                style={{ borderRadius: 12 }}
+                title={<Title level={4}>Boards</Title>}>
+                {this.displayMatrix(boards)}
+            </Card>
 
-      )
+        )
     }
 }
 export default BoardMatrix;

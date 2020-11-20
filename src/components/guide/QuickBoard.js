@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Button, Row, Col, Tabs, Tooltip, Space, Spin } from 'antd';
+import { Button, Row, Col, Tabs, Tooltip, Space,Spin } from 'antd';
 
 import { EditOutlined, ItalicOutlined, UndoOutlined, RedoOutlined, ScissorOutlined } from '@ant-design/icons';
 
@@ -27,12 +27,9 @@ const initialPanes = [
     { title: 'Board 2', key: '2', closable: false, isLoaded: true },
 ];
 
-const CANVAS_HEIGHT = 3000;
-const CANVAS_WIDTH = 2000;
-
 @inject("appStore")
 @observer
-class Board extends Component {
+class QuickBoard extends Component {
     constructor(props) {
         super(props);
 
@@ -75,7 +72,7 @@ class Board extends Component {
      * rest of the panes as to be loaded.
      */
     provisionPriorBoards = async () => {
-
+        
         const listStore = new BoardListStore({ apiProxy: this.props.appStore.apiProxy });
         await listStore.load(this.props.sessionUserId);
 
@@ -85,15 +82,15 @@ class Board extends Component {
         }
 
         const { panes } = this.state;
-
-        this.expandInitialPanes(panes, listStore.boardCount);
-        await this.forceLoad(panes, 1);
+        
+        this.expandInitialPanes(panes,listStore.boardCount);
+        await this.forceLoad(panes,1);
         this.undoTab(false);
 
         this.setState({ panes: panes, isLoading: false })
     }
 
-    expandInitialPanes = (panes, capacity) => {
+    expandInitialPanes = (panes,capacity) => {
 
         for (var i = 0; i < panes.length; i++) {
             panes[i].isLoaded = false;
@@ -107,7 +104,7 @@ class Board extends Component {
 
             const tab = { title: `Board ${boardIndex}`, key: `${boardIndex}`, closable: false, isLoaded: false };
             panes.push(tab);
-
+            
             boardIndex++;
         }
 
@@ -125,8 +122,8 @@ class Board extends Component {
         if (panes[boardKey - 1].isLoaded) {
             return;
         }
-
-        await this.forceLoad(panes, boardKey);
+        
+        await this.forceLoad(panes,boardKey);
     }
 
     /**
@@ -138,7 +135,7 @@ class Board extends Component {
      * @param {*} panes 
      * @param {*} boardKey 
      */
-    forceLoad = async (panes, boardKey) => {
+    forceLoad = async(panes,boardKey) => {
         const boardFileName = `Board_${boardKey}`;
 
         const url = `${assetHost}/boards/${this.props.sessionUserId}/${boardFileName}`;
@@ -164,72 +161,42 @@ class Board extends Component {
         this.yOffset = temp.actualBoundingBoxAscent;
         this.textWidth = temp.width;
 
-        //In mouse down start drawing
-        this.canvas.addEventListener('mousedown', this.onMouseDown);
-        this.canvas.addEventListener('mousemove', this.onMouseMove);
 
-        this.canvas.addEventListener('touchstart', this.onTouchStart);
-        this.canvas.addEventListener('touchmove', this.onTouchMove);
+        //In mouse down start drawing
+        this.canvas.addEventListener('mousedown', (e) => {
+
+            // Reset current path if any...
+            this.ctx.beginPath();
+
+            //save board on every mouse down in a stack
+            this.pushUndoList();
+
+            //Place the textBox only if the user has selected the TextBox
+            if (this.mode === TEXTBOX && e.buttons === 1) {
+                this.textBox(e);
+            }
+
+        });
+
+        this.canvas.addEventListener('mousemove', (e) => {
+
+            if (this.mode === PEN || this.mode === ERASER) {
+
+                // Check whether we're holding the left click down while moving the mouse
+                if (e.buttons === 1) {
+                    this.paint(e);
+                }
+
+            }
+        });
 
         window.addEventListener("keypress", this.write);
 
-        this.container.addEventListener('touchstart', this.preventScrolling);
-        this.container.addEventListener('touchmove', this.preventScrolling);
-        this.container.addEventListener('touchend', this.preventScrolling);
-
         const stream = this.canvas.captureStream(25);
-
+        
         this.props.onCanvasStream(stream);
     }
 
-    preventScrolling = (e) => {
-        if (e.target == this.canvas) {
-            e.preventDefault();
-        }
-    }
-
-    onMouseMove = (e) => {
-        if (this.mode === PEN || this.mode === ERASER) {
-
-            // Check whether we're holding the left click down while moving the mouse
-            if (e.buttons === 1) {
-                this.paint(e);
-            }
-        }
-    }
-
-    onMouseDown = (e) => {
-        // Reset current path if any...
-        this.ctx.beginPath();
-
-        //save board on every mouse down in a stack
-        this.pushUndoList();
-
-        //Place the textBox only if the user has selected the TextBox
-        if (this.mode === TEXTBOX && e.buttons === 1) {
-            this.textBox(e);
-        }
-    }
-
-    // Let us transform the touchstart as MouseDownEvent and 
-    // dispatch back to the canvas
-    onTouchStart = (e) => {
-        const touch = e.touches[0];
-        const mouseEvent = new MouseEvent("mousedown", {
-            clientX: touch.clientX,
-            clientY: touch.clientY,
-            buttons: 1
-        });
-        this.canvas.dispatchEvent(mouseEvent);
-    }
-
-    onTouchMove = (e) => {
-        if (this.mode === PEN || this.mode === ERASER) {
-            const touch = e.touches[0];
-            const event = { clientX: touch.clientX, clientY: touch.clientY };
-            this.paint(event);
-        }
-    }
 
 
     // unregister the event listeners
@@ -448,7 +415,7 @@ class Board extends Component {
         const { panes } = this.state;
         panes.push({ title: `Board - ${this.newTabIndex}`, key: activeKey, closable: false, isLoaded: true });
 
-        this.setState({ panes: panes, activeKey });
+        this.setState({panes: panes,activeKey});
 
         this.newTabIndex++;
     };
@@ -465,18 +432,18 @@ class Board extends Component {
     }
 
     renderControls = (isLoading) => {
-
-        if (isLoading) {
-            return <Spin />
+    
+        if(isLoading) {
+            return <Spin/>
         }
 
-        const { panes } = this.state;
+        const {panes} = this.state;
 
         return (
             <Row>
                 <Col span={12}>
                     <Tabs type="editable-card"
-                        defaultActiveKey="1" tabPosition="top" style={{ height: 30 }}
+                        defaultActiveKey="1" tabPosition="top" style={{height:30}}
                         onTabClick={this.onTabClick} onEdit={this.onEdit}>
                         {panes.map(pane => (
                             <TabPane tab={pane.title} key={pane.key} closable={pane.closable}>
@@ -485,7 +452,7 @@ class Board extends Component {
                     </Tabs>
                 </Col>
                 <Col span={10}>
-                    <div style={{ float: "right", textAlign: "left", paddingRight: "10px", height: 30 }}>
+                    <div style={{ float: "right", textAlign: "left", paddingRight: "10px" }}>
                         <Space>
                             <Tooltip title="Pen">
                                 <Button onClick={this.freeDrawing} id="pen" style={this.getStyle(PEN)} type="primary" icon={<EditOutlined />} shape={"circle"} />
@@ -510,21 +477,14 @@ class Board extends Component {
     }
 
     render() {
-
-        const { isLoading } = this.state;
+        const {isLoading} = this.state;
 
         return (
-            <div style={{ padding: 0 }}>
-                <div style={{ background: "rgb(59,109,171)", height: 30 }}>
-                    {this.renderControls(isLoading)}
-                </div>
-                <div style={{ maxHeight: screen.height, overflow: "auto", border: "3px solid rgb(59,109,171)" }}>
-                    <div key="container" id="container" ref={ref => (this.container = ref)}>
-                        <canvas height={CANVAS_HEIGHT} width={CANVAS_WIDTH} style={{ backgroundColor: "#646464", height: "100%" }} key="canvas" ref={ref => (this.canvas = ref)} />
-                    </div>
-                </div>
+            <div style={{ padding: 0, height: screen.height }}>
+                {this.renderControls(isLoading)}
+                <canvas height={screen.height} width={screen.width} className="activeBoard" key="canvas" ref={ref => (this.canvas = ref)} />
             </div>
         )
     }
 }
-export default Board;
+export default QuickBoard;

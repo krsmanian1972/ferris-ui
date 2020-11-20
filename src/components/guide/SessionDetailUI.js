@@ -224,7 +224,7 @@ class SessionDetailUI extends Component {
                     {people.coach && (
                         <div key="assets" style={{marginTop:10}}>
                             <BoardList key="cb" title="Coach Boards" sessionUserId={people.coach.sessionUser.id} />
-                            <BoardList key="ab" title="Actor Boards" sessionUserId={people.member.sessionUser.id} />
+                            <BoardList key="ab" title="Actor Boards" sessionUserId={people.member.sessionUser.id}/>
                             <NoteList key="cn" title="Coach Notes" sessionUserId={people.coach.sessionUser.id} closingNotes={session.closingNotes} />
                             <NoteList key="an" title="Actor Notes" sessionUserId={people.member.sessionUser.id} />
                         </div>

@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import { assetHost } from '../stores/APIEndpoints';
 
+const CANVAS_HEIGHT = 3000;
+const CANVAS_WIDTH = 2000;
+
 class MiniBoard extends Component {
     constructor(props) {
         super(props);
@@ -36,16 +39,14 @@ class MiniBoard extends Component {
     render() {
         const boardKey = `mini-canvas-${this.props.boardId}`;
 
-        var klass = this.props.cssKlass;
-
-        if (!klass) {
-            klass = "miniBoardFrame"
-        }
-
+        const listType = this.props.listType;
+        const boardHeight = listType === "matrix" ? screen.height * 0.5 : screen.height * 0.5;
         return (
-            <div className={klass}>
-                {!this.props.cssKlass && this.getName()}
-                <canvas height={screen.height * 0.80} width={screen.width * 0.94} className="miniBoard" key={boardKey} ref={ref => (this.canvas = ref)} />
+            <div>
+                {listType === "session" && this.getName()}
+                <div style={{ maxHeight: boardHeight, overflow: "auto", marginLeft: 3, border: "2px solid rgb(59,109,171)", borderRadius:12 }}>
+                    <canvas height={CANVAS_HEIGHT} width={CANVAS_WIDTH} className="miniBoard" key={boardKey} ref={ref => (this.canvas = ref)} />
+                </div>
             </div>
         )
     }
