@@ -27,8 +27,8 @@ const initialPanes = [
     { title: 'Board 2', key: '2', closable: false, isLoaded: true },
 ];
 
-const CANVAS_HEIGHT = 3000;
-const CANVAS_WIDTH = 2000;
+const CANVAS_WIDTH = 1280
+const CANVAS_HEIGHT = 1280;
 
 @inject("appStore")
 @observer
@@ -520,7 +520,7 @@ class Board extends Component {
                 </div>
                 <div style={{ maxHeight: screen.height, overflow: "auto", border: "3px solid rgb(59,109,171)" }}>
                     <div key="container" id="container" ref={ref => (this.container = ref)}>
-                        <canvas height={CANVAS_HEIGHT} width={CANVAS_WIDTH} style={{ backgroundColor: "#646464", height: "100%" }} key="canvas" ref={ref => (this.canvas = ref)} />
+                        <canvas height={CANVAS_HEIGHT} width={CANVAS_WIDTH} className="activeBoard" key="canvas" ref={ref => (this.canvas = ref)} />
                     </div>
                 </div>
             </div>
