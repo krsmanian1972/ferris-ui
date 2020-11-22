@@ -23,8 +23,8 @@ const cursorSize = { width: 1, height: 18 };
 const selected = { background: "white", color: "black", borderColor: "black" };
 const unselected = {};
 const initialPanes = [
-    { title: 'Board 1', key: '1', closable: false, isLoaded: true },
-    { title: 'Board 2', key: '2', closable: false, isLoaded: true },
+    { title: 'Board-1', key: '1', closable: false, isLoaded: true },
+    { title: 'Board-2', key: '2', closable: false, isLoaded: true },
 ];
 
 const CANVAS_WIDTH = 1280
@@ -105,7 +105,7 @@ class Board extends Component {
         for (var i = 0; i < diff; i++) {
             this.undoTabList[boardIndex] = [];
 
-            const tab = { title: `Board ${boardIndex}`, key: `${boardIndex}`, closable: false, isLoaded: false };
+            const tab = { title: `Board-${boardIndex}`, key: `${boardIndex}`, closable: false, isLoaded: false };
             panes.push(tab);
 
             boardIndex++;
@@ -141,12 +141,21 @@ class Board extends Component {
     forceLoad = async (panes, boardKey) => {
         const boardFileName = `Board_${boardKey}`;
 
-        const url = `${assetHost}/boards/${this.props.sessionUserId}/${boardFileName}`;
-        const response = await this.props.appStore.apiProxy.getAsync(url);
-        const data = await response.text();
+        this.undoTabList[boardKey] = []
 
-        this.undoTabList[boardKey].push(data);
-        panes[boardKey - 1].isLoaded = true;
+        try {
+            const url = `${assetHost}/boards/${this.props.sessionUserId}/${boardFileName}`;
+            const response = await this.props.appStore.apiProxy.getAsync(url);
+            const data = await response.text();
+            this.undoTabList[boardKey].push(data);
+            panes[boardKey - 1].isLoaded = true;
+        }
+        catch(e) {
+            this.undoTabList[boardKey] = [];
+            panes[boardKey - 1].isLoaded = true;
+        }
+
+
     }
 
     componentDidMount() {
@@ -232,10 +241,9 @@ class Board extends Component {
     }
 
 
-    // unregister the event listeners
+    // Save the current tab information as the user may switch to a differnt tab
     componentWillUnmount() {
-
-
+        this.pushUndoList();
     }
 
     pushUndoList = () => {
@@ -399,8 +407,9 @@ class Board extends Component {
 
     undoTab = (samePane) => {
 
+        this.ctx.clearRect(0,0,CANVAS_WIDTH,CANVAS_HEIGHT);
+        
         if (this.undoTabList[this.currentTab].length === 0) {
-            this.ctx.clearRect(0, 0, screen.width, screen.height);
             return;
         }
 
@@ -414,7 +423,6 @@ class Board extends Component {
         }
 
         img.onload = function () {
-            me.ctx.clearRect(0, 0, img.width, img.height);
             me.ctx.drawImage(img, 0, 0, img.width, img.height);
         }
     }
@@ -446,7 +454,7 @@ class Board extends Component {
         this.undoTabList[this.newTabIndex] = [];
 
         const { panes } = this.state;
-        panes.push({ title: `Board - ${this.newTabIndex}`, key: activeKey, closable: false, isLoaded: true });
+        panes.push({ title: `Board-${this.newTabIndex}`, key: activeKey, closable: false, isLoaded: true });
 
         this.setState({ panes: panes, activeKey });
 

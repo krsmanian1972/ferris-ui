@@ -1,15 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-
+import PeerBoard from '../commons/PeerBoard';
 const standardStyle = {
     height: "100%",
     width: "100%",
-    background: "#666",
+    background: "#646464",
     position: "relative",
     overflow: "hidden",
 };
 
+var peerHook;
+
+const onInit = (reflect) => {
+    peerHook = reflect;
+}
+
 function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoard, coachingPlan, actionList, isMinimized }) {
+
+    var peerBoardVisibility = "none";
 
     const [peerKey, setPeerKey] = useState('none');
     const [myKey, setMyKey] = useState('none');
@@ -17,13 +25,17 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoard, coachingP
     const peerVideo = useRef(null);
     const peerScreen = useRef(null);
     const peerBoard = useRef(null);
-
+    
     const localVideo = useRef(null);
 
     useEffect(() => {
         if (peerBoard.current && boardSrc) {
             peerBoard.current.srcObject = boardSrc;
         }
+        if (boardSrc) {
+            peerHook(peerBoard.current);
+        }
+        
         if (peerScreen.current && screenSrc) {
             peerScreen.current.srcObject = screenSrc;
         }
@@ -57,10 +69,10 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoard, coachingP
         }
 
         if (peerKey === "none") {
-            return { width: "33.33%" };
+            return { width: "31%", marginRight: "1%" };
         }
 
-        return { width: "50%" };
+        return { width: "48%", marginRight: "1%" };
     }
 
     const getMyStyle = (compKey) => {
@@ -69,10 +81,10 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoard, coachingP
         }
 
         if (myKey === "none") {
-            return { width: "25%" };
+            return { width: "24%", marginRight: "1%" };
         }
 
-        return { width: "33.33%" };
+        return { width: "31%", marginRight: "1%" };
     }
 
     const getSuspendedItems = (widgets, activeKey) => {
@@ -94,29 +106,36 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoard, coachingP
         }
     }
 
+
     const peerWidgets = new Map();
     peerWidgets.set("peerVideo", <video key="peerVideo" className="videoItem" style={getPeerStyle("peerVideo")} poster="videoPeer.png" ref={peerVideo} autoPlay onClick={() => setSelected("peerVideo", "peer")} />);
     peerWidgets.set("peerScreen", <video key="peerScreen" className="videoItem" style={getPeerStyle("peerScreen")} poster="peerScreen.png" ref={peerScreen} autoPlay onClick={() => setSelected("peerScreen", "peer")} />);
     peerWidgets.set("peerBoard", <video key="peerBoard" className="videoItem" style={getPeerStyle("peerBoard")} poster="peerBoard.png" ref={peerBoard} autoPlay onClick={() => setSelected("peerBoard", "peer")} />);
 
     const boardKey = 'myBoard';
-    const boardDiv = <div key="myMiniBoard" className="videoItem" style={getMyStyle(boardKey)} onClick={() => setSelected(boardKey, "self")} >My Board</div>
+    const boardDiv = <div key="myMiniBoard" className="non-videoItem" style={getMyStyle(boardKey)} onClick={() => setSelected(boardKey, "self")} >My Board</div>
 
     const planKey = "coachingPlan";
-    const planDiv = <div key="coachingPlanDiv" className="videoItem" style={getMyStyle(planKey)} onClick={() => setSelected(planKey, "self")} >Coaching Plan</div>
+    const planDiv = <div key="coachingPlanDiv" className="non-videoItem" style={getMyStyle(planKey)} onClick={() => setSelected(planKey, "self")} >Coaching Plan</div>
 
     const actionPlanKey = "actionPlan";
-    const actionPlanDiv = <div key="actionPlanDiv" className="videoItem" style={getMyStyle(actionPlanKey)} onClick={() => setSelected(actionPlanKey, "self")} >Action Plan</div>
+    const actionPlanDiv = <div key="actionPlanDiv" className="non-videoItem" style={getMyStyle(actionPlanKey)} onClick={() => setSelected(actionPlanKey, "self")} >Action Plan</div>
 
     const myWidgets = new Map();
     myWidgets.set(boardKey, boardDiv);
     myWidgets.set(planKey, planDiv);
-    myWidgets.set(actionPlanKey,actionPlanDiv);
-
+    myWidgets.set(actionPlanKey, actionPlanDiv);
 
     const getActiveItem = () => {
+        
+        peerBoardVisibility = "none";
+
         if (myKey === "none" && peerKey === "none") {
             return <></>;
+        }
+
+        if (peerKey === "peerBoard") {
+            peerBoardVisibility = "block";
         }
 
         if (peerKey !== "none") {
@@ -139,6 +158,9 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoard, coachingP
 
             <div className="activeItem">
                 {getActiveItem()}
+                <div style={{ display: peerBoardVisibility }}>
+                    <PeerBoard key="maxPeerBoard" onInit={onInit} />
+                </div>
             </div>
 
             <div className="peerVideoContainer" style={getMiniBoardHeight()}>
@@ -149,6 +171,9 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoard, coachingP
                 {getSuspendedItems(myWidgets, myKey).map(value => value)}
                 <video key="myVideo" className="videoItem" style={getMyStyle("myVideo")} poster="videoSelf.png" onClick={() => minimizeAll()} ref={localVideo} autoPlay muted />
             </div>
+
+
+
         </div>
 
     );

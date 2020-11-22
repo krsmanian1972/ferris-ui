@@ -79,17 +79,6 @@ code {
   overflow: hidden;
 }
 
-#localVideo {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 15%;
-  height: 15%;
-  z-index: 3;
-  border: 1px groove white;
-  background-color: rgba(255, 255, 255, 0.062);
-}
-
 .peerVideoContainer {
   position: absolute;
   bottom: 0;
@@ -99,7 +88,6 @@ code {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  background-color: rgba(34, 34, 34);
 }
 
 .myVideoContainer {
@@ -111,17 +99,28 @@ code {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  background-color: rgba(34, 34, 34);
 }
 
 .videoItem {
   z-index: 3;
   height:100%;
-  border: 1px groove rgba(153, 153, 153);
+  border: 1px groove white;
+  border-radius: 12px;
   text-align: center;
   font-weight: bold;
-  color:rgba(153, 153, 153);
-  background-color: rgba(34, 34, 34,0);
+  color:white;
+  background-color: #646464;
+}
+
+.non-videoItem {
+  z-index: 3;
+  height:100%;
+  border: 1px groove white;
+  border-radius: 12px;
+  text-align: center;
+  font-weight: bold;
+  color:rgb(44, 147, 209);
+  background-color: #000000;
 }
 
 .activeItem {
@@ -130,7 +129,6 @@ code {
 }
 
 .activeBoard {
-  background-color: #646464;
   height:100%
 }
 
@@ -138,12 +136,6 @@ code {
   background-color: #646464;
   height:100%;
 }
-
-.activeBoardBG {
-  background-color: rgba(100,100,100,0.5);
-  z-index: 1;
-}
-
 
 .boardTitle {
   color:white;

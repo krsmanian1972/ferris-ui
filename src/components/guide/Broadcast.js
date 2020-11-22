@@ -15,6 +15,7 @@ import NotesStore from '../stores/NotesStore';
 
 import NotesDrawer from './NotesDrawer';
 import VideoBoard from './VideoBoard';
+
 import Board from './Board';
 
 import SharedCoachingPlan from '../plan/SharedCoachingPlan';
@@ -73,7 +74,7 @@ class Broadcast extends Component {
         const isCoach = this.props.params.sessionUserType === 'coach';
 
         this.initializeNotesStore(sessionUserId);
-
+        
         this.myBoard = <Board key={MY_BOARD_KEY} boardId={MY_BOARD_KEY} sessionUserId={sessionUserId} onCanvasStream={this.onCanvasStream} />
         this.coachingPlan = <SharedCoachingPlan key="gt" isCoach = {isCoach} enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
         this.actionList = <SharedActionList key="tt" isCoach = {isCoach} enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
