@@ -5,7 +5,9 @@ import ActionList from './ActionList';
 import TaskStore from '../stores/TaskStore';
 import TaskDrawer from './TaskDrawer';
 
-import { Typography } from 'antd';
+import {Button,Tooltip, Typography } from 'antd';
+import { SyncOutlined } from '@ant-design/icons';
+
 const { Title } = Typography;
 
 const titleBarStyle = { background: "rgb(59,109,171)", display: "flex", flexWrap: "wrap", minHeight: 50, height: 50, flexDirection: "row", justifyContent: "space-between", marginBottom: "5px" };
@@ -23,10 +25,18 @@ export default class SharedActionList extends ActionList {
         this.store.fetchTasks();
     }
 
+    refreshStores = () => {
+        this.store.fetchTasks();   
+    }
+
     getTitle = () => {
         return (
             <div style={titleStyle}>
-                <Title style={{ color: "white" }} level={4}>Action Plan &nbsp;{this.countTag()}</Title>
+                <Title style={{ color: "white" }} level={4}>Action Plan &nbsp; 
+                <Tooltip key="refresh" title="Refresh for latest updates">
+                    <Button key="refresh" icon={<SyncOutlined />} shape="circle" onClick={() => this.refreshStores()}></Button>
+                </Tooltip>
+                &nbsp;{this.countTag()}</Title>
             </div>
         )
     }

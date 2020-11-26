@@ -21,13 +21,7 @@ class ScreenDeviceAdapter extends BaseStreamHandler {
                 this.stream = screenStream;
                 this.emit('stream', screenStream);
             })
-            .catch((err) => {
-                if (err instanceof DOMException) {
-                    alert('Cannot start screen capture');
-                } else {
-                    console.log(err);
-                }
-            });
+            .catch((err) => {});
 
         return this;
     }

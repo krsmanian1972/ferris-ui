@@ -10,7 +10,8 @@ import ObservationStore from '../stores/ObservationStore';
 import ConstraintList from './ConstraintList';
 import ConstraintStore from '../stores/ConstraintStore';
 
-import { Typography } from 'antd';
+import { Typography, Button, Tooltip } from 'antd';
+import { SyncOutlined } from '@ant-design/icons';
 
 const { Title } = Typography;
 
@@ -40,16 +41,26 @@ export default class SharedCoachingPlan extends Component {
         return (
             <div style={titleBarStyle}>
                 <div style={titleStyle}>
-                    <Title style={{ color: "white" }} level={4}>Coaching Plan</Title>
+                    <Title style={{ color: "white" }} level={4}>Coaching Plan &nbsp;
+                        <Tooltip key="refresh" title="Refresh for latest updates">
+                            <Button key="refresh" icon={<SyncOutlined />} shape="circle" onClick={() => this.refreshStores()}></Button>
+                        </Tooltip>
+                    </Title>
                 </div>
             </div>
         )
     }
 
+    refreshStores = () => {
+        this.objectiveStore.fetchObjectives();
+        this.observationStore.fetchObservations();
+        this.constraintStore.fetchOptions();
+    }
+
     render() {
 
         const height = window.innerHeight * 84 / 100;
-        const contentStyle = { margin: "1%",display: "flex", flexDirection: "column", height: height, overflow: "auto" };
+        const contentStyle = { margin: "1%", display: "flex", flexDirection: "column", height: height, overflow: "auto" };
 
         return (
             <div>
