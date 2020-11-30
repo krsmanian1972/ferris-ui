@@ -1,7 +1,7 @@
 import { decorate, observable, computed, action } from 'mobx';
 
-import { apiHost,assetHost } from './APIEndpoints';
-import { createProgramQuery, programsQuery, alterProgramStateQuery} from './Queries';
+import { apiHost, assetHost } from './APIEndpoints';
+import { createProgramQuery, programsQuery, programCoachesQuery, associateCoachQuery, alterProgramStateQuery } from './Queries';
 
 const INIT = "init";
 const PENDING = 'pending';
@@ -14,6 +14,8 @@ const CREATION_ERROR = { status: "error", help: "Unable to create the program." 
 const ACTIVATION_ERROR = { status: "error", help: "Unable to activate the program." };
 const LOADING_ERROR = { status: "error", help: "Unable to load the program." };
 const NO_MATCHING_RECORD = { status: "error", help: "Unable to find a matching program" };
+const COACH_ASSOCIATION_ERROR = { status: "error", help: "Unable to associate the coach into this program." };
+const NO_COACH_FOUND = {status: "error", help: "Unable to fetch the coaches of this program. Please write to admin."};
 
 export const PUBLIC_PROGRAM_INFO = "This program will be open for public enrollment after you activate this program. The program will be in draft till you activate it.";
 export const PRIVATE_PROGRAM_INFO = "This program will be visible to you and to the members invited by you. The program will be in draft till you activate it."
@@ -24,7 +26,7 @@ export default class ProgramStore {
     message = EMPTY_MESSAGE;
 
     isPrivate = false;
-    showDrawer=false;
+    showDrawer = false;
     showActivationModal = false;
     showActivationResultModal = false;
 
@@ -32,6 +34,7 @@ export default class ProgramStore {
 
     programId = null;
     programModel = null;
+    peerCoaches = null;
 
     editMode = false;
 
@@ -52,9 +55,32 @@ export default class ProgramStore {
         return this.state === ERROR;
     }
 
-    get isOwner() {
-        return this.programModel && this.programModel.coach.id === this.apiProxy.getUserFuzzyId();
+    get isParentProgram() {
+        return this.programModel && this.programModel.isParent;
     }
+
+    get isOwner() {
+        return this.isParentProgram && this.programModel.coach.id === this.apiProxy.getUserFuzzyId();
+    }
+
+    get isPeerCoach() {
+
+        if(!this.peerCoaches) {
+            return false;
+        }
+
+        const userId = this.apiProxy.getUserFuzzyId();
+        
+        for(let i=0;i<this.peerCoaches.length;i++) {
+            let aCoach = this.peerCoaches[i];
+            if(aCoach.id === userId) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 
     get isEnrolled() {
         return this.programModel && this.programModel.enrollmentStatus === "YES";
@@ -64,11 +90,14 @@ export default class ProgramStore {
         if (!this.isOwner) {
             return true;
         }
+        if (!this.isParentProgram) {
+            return true;
+        }
         return !this.editMode
     }
 
     /**
-     * Allow only the coach to activate this program
+     * Allow only the owner, of the Parent program, to activate this program
      */
     get canActivate() {
         if (this.state !== DONE) {
@@ -77,25 +106,27 @@ export default class ProgramStore {
         return this.isOwner && !this.programModel.program.active;
     }
 
-     /**
-     * Allow only the coach to edit this program. 
-     * Editing the content should be allowed even after the activation.
-     */
+    /**
+    * Allow only the coach to edit this program AND the program should be
+    * a parent program.
+    *  
+    * Editing the content should be allowed even after the activation.
+    */
     get canEdit() {
         if (this.state !== DONE) {
             return false;
         }
-        return this.isOwner;
+        return this.isOwner && this.isParentProgram;
     }
 
     /**
-     * Allow anyone other than the coach to enroll
+     * Allow anyone to enroll, except the coaches of the program.
      */
     get canEnroll() {
         if (this.state !== DONE) {
             return false;
         }
-        if (this.isOwner) {
+        if(this.isPeerCoach) {
             return false;
         }
         return this.programModel.program.active && !this.isEnrolled;
@@ -106,13 +137,56 @@ export default class ProgramStore {
         this.load(this.programId)
     }
 
-    populateDescription = async (programModel) => {
+    /**
+     * Load the list of all the coaches who are common to the 
+     * parent program and the spawned programs. 
+     * 
+     * The common denominator is the parent program id that is guaranteed to be
+     * resolved at the service side.
+     * 
+     * Hence let us just pass the programId.
+     */
+    fetchPeerCoaches = async () => {
 
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
+        this.peerCoaches = [];
+
+        const variables = { programId: this.programId };
+
+        try {
+            const response = await this.apiProxy.query(apiHost, programCoachesQuery, variables);
+            const data = await response.json();
+
+            if (data.error == true) {
+                this.state = ERROR;
+                this.message = LOADING_ERROR;
+                return;
+            }
+
+            const result = data.data.getProgramCoaches.coaches;
+            if (result.length === 0) {
+                this.state = ERROR;
+                this.message = NO_COACH_FOUND;
+                return;
+            }
+
+            this.peerCoaches = result;
+            this.state = DONE;
+        }
+        catch (e) {
+            this.state = ERROR;
+            this.message = LOADING_ERROR;
+            console.log(e);
+        }
+    }
+
+    populateDescription = async (programModel) => {
+
         const ver = new Date().getTime();
-        
-        const url = `${assetHost}/programs/${this.programId}/about/about.html?nocache=${ver}`;
+        const parentProgramId = programModel.program.parentProgramId;
+
+        const url = `${assetHost}/programs/${parentProgramId}/about/about.html?nocache=${ver}`;
         const response = await this.apiProxy.getAsync(url);
         const data = await response.text();
 
@@ -153,14 +227,16 @@ export default class ProgramStore {
                 this.message = NO_MATCHING_RECORD;
                 return;
             }
-            
-            const programModel = result[0]
+
+            const programModel = result[0];
+
             await this.populateDescription(programModel);
 
             this.programModel = programModel
             this.state = DONE;
-        }
 
+            await this.fetchPeerCoaches();
+        }
         catch (e) {
             this.state = ERROR;
             this.message = LOADING_ERROR;
@@ -202,6 +278,45 @@ export default class ProgramStore {
         catch (e) {
             this.state = ERROR;
             this.message = CREATION_ERROR;
+            console.log(e);
+        }
+    }
+
+    /**
+     * Admin of a Program can associate another coach to spawn a child program.
+     * 
+     * The pre-requisite is that the admin should know the email id 
+     * of the registered peer-coach.
+     */
+    associateCoach = async (coachRequest) => {
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+
+        const variables = {
+            input: {
+                peerCoachEmail: coachRequest.email,
+                programId: this.programId,
+                adminCoachId: this.apiProxy.getUserFuzzyId(),
+            }
+        }
+
+        try {
+            const response = await this.apiProxy.mutate(apiHost, associateCoachQuery, variables);
+            const data = await response.json();
+
+            if (data.error == true) {
+                this.state = ERROR;
+                this.message = CREATION_ERROR;
+                return;
+            }
+            this.state = DONE;
+
+            await this.fetchPeerCoaches();
+            this.showDrawer = false;
+        }
+        catch (e) {
+            this.state = ERROR;
+            this.message = COACH_ASSOCIATION_ERROR;
             console.log(e);
         }
     }
@@ -248,29 +363,34 @@ decorate(ProgramStore, {
     state: observable,
     editMode: observable,
     message: observable,
-    change:observable,
-    isPrivate:observable,
+    change: observable,
+    isPrivate: observable,
 
-    showDrawer:observable,
+    showDrawer: observable,
     showActivationModal: observable,
     showActivationResultModal: observable,
-    
+
     programModel: observable,
+    peerCoaches: observable,
 
     isLoading: computed,
     isDone: computed,
     isError: computed,
 
+    isParentProgram: computed,
     isOwner: computed,
+    isPeerCoach: computed,
     isEnrolled: computed,
+
     canActivate: computed,
     canEnroll: computed,
-    
     isReadOnly: computed,
     canEdit: computed,
 
     createProgram: action,
+    associateCoach: action,
+    fetchPeerCoaches: action,
+    activate: action,
     load: action,
     reload: action,
-    activate: action,
 });

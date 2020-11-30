@@ -60,7 +60,7 @@ export default class EditableProgramDescription extends Component {
         socket.emit(
             'programContent', {
             content: program.description,
-            fuzzyId: program.id,
+            fuzzyId: program.parentProgramId,
             name: 'about.html'
             }
         );

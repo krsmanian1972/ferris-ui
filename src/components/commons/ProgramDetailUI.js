@@ -38,10 +38,6 @@ class ProgramDetailUI extends Component {
         await this.store.load(programId);
     }
 
-    getPosterUrl = (programId) => {
-        return `${assetHost}/programs/${programId}/poster/poster.png`;
-    }
-
     getEnrollmentButton = () => {
         if (!this.store.canEnroll) {
             return;
@@ -58,7 +54,7 @@ class ProgramDetailUI extends Component {
      * The Journal is at the enrollment level.
      */
     getJournalButton = () => {
-        if (this.store.isOwner) {
+        if (this.store.isPeerCoach) {
             return;
         }
 
@@ -80,7 +76,7 @@ class ProgramDetailUI extends Component {
      * enrolled into the program.
      */
     getDiscussionButton = () => {
-        if (this.store.isOwner) {
+        if (this.store.isPeerCoach) {
             return;
         }
 
@@ -153,8 +149,13 @@ class ProgramDetailUI extends Component {
         return this.renderProgramModel();
     }
 
+    /**
+     * The program trailer should be avilable with the parent program
+     * @param {*} program 
+     * @param {*} change 
+     */
     getTrailer = (program, change) => {
-        const url = `${assetHost}/programs/${program.id}/trailer/trailer.mp4`;
+        const url = `${assetHost}/programs/${program.parentProgramId}/trailer/trailer.mp4`;
         return (
             <Card
                 headStyle={cardHeaderStyle}
@@ -166,8 +167,14 @@ class ProgramDetailUI extends Component {
         )
     }
 
+   
+    /**
+     * The poster of the spawned programs are still with the parentProgram
+     * @param {*} program 
+     * @param {*} change 
+     */
     getProgramPoster = (program, change) => {
-        const url = `${assetHost}/programs/${program.id}/poster/poster.png`;
+        const url = `${assetHost}/programs/${program.parentProgramId}/poster/poster.png`;
         return (
             <Card>
                 <div style={{ textAlign: "center", height: 350 }}>

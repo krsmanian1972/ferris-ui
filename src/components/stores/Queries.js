@@ -57,6 +57,9 @@ export const programsQuery = `query ($criteria: ProgramCriteria!) {
         description
         coachName
         isPrivate
+        genreId
+        isParent
+        parentProgramId
       }
       coach {
         id
@@ -72,6 +75,18 @@ export const programsQuery = `query ($criteria: ProgramCriteria!) {
   }   
 }`
 
+export const programCoachesQuery = `query ($programId: String!) {
+  getProgramCoaches(programId: $programId) {
+    coaches{
+      id,
+      name
+    }
+    error{
+      message
+    }
+  }
+}`
+
 
 export const createProgramQuery = `mutation ($input: NewProgramRequest!) {
   createProgram(newProgramRequest: $input) {
@@ -83,6 +98,19 @@ export const createProgramQuery = `mutation ($input: NewProgramRequest!) {
     program{
       id,
       name
+    }
+  }
+}`;
+
+export const associateCoachQuery = `mutation ($input: AssociateCoachRequest!) {
+  associateCoach(request: $input){
+    program {
+      id,
+      name,
+    }
+    errors {
+      field,
+      message
     }
   }
 }`;

@@ -40,7 +40,7 @@ export default class Milestones extends Component {
         const ver = new Date().getTime();
 
         try {
-            const url = `${assetHost}/programs/${program.id}/about/milestones.html?nocache=${ver}`;
+            const url = `${assetHost}/programs/${program.parentProgramId}/about/milestones.html?nocache=${ver}`;
             const response = await this.props.apiProxy.getAsync(url);
             if (response.status === 404) {
                 this.setState({ at: DONE });
@@ -96,7 +96,7 @@ export default class Milestones extends Component {
         socket.emit(
             'programContent', {
             content: this.milestones,
-            fuzzyId: program.id,
+            fuzzyId: program.parentProgramId,
             name: 'milestones.html'
             }
         );

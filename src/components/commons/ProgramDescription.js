@@ -15,6 +15,10 @@ export default class ProgramDescription extends Component {
         super(props);
     }
 
+    /**
+     * We populate the description from the respective content location
+     * at the Program Store.
+     */
     renderDescription = () => {
         const program = this.props.program;
         return <Editor id="about" value={program.description} readOnly={true} height={300} />

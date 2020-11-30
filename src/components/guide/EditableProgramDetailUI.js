@@ -35,21 +35,12 @@ class EditableProgramDetailUI extends Component {
         await this.store.load(programId);
     }
 
-    getPosterUrl = (programId) => {
-        return `${assetHost}/programs/${programId}/poster/poster.png`;
-    }
-
-    getTrailerUrl = () => {
-        const programId = this.props.params.programId;
-        return `${assetHost}/programs/${programId}/cover/cover.png`;
-    }
-
     getActivationButton = () => {
         if (!this.store.canActivate) {
             return;
         }
         return (
-            <Tooltip key="new_activation_tip" title="By activating this program, it will be visible to the world.">
+            <Tooltip key="new_activation_tip" title="By activating this program, it becomes open for enrollment.">
                 <Button key="activateProgram" onClick={this.onActivate} type="primary" icon={<RocketOutlined />}>Activate</Button>
             </Tooltip>
         );
@@ -64,7 +55,7 @@ class EditableProgramDetailUI extends Component {
             return;
         }
 
-        const action = `${assetHost}/programs/${program.id}/poster`
+        const action = `${assetHost}/programs/${program.parentProgramId}/poster`
         const props = {
             name: 'poster.png',
             action: action,
@@ -90,7 +81,7 @@ class EditableProgramDetailUI extends Component {
             return;
         }
 
-        const action = `${assetHost}/programs/${program.id}/banner`
+        const action = `${assetHost}/programs/${program.parentProgramId}/banner`
         const props = {
             name: 'banner.png',
             action: action,
@@ -143,7 +134,7 @@ class EditableProgramDetailUI extends Component {
 
     getProgramPoster = (program, change) => {
         const ver = new Date().getTime();
-        const url = `${assetHost}/programs/${program.id}/poster/poster.png?nocache=${ver}`;
+        const url = `${assetHost}/programs/${program.parentProgramId}/poster/poster.png?nocache=${ver}`;
         return (
             <Card>
                 <div style={{ textAlign: "center", height: 350 }}>
@@ -169,7 +160,7 @@ class EditableProgramDetailUI extends Component {
         }
 
         const ver = new Date().getTime();
-        const url = `${assetHost}/programs/${program.id}/banner/banner.png?nocache=${ver}`;
+        const url = `${assetHost}/programs/${program.parentProgramId}/banner/banner.png?nocache=${ver}`;
         return (
             <Card
                 headStyle={cardHeaderStyle}
@@ -201,7 +192,7 @@ class EditableProgramDetailUI extends Component {
 
                     {this.getProgramPoster(program, change)}
 
-                    <Trailer program_id={program.id} canEdit={this.store.canEdit} />
+                    <Trailer parentProgramId={program.parentProgramId} canEdit={this.store.canEdit} />
 
                     <ProgramDescription program={program} programStore={this.store} />
 

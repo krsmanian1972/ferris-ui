@@ -8,6 +8,7 @@ import { cardHeaderStyle } from '../util/Style';
 
 const { Title } = Typography;
 
+
 export default class Trailer extends Component {
 
     constructor(props) {
@@ -27,7 +28,7 @@ export default class Trailer extends Component {
             return;
         }
 
-        const action = `${assetHost}/programs/${this.props.program_id}/trailer`
+        const action = `${assetHost}/programs/${this.props.parentProgramId}/trailer`
 
         const props = {
             name: 'trailer.mp4',
@@ -75,7 +76,7 @@ export default class Trailer extends Component {
     renderTrailer = () => {
         if (this.state.showTrailer) {
             const ver = new Date().getTime();
-            const url = `${assetHost}/programs/${this.props.program_id}/trailer/trailer.mp4?nocache=${ver}`;
+            const url = `${assetHost}/programs/${this.props.parentProgramId}/trailer/trailer.mp4?nocache=${ver}`;
             return (
                 <div className='trailer-wrapper'>
                     <ReactPlayer width='100%' height='100%' controls className='trailer' url={url} />
