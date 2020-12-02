@@ -1,26 +1,35 @@
 import React from 'react';
 
-import { Tooltip, Typography, Card, Button, Statistic } from 'antd';
-import { MailOutlined, ProfileOutlined } from '@ant-design/icons';
-import { assetHost } from '../stores/APIEndpoints';
+import { Tooltip, Button, Typography, Space } from 'antd';
+import { PlusCircleOutlined } from '@ant-design/icons';
+import Avatar from 'antd/lib/avatar/avatar';
 
-import { cardHeaderStyle } from '../util/Style';
+import { assetHost, baseUrl } from '../stores/APIEndpoints';
+import { rustColor } from '../util/Style'
 
-const { Title, Paragraph } = Typography;
+const { Title } = Typography;
 
-export default function AboutCoach({ coach, appStore }) {
+const FEATURE_KEY = "profile";
+const contentStyle = { display: "flex", flexDirection: "row", justifyContent: "space-between", marginBottom: 40, paddingLeft: 15, alignItems: "center", borderLeft: "3px solid green" };
 
-    const profileButton = () => {
-        return (
-            <Tooltip key="profile_tip" title="To edit the profile of the Coach">
-                <Button key="profile_button" onClick={showProfileUI} type="primary" icon={<ProfileOutlined />}>Profile</Button>
-            </Tooltip>
-        );
+export default function AboutCoach({ coach, program, canEnroll, onEnroll }) {
+
+    const getEnrollmentButton = () => {
+        if (canEnroll) {
+            return (
+                <div style={{ width: "20%", textAlign: "right" }}>
+                    <Tooltip key="new_enrollment_tip" title={`Enroll in this program offered by ${coach.name}`}>
+                        <Button key="enroll" onClick={() => onEnroll(coach, program)} type="primary" icon={<PlusCircleOutlined />}>Enroll</Button>
+                    </Tooltip>
+                </div>
+            );
+        }
     }
 
-    const showProfileUI = () => {
-        const params = { userId: coach.id, parentKey: "programDetailUI" };
-        appStore.currentComponent = { label: "Profile", key: "profile", params: params };
+    const openProfileWindow = () => {
+        const title = `Profile of ${coach.name}`
+        const url = `${baseUrl}?featureKey=${FEATURE_KEY}&fuzzyId=${coach.id}`;
+        window.open(url, "_blank");
     }
 
     const getCoachCoverUrl = () => {
@@ -30,25 +39,12 @@ export default function AboutCoach({ coach, appStore }) {
     }
 
     return (
-        <Card
-            headStyle={cardHeaderStyle}
-            style={{ borderRadius: "12px", marginTop: "10px" }}
-            title={<Title level={4}>Coach</Title>}
-            extra={profileButton()}>
-
-            <div key="user_image" style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-                <div style={{ width: "30%", height: 100 }}>
-                    <div style={{ display: "inline-block", verticalAlign: "middle", height: 100 }}></div>
-                    <img style={{ maxHeight: "100%", maxWidth: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={getCoachCoverUrl()} />
-                </div>
-                <div style={{ width: "70%", textAlign: "left", height: 100, marginLeft: 15 }}>
-                    <Statistic value={coach.name} valueStyle={{ color: "rgb(0, 183, 235)", fontWeight: "bold" }} />
-                    <Paragraph style={{ marginTop: 10 }}><MailOutlined /> {coach.email}</Paragraph>
-                </div>
-            </div>
-        </Card>
+        <div key="coach_div" style={contentStyle}>
+            <Space>
+                <Avatar size="large" style={{ cursor: "pointer", marginRight: 20 }} src={getCoachCoverUrl()} onClick={openProfileWindow} />
+                <Title level={3} style={{ ...rustColor, cursor: "pointer", margin: 0 }} onClick={openProfileWindow}>{coach.name}</Title>
+            </Space>
+            {getEnrollmentButton()}
+        </div>
     )
-
-
-
 }

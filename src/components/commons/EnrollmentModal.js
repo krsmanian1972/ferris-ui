@@ -27,22 +27,22 @@ class EnrollmentModal extends Component {
 
     enroll = async () => {
         const store = this.props.enrollmentStore;
-        const programStore = this.props.programStore;
-        const programId = programStore.programId;
-
-        await store.createEnrollment(programId);
+        const selectedProgramId = store.selectedProgram.id;
+        await store.createEnrollment();
 
         if (store.isError) {
             failureNotification(store.message);
         }
 
         if (store.isDone) {
-            programStore.reload();
+            this.props.programStore.load(selectedProgramId);
         }
     }
 
     render() {
         const store = this.props.enrollmentStore;
+        const coachName = store.selectedCoach ? store.selectedCoach.name : "";
+        const subTitle = `The coach, ${coachName}, will contact you to customize the coaching plan.`
 
         return (
             <>
@@ -55,7 +55,7 @@ class EnrollmentModal extends Component {
 
                     <Result
                         title="Select Ok to enroll in this program."
-                        subTitle="The coach will contact you to customize the plan." />
+                        subTitle={subTitle} />
                 </Modal>
 
                 <Modal
@@ -72,7 +72,7 @@ class EnrollmentModal extends Component {
                     <Result
                         status="success"
                         title="You have successfully enrolled in this program."
-                        subTitle="The coach will contact you, to customize the plan, in two working days." />
+                        subTitle={subTitle} />
                 </Modal>
             </>
         );

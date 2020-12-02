@@ -77,9 +77,23 @@ export const programsQuery = `query ($criteria: ProgramCriteria!) {
 
 export const programCoachesQuery = `query ($programId: String!) {
   getProgramCoaches(programId: $programId) {
-    coaches{
-      id,
-      name
+    peerCoaches {
+      program {
+        id
+        active
+        name
+        description
+        coachName
+        isPrivate
+        genreId
+        isParent
+        parentProgramId
+      }
+      coach {
+        id
+        email
+        name
+      }
     }
     error{
       message

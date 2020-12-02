@@ -16,6 +16,8 @@ export default class EnrollmentStore {
     state = INIT;
     message = EMPTY_MESSAGE;
 
+    selectedCoach = null
+    selectedProgram = null;
     showEnrollmentModal = false;
     showResultModal = false;
     showInvitationDrawer = false;
@@ -37,17 +39,19 @@ export default class EnrollmentStore {
     }
 
     /**
-     * Self enrollment where a member directly enrolls into a program.
+     * Let us be specific about the choice of the member.
+     * Specific -> The Coach and the Program
      * 
-     * @param {*} programId 
+     * @param {*} parentProgramId 
      */
-    createEnrollment = async (programId) => {
+    createEnrollment = async () => {
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
         const variables = {
             input: {
-                programId: programId,
+                coachId: this.selectedCoach.id,
+                programId: this.selectedProgram.id,
                 userId: this.apiProxy.getUserFuzzyId(),
             }
         }

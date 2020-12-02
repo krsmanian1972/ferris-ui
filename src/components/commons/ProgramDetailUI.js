@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
 import { Spin, Result, PageHeader, Tooltip, Card, Button } from 'antd';
-import { PlusCircleOutlined, AccountBookOutlined, CompassOutlined } from '@ant-design/icons';
+import { AccountBookOutlined, CompassOutlined } from '@ant-design/icons';
 import { Typography } from 'antd';
 
 import ReactPlayer from 'react-player';
@@ -13,7 +13,7 @@ import EnrollmentStore from '../stores/EnrollmentStore';
 
 import ProgramDescription from './ProgramDescription';
 import EnrollmentModal from './EnrollmentModal';
-import AboutCoach from './AboutCoach';
+import CoachProvider from './CoachProvider';
 import Milestones from '../guide/Milestones';
 
 import { cardHeaderStyle, pageHeaderStyle, pageTitle } from '../util/Style';
@@ -36,17 +36,6 @@ class ProgramDetailUI extends Component {
 
     load = async (programId) => {
         await this.store.load(programId);
-    }
-
-    getEnrollmentButton = () => {
-        if (!this.store.canEnroll) {
-            return;
-        }
-        return (
-            <Tooltip key="new_enrollment_tip" title="Enroll into this program">
-                <Button key="enroll" onClick={this.onEnroll} type="primary" icon={<PlusCircleOutlined />}>Enroll</Button>
-            </Tooltip>
-        );
     }
 
     /**
@@ -91,7 +80,13 @@ class ProgramDetailUI extends Component {
         );
     }
 
-    onEnroll = () => {
+    /**
+     * We need the coach and its program to complete the enrollment
+     * 
+     */
+    onEnroll = (coach,program) => {
+        this.enrollmentStore.selectedCoach = coach;
+        this.enrollmentStore.selectedProgram = program;
         this.enrollmentStore.showEnrollmentModal = true;
     }
 
@@ -196,7 +191,6 @@ class ProgramDetailUI extends Component {
                     style={pageHeaderStyle}
                     title={pageTitle(program.name)}
                     extra={[
-                        this.getEnrollmentButton(),
                         this.getJournalButton(),
                         this.getDiscussionButton(),
                     ]}>
@@ -205,10 +199,10 @@ class ProgramDetailUI extends Component {
 
                     {this.getTrailer(program, change)}
 
+                    <CoachProvider programStore = {this.store} onEnroll={this.onEnroll}/>
+
                     <ProgramDescription program={program} programStore={this.store} />
 
-                    <AboutCoach coach={coach} appStore={this.props.appStore}/>
-                    
                     <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
 
                 </PageHeader>

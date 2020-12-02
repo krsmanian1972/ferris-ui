@@ -164,7 +164,7 @@ export default class ProgramStore {
                 return;
             }
 
-            const result = data.data.getProgramCoaches.coaches;
+            const result = data.data.getProgramCoaches.peerCoaches;
             if (result.length === 0) {
                 this.state = ERROR;
                 this.message = NO_COACH_FOUND;
