@@ -1,6 +1,6 @@
 import { decorate, observable, computed, action } from 'mobx';
 import { apiHost } from './APIEndpoints';
-import { createEnrollmentQuery,managedEnrollmentQuery } from './Queries';
+import { createEnrollmentQuery, managedEnrollmentQuery } from './Queries';
 
 const INIT = "init";
 const PENDING = 'pending';
@@ -8,8 +8,8 @@ const DONE = 'done';
 const ERROR = 'error';
 
 const EMPTY_MESSAGE = { status: "", help: "" };
-const ENROLLMENT_ERROR = { status: "error", help: "We are very sorry. Unable to complete your enrollment in this program. Please contact the coach." };
-const MANAGED_ENROLLMENT_ERROR = { status: "error", help: "Error during enrollment by invitation." };
+const ENROLLMENT_ERROR = { status: "error", help: "It seems you have already enrolled in this program or in a similar program offered by a different coach." };
+const MANAGED_ENROLLMENT_ERROR = { status: "error", help: "It seems the member have already enrolled in this program offered either by you or by a peer coach." };
 
 export default class EnrollmentStore {
 
@@ -59,10 +59,13 @@ export default class EnrollmentStore {
         try {
             const response = await this.apiProxy.mutate(apiHost, createEnrollmentQuery, variables);
             const data = await response.json();
+            const result = data.data.createEnrollment;
 
-            if (data.error == true) {
+            if (result.errors && result.errors.length > 0) {
                 this.state = ERROR;
                 this.message = ENROLLMENT_ERROR;
+                this.showEnrollmentModal = false;
+                this.showResultModal = false;
                 return;
             }
             this.state = DONE
@@ -84,7 +87,7 @@ export default class EnrollmentStore {
      * @param {*} invitationForm 
      * @param {*} subject 
      */
-    enrollMember = async (programId,invitationForm,subject) => {
+    enrollMember = async (programId, invitationForm, subject) => {
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
@@ -94,15 +97,15 @@ export default class EnrollmentStore {
                 coachId: this.apiProxy.getUserFuzzyId(),
                 memberMail: invitationForm.email,
                 subject: subject,
-                message:invitationForm.message,
+                message: invitationForm.message,
             }
         }
 
         try {
             const response = await this.apiProxy.mutate(apiHost, managedEnrollmentQuery, variables);
             const data = await response.json();
-
-            if (data.error == true) {
+            const result = data.data.managedEnrollment;
+            if (result.errors && result.errors.length > 0) {
                 this.state = ERROR;
                 this.message = MANAGED_ENROLLMENT_ERROR;
                 return;
