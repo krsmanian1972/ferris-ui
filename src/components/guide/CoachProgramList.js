@@ -30,7 +30,7 @@ class CoachProgramList extends ProgramList {
      * @param {*} program 
      */
     uploadCover = (program) => {
-        const action = `${assetHost}/programs/${program.id}/cover`
+        const action = `${assetHost}/programs/${program.parentProgramId}/cover`
         const props = {
             name: 'cover.png',
             action: action,
@@ -101,7 +101,7 @@ class CoachProgramList extends ProgramList {
      */
     getCoverUrl = (program) => {
         const ver = new Date().getTime();
-        const url = `${assetHost}/programs/${program.id}/cover/cover.png?nocache=${ver}`;
+        const url = `${assetHost}/programs/${program.parentProgramId}/cover/cover.png?nocache=${ver}`;
         return url;
     }
 

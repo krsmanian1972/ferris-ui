@@ -65,7 +65,7 @@ class ProgramList extends Component {
     }
 
     getCoverUrl = (program) => {
-        const url = `${assetHost}/programs/${program.id}/cover/cover.png`;
+        const url = `${assetHost}/programs/${program.parentProgramId}/cover/cover.png`;
         return url;
     }
 

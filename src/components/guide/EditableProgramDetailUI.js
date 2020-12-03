@@ -9,7 +9,7 @@ import ProgramStore from '../stores/ProgramStore';
 
 import ProgramDescription from './EditableProgramDescription';
 import ActivationModal from './ActivationModal';
-import AboutCoach from '../commons/AboutCoach';
+import CoachProvider from '../commons/CoachProvider';
 import Milestones from './Milestones';
 import EnrollmentList from './EnrollmentList';
 import Trailer from './Trailer';
@@ -196,7 +196,7 @@ class EditableProgramDetailUI extends Component {
 
                     <ProgramDescription program={program} programStore={this.store} />
 
-                    <AboutCoach coach={coach} appStore={this.props.appStore}/>
+                    <CoachProvider programStore = {this.store} />
                     
                     <Milestones program={program} programStore={this.store} apiProxy={this.props.appStore.apiProxy} />
 

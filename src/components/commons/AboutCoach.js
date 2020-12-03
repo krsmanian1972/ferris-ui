@@ -12,7 +12,7 @@ const { Title } = Typography;
 const FEATURE_KEY = "profile";
 const contentStyle = { display: "flex", flexDirection: "row", justifyContent: "space-between", marginBottom: 40, paddingLeft: 15, alignItems: "center", borderLeft: "3px solid green" };
 
-export default function AboutCoach({ coach, program, canEnroll, onEnroll }) {
+export default function AboutCoach({ coach, program, canEnroll, onEnroll,isYou }) {
 
     const getEnrollmentButton = () => {
         if (canEnroll) {
@@ -23,6 +23,14 @@ export default function AboutCoach({ coach, program, canEnroll, onEnroll }) {
                     </Tooltip>
                 </div>
             );
+        }
+    }
+
+    const getSelfIndicator = () => {
+        if (isYou) {
+            return (
+                <div style={{ width: "20%", textAlign: "right", ...rustColor }}>You</div>
+            )
         }
     }
 
@@ -45,6 +53,7 @@ export default function AboutCoach({ coach, program, canEnroll, onEnroll }) {
                 <Title level={3} style={{ ...rustColor, cursor: "pointer", margin: 0 }} onClick={openProfileWindow}>{coach.name}</Title>
             </Space>
             {getEnrollmentButton()}
+            {getSelfIndicator()}
         </div>
     )
 }

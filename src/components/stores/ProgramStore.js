@@ -5,6 +5,7 @@ import { createProgramQuery, programsQuery, programCoachesQuery, associateCoachQ
 
 const INIT = "init";
 const PENDING = 'pending';
+const INVALID = "invalid";
 const DONE = 'done';
 const ERROR = 'error';
 
@@ -27,6 +28,7 @@ export default class ProgramStore {
 
     isPrivate = false;
     showDrawer = false;
+    showCoachAssociationDrawer = false;
     showActivationModal = false;
     showActivationResultModal = false;
 
@@ -55,8 +57,12 @@ export default class ProgramStore {
         return this.state === ERROR;
     }
 
+    get isInvalid() {
+        return this.state === INVALID;
+    }
+
     get isParentProgram() {
-        return this.programModel && this.programModel.isParent;
+        return this.programModel && this.programModel.program.isParent;
     }
 
     get isOwner() {
@@ -72,7 +78,7 @@ export default class ProgramStore {
         const userId = this.apiProxy.getUserFuzzyId();
         
         for(let i=0;i<this.peerCoaches.length;i++) {
-            let aCoach = this.peerCoaches[i];
+            let aCoach = this.peerCoaches[i].coach;
             if(aCoach.id === userId) {
                 return true;
             }
@@ -303,16 +309,17 @@ export default class ProgramStore {
         try {
             const response = await this.apiProxy.mutate(apiHost, associateCoachQuery, variables);
             const data = await response.json();
+            const result = data.data.associateCoach;
 
-            if (data.error == true) {
-                this.state = ERROR;
-                this.message = CREATION_ERROR;
+            if (result.errors && result.errors.length > 0) {
+                this.state = INVALID;
+                this.message = result.errors[0].message;
                 return;
             }
-            this.state = DONE;
 
+            this.state = DONE;
             await this.fetchPeerCoaches();
-            this.showDrawer = false;
+            this.showCoachAssociationDrawer = false;
         }
         catch (e) {
             this.state = ERROR;
@@ -367,6 +374,7 @@ decorate(ProgramStore, {
     isPrivate: observable,
 
     showDrawer: observable,
+    showCoachAssociationDrawer:observable,
     showActivationModal: observable,
     showActivationResultModal: observable,
 
@@ -376,6 +384,7 @@ decorate(ProgramStore, {
     isLoading: computed,
     isDone: computed,
     isError: computed,
+    isInvalid: computed,
 
     isParentProgram: computed,
     isOwner: computed,
