@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Tooltip, Button, Typography, Space } from 'antd';
-import { PlusCircleOutlined } from '@ant-design/icons';
+import { PlusCircleOutlined, ProfileFilled } from '@ant-design/icons';
 import Avatar from 'antd/lib/avatar/avatar';
 
 import { assetHost, baseUrl } from '../stores/APIEndpoints';
@@ -12,7 +12,7 @@ const { Title } = Typography;
 const FEATURE_KEY = "profile";
 const contentStyle = { display: "flex", flexDirection: "row", justifyContent: "space-between", marginBottom: 40, paddingLeft: 15, alignItems: "center", borderLeft: "3px solid green" };
 
-export default function AboutCoach({ coach, program, canEnroll, onEnroll,isYou }) {
+export default function AboutCoach({ coach, program, canEnroll, onEnroll, isYou }) {
 
     const getEnrollmentButton = () => {
         if (canEnroll) {
@@ -32,6 +32,7 @@ export default function AboutCoach({ coach, program, canEnroll, onEnroll,isYou }
                 <div style={{ width: "20%", textAlign: "right", ...rustColor }}>You</div>
             )
         }
+        return <>&nbsp;</>
     }
 
     const openProfileWindow = () => {
@@ -50,10 +51,11 @@ export default function AboutCoach({ coach, program, canEnroll, onEnroll,isYou }
         <div key="coach_div" style={contentStyle}>
             <Space>
                 <Avatar size="large" style={{ cursor: "pointer", marginRight: 20 }} src={getCoachCoverUrl()} onClick={openProfileWindow} />
-                <Title level={3} style={{ ...rustColor, cursor: "pointer", margin: 0 }} onClick={openProfileWindow}>{coach.name}</Title>
+                <Title level={3} style={{color: "rgb(0, 183, 235)", fontWeight: "bold" , cursor: "pointer",margin:0 }} onClick={openProfileWindow}>{coach.name}</Title>
             </Space>
-            {getEnrollmentButton()}
             {getSelfIndicator()}
+            <Button type="link" style={{...rustColor}} onClick={openProfileWindow} icon={<ProfileFilled/>}>View Profile</Button>
+            {getEnrollmentButton()}
         </div>
     )
 }

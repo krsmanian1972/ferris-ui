@@ -10,13 +10,10 @@
 			"path": "../../../../ferex"
 		},
 		{
-			"path": "../../../../../rust/ferric"
-		},
-		{
-			"path": "../../../../../rust/scheduler"
-		},
-		{
 			"path": "../../../../../rust/mail_monit"
+		},
+		{
+			"path": "../../../../../rust/compound"
 		}
 	],
 	"settings": {

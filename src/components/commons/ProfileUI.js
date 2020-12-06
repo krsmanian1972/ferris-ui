@@ -223,7 +223,6 @@ export default class ProfileUI extends Component {
 
                 <div style={{ width: "70%", textAlign: "left", height: 180, marginLeft: 15 }}>
                     <Statistic value={user.name} valueStyle={{ color: "rgb(0, 183, 235)", fontWeight: "bold" }} />
-                    <Paragraph style={{ marginTop: 10 }}><MailOutlined /> {user.email} </Paragraph>
                     <Tooltip key="user_link" title="Share this link to access your profile">
                         <Tag style={{ marginTop: 5, marginBottom: 5, color: "blue", fontSize: "smaller" }}>{this.getPageLink(user.id)}</Tag>
                     </Tooltip>

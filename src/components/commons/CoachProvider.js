@@ -4,7 +4,7 @@
  */
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { Typography, Card,Tooltip,Button } from 'antd';
+import { Typography, Card, Tooltip, Button } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 
 import CoachAssociationDrawer from '../guide/CoachAssociationDrawer';
@@ -100,7 +100,8 @@ export default class CoachProvider extends Component {
             for (var index = 0; index < peerCoaches.length; index++) {
                 const { coach, program } = peerCoaches[index];
                 const isYou = coach.id === userId;
-                abouts.push(<AboutCoach key={index} coach={coach} program={program} canEnroll={false} isYou={isYou} />);
+                abouts.push(
+                    <AboutCoach key={index} coach={coach} program={program} canEnroll={false} isYou={isYou} />);
             }
         }
 
@@ -113,7 +114,7 @@ export default class CoachProvider extends Component {
 
                 {abouts}
 
-                <CoachAssociationDrawer programStore={this.props.programStore}/>
+                <CoachAssociationDrawer programStore={this.props.programStore} />
             </Card>
         )
     }
