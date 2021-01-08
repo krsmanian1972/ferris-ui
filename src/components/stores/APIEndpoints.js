@@ -18,3 +18,5 @@ export const assetHost = backendHost+"/assets";
 
 export const baseUrl = uiUrl;
 
+export const rtcServerUrl = "https://krscode.com/rtc";
+
