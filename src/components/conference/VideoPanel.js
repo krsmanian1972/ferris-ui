@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-function VideoPanel({ stream }) {
+function VideoPanel({ stream, muted }) {
 
     const videoEl = useRef(null);
-  
+
     useEffect(() => {
         if (videoEl.current && stream) {
             videoEl.current.srcObject = stream;
@@ -15,9 +15,10 @@ function VideoPanel({ stream }) {
         return { width: "31%", marginRight: "1%" };
     }
 
-    return (
-        <video className="videoItem" style={getMyStyle("myVideo")} poster="videoSelf.png" ref={videoEl} autoPlay muted />
-    );
+    if (muted) {
+        return <video className="videoItem" style={getMyStyle("myVideo")} poster="videoSelf.png" ref={videoEl} autoPlay muted />
+    }
+    return <video className="videoItem" style={getMyStyle("myVideo")} poster="videoSelf.png" ref={videoEl} autoPlay />
 }
 
 VideoPanel.propTypes = {

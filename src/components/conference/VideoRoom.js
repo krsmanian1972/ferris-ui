@@ -282,6 +282,7 @@ export default class VideoRoom extends Component {
 				},
 				error: function (error) {
 					Janus.error("WebRTC error:", error);
+					message.error(error);
 					if (useAudio) {
 						me.publishOwnFeed(false);
 					}
@@ -293,6 +294,8 @@ export default class VideoRoom extends Component {
 
 		for (var key in givenFeeds) {
 			var feed = givenFeeds[key];
+
+			console.log(feed);
 
 			var feedId = feed["id"];
 			var display = feed["display"];
@@ -377,7 +380,7 @@ export default class VideoRoom extends Component {
 						{this.getPeerVideos().map(value => value)}
 					</div>
 					<div className="myVideoContainer" style={{ height: "15%" }}>
-						<VideoPanel key="local" stream={mystream}/>
+						<VideoPanel key="local" stream={mystream} muted={true}/>
 					</div>
 				</div>
 			</div>
@@ -390,7 +393,7 @@ export default class VideoRoom extends Component {
 
         for (const [key, remoteFeed] of this.remoteFeedMap) {
 			if(remoteFeed) {
-            	const el = <VideoPanel key={key} stream={remoteFeed.stream} />
+            	const el = <VideoPanel key={key} stream={remoteFeed.stream} muted={false}/>
 				peerVideos.push(el);
 			}
         }
