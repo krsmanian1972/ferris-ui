@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Janus from './Janus.js';
 import { message, Button } from 'antd';
+
 import VideoPanel from './VideoPanel';
 import RemoteFeedHandle from './RemoteFeedHandle';
 
@@ -141,6 +142,7 @@ export default class VideoRoom extends Component {
 				Janus.debug(" ::: Got a message (publisher) :::", msg);
 				me.handleVideoRoomMessage(msg);
 				me.handleJsep(jsep);
+				me.auditCodec(msg);
 			},
 			onlocalstream: function (stream) {
 				Janus.debug(" ::: Got a local stream :::", stream);
@@ -163,10 +165,13 @@ export default class VideoRoom extends Component {
 		if (!jsep) {
 			return;
 		}
-
-		let mystream = this.state.mystream;
+		
 		Janus.debug("Handling SDP as well...", jsep);
 		sfutest.handleRemoteJsep({ jsep: jsep });
+	}
+
+	auditCodec = (msg) => {
+		let mystream = this.state.mystream;
 
 		var audio = msg["audio_codec"];
 		if (mystream && mystream.getAudioTracks() && mystream.getAudioTracks().length > 0 && !audio) {
