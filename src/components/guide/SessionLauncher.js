@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import { Button } from 'antd';
 import { baseUrl } from '../stores/APIEndpoints';
 
-const FEATURE_KEY = "broadcast";
+import {BROADCAST_FEATURE_KEY, PEERCAST_FEATURE_KEY} from '../util/Features';
 
 @observer
 class SessionLauncher extends Component {
@@ -38,6 +38,15 @@ class SessionLauncher extends Component {
         this.setState({ showWindowPortal: false })
     }
 
+    getFeatureKey = () => {
+        if (!this.props.session.sessionType) {
+            return PEERCAST_FEATURE_KEY;
+        }
+        if(this.props.session.sessionType === "multi") {
+            return BROADCAST_FEATURE_KEY;
+        }
+        return PEERCAST_FEATURE_KEY;
+    }
 
     openWindow() {
 
@@ -47,13 +56,14 @@ class SessionLauncher extends Component {
         const sessionUserType = this.props.sessionUser.userType;
         const enrollmentId = this.props.session.enrollmentId;
         const memberId = this.props.memberId;
+        const featureKey = this.getFeatureKey();
 
         const h = screen.height * 0.75;
         const w = screen.width * 0.75;
         const l = (screen.width - w) / 2;
         const t = (screen.height - h) / 2;
 
-        const url = `${baseUrl}?featureKey=${FEATURE_KEY}&sessionId=${sessionId}&sessionUserId=${sessionUserId}&sessionUserType=${sessionUserType}&enrollmentId=${enrollmentId}&memberId=${memberId}`;
+        const url = `${baseUrl}?featureKey=${featureKey}&sessionId=${sessionId}&sessionUserId=${sessionUserId}&sessionUserType=${sessionUserType}&enrollmentId=${enrollmentId}&memberId=${memberId}`;
         const specs = `toolbar=0 ,location=0, status=no,titlebar=1,menubar=0,width=${w},height=${h},left=${l},top=${t}`;
 
         this.externalWindow = window.open(url, "_blank");

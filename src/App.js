@@ -8,15 +8,13 @@ import SelectedComponent from './components/SelectedComponent'
 import { appStore } from './components/stores/AppStore';
 import { drawerStore } from './components/stores/DrawerStore';
 
+import { BROADCAST_FEATURE_KEY, PEERCAST_FEATURE_KEY, PROFILE_FEATURE_KEY } from './components/util/Features';
+
 const { Content, Footer } = Layout;
 
 const minHeight = window.innerHeight * .89;
 
-const BROADCAST_FEATURE_KEY = "broadcast";
-const PROFILE_FEATURE_KEY = "profile";
-
 export default class App extends Component {
-
 
   /**
    * Update the routing preference into the AppStore
@@ -25,6 +23,10 @@ export default class App extends Component {
     const search = window.location.search;
     const params = new URLSearchParams(search);
     const featureKey = params.get("featureKey");
+
+    if (featureKey && featureKey === PEERCAST_FEATURE_KEY) {
+      this.peercastRoute(params);
+    }
 
     if (featureKey && featureKey === BROADCAST_FEATURE_KEY) {
       this.broadcastRoute(params);
@@ -36,7 +38,7 @@ export default class App extends Component {
 
   }
 
-  broadcastRoute = (params) => {
+  peercastRoute = (params) => {
     const featureKey = params.get("featureKey");
     const sessionId = params.get("sessionId");
     const sessionUserId = params.get("sessionUserId");
@@ -53,7 +55,24 @@ export default class App extends Component {
     if (featureKey && sessionUserId) {
       appStore.updatePreferredRoute(featureKey, sessionInfo);
     }
+  }
 
+  broadcastRoute = (params) => {
+    const featureKey = params.get("featureKey");
+    const sessionId = params.get("sessionId");
+    const sessionUserId = params.get("sessionUserId");
+    const sessionUserType = params.get("sessionUserType");
+
+    const sessionInfo = {
+      sessionId: sessionId,
+      sessionUserId: sessionUserId,
+      sessionUserType: sessionUserType,
+      memberId: params.get("memberId")
+    };
+
+    if (featureKey && sessionUserId) {
+      appStore.updatePreferredRoute(featureKey, sessionInfo);
+    }
   }
 
   profileRoute = (params) => {
@@ -63,7 +82,6 @@ export default class App extends Component {
       appStore.currentComponent = { label: "Profile", key: "profile", params: compParams };
     }
   }
-
 
   renderLayout = () => {
 

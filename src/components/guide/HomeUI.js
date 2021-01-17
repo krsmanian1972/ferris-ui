@@ -1,20 +1,17 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
-import { PageHeader, Typography, Button, Tooltip } from 'antd';
-import { CalendarOutlined, PlusCircleOutlined, UserOutlined } from '@ant-design/icons';
+import { PageHeader, Button, Tooltip } from 'antd';
+import { CalendarOutlined, PlusCircleOutlined } from '@ant-design/icons';
 
 import TodaySessions from './TodaySessions';
+import ScheduleDrawer from './ScheduleDrawer';
 
 import SessionListStore from '../stores/SessionListStore';
-import SessionStore from '../stores/SessionStore';
-
-import ScheduleDrawer from './ScheduleDrawer';
 import ProgramListStore from '../stores/ProgramListStore';
 import EnrollmentListStore from '../stores/EnrollmentListStore';
+import SessionStore from '../stores/SessionStore';
+
 import { pageHeaderStyle, pageTitle } from '../util/Style';
-
-
-const { Title } = Typography;
 
 
 @inject("appStore")
@@ -43,9 +40,16 @@ class HomeUI extends Component {
     showNewSchedule = () => {
         this.sessionStore.startTimeMsg = {};
         this.sessionStore.durationMsg = {};
+        this.sessionStore.sessionType = "mono"; 
         this.sessionStore.showDrawer = true;
     }
 
+    showNewConference = () => {
+        this.sessionStore.startTimeMsg = {};
+        this.sessionStore.durationMsg = {};
+        this.sessionStore.sessionType = "multi";
+        this.sessionStore.showDrawer = true;
+    }
    
     showUserEvents = () => {
         const params = { event: {}, parentKey: "home" };
@@ -60,8 +64,18 @@ class HomeUI extends Component {
     newScheduleButton = () => {
         if (this.props.appStore.isCoach) {
             return (
-                <Tooltip key="new_session_tip" title="Create Session">
-                    <Button type="primary" icon={<PlusCircleOutlined />} onClick={() => this.showNewSchedule()}>New</Button>
+                <Tooltip key="new_session_tip" title="Create One-To-One Session">
+                    <Button type="primary" icon={<PlusCircleOutlined />} onClick={() => this.showNewSchedule()}>New 1-to-1</Button>
+                </Tooltip>
+            )
+        }
+    }
+
+    newConferenceButton = () => {
+        if (this.props.appStore.isCoach) {
+            return (
+                <Tooltip key="new_conference_tip" title="Create a conference session and invite multiple members.">
+                    <Button type="primary" icon={<PlusCircleOutlined />} onClick={() => this.showNewConference()}>New Conference</Button>
                 </Tooltip>
             )
         }
@@ -91,6 +105,7 @@ class HomeUI extends Component {
                     title={pageTitle("Moment 36")}
                     extra={[
                         this.newScheduleButton(),
+                        this.newConferenceButton(),
                         this.eventsButton(),
                     ]}>
                     <TodaySessions sessionListStore={this.sessionListStore} sessionStore={this.sessionStore} showSessionDetail={this.showSessionDetail} />

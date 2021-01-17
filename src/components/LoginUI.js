@@ -5,7 +5,6 @@ import { Button, Form, Input, Card, Typography, notification, message } from 'an
 import { CodeOutlined } from '@ant-design/icons';
 
 import About from './About';
-import VideoRoom from '../components/conference/VideoRoom';
 
 const { Title } = Typography;
 
@@ -25,7 +24,6 @@ const failureNotification = () => {
     };
     notification.open(args);
 };
-
 
 
 @inject('appStore')
@@ -79,7 +77,7 @@ export default class LoginScreen extends Component {
                 </div>
 
                 <div>
-                    <VideoRoom/>
+                    <About/>
                 </div>
             </>
         );

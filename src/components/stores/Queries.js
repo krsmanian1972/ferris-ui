@@ -852,3 +852,22 @@ export const getPendingDiscussionsQuery = `query ($criteria: UserCriteria!) {
     }
   }
 }`;
+
+export const createConferenceQuery = `mutation ($input: NewConferenceRequest!) {
+  createConference(newConferenceRequest: $input){
+    conference {
+      id,
+      name,
+      description,
+      programId,
+      people,
+      duration,
+      scheduleStart,
+      scheduleEnd,
+    }
+    errors {
+      field,
+      message
+    }
+  }
+}`;

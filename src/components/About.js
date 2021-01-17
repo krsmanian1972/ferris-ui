@@ -1,9 +1,8 @@
 import React, { Component } from "react";
 import { Card, Row, Col } from 'antd';
 import { CaretRightOutlined } from '@ant-design/icons';
-import { cardHeaderStyle, pageTitle } from "./util/Style";
+import { cardHeaderStyle } from "./util/Style";
 
-import moment from 'moment';
 
 const aboutStyle = {
     marginBottom: 5,
@@ -43,8 +42,8 @@ class About extends Component {
                     </Row>
                 </Card>
                 <Card headStyle={cardHeaderStyle} style={aboutStyle} title="Ferris - The Coaching Assistant">
-                    <p>Version 0.2</p>
-                    <p>Oct-2020</p>
+                    <p>Version 0.3</p>
+                    <p>Jan-2021</p>
                     <p>Maintained by&nbsp;KRSCode.com</p>
                 </Card>
                 <Card headStyle={cardHeaderStyle} style={commentsStyle} title="For Support">

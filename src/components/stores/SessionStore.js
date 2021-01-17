@@ -4,7 +4,7 @@ import moment from 'moment';
 import { isBlank } from './Util';
 
 import { apiHost } from './APIEndpoints';
-import { createSessionQuery, alterSessionStateQuery, sessionUsersQuery, findSessionQuery } from './Queries';
+import { createSessionQuery, alterSessionStateQuery, sessionUsersQuery, findSessionQuery, createConferenceQuery } from './Queries';
 
 const INIT = "init";
 const PENDING = 'pending';
@@ -17,7 +17,6 @@ const ERROR_MESSAGE = { status: ERROR, help: "We are very sorry, the service is 
 const LOADING_ERROR = { status: "error", help: "Unable to load the people." };
 const COACH_LAUNCH_HELP = "You may activate this session, as Ready, 5 minutes ahead of the starting time.";
 const ACTOR_LAUNCH_HELP = "Waiting for the coach to activate this session as Ready.";
-
 
 const READY = "READY";
 const OVERDUE = "OVERDUE";
@@ -35,6 +34,8 @@ export default class SessionStore {
     message = EMPTY_MESSAGE;
 
     showDrawer = false;
+
+    sessionType = "mono";
 
     startTimeMsg = {};
     startTime = null;
@@ -77,6 +78,54 @@ export default class SessionStore {
         return this.state === INVALID;
     }
 
+
+    /**
+     * Creating a Conference Session with a single member 
+     * who is nothing but the coach using the
+     * self enrollment id. 
+     * Remember to convert the given time to utc format.
+     */
+    createConference = async (sessionRequest) => {
+
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+
+        if (!this.isValidConference(sessionRequest)) {
+            this.state = INVALID;
+            return;
+        }
+
+        const variables = {
+            input: {
+                programId: sessionRequest.programId,
+                name: sessionRequest.name,
+                description: sessionRequest.description,
+                duration: this.duration,
+                startTime: sessionRequest.startTime.utc().format(),
+            }
+        }
+
+        try {
+            const response = await this.apiProxy.mutate(apiHost, createConferenceQuery, variables);
+            const data = await response.json();
+
+            if (data.error == true) {
+                this.state = ERROR;
+                this.message = ERROR_MESSAGE;
+                return;
+            }
+
+            this.showDrawer = false;
+            this.state = DONE;
+            this.sessionListStore.buildRoster();
+        }
+        catch (e) {
+            this.state = ERROR;
+            this.message = ERROR_MESSAGE;
+            console.log(e);
+        }
+
+    }
 
     /**
      * Creating a New Session. 
@@ -123,6 +172,22 @@ export default class SessionStore {
             console.log(e);
         }
 
+    }
+
+    isValidConference = (sessionRequest) => {
+
+        this.programMsg = EMPTY_MESSAGE;
+  
+        if (isBlank(sessionRequest.programId)) {
+            this.programMsg = { status: ERROR, help: "Please Select a Program" };
+        }
+
+        this.validateDate(sessionRequest.startTime);
+        this.validateDuration(sessionRequest.duration);
+
+        return this.programMsg.status !== ERROR
+            && this.startTimeMsg.status !== ERROR
+            && this.durationMsg.status !== ERROR;
     }
 
     isValid = (sessionRequest) => {
@@ -401,6 +466,7 @@ export default class SessionStore {
 
 decorate(SessionStore, {
     state: observable,
+    sessionType: observable,
     showDrawer: observable,
 
     startTime: observable,
@@ -436,6 +502,7 @@ decorate(SessionStore, {
     broadcastHelp: computed,
 
     createSchedule: action,
+    createConference: action,
     validateDate: action,
     validateDuration: action,
     alterSessionState: action,

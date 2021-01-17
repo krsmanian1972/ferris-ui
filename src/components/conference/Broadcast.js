@@ -4,6 +4,7 @@ import { message, Button } from 'antd';
 
 import VideoPanel from './VideoPanel';
 import RemoteFeedHandle from './RemoteFeedHandle';
+import {rtcServerUrl} from '../stores/APIEndpoints';
 
 const standardStyle = {
     height: "100%",
@@ -13,7 +14,6 @@ const standardStyle = {
     overflow: "hidden",
 };
 
-const server = "https://krscode.com/rtc";
 
 var janus = null;
 var sfutest = null;
@@ -53,7 +53,7 @@ export default class VideoRoom extends Component {
 
 		// Create session with Gateway callbacks
 		janus = new Janus({
-			server: server,
+			server: rtcServerUrl,
 			success: function () {
 				janus.attach(me.createPublisherCallback());
 			},

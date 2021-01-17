@@ -11,14 +11,6 @@ import { QuestionCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 const { TextArea } = Input;
 const { Option } = Select;
 
-
-const marks = {
-    0: '0 min',
-    15: '15',
-    30: '30',
-    45: '45 min'
-}
-
 const formItemLayout = {
     labelCol: {
         xs: { span: 24 },
@@ -42,7 +34,6 @@ const failureNotification = () => {
     };
     notification.open(args);
 };
-
 
 @observer
 class ScheduleForm extends Component {
@@ -91,7 +82,12 @@ class ScheduleForm extends Component {
 
         const store = this.props.sessionStore;
 
-        await store.createSchedule(values);
+        if(store.sessionType === "mono") {
+            await store.createSchedule(values);
+        }
+        else {
+            await store.createConference(values);
+        }
 
         if (store.isError) {
             failureNotification();
@@ -112,6 +108,9 @@ class ScheduleForm extends Component {
      */
     onProgramChange = (programId) => {
         const store = this.props.sessionStore;
+        if (store.sessionType === "multi") {
+            return;
+        }
         this.formRef.current.setFieldsValue({ memberId: '' });
         store.enrollmentListStore.fetchEnrollments(programId, 'ALL');
     }
@@ -160,6 +159,36 @@ class ScheduleForm extends Component {
         );
     }
 
+    renderMembers = () => {
+        const store = this.props.sessionStore;
+        if (store.sessionType === "multi") {
+            return <></>
+        }
+
+        const members = store.enrollmentListStore.members;
+        const memberMsg = this.pick(store.enrollmentListStore.message, store.memberMsg);
+
+        return (
+            <Form.Item name="memberId"
+                rules={[{ required: true, message: 'Please select an enrolled member for the Program' }]}
+                label={this.getMemberLabel()}
+                validateStatus={memberMsg.status}
+                help={memberMsg.help}>
+
+                <Select
+                    showSearch
+                    filterOption={(input, option) =>
+                        option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    }
+                    placeholder="Select an enrolled Member">
+                    {members.map(item => (
+                        <Option key={item.id}>{item.searchable}</Option>
+                    ))}
+                </Select>
+            </Form.Item>
+        )
+    }
+
     pick = (msg1, msg2) => {
         if (msg1.status === "error") {
             return msg1;
@@ -174,12 +203,8 @@ class ScheduleForm extends Component {
         const programs = store.programListStore.programs;
         const programMsg = this.pick(store.programListStore.message, store.programMsg);
 
-        const members = store.enrollmentListStore.members;
-        const memberMsg = this.pick(store.enrollmentListStore.message, store.memberMsg);
-
         const startTimeMsg = store.startTimeMsg;
         const durationMsg = store.durationMsg;
-
 
         return (
             <Form {...formItemLayout}
@@ -207,26 +232,10 @@ class ScheduleForm extends Component {
                     </Select>
                 </Form.Item>
 
-                <Form.Item name="memberId"
-                    rules={[{ required: true, message: 'Please select an enrolled member for the Program' }]}
-                    label={this.getMemberLabel()}
-                    validateStatus={memberMsg.status}
-                    help={memberMsg.help}>
-
-                    <Select
-                        showSearch
-                        filterOption={(input, option) =>
-                            option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                        }
-                        placeholder="Select an enrolled Member">
-                        {members.map(item => (
-                            <Option key={item.id}>{item.searchable}</Option>
-                        ))}
-                    </Select>
-                </Form.Item>
+                {this.renderMembers()}
 
                 <Form.Item name="name"
-                    rules={[{required: true, message: 'Please provide a topic for this session' }]}
+                    rules={[{ required: true, message: 'Please provide a topic for this session' }]}
                     label="Session Name">
                     <Input placeholder="Topic for this session" />
                 </Form.Item>
@@ -270,7 +279,6 @@ class ScheduleForm extends Component {
                     label={this.getEndTimeLabel()}>
                     {this.getEndTime()}
                 </Form.Item>
-
 
                 <Form.Item>
                     <Button type="primary" disabled={store.isLoading} htmlType="submit" icon={<PlusCircleOutlined />}>Create Schedule</Button>

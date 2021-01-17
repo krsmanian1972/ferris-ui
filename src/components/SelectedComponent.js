@@ -18,12 +18,12 @@ import SessionDetailUI from './guide/SessionDetailUI';
 import HomeUI from './guide/HomeUI';
 import EnrollmentUI from './guide/EnrollmentUI';
 import UserEventsUI from './commons/UserEventsUI';
-import Broadcast from './guide/Broadcast';
+import Peercast from './conference/Peercast';
+import Broadcast from './conference/Broadcast';
 import WeekSessions from './guide/WeekSessions';
 import JournalUI from './commons/JournalUI';
 import DiscussionUI from './commons/DiscussionUI';
 import DigestUI from './commons/DigestUI';
-
 
 
 @inject("appStore")
@@ -83,6 +83,9 @@ class SelectedComponent extends Component {
             }
             case 'registration': {
                 return <Registration />;
+            }
+            case 'peercast': {
+                return <Peercast params={currentComponent.params} />
             }
             case 'broadcast': {
                 return <Broadcast params={currentComponent.params} />

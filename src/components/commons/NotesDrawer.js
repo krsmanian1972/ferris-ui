@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
 import { Tabs, Drawer } from 'antd';
-import NoteList from '../commons/NoteList';
+import NoteList from './NoteList';
 import NotesForm from './NotesForm';
 
 const { TabPane } = Tabs;

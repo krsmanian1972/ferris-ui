@@ -5,7 +5,7 @@ import { DatePicker, Button, Form, Input, Upload, notification, message } from '
 import { UploadOutlined } from '@ant-design/icons';
 import {assetHost} from '../stores/APIEndpoints';
 
-import Editor from "../commons/Editor";
+import Editor from "./Editor";
 
 const { TextArea } = Input;
 

@@ -13,10 +13,10 @@ import BoardStreamTransceiver from '../webrtc/BoardStreamTransceiver';
 import NoteListStore from '../stores/NoteListStore';
 import NotesStore from '../stores/NotesStore';
 
-import NotesDrawer from './NotesDrawer';
-import VideoBoard from './VideoBoard';
+import VideoBoard from './PeerVideoBoard';
 
-import Board from './Board';
+import NotesDrawer from '../commons/NotesDrawer';
+import Board from '../commons/Board';
 
 import SharedCoachingPlan from '../plan/SharedCoachingPlan';
 import SharedActionList from '../plan/SharedActionList';
@@ -30,7 +30,7 @@ const MY_BOARD_KEY = 'myBoard';
 
 @inject("appStore")
 @observer
-class Broadcast extends Component {
+class Peercast extends Component {
     constructor(props) {
         super(props);
 
@@ -423,4 +423,4 @@ class Broadcast extends Component {
         )
     }
 }
-export default Broadcast
+export default Peercast
