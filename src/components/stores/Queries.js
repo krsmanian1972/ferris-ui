@@ -198,7 +198,8 @@ export const alterSessionStateQuery = `mutation($input: ChangeSessionStateReques
       scheduleStart,
       scheduleEnd,
       status,
-      isClosed
+      isClosed,
+      sessionType
     }
     errors {
       field
@@ -224,6 +225,7 @@ export const eventsQuery = `query ($criteria: EventCriteria!) {
         status,
         isClosed,
         closingNotes,
+        sessionType
       }
       program {
         name,
@@ -793,6 +795,7 @@ export const findSessionQuery = `query ($criteria: SessionCriteria!) {
         actualStart
         actualEnd
         status
+        sessionType
   } 
 }`;
 

@@ -26,6 +26,9 @@ const START = "START";
 
 const COACH = "coach";
 
+const MONO = "mono";
+const MULTI = "multi";
+
 const ALLOWED_MINUTES = new Set([0, 15, 30, 45]);
 
 export default class SessionStore {
@@ -35,7 +38,7 @@ export default class SessionStore {
 
     showDrawer = false;
 
-    sessionType = "mono";
+    sessionType = MONO;
 
     startTimeMsg = {};
     startTime = null;
@@ -177,7 +180,7 @@ export default class SessionStore {
     isValidConference = (sessionRequest) => {
 
         this.programMsg = EMPTY_MESSAGE;
-  
+
         if (isBlank(sessionRequest.programId)) {
             this.programMsg = { status: ERROR, help: "Please Select a Program" };
         }
@@ -256,6 +259,18 @@ export default class SessionStore {
         this.duration = (hours * 60) + minutes;
     }
 
+    setSelectedEvent = (selectedEvent) => {
+        if (selectedEvent && selectedEvent.session) {
+            this.event = selectedEvent;
+            this.sessionType = selectedEvent.session.sessionType;
+        }
+    }
+
+    /**
+     * Since Conference is likely to have more than one member other than the coach
+     * let classify the pople into two buckets. The Coach, The Members.
+     * 
+     */
     loadPeople = async () => {
 
         const sessionId = this.event.session.id;
@@ -275,11 +290,11 @@ export default class SessionStore {
 
             const users = data.data.getSessionUsers.users;
 
-            if (users[0].sessionUser.userType === COACH) {
-                this.people = { coach: users[0], member: users[1] }
+            if (this.event.session.sessionType === MONO) {
+                this.setSessionPeople(users);
             }
             else {
-                this.people = { coach: users[1], member: users[0] }
+                this.setConferencePeople(users);
             }
 
             this.state = DONE;
@@ -289,6 +304,36 @@ export default class SessionStore {
             this.state = ERROR;
             this.message = LOADING_ERROR;
             console.log(e);
+        }
+    }
+
+    setSessionPeople = (users) => {
+
+        if (users && users.length == 2) {
+            if (users[0].sessionUser.userType === COACH) {
+                this.people = { coach: users[0], member: users[1] }
+            }
+            else {
+                this.people = { coach: users[1], member: users[0] }
+            }
+        }
+    }
+
+    setConferencePeople = (users) => {
+
+        if (!users) {
+            return;
+        }
+
+        this.people = { coach: null, members: [] };
+
+        for (var i = 0; i < users.length; i++) {
+            if (users[i].sessionUser.userType === COACH) {
+                this.people.coach = users[i];
+            }
+            else {
+                this.people.members.push(users[i]);
+            }
         }
     }
 
@@ -412,8 +457,8 @@ export default class SessionStore {
         }
     }
 
-    getSessionStatus = async() => {
-        
+    getSessionStatus = async () => {
+
         const sessionId = this.event.session.id;
 
         const variables = {
@@ -428,7 +473,7 @@ export default class SessionStore {
 
             if (result.data == null) {
                 return { status: null };
-            
+
             }
             return { status: result.data.getSession.status };
         }
@@ -437,7 +482,7 @@ export default class SessionStore {
         }
     }
 
-    startPolling = async() => {
+    startPolling = async () => {
 
         if (!this.shouldRefresh()) {
             return;
@@ -452,15 +497,15 @@ export default class SessionStore {
             this.event.session.status = result.status;
             this.pollStatus = result.status;
         }
-      
+
         setTimeout(() => this.startPolling(), 5000);
     }
 
     shouldRefresh = () => {
         return this.event.session
-        && !this.isCoach
-        && !this.event.session.isClosed
-        && (this.event.session.status === PLANNED || this.event.session.status === OVERDUE) 
+            && !this.isCoach
+            && !this.event.session.isClosed
+            && (this.event.session.status === PLANNED || this.event.session.status === OVERDUE)
     }
 }
 
@@ -501,6 +546,8 @@ decorate(SessionStore, {
 
     broadcastHelp: computed,
 
+    setSelectedEvent: action,
+    loadPeople: action,
     createSchedule: action,
     createConference: action,
     validateDate: action,

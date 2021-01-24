@@ -11,9 +11,6 @@
 		},
 		{
 			"path": "../../../../../rust/mail_monit"
-		},
-		{
-			"path": "../../../../../rust/compound"
 		}
 	],
 	"settings": {

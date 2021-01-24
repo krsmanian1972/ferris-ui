@@ -64,8 +64,8 @@ class HomeUI extends Component {
     newScheduleButton = () => {
         if (this.props.appStore.isCoach) {
             return (
-                <Tooltip key="new_session_tip" title="Create One-To-One Session">
-                    <Button type="primary" icon={<PlusCircleOutlined />} onClick={() => this.showNewSchedule()}>New 1-to-1</Button>
+                <Tooltip key="new_session_tip" title="Create One-On-One Session">
+                    <Button type="primary" icon={<PlusCircleOutlined />} onClick={() => this.showNewSchedule()}>New 1-On-1</Button>
                 </Tooltip>
             )
         }

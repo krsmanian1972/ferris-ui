@@ -3,7 +3,7 @@ import { inject, observer } from 'mobx-react';
 import { assetHost } from '../stores/APIEndpoints';
 
 import { Typography, Card, Statistic, PageHeader, Button, Tag, Popconfirm, notification, message } from 'antd';
-import { MailOutlined, CaretRightOutlined, CloseOutlined, CheckOutlined } from '@ant-design/icons';
+import { CaretRightOutlined, CloseOutlined, CheckOutlined } from '@ant-design/icons';
 
 import Moment from 'react-moment';
 import moment from 'moment';
@@ -12,13 +12,14 @@ import 'moment-timezone';
 import SessionStore from '../stores/SessionStore';
 
 import BoardList from "../commons/BoardList";
-import SessionLauncher from './SessionLauncher';
 import NoteList from '../commons/NoteList';
+import SessionLauncher from './SessionLauncher';
+import SessionPeers from "./SessionPeers";
 import ClosureDrawer from './ClosureDrawer';
 
-import { cardHeaderStyle, pageHeaderStyle, pageTitle,rustColor } from '../util/Style';
+import { cardHeaderStyle, pageHeaderStyle, pageTitle, rustColor } from '../util/Style';
 
-const { Title, Paragraph,Text } = Typography;
+const { Title, Text } = Typography;
 
 const { Countdown } = Statistic;
 
@@ -39,7 +40,7 @@ class SessionDetailUI extends Component {
     constructor(props) {
         super(props);
         this.store = new SessionStore({ apiProxy: props.appStore.apiProxy });
-        this.store.event = this.props.params.event;
+        this.store.setSelectedEvent(this.props.params.event);
     }
 
     componentDidMount() {
@@ -108,32 +109,20 @@ class SessionDetailUI extends Component {
         )
     }
 
-    renderPeople = (people) => {
-        if (!people.coach) {
-            return <></>
+    renderPeople = (people, session) => {
+
+        if (people.coach && session.sessionType === "mono") {
+            return (
+                <SessionPeers people={people}/>
+            )
         }
 
-        const coach = people.coach;
-        const member = people.member;
-
-        return (
-            <Card key="people"
-                headStyle={cardHeaderStyle}
-                style={{ borderRadius: 12, marginTop: 10 }}
-                title={<Title level={4}>People</Title>}>
-                <div style={{ display: "flex", marginTop: 10, flexDirection: "row", justifyContent: "space-between" }}>
-                    <div key="coachId" style={{ width: "50%" }}>
-                        <Statistic title="Coach" value={coach.user.name} valueStyle={{ color: "rgb(0, 183, 235)", fontWeight: "bold" }} />
-                        <Paragraph><MailOutlined /> {coach.user.email}</Paragraph>
-                    </div>
-
-                    <div key="actorId" style={{ width: "50%", borderLeft: "1px solid lightgray", paddingLeft: 20 }}>
-                        <Statistic title="Actor" value={member.user.name} />
-                        <Paragraph><MailOutlined /> {member.user.email}</Paragraph>
-                    </div>
-                </div>
-            </Card>
-        )
+        if (people.coach && session.sessionType === "multi"){
+            return (
+                <></>
+                //<ConferenceMembers sessionStore = {this.store} />
+            )
+        }
     }
 
     makeReady = async () => {
@@ -198,6 +187,19 @@ class SessionDetailUI extends Component {
         }
     }
 
+    renderArtifacts = (people, session) => {
+        if (session.sessionType === "mono" && people.coach) {
+            return (
+                <div key="assets" style={{ marginTop: 10 }}>
+                    <BoardList key="cb" title="Coach Boards" sessionUserId={people.coach.sessionUser.id} />
+                    <BoardList key="ab" title="Actor Boards" sessionUserId={people.member.sessionUser.id} />
+
+                    <NoteList key="cn" title="Coach Notes" sessionUserId={people.coach.sessionUser.id} closingNotes={session.closingNotes} />
+                    <NoteList key="an" title="Actor Notes" sessionUserId={people.member.sessionUser.id} />
+                </div>
+            )
+        }
+    }
 
     render() {
 
@@ -220,17 +222,8 @@ class SessionDetailUI extends Component {
                     ]}
                 >
                     {this.renderTopSegment(program, session, sessionUser, people)}
-
-                    {people.coach && (
-                        <div key="assets" style={{marginTop:10}}>
-                            <BoardList key="cb" title="Coach Boards" sessionUserId={people.coach.sessionUser.id} />
-                            <BoardList key="ab" title="Actor Boards" sessionUserId={people.member.sessionUser.id}/>
-                            <NoteList key="cn" title="Coach Notes" sessionUserId={people.coach.sessionUser.id} closingNotes={session.closingNotes} />
-                            <NoteList key="an" title="Actor Notes" sessionUserId={people.member.sessionUser.id} />
-                        </div>
-                    )}
-
-                    {this.renderPeople(people)}
+                    {this.renderArtifacts(people, session)}
+                    {this.renderPeople(people, session)}
                 </PageHeader>
 
                 <ClosureDrawer store={this.store} />
