@@ -225,7 +225,8 @@ export const eventsQuery = `query ($criteria: EventCriteria!) {
         status,
         isClosed,
         closingNotes,
-        sessionType
+        sessionType,
+        conferenceId
       }
       program {
         name,
@@ -787,15 +788,16 @@ export const getBoardsQuery = `query($criteria: EventCriteria!){
 
 export const findSessionQuery = `query ($criteria: SessionCriteria!) {
   getSession(criteria: $criteria) {
-        id
-        name
-        duration
-        scheduleStart
-        scheduleEnd
-        actualStart
-        actualEnd
-        status
-        sessionType
+        id,
+        name,
+        duration,
+        scheduleStart,
+        scheduleEnd,
+        actualStart,
+        actualEnd,
+        status,
+        sessionType,
+        conferenceId
   } 
 }`;
 
@@ -868,6 +870,16 @@ export const createConferenceQuery = `mutation ($input: NewConferenceRequest!) {
       scheduleStart,
       scheduleEnd,
     }
+    errors {
+      field,
+      message
+    }
+  }
+}`;
+
+export const manageConferencePeopleQuery = `mutation ($input: MemberRequest!) {
+  manageConference(memberRequest: $input){
+    rows 
     errors {
       field,
       message

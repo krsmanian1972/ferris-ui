@@ -9,12 +9,14 @@ import Moment from 'react-moment';
 import moment from 'moment';
 import 'moment-timezone';
 
+import EnrollmentListStore from '../stores/EnrollmentListStore';
 import SessionStore from '../stores/SessionStore';
 
 import BoardList from "../commons/BoardList";
 import NoteList from '../commons/NoteList';
 import SessionLauncher from './SessionLauncher';
 import SessionPeers from "./SessionPeers";
+import ConferenceMembers from "./ConferenceMembers";
 import ClosureDrawer from './ClosureDrawer';
 
 import { cardHeaderStyle, pageHeaderStyle, pageTitle, rustColor } from '../util/Style';
@@ -39,7 +41,11 @@ class SessionDetailUI extends Component {
 
     constructor(props) {
         super(props);
-        this.store = new SessionStore({ apiProxy: props.appStore.apiProxy });
+        this.enrollmentListStore = new EnrollmentListStore({ apiProxy: props.appStore.apiProxy });
+        this.store = new SessionStore({ 
+            apiProxy: props.appStore.apiProxy, 
+            enrollmentListStore: this.enrollmentListStore,
+        });
         this.store.setSelectedEvent(this.props.params.event);
     }
 
@@ -119,8 +125,7 @@ class SessionDetailUI extends Component {
 
         if (people.coach && session.sessionType === "multi"){
             return (
-                <></>
-                //<ConferenceMembers sessionStore = {this.store} />
+                <ConferenceMembers sessionStore = {this.store} />
             )
         }
     }

@@ -40,9 +40,16 @@ export default class EnrollmentListStore {
      * @param {*} result 
      */
     setSearchable = (result) => {
-        result.map(item=>{
+        let selfIndex = -1;
+
+        result.map((item,index)=>{
             item.searchable = item.name+"::"+item.email;
-        })
+            if(item.id===this.apiProxy.getUserFuzzyId()) {
+                selfIndex = index;
+            }
+        });
+
+        result.splice(selfIndex, 1);
     }
 
     /**

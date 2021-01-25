@@ -4,7 +4,7 @@ import moment from 'moment';
 import { isBlank } from './Util';
 
 import { apiHost } from './APIEndpoints';
-import { createSessionQuery, alterSessionStateQuery, sessionUsersQuery, findSessionQuery, createConferenceQuery } from './Queries';
+import { createSessionQuery, alterSessionStateQuery, sessionUsersQuery, findSessionQuery, createConferenceQuery, manageConferencePeopleQuery } from './Queries';
 
 const INIT = "init";
 const PENDING = 'pending';
@@ -37,6 +37,8 @@ export default class SessionStore {
     message = EMPTY_MESSAGE;
 
     showDrawer = false;
+    showClosureDrawer = false;
+    showInvitationDrawer = false;
 
     sessionType = MONO;
 
@@ -54,7 +56,7 @@ export default class SessionStore {
     change = null;
     pollStatus = null;
 
-    showClosureDrawer = false;
+    
     targetState = "";
 
     constructor(props) {
@@ -457,6 +459,60 @@ export default class SessionStore {
         }
     }
 
+    addConferenceMember = async (request) => {
+
+        const variables = {
+            input: {
+                conferenceId: this.event.session.conferenceId,
+                memberIds: [request.memberId],
+                intention: 'ADD'
+            }
+        }
+
+        await this.manageConferencePeople(variables);
+    }
+
+    removeConferenceMember = async (memberId) => {
+
+        const variables = {
+            input: {
+                conferenceId: this.event.session.conferenceId,
+                memberIds: [memberId],
+                intention: 'REMOVE'
+            }
+        }
+
+        await this.manageConferencePeople(variables);
+    }
+
+    manageConferencePeople = async (variables) => {
+        this.state = PENDING;
+        this.message = EMPTY_MESSAGE;
+
+        try {
+            const response = await this.apiProxy.mutate(apiHost, manageConferencePeopleQuery, variables);
+            const data = await response.json();
+            const result = data.data.manageConference;
+
+            if (result.errors != null && result.errors.length > 0) {
+                const help = result.errors[0].message;
+                this.message = { status: ERROR, help: help }
+                this.state = ERROR;
+                return;
+            }
+
+            await this.loadPeople();
+            this.change = result.rows.length;
+            this.showInvitationDrawer = false;
+            this.state = DONE;
+        }
+        catch (e) {
+            this.state = ERROR;
+            this.message = ERROR_MESSAGE;
+            console.log(e);
+        }
+    }
+
     getSessionStatus = async () => {
 
         const sessionId = this.event.session.id;
@@ -512,7 +568,10 @@ export default class SessionStore {
 decorate(SessionStore, {
     state: observable,
     sessionType: observable,
+
     showDrawer: observable,
+    showClosureDrawer: observable,
+    showInvitationDrawer: observable,
 
     startTime: observable,
     startTimeMsg: observable,
@@ -528,7 +587,6 @@ decorate(SessionStore, {
     people: observable,
     change: observable,
 
-    showClosureDrawer: observable,
     targetState: observable,
 
     isLoading: computed,
@@ -549,7 +607,6 @@ decorate(SessionStore, {
     setSelectedEvent: action,
     loadPeople: action,
     createSchedule: action,
-    createConference: action,
     validateDate: action,
     validateDuration: action,
     alterSessionState: action,
@@ -561,4 +618,7 @@ decorate(SessionStore, {
     startPolling: action,
     shouldRefresh: action,
     getSessionStatus: action,
+    addConferenceMember: action,
+    removeConferenceMember: action,
+    createConference: action,
 });
