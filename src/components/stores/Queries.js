@@ -199,7 +199,8 @@ export const alterSessionStateQuery = `mutation($input: ChangeSessionStateReques
       scheduleEnd,
       status,
       isClosed,
-      sessionType
+      sessionType,
+      conferenceId,
     }
     errors {
       field

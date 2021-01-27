@@ -59,15 +59,16 @@ export default class App extends Component {
 
   broadcastRoute = (params) => {
     const featureKey = params.get("featureKey");
+    const conferenceId = params.get("conferenceId");
     const sessionId = params.get("sessionId");
     const sessionUserId = params.get("sessionUserId");
     const sessionUserType = params.get("sessionUserType");
 
     const sessionInfo = {
+      conferenceId: conferenceId,
       sessionId: sessionId,
       sessionUserId: sessionUserId,
       sessionUserType: sessionUserType,
-      memberId: params.get("memberId")
     };
 
     if (featureKey && sessionUserId) {

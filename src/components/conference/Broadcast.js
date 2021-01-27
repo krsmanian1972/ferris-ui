@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
+import { inject, observer } from 'mobx-react';
 import Janus from './Janus.js';
-import { message, Button } from 'antd';
+import { message } from 'antd';
 
 import VideoPanel from './VideoPanel';
 import RemoteFeedHandle from './RemoteFeedHandle';
@@ -14,22 +15,19 @@ const standardStyle = {
     overflow: "hidden",
 };
 
-
 var janus = null;
 var sfutest = null;
-var opaqueId = "videoroomtest-" + Janus.randomString(12);
-
-var myroom = 1234;	// Demo room
-var myusername = "raja";
 
 var myid = null;
 var mypvtid = null;
 
 var doSimulcast = false;
 var doSimulcast2 = false;
-var subscriber_mode = false;
+var subscriberMode = false;
 
-export default class VideoRoom extends Component {
+@inject("appStore")
+@observer
+class Broadcast extends Component {
 
 	remoteFeedMap = new Map();
 
@@ -39,8 +37,28 @@ export default class VideoRoom extends Component {
 		this.state = {
 			mystream: null,
 			status: '',
-			message: ''
+			message: '',
+			portalSize: { height: window.innerHeight, width: window.innerWidth }
 		}
+	}
+
+	componentDidMount() {
+
+		window.addEventListener("resize", () => {
+            const portalSize = { height: window.innerHeight, width: window.innerWidth };
+            this.setState({ portalSize: portalSize });
+		});
+		
+		this.auditUser();
+	}
+
+	auditUser = async() => {
+
+		this.myroom = this.props.params.conferenceId;
+		this.opaqueId = this.props.params.sessionUserId;
+		this.myusername = this.props.appStore.credentials.username;
+		
+		Janus.init({ debug: "all", callback: this.createJanusInstance });
 	}
 
 	/**
@@ -67,10 +85,14 @@ export default class VideoRoom extends Component {
 	}
 
 	doRegister = () => {
-		Janus.log("Plugin attached! (" + sfutest.getPlugin() + ", id=" + sfutest.getId() + ")");
-		Janus.log("  -- This is a publisher/manager");
-		const newState = { status: "canRegister", message: 'Plugin attached.' };
-		this.setState(newState);
+		var register = {
+			request: "join",
+			room: this.myroom,
+			ptype: "publisher",
+			display: this.myusername
+		};
+
+		sfutest.send({ message: register });
 	}
 
 	remoteFeedListener = (feedEvent) => {
@@ -118,7 +140,7 @@ export default class VideoRoom extends Component {
 
 		var attachCallback = {
 			plugin: "janus.plugin.videoroom",
-			opaqueId: opaqueId,
+			opaqueId: this.opaqueId,
 			success: function (pluginHandle) {
 				sfutest = pluginHandle;
 				me.doRegister();
@@ -199,7 +221,7 @@ export default class VideoRoom extends Component {
 
 			Janus.log("Successfully joined room " + msg["room"] + " with ID " + myid);
 
-			if (!subscriber_mode) {
+			if (!subscriberMode) {
 				this.publishOwnFeed(true);
 			}
 
@@ -255,9 +277,9 @@ export default class VideoRoom extends Component {
 			if (msg["error_code"] === 426) {
 				// This is a "no such room" error: give a more meaningful description
 				message.error(
-					"<p>Apparently room <code>" + myroom + "</code> (the one this demo uses as a test room) " +
+					"<p>Apparently room <code>" + this.myroom + "</code> (the one this demo uses as a test room) " +
 					"does not exist...</p><p>Do you have an updated <code>janus.plugin.videoroom.jcfg</code> " +
-					"configuration file? If not, make sure you copy the details of room <code>" + myroom + "</code> " +
+					"configuration file? If not, make sure you copy the details of room <code>" + this.myroom + "</code> " +
 					"from that sample in your current configuration file, then restart Janus and try again."
 				);
 			}
@@ -302,7 +324,7 @@ export default class VideoRoom extends Component {
 			var audio_codec = feed["audio_codec"];
 			var video_codec = feed["video_codec"];
 
-			const remoteFeedHandle = new RemoteFeedHandle(janus, opaqueId, mypvtid, myroom, this.remoteFeedListener);
+			const remoteFeedHandle = new RemoteFeedHandle(janus, this.opaqueId, mypvtid, this.myroom, this.remoteFeedListener);
 			remoteFeedHandle.subscribeTo(feedId, display, audio_codec, video_codec);
 		}
 	}
@@ -328,53 +350,13 @@ export default class VideoRoom extends Component {
 		this.setState(newState);
 	}
 
-	startButton = () => {
-		if (janus) {
-			return <></>
-		}
-		return (
-			<Button key="init" onClick={this.startClicked}>Start</Button>
-		)
-	}
-
-	startClicked = () => {
-		Janus.init({ debug: "all", callback: this.createJanusInstance });
-	}
-
-	registrationButton = () => {
-		if (this.state.status === 'canRegister') {
-			return (
-				<Button key="registration" onClick={this.registerClicked} >Register</Button>
-			)
-		}
-	}
-
-	registerClicked = () => {
-
-		const newState = { status: "registered", message: 'Registered' };
-		this.setState(newState);
-
-		var register = {
-			request: "join",
-			room: myroom,
-			ptype: "publisher",
-			display: myusername
-		};
-
-		sfutest.send({ message: register });
-	}
-
 	render() {
 
-		const viewHeight = window.innerHeight * 0.50;
-		const { mystream } = this.state;
+		const { mystream,portalSize } = this.state;
+		const viewHeight = portalSize.height * 0.94;
 
 		return (
 			<div style={{ padding: 2, height: viewHeight }}>
-				<div>
-					{this.startButton()}
-					{this.registrationButton()}
-				</div>
 				<div style={standardStyle} >
 					<div className="peerVideoContainer" style={{height: "15%"}}>
 						{this.getPeerVideos().map(value => value)}
@@ -403,5 +385,6 @@ export default class VideoRoom extends Component {
 
 }
 
+export default Broadcast; 
 
 

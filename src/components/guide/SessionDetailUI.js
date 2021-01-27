@@ -11,6 +11,7 @@ import 'moment-timezone';
 
 import EnrollmentListStore from '../stores/EnrollmentListStore';
 import SessionStore from '../stores/SessionStore';
+import JanusStore from '../conference/JanusStore';
 
 import BoardList from "../commons/BoardList";
 import NoteList from '../commons/NoteList';
@@ -47,6 +48,7 @@ class SessionDetailUI extends Component {
             enrollmentListStore: this.enrollmentListStore,
         });
         this.store.setSelectedEvent(this.props.params.event);
+        this.janusStore = new JanusStore({ apiProxy: props.appStore.apiProxy });
     }
 
     componentDidMount() {
@@ -132,6 +134,11 @@ class SessionDetailUI extends Component {
 
     makeReady = async () => {
 
+        const { session } = this.store.event;
+        if (session.sessionType === "multi") {
+            this.janusStore.provisionVideoRoom(session.conferenceId);
+        }
+
         await this.store.alterSessionState("READY");
 
         if (this.store.isError) {
@@ -143,11 +150,22 @@ class SessionDetailUI extends Component {
     }
 
     cancelEvent = () => {
+        const { session } = this.store.event;
+        if (session.sessionType === "multi") {
+            this.janusStore.removeVideoRoom(session.conferenceId);
+        }
+        
         this.store.targetState = "CANCEL";
         this.store.showClosureDrawer = true;
     }
 
     completeEvent = () => {
+        
+        const { session } = this.store.event;
+        if (session.sessionType === "multi") {
+            this.janusStore.removeVideoRoom(session.conferenceId);
+        }
+        
         this.store.targetState = "DONE";
         this.store.showClosureDrawer = true;
     }

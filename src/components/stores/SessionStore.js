@@ -6,6 +6,9 @@ import { isBlank } from './Util';
 import { apiHost } from './APIEndpoints';
 import { createSessionQuery, alterSessionStateQuery, sessionUsersQuery, findSessionQuery, createConferenceQuery, manageConferencePeopleQuery } from './Queries';
 
+import Janus from '../conference/Janus.js';
+import {rtcServerUrl} from './APIEndpoints';
+
 const INIT = "init";
 const PENDING = 'pending';
 const DONE = 'done';
@@ -64,6 +67,8 @@ export default class SessionStore {
         this.sessionListStore = props.sessionListStore;
         this.programListStore = props.programListStore;
         this.enrollmentListStore = props.enrollmentListStore;
+
+        Janus.init({ debug: "all", callback: this.gatewayCallback });
     }
 
 
@@ -563,6 +568,7 @@ export default class SessionStore {
             && !this.event.session.isClosed
             && (this.event.session.status === PLANNED || this.event.session.status === OVERDUE)
     }
+
 }
 
 decorate(SessionStore, {
