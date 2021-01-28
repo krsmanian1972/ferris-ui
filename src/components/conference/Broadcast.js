@@ -85,7 +85,7 @@ class Broadcast extends Component {
 	}
 
 	doRegister = () => {
-		var register = {
+		const register = {
 			request: "join",
 			room: this.myroom,
 			ptype: "publisher",
