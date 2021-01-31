@@ -16,7 +16,7 @@ const standardStyle = {
 };
 
 var janus = null;
-var sfutest = null;
+var localPlugin = null;
 
 var myid = null;
 var mypvtid = null;
@@ -92,7 +92,7 @@ class Broadcast extends Component {
 			display: this.myusername
 		};
 
-		sfutest.send({ message: register });
+		localPlugin.send({ message: register });
 	}
 
 	remoteFeedListener = (feedEvent) => {
@@ -100,19 +100,19 @@ class Broadcast extends Component {
 			return;
 		}
 		if (feedEvent.event === "attached") {
-			var remoteFeed = feedEvent.remoteFeed;
+			const remoteFeed = feedEvent.remoteFeed;
 
-			var rfid =  remoteFeed.rfid;
+			const rfid =  remoteFeed.rfid;
 			this.remoteFeedMap.set(rfid,remoteFeed);
 			
 			const newState = {status: "feedAttached",rfid: rfid};
 			this.setState(newState);
 		}
 		else if(feedEvent.event === "remoteStream") {
-			var rfid = feedEvent.rfid;
-			var stream = feedEvent.stream;
+			const rfid = feedEvent.rfid;
+			const stream = feedEvent.stream;
 
-			var remoteFeed = this.remoteFeedMap.get(rfid);
+			const remoteFeed = this.remoteFeedMap.get(rfid);
 			if(remoteFeed != null) {
 				remoteFeed.stream = stream;
 			}
@@ -123,7 +123,7 @@ class Broadcast extends Component {
 	}
 
 	detachRemoteFeeds = (rfid) => {
-		var remoteFeed = this.remoteFeedMap.get(rfid);
+		const remoteFeed = this.remoteFeedMap.get(rfid);
 		if (remoteFeed != null) {
 			Janus.debug("Feed " + remoteFeed.rfid + " (" + remoteFeed.rfdisplay + ") has left the room, detaching");
 			this.remoteFeedMap.set(rfid,null);
@@ -138,11 +138,11 @@ class Broadcast extends Component {
 
 		let me = this;
 
-		var attachCallback = {
+		const streamCallback = {
 			plugin: "janus.plugin.videoroom",
 			opaqueId: this.opaqueId,
 			success: function (pluginHandle) {
-				sfutest = pluginHandle;
+				localPlugin = pluginHandle;
 				me.doRegister();
 			},
 			error: function (error) {
@@ -180,7 +180,7 @@ class Broadcast extends Component {
 				me.setState(newState);
 			}
 		};
-		return attachCallback;
+		return streamCallback;
 	}
 
 	handleJsep = (jsep) => {
@@ -189,18 +189,18 @@ class Broadcast extends Component {
 		}
 		
 		Janus.debug("Handling SDP as well...", jsep);
-		sfutest.handleRemoteJsep({ jsep: jsep });
+		localPlugin.handleRemoteJsep({ jsep: jsep });
 	}
 
 	auditCodec = (msg) => {
-		let mystream = this.state.mystream;
+		const mystream = this.state.mystream;
 
-		var audio = msg["audio_codec"];
+		const audio = msg["audio_codec"];
 		if (mystream && mystream.getAudioTracks() && mystream.getAudioTracks().length > 0 && !audio) {
 			message.warning("Our audio stream has been rejected, viewers won't hear us");
 		}
 
-		var video = msg["video_codec"];
+		const video = msg["video_codec"];
 		if (mystream && mystream.getVideoTracks() && mystream.getVideoTracks().length > 0 && !video) {
 			message.warning("Our video stream has been rejected, viewers won't see us");
 		}
@@ -208,7 +208,7 @@ class Broadcast extends Component {
 
 	handleVideoRoomMessage = (msg) => {
 
-		var event = msg["videoroom"];
+		const event = msg["videoroom"];
 
 		if (!event) {
 			return;
@@ -227,7 +227,7 @@ class Broadcast extends Component {
 
 			// Any new feed to attach to?
 			if (msg["publishers"]) {
-				var list = msg["publishers"];
+				const list = msg["publishers"];
 				Janus.debug("Got a list of available publishers/feeds:", list);
 
 				this.subscribeToRemoteFeeds(list);
@@ -248,26 +248,26 @@ class Broadcast extends Component {
 	onRtcEvent = (msg) => {
 		if (msg["publishers"]) {
 			// Any new feed to attach to?
-			var list = msg["publishers"];
+			const list = msg["publishers"];
 			Janus.debug("Got a list of available publishers/feeds:", list);
 	
 			this.subscribeToRemoteFeeds(list);
 		}
 		else if (msg["leaving"]) {
 			// One of the publishers has gone away?
-			var leaving = msg["leaving"];
+			const leaving = msg["leaving"];
 			Janus.log("Publisher left: " + leaving);
 
 			this.detachRemoteFeeds(leaving);
 		}
 		else if (msg["unpublished"]) {
 			// One of the publishers has unpublished?
-			var unpublished = msg["unpublished"];
+			const unpublished = msg["unpublished"];
 			Janus.log("Publisher left: " + unpublished);
 
 			if (unpublished === 'ok') {
 				// That's us
-				sfutest.hangup();
+				localPlugin.hangup();
 				return;
 			}
 
@@ -290,8 +290,8 @@ class Broadcast extends Component {
 	}
 
 	publishOwnFeed = (useAudio) => {
-		var me = this;
-		sfutest.createOffer(
+		let me = this;
+		localPlugin.createOffer(
 			{
 				// Add data:true here if you want to publish datachannels as well
 				media: { audioRecv: false, videoRecv: false, audioSend: useAudio, videoSend: true },	// Publishers are sendonly
@@ -299,8 +299,8 @@ class Broadcast extends Component {
 				simulcast2: doSimulcast2,
 				success: function (jsep) {
 					Janus.debug("Got publisher SDP!", jsep);
-					var publish = { request: "configure", audio: useAudio, video: true };
-					sfutest.send({ message: publish, jsep: jsep });
+					const publish = { request: "configure", audio: useAudio, video: true };
+					localPlugin.send({ message: publish, jsep: jsep });
 				},
 				error: function (error) {
 					Janus.error("WebRTC error:", error);
@@ -314,15 +314,13 @@ class Broadcast extends Component {
 
 	subscribeToRemoteFeeds = (givenFeeds) => {
 
-		for (var key in givenFeeds) {
-			var feed = givenFeeds[key];
-
-			console.log(feed);
-
-			var feedId = feed["id"];
-			var display = feed["display"];
-			var audio_codec = feed["audio_codec"];
-			var video_codec = feed["video_codec"];
+		for (let key in givenFeeds) {
+			const feed = givenFeeds[key];
+			
+			const feedId = feed["id"];
+			const display = feed["display"];
+			const audio_codec = feed["audio_codec"];
+			const video_codec = feed["video_codec"];
 
 			const remoteFeedHandle = new RemoteFeedHandle(janus, this.opaqueId, mypvtid, this.myroom, this.remoteFeedListener);
 			remoteFeedHandle.subscribeTo(feedId, display, audio_codec, video_codec);
@@ -330,18 +328,19 @@ class Broadcast extends Component {
 	}
 
 	unpublishOwnFeed = () => {
-		var unpublish = { request: "unpublish" };
-		sfutest.send({ message: unpublish });
+		const unpublish = { request: "unpublish" };
+		localPlugin.send({ message: unpublish });
 	}
 
 	toggleMute = () =>{
-		var muted = sfutest.isAudioMuted();
+		const muted = localPlugin.isAudioMuted();
 		Janus.log((muted ? "Unmuting" : "Muting") + " local stream...");
-		if (muted)
-			sfutest.unmuteAudio();
-		else
-			sfutest.muteAudio();
-		muted = sfutest.isAudioMuted();
+		if (muted) {
+			localPlugin.unmuteAudio();
+		}
+		else {
+			localPlugin.muteAudio();
+		}
 	}
 	
 	errorStatus = (error) => {
