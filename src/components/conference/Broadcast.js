@@ -316,7 +316,7 @@ class Broadcast extends Component {
 
 		for (let key in givenFeeds) {
 			const feed = givenFeeds[key];
-			
+
 			const feedId = feed["id"];
 			const display = feed["display"];
 			const audio_codec = feed["audio_codec"];
@@ -353,15 +353,12 @@ class Broadcast extends Component {
 
 		const { mystream,portalSize } = this.state;
 		const viewHeight = portalSize.height * 0.94;
-
 		return (
 			<div style={{ padding: 2, height: viewHeight }}>
 				<div style={standardStyle} >
-					<div className="peerVideoContainer" style={{height: "15%"}}>
+					<div className="conferenceVideos" style={{height:viewHeight}}>
 						{this.getPeerVideos().map(value => value)}
-					</div>
-					<div className="myVideoContainer" style={{ height: "15%" }}>
-						<VideoPanel key="local" stream={mystream} muted={true}/>
+						<VideoPanel key="local" stream={mystream} isLocal={true} username={this.myusername}/>
 					</div>
 				</div>
 			</div>
@@ -374,7 +371,7 @@ class Broadcast extends Component {
 
         for (const [key, remoteFeed] of this.remoteFeedMap) {
 			if(remoteFeed) {
-            	const el = <VideoPanel key={key} stream={remoteFeed.stream} muted={false}/>
+            	const el = <VideoPanel key={key} stream={remoteFeed.stream} isLocal={false} username={remoteFeed.rfdisplay}/>
 				peerVideos.push(el);
 			}
         }
