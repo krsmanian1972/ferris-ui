@@ -35,7 +35,7 @@ export default class NoteListStore {
     }
 
     /**
-     * Obtain the List of Boards for the given sessionUserFuzzyId
+     * Obtain the List of Notes for the given sessionUserFuzzyId
      *
      */
     load = async (sessionUserId, closingNotes) => {

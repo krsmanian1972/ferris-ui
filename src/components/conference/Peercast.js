@@ -82,15 +82,17 @@ class Peercast extends Component {
 
     initializeNotesStore = (sessionUserId) => {
 
-        this.noteListStore = new NoteListStore({
+        const noteListStore = new NoteListStore({
             apiProxy: this.props.appStore.apiProxy,
         });
 
         this.notesStore = new NotesStore({
             apiProxy: this.props.appStore.apiProxy,
-            noteListStore: this.noteListStore,
+            noteListStore: noteListStore,
             sessionUserId: sessionUserId,
         });
+
+        noteListStore.load(sessionUserId,null);
     }
 
     onCanvasStream = (stream) => {
@@ -418,7 +420,7 @@ class Peercast extends Component {
                     </Col>
                 </Row>
 
-                <NotesDrawer notesStore={this.notesStore} sessionUserId={sessionUserId} apiProxy={this.props.appStore.apiProxy} />
+                <NotesDrawer notesStore={this.notesStore}/>
             </div>
         )
     }

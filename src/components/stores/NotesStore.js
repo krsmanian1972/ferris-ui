@@ -120,8 +120,6 @@ export default class NotesStore {
 
     createNotes = async (newNotes) => {
 
-        console.log(newNotes);
-
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
@@ -153,6 +151,8 @@ export default class NotesStore {
                 return;
             }
 
+            this.noteListStore.load(this.sessionUserId,null);
+            
             this.showDrawer = false;
             this.state = DONE;
         }

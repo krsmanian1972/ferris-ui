@@ -17,16 +17,15 @@ class NotesDrawer extends Component {
 
     render() {
         const store = this.props.notesStore;
-        const title =  "Notes";
 
         return (
-            <Drawer title = {title} width={"55%"} closable={true} onClose={this.close} visible={store.showDrawer} >
+            <Drawer width={"55%"} closable={true} onClose={this.close} visible={store.showDrawer} >
                 <Tabs defaultActiveKey="1" tabPosition="right" >
                     <TabPane key="1" tab="New">
                         <NotesForm notesStore={store} />
                     </TabPane>
                     <TabPane key="2" tab="Earlier">
-                        <NoteList sessionUserId = {this.props.sessionUserId} apiProxy={this.props.apiProxy}/>
+                        <NoteList title="My Notes" notesStore={store}/>
                     </TabPane>
                 </Tabs>
             </Drawer>

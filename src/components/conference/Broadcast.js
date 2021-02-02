@@ -61,7 +61,7 @@ class Broadcast extends Component {
 		this.auditUser();
 	}
 
-	auditUser = async () => {
+	auditUser = () => {
 
 		this.opaqueId = this.props.params.sessionUserId;
 		this.myusername = this.props.appStore.credentials.username;
@@ -77,15 +77,17 @@ class Broadcast extends Component {
 
 	initializeNotesStore = () => {
 
-		this.noteListStore = new NoteListStore({
+		const noteListStore = new NoteListStore({
 			apiProxy: this.props.appStore.apiProxy,
 		});
 
 		this.notesStore = new NotesStore({
 			apiProxy: this.props.appStore.apiProxy,
-			noteListStore: this.noteListStore,
+			noteListStore: noteListStore,
 			sessionUserId: this.opaqueId,
 		});
+
+		noteListStore.load(this.opaqueId,null);
 	}
 
 	getVideoIcon = () => {
@@ -212,7 +214,7 @@ class Broadcast extends Component {
 					</div>
 				</div>
 				{this.renderControls(isActive)}
-				{this.opaqueId && <NotesDrawer notesStore={this.notesStore} sessionUserId={this.opaqueId} apiProxy={this.props.appStore.apiProxy} />}
+				{this.opaqueId && <NotesDrawer notesStore={this.notesStore} />}
 			</div>
 		)
 	}

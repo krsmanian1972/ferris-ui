@@ -65,7 +65,7 @@ class HomeUI extends Component {
         if (this.props.appStore.isCoach) {
             return (
                 <Tooltip key="new_session_tip" title="Create One-On-One Session">
-                    <Button type="primary" icon={<PlusCircleOutlined />} onClick={() => this.showNewSchedule()}>New 1-On-1</Button>
+                    <Button type="primary" icon={<PlusCircleOutlined />} onClick={() => this.showNewSchedule()}>1-On-1</Button>
                 </Tooltip>
             )
         }
@@ -75,7 +75,7 @@ class HomeUI extends Component {
         if (this.props.appStore.isCoach) {
             return (
                 <Tooltip key="new_conference_tip" title="Create a conference session and invite multiple members.">
-                    <Button type="primary" icon={<PlusCircleOutlined />} onClick={() => this.showNewConference()}>New Conference</Button>
+                    <Button type="primary" icon={<PlusCircleOutlined />} onClick={() => this.showNewConference()}>Conference</Button>
                 </Tooltip>
             )
         }

@@ -16,8 +16,14 @@ class NoteList extends Component {
 
     constructor(props) {
         super(props);
-        this.store = new NoteListStore({ apiProxy: props.appStore.apiProxy });
-        this.store.load(props.sessionUserId, props.closingNotes);
+        
+        if(props.notesStore) {
+            this.store = props.notesStore.noteListStore;
+        }
+        else {
+            this.store = new NoteListStore({ apiProxy: props.appStore.apiProxy });
+            this.store.load(props.sessionUserId, props.closingNotes);
+        }
     }
 
     next = () => {
@@ -80,7 +86,7 @@ class NoteList extends Component {
         const props = {
             dots: false,
             infinite: true,
-            slidesToShow: Math.min(2, rowCount),
+            slidesToShow: Math.min(1, rowCount),
             slidesToScroll: 1,
             swipeToSlide: true,
         };
