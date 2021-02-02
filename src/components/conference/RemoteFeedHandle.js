@@ -25,52 +25,42 @@ class RemoteFeedHandle {
 		this.feedListener = feedListener;
 	}
 
+	/**
+	 * The type is either video or screen. 
+	 * @param {*} feedId 
+	 * @param {*} type 
+	 * @param {*} audio_codec 
+	 * @param {*} video_codec 
+	 */
+	subscribeTo = (feedId, type, video_codec) => {
 
-	subscribeTo = (feedId, display, audio_codec, video_codec) => {
-
-		var me = this;
+		let me = this;
 
 		this.janus.attach(
 			{
 				plugin: "janus.plugin.videoroom",
 				opaqueId: me.opaqueId,
 				success: function (pluginHandle) {
-					Janus.log("Plugin attached! (" + pluginHandle.getPlugin() + ", id=" + pluginHandle.getId() + ")");
-					Janus.log("  -- This is a subscriber");
-
 					me.remoteFeed = pluginHandle;
-					me.remoteFeed.simulcastStarted = false;
-					const subscription = me.createSubscription(feedId, display, audio_codec, video_codec);
+					const subscription = me.createSubscription(feedId, type, video_codec);
 					me.remoteFeed.send({ message: subscription });
-
 				},
 				error: function (error) {
 					Janus.error("  -- Error attaching plugin...", error);
 				},
 				onmessage: function (msg, jsep) {
-					Janus.debug(" ::: Got a message (subscriber) :::", msg);
-
 					me.handleJoiningMessage(msg);
 					me.handleJsep(jsep);
-				},
-				iceState: function (state) {
-					Janus.log("ICE state of this WebRTC PeerConnection (feed #" + me.remoteFeed.rfindex + ") changed to " + state);
-				},
-				webrtcState: function (on) {
-					Janus.log("Janus says this WebRTC PeerConnection (feed #" + me.remoteFeed.rfindex + ") is " + (on ? "up" : "down") + " now");
 				},
 				onlocalstream: function (stream) {
 					// The subscriber stream is recvonly, we don't expect anything here
 				},
 				onremotestream: function (stream) {
-					Janus.debug("Remote feed #" + me.remoteFeed.rfid + ", stream:", stream);
-
-					var feedEvent = {
+					const feedEvent = {
 						event:"remoteStream",
 						rfid: me.remoteFeed.rfid,
 						stream:stream,	
 					}
-
 					me.feedListener(feedEvent);
 				},
 				oncleanup: function () {
@@ -80,10 +70,29 @@ class RemoteFeedHandle {
 		)
 	}
 
-	createSubscription = (feedId, display, audio_codec, video_codec) => {
+	createSubscription = (feedId,type,video_codec) => {
 
-		// We wait for the plugin to send us an offer
-		var subscription = {
+		if(type === "screen") {
+			return this.screenSubscription(feedId);
+		}
+
+		return this.videoSubscription(feedId,video_codec);
+	}
+
+	screenSubscription = (feedId) => {
+		const subscription = {
+			request: "join",
+			room: this.myroom,
+			ptype: "listener",
+			feed: feedId,
+		};
+
+		return subscription;
+	}
+
+	videoSubscription = (feedId, video_codec) => {
+
+		const subscription = {
 			request: "join",
 			room: this.myroom,
 			ptype: "subscriber",
@@ -109,8 +118,7 @@ class RemoteFeedHandle {
 			return;
 		}
 
-		var event = msg["videoroom"];
-		Janus.debug("Event: " + event);
+		const event = msg["videoroom"];
 		if (!event) {
 			return
 		}
@@ -119,14 +127,13 @@ class RemoteFeedHandle {
 			this.remoteFeed.rfid = msg["id"];
 			this.remoteFeed.rfdisplay = msg["display"];
 
-			var feedEvent = {
+			const feedEvent = {
 				event:"attached",
 				remoteFeed: this.remoteFeed 
 			}
 
 			this.feedListener(feedEvent);
 	
-			Janus.log("Successfully attached to feed " + this.remoteFeed.rfid + " (" + this.remoteFeed.rfdisplay + ") in room " + msg["room"]);
 		} else if (event === "event") {
 			// Nothing to handle for event
 		} else {
@@ -139,23 +146,18 @@ class RemoteFeedHandle {
 			return;
 		}
 		
-		var remoteFeed = this.remoteFeed;
-		var room = this.myroom;
+		const remoteFeed = this.remoteFeed;
+		const room = this.myroom;
 
 		// Answer and attach
 		remoteFeed.createAnswer({
 			jsep: jsep,
 
-			// Add data:true here if you want to subscribe to datachannels as well
-			// (obviously only works if the publisher offered them in the first place)
-
-			media: { audioSend: false, videoSend: false },	// We want recvonly audio/video
+			media: { audioSend: false, videoSend: false },
 
 			success: function (jsep) {
-				Janus.debug("Got SDP!", jsep);
-
-				var body = { request: "start", room: room };
-				remoteFeed.send({ message: body, jsep: jsep });
+				const answer = { request: "start", room: room };
+				remoteFeed.send({ message: answer, jsep: jsep });
 			},
 			error: function (error) {
 				Janus.error("WebRTC error:", error);

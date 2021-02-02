@@ -8,23 +8,47 @@ export default class JanusStore {
         Janus.init({ debug: "all", callback: this.gatewayCallback });
     }
 
-    provisionVideoRoom = (conferenceId) => {
-        var message = {
+    /**
+     * Provision a Video Room to allow 10 active users and a Room for
+     * rendering the screen sharing session with two publishers;
+     * 
+     * @param {*} conferenceId 
+     */
+    provisionRooms = (conferenceId) => {
+        const message = { 
+            request: "create", 
+            room: conferenceId, 
+            publishers: 10 
+        };
+
+        this.janusHandle.send({ message: message });
+
+        this.provisionScreenRooms(conferenceId);
+    }
+
+    provisionScreenRooms = (conferenceId) => {
+        const message = {
             request: "create",
-            room: conferenceId,
+            room: `scr-${conferenceId}`,
+            publishers: 2,
+            bitrate: 500000,
         };
 
         this.janusHandle.send({ message: message });
     }
 
-    removeVideoRoom = (conferenceId) => {
+    /**
+     * Destroy both the video and screen sharing rooms created for the conference
+     * 
+     * @param {*} conferenceId 
+     */
+   
+    removeRooms = (conferenceId) => {
+        const videoRoomMsg = { request: "destroy", room: conferenceId };
+        this.janusHandle.send({ message: videoRoomMsg });
 
-        var message = {
-            request: "destroy",
-            room: conferenceId,
-        };
-
-        this.janusHandle.send({ message: message });
+        const screenRoomMsg = { request: "destroy", room: `scr-${conferenceId}` };
+        this.janusHandle.send({ message: screenRoomMsg });
     }
 
     gatewayCallback = () => {

@@ -35,21 +35,25 @@ class ConferenceMembers extends Component {
 
 
     addMemberButton = () => {
-        return (
-            <Tooltip key="add_member_tip" title="To invite a registered member to this session.">
-                <Button key="add" onClick={this.onNewMember} type="primary" icon={<PlusCircleOutlined />}>Add Member</Button>
-            </Tooltip>
-        )
+        if (this.store.canAlterPeople) {
+            return (
+                <Tooltip key="add_member_tip" title="To invite a registered member to this session.">
+                    <Button key="add" onClick={this.onNewMember} type="primary" icon={<PlusCircleOutlined />}>Add Member</Button>
+                </Tooltip>
+            )
+        }
     }
 
     removeMemberButton = (userId) => {
-        return (
-            <Popconfirm key="ready_pop" placement="left" title="Are you sure to remove this member?" okText="Yes" cancelText="No"
-                onConfirm={() => this.onRemoveMember(userId)}
-            >
-                <Button key="remove" danger icon={<DeleteOutlined />} shape="circle" style={{ margin: 10 }}></Button>
-            </Popconfirm>
-        )
+        if (this.store.canAlterPeople) {
+            return (
+                <Popconfirm key="ready_pop" placement="left" title="Are you sure to remove this member?" okText="Yes" cancelText="No"
+                    onConfirm={() => this.onRemoveMember(userId)}
+                >
+                    <Button key="remove" danger icon={<DeleteOutlined />} shape="circle" style={{ margin: 10 }}></Button>
+                </Popconfirm>
+            )
+        }
     }
 
     onNewMember = () => {

@@ -7,7 +7,6 @@ import { apiHost } from './APIEndpoints';
 import { createSessionQuery, alterSessionStateQuery, sessionUsersQuery, findSessionQuery, createConferenceQuery, manageConferencePeopleQuery } from './Queries';
 
 import Janus from '../conference/Janus.js';
-import {rtcServerUrl} from './APIEndpoints';
 
 const INIT = "init";
 const PENDING = 'pending';
@@ -59,7 +58,7 @@ export default class SessionStore {
     change = null;
     pollStatus = null;
 
-    
+
     targetState = "";
 
     constructor(props) {
@@ -388,6 +387,12 @@ export default class SessionStore {
             && (this.event.session.status === READY || this.event.session.status === PROGRESS)
     }
 
+    get canAlterPeople() {
+        return this.isCoach 
+            && this.event.session 
+            && !this.event.session.isClosed;
+    }
+
     get broadcastHelp() {
 
         if (this.event && this.event.session && (this.event.session.status === PLANNED || this.event.session.status === OVERDUE)) {
@@ -607,6 +612,7 @@ decorate(SessionStore, {
     canCancelEvent: computed,
     canBroadcast: computed,
     canCompleteEvent: computed,
+    canAlterPeople: computed,
 
     broadcastHelp: computed,
 

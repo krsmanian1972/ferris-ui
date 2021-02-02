@@ -12,10 +12,10 @@ import BoardStreamTransceiver from '../webrtc/BoardStreamTransceiver';
 
 import NoteListStore from '../stores/NoteListStore';
 import NotesStore from '../stores/NotesStore';
+import NotesDrawer from '../commons/NotesDrawer';
 
 import VideoBoard from './PeerVideoBoard';
 
-import NotesDrawer from '../commons/NotesDrawer';
 import Board from '../commons/Board';
 
 import SharedCoachingPlan from '../plan/SharedCoachingPlan';

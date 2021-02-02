@@ -1,12 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-const height = screen.height * 20 / 100;
+const height = window.innerHeight * 18 / 100;
+const thumbnail = { maxHeight: height };
 
-const panelStyle = {marginBottom: 5, border: "1px groove white", background: "black"};
-const thumbnail = { maxHeight: height};
-const localName = { color: "white", margin: 1 };
-const remoteName = { color: "yellow", margin: 1 };
+const panelStyle = { marginTop: 5, marginBottom: 5, border: "1px groove white", background: "#646464" };
+
+const localNameStyle = { color: "#fae78f", fontWeight: "bold", margin: 1 };
+const remoteNameStyle = { color: "white", fontWeight: "bold", margin: 1 };
 
 function VideoPanel({ stream, isLocal, username }) {
 
@@ -21,14 +22,14 @@ function VideoPanel({ stream, isLocal, username }) {
     if (isLocal) {
         return (
             <div style={panelStyle}>
-                <p style={localName}>{username}</p>
+                <p style={localNameStyle}>{username}</p>
                 <video style={thumbnail} poster="videoSelf.png" ref={videoEl} autoPlay muted />
             </div>
         )
     }
     return (
         <div style={panelStyle}>
-            <p style={remoteName}>{username}</p>
+            <p style={remoteNameStyle}>{username}</p>
             <video style={thumbnail} poster="videoPeer.png" ref={videoEl} autoPlay />
         </div>
     )

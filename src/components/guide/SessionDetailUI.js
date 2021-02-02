@@ -133,10 +133,9 @@ class SessionDetailUI extends Component {
     }
 
     makeReady = async () => {
-
         const { session } = this.store.event;
         if (session.sessionType === "multi") {
-            this.janusStore.provisionVideoRoom(session.conferenceId);
+            this.janusStore.provisionRooms(session.conferenceId);
         }
 
         await this.store.alterSessionState("READY");
@@ -152,7 +151,7 @@ class SessionDetailUI extends Component {
     cancelEvent = () => {
         const { session } = this.store.event;
         if (session.sessionType === "multi") {
-            this.janusStore.removeVideoRoom(session.conferenceId);
+            this.janusStore.removeRooms(session.conferenceId);
         }
         
         this.store.targetState = "CANCEL";
@@ -160,10 +159,9 @@ class SessionDetailUI extends Component {
     }
 
     completeEvent = () => {
-        
         const { session } = this.store.event;
         if (session.sessionType === "multi") {
-            this.janusStore.removeVideoRoom(session.conferenceId);
+            this.janusStore.removeRooms(session.conferenceId);
         }
         
         this.store.targetState = "DONE";

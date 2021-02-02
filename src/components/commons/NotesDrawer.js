@@ -17,10 +17,10 @@ class NotesDrawer extends Component {
 
     render() {
         const store = this.props.notesStore;
-        const title =  "New Notes";
+        const title =  "Notes";
 
         return (
-            <Drawer height="50%" placement="bottom" closable={true} onClose={this.close} visible={store.showDrawer} >
+            <Drawer title = {title} width={"55%"} closable={true} onClose={this.close} visible={store.showDrawer} >
                 <Tabs defaultActiveKey="1" tabPosition="right" >
                     <TabPane key="1" tab="New">
                         <NotesForm notesStore={store} />
@@ -30,7 +30,7 @@ class NotesDrawer extends Component {
                     </TabPane>
                 </Tabs>
             </Drawer>
-        );
+        )
     }
 }
 export default NotesDrawer
