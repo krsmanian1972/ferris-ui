@@ -8,7 +8,7 @@ var myid = null;
 var mypvtid = null;
 
 const LISTENER = "listener";
-const PUBLISHER = "publisher";
+const SCREEN_PUBLISHER = "screen_publisher";
 
 class Screencast {
 
@@ -45,14 +45,14 @@ class Screencast {
 	  * The role may be either publisher or listener.
 	  */
 	startScreenSharing = () => {
-		this.role = PUBLISHER;
-		this.publishOwnFeed();
+		this.role = SCREEN_PUBLISHER;
+		this.publishScreen();
 	}
 
 	/**
 	 * Let us simply send a unpublish signal to the Janus server
 	 */
-	stopScreenSharing = () => {
+	stopSharing = () => {
 		this.role = LISTENER;
 		this.unpublishOwnFeed();
 	}
@@ -108,7 +108,7 @@ class Screencast {
 			}
 
 			const displayName = remoteFeed.rfdisplay;
-			const roomEvent = { screenStatus: `${displayName} Screen`, rfid: rfid };
+			const roomEvent = { screenStatus: `${displayName} Rendering`, rfid: rfid };
 			this.roomListener(roomEvent);
 		}
 	}
@@ -136,6 +136,8 @@ class Screencast {
 			success: function (pluginHandle) {
 				localPlugin = pluginHandle;
 				me.doRegister();
+				const roomEvent = {isScreenActive: true, isPrepared: true, screenStatus: 'Registered'}
+				me.roomListener(roomEvent);
 			},
 			error: function (error) {
 				me.errorStatus(error);
@@ -190,8 +192,8 @@ class Screencast {
 			myid = msg["id"];
 			mypvtid = msg["private_id"];
 
-			if (this.role === PUBLISHER) {
-				this.publishOwnFeed();
+			if (this.role === SCREEN_PUBLISHER) {
+				this.publishScreen();
 			}
 			else {
 				if (msg["publishers"]) {
@@ -232,7 +234,7 @@ class Screencast {
 		}
 	}
 
-	publishOwnFeed = () => {
+	publishScreen = () => {
 		if (!localPlugin) {
 			return;
 		}
@@ -262,7 +264,7 @@ class Screencast {
 			const videoCodec = feed["video_codec"];
 
 			const remoteFeedHandle = new RemoteFeedHandle(janus, this.opaqueId, mypvtid, this.myroom, this.remoteFeedListener);
-			remoteFeedHandle.subscribeTo(feedId, "video", videoCodec);
+			remoteFeedHandle.subscribeTo(feedId, videoCodec);
 		}
 	}
 

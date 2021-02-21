@@ -17,7 +17,7 @@ const TEXTBOX = 'TEXTBOX';
 
 const cursorColour = '#FFFFFF';
 const cursorBlinkSpeed = 1 * 1000;
-const backgroundColour = '#646464';
+const backgroundColour = 'black';
 const cursorSize = { width: 1, height: 18 };
 
 const selected = { background: "white", color: "black", borderColor: "black" };
@@ -150,12 +150,10 @@ class Board extends Component {
             this.undoTabList[boardKey].push(data);
             panes[boardKey - 1].isLoaded = true;
         }
-        catch(e) {
+        catch (e) {
             this.undoTabList[boardKey] = [];
             panes[boardKey - 1].isLoaded = true;
         }
-
-
     }
 
     componentDidMount() {
@@ -164,6 +162,8 @@ class Board extends Component {
         this.y = 0;
         this.sentence = "";
         this.cursorPos = { x: 0, y: 0 };
+
+        this.hiddenCtx = this.hiddenCanvas.getContext("2d");
 
         this.ctx = this.canvas.getContext("2d");
         this.ctx.font = "16px Courier";
@@ -186,9 +186,40 @@ class Board extends Component {
         this.container.addEventListener('touchmove', this.preventScrolling);
         this.container.addEventListener('touchend', this.preventScrolling);
 
-        const stream = this.canvas.captureStream(25);
+        this.video.addEventListener('play', this.videoPlayListener, false);
 
-        this.props.onCanvasStream(stream);
+        const stream = this.canvas.captureStream();
+
+        this.props.onCanvasStream(stream, this.canvasSink);
+    }
+
+    videoPlayListener = () => {
+        this.vw = this.video.videoWidth;
+        this.vh = this.video.videoHeight;
+        this.timerCallback();
+    }
+
+    timerCallback = () => {
+        if (this.video.paused || this.video.ended) {
+            return;
+        }
+        this.copyVideo();
+        let self = this;
+        setTimeout(function () {
+            self.timerCallback();
+        }, 0);
+    }
+
+    copyVideo = () => {
+        this.hiddenCtx.drawImage(this.video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        //let frame = this.hiddenCtx.getImageData(0, 0,CANVAS_WIDTH, CANVAS_HEIGHT);
+        //this.ctx.putImageData(frame, 0, 0);
+    }
+
+    canvasSink = (stream) => {
+        if (this.video && stream) {
+            this.video.srcObject = stream;
+        }
     }
 
     preventScrolling = (e) => {
@@ -407,8 +438,8 @@ class Board extends Component {
 
     undoTab = (samePane) => {
 
-        this.ctx.clearRect(0,0,CANVAS_WIDTH,CANVAS_HEIGHT);
-        
+        this.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
         if (this.undoTabList[this.currentTab].length === 0) {
             return;
         }
@@ -526,10 +557,14 @@ class Board extends Component {
                 <div style={{ background: "rgb(59,109,171)", height: 30 }}>
                     {this.renderControls(isLoading)}
                 </div>
-                <div style={{ maxHeight: screen.height, overflow: "auto", border: "3px solid rgb(59,109,171)" }}>
-                    <div key="container" id="container" ref={ref => (this.container = ref)}>
-                        <canvas height={CANVAS_HEIGHT} width={CANVAS_WIDTH} className="activeBoard" key="canvas" ref={ref => (this.canvas = ref)} />
+                <div style={{position:"relative",width:"100%",height:"100%"}}>
+                    <div style={{ position:"absolute", top:0, left:0, zIndex:2, maxHeight: screen.height, overflow: "auto", border: "3px solid rgb(59,109,171)" }}>
+                        <div key="container" id="container" ref={ref => (this.container = ref)}>
+                            <canvas height={CANVAS_HEIGHT} width={CANVAS_WIDTH} key="canvas" ref={ref => (this.canvas = ref)} />
+                            <canvas height={CANVAS_HEIGHT} width={CANVAS_WIDTH} className="hiddenBoard" key="hiddenCanvas" ref={ref => (this.hiddenCanvas = ref)} />
+                        </div>
                     </div>
+                    <video style={{position:"absolute",top:0,left:0,zIndex:-1}} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} key="cv" ref={ref => (this.video = ref)} autoPlay muted />
                 </div>
             </div>
         )

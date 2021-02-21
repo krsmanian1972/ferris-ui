@@ -2,16 +2,20 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
 import { Row, Col, Space, Button, Tooltip, Tag } from 'antd';
-import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutlined, AudioMutedOutlined, EyeInvisibleOutlined, CompressOutlined, ExpandOutlined } from '@ant-design/icons';
+import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutlined, AudioMutedOutlined, EyeInvisibleOutlined, CompressOutlined, ExpandOutlined, CodepenOutlined } from '@ant-design/icons';
 
 import NoteListStore from '../stores/NoteListStore';
 import NotesStore from '../stores/NotesStore';
 import NotesDrawer from '../commons/NotesDrawer';
 
+import Board from '../commons/Board';
+
 import VideoRoom from './VideoRoom';
 import Screencast from './Screencast';
 import VideoPanel from './VideoPanel';
 import ArtifactPanel from './ArtifactPanel';
+
+const MY_BOARD_KEY = 'myBoard';
 
 @inject("appStore")
 @observer
@@ -26,6 +30,7 @@ class Broadcast extends Component {
 
 			isActive: false,
 			isScreenActive: false,
+			isPrepared:false,
 
 			status: '',
 			screenStatus: '',
@@ -64,7 +69,7 @@ class Broadcast extends Component {
 	auditUser = () => {
 
 		this.opaqueId = this.props.params.sessionUserId;
-		this.myusername = this.props.appStore.credentials.username;
+		this.myusername = `${this.props.appStore.credentials.username}-${this.props.params.sessionUserType}`;
 
 		this.videoRoom = new VideoRoom(this.props, this.roomListener);
 		this.screencast = new Screencast(this.props, this.roomListener);
@@ -87,7 +92,7 @@ class Broadcast extends Component {
 			sessionUserId: this.opaqueId,
 		});
 
-		noteListStore.load(this.opaqueId,null);
+		noteListStore.load(this.opaqueId, null);
 	}
 
 	getVideoIcon = () => {
@@ -193,7 +198,7 @@ class Broadcast extends Component {
 
 	render() {
 
-		const { myVideoStream, myScreenStream, portalSize, isMinimized, isActive } = this.state;
+		const { myVideoStream, portalSize, isMinimized, isActive } = this.state;
 
 		const viewHeight = portalSize.height * 0.94;
 		const viewPanelHeight = viewHeight * 0.99;
@@ -209,8 +214,7 @@ class Broadcast extends Component {
 						<VideoPanel key="local" stream={myVideoStream} isLocal={true} username={this.myusername} />
 					</div>
 					<div className="broadcast-center" style={artifactPanelStyle}>
-						{this.getPeerScreens().map(value => value)}
-						{myScreenStream && <ArtifactPanel key="localScreen" stream={myScreenStream} username={this.myusername} />}
+						{this.renderArtifacts()}
 					</div>
 				</div>
 				{this.renderControls(isActive)}
@@ -235,13 +239,13 @@ class Broadcast extends Component {
 
 	toggleScreenSharing = () => {
 		if (!this.state.isScreenSharing) {
-			this.setState({ isScreenSharing: true });
+			this.setState({ isScreenSharing: true});
 			this.screencast.startScreenSharing();
 			return;
 		}
 
-		this.setState({ isScreenSharing: false });
-		this.screencast.stopScreenSharing();
+		this.setState({ isScreenSharing: false});
+		this.screencast.stopSharing();
 	}
 
 	getPeerScreens = () => {
@@ -261,42 +265,68 @@ class Broadcast extends Component {
 		return peerScreens;
 	}
 
+	
+
+	/**
+	 * Canvas Sharing will supersede Screen Sharing.
+	 * 
+	 */
+	renderArtifacts = () => {
+		const { isScreenSharing, myScreenStream,isPrepared } = this.state;
+
+		if (!isScreenSharing && isPrepared) {
+			return (
+				<div className="activeItem">
+	
+				</div>
+			)
+		}
+
+		return (
+			<>
+				{this.getPeerScreens().map(value => value)}
+				{myScreenStream && <ArtifactPanel key="localScreen" stream={myScreenStream} username={this.myusername} />}
+			</>
+		)
+	}
+
 	renderControls = (isActive) => {
 
 		return (
 			<Row style={{ marginTop: 8 }}>
 				<Col span={12} style={{ textAlign: "left" }}>
 					<Space>
-						<Tooltip title={this.getVideoTooltip()}>
-							<Button disabled={!isActive} type="primary" icon={this.getVideoIcon()} shape="circle" onClick={this.toggleVideoDevice} />
+						<Tooltip key="video_tp" title={this.getVideoTooltip()}>
+							<Button key="video_bt" disabled={!isActive} type="primary" icon={this.getVideoIcon()} shape="circle" onClick={this.toggleVideoDevice} />
 						</Tooltip>
-						<Tooltip title={this.getAudioTooltip()}>
-							<Button disabled={!isActive} type="primary" icon={this.getAudioIcon()} shape="circle" onClick={this.toggleAudioDevice} />
+						<Tooltip key="audio_tp" title={this.getAudioTooltip()}>
+							<Button key="audio_bt" disabled={!isActive} type="primary" icon={this.getAudioIcon()} shape="circle" onClick={this.toggleAudioDevice} />
 						</Tooltip>
-						<Tooltip title={this.getMiniBoardTooltip()}>
-							<Button onClick={this.minimizeMiniBoard} type="primary" icon={this.getMiniBoardIcon()} shape="circle" />
+						<Tooltip key="min_tp" title={this.getMiniBoardTooltip()}>
+							<Button key="min_bt" onClick={this.minimizeMiniBoard} type="primary" icon={this.getMiniBoardIcon()} shape="circle" />
 						</Tooltip>
-						<Tag color="#108ee9">{this.state.status}</Tag>
+						<Tag key="stat_tg" color="#108ee9">{this.state.status}</Tag>
 					</Space>
 				</Col>
 				<Col span={6}>
 					<Space>
-						<Tooltip title={this.getShareScreenTooltip()}>
-							<Button disabled={!isActive} id="screenShare" type="primary" icon={this.getShareScreenIcon()} shape="circle" onClick={this.toggleScreenSharing} />
+						<Tooltip key="screen_tp" title={this.getShareScreenTooltip()}>
+							<Button key="screen_bt" disabled={!isActive} id="screenShare" type="primary" icon={this.getShareScreenIcon()} shape="circle" onClick={this.toggleScreenSharing} />
 						</Tooltip>
-						<Tag color="#108ee9">{this.state.screenStatus}</Tag>
+						<Tag key="screen_tag_tp" color="#108ee9">{this.state.screenStatus}</Tag>
 					</Space>
 				</Col>
 				<Col span={6} style={{ textAlign: "right" }}>
 					<Space>
-						<Tooltip title="Notes">
-							<Button onClick={this.showNotes} id="notes" type="primary" icon={<BookOutlined />} shape="circle" />
+						<Tooltip key="notes_tp" title="Notes">
+							<Button key="notes_bt" onClick={this.showNotes} id="notes" type="primary" icon={<BookOutlined />} shape="circle" />
 						</Tooltip>
 					</Space>
 				</Col>
 			</Row>
 		)
 	}
+
 }
 
 export default Broadcast;

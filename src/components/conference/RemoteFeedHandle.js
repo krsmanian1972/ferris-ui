@@ -26,13 +26,11 @@ class RemoteFeedHandle {
 	}
 
 	/**
-	 * The type is either video or screen. 
+	 * 
 	 * @param {*} feedId 
-	 * @param {*} type 
-	 * @param {*} audio_codec 
 	 * @param {*} video_codec 
 	 */
-	subscribeTo = (feedId, type, video_codec) => {
+	subscribeTo = (feedId, video_codec) => {
 
 		let me = this;
 
@@ -42,7 +40,7 @@ class RemoteFeedHandle {
 				opaqueId: me.opaqueId,
 				success: function (pluginHandle) {
 					me.remoteFeed = pluginHandle;
-					const subscription = me.createSubscription(feedId, type, video_codec);
+					const subscription = me.videoSubscription(feedId, video_codec);
 					me.remoteFeed.send({ message: subscription });
 				},
 				error: function (error) {
@@ -68,26 +66,6 @@ class RemoteFeedHandle {
 				}
 			}
 		)
-	}
-
-	createSubscription = (feedId,type,video_codec) => {
-
-		if(type === "screen") {
-			return this.screenSubscription(feedId);
-		}
-
-		return this.videoSubscription(feedId,video_codec);
-	}
-
-	screenSubscription = (feedId) => {
-		const subscription = {
-			request: "join",
-			room: this.myroom,
-			ptype: "listener",
-			feed: feedId,
-		};
-
-		return subscription;
 	}
 
 	videoSubscription = (feedId, video_codec) => {
@@ -145,7 +123,7 @@ class RemoteFeedHandle {
 		if (!jsep) {
 			return;
 		}
-		
+
 		const remoteFeed = this.remoteFeed;
 		const room = this.myroom;
 

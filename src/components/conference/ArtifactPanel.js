@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-const panelStyle = { marginTop: 5, marginBottom: 5, border: "1px groove white", background: "#646464", height:"100%", width:"100%" };
+const panelStyle = { marginTop: 5, marginBottom: 5, border: "1px groove white", background: "#646464"};
 const nameStyle = { color: "#fae78f", fontWeight: "bold", margin: 1 };
 
 function ArtifactPanel({ stream, username }) {

@@ -164,6 +164,12 @@ class Peercast extends Component {
         }
     }
 
+    /**
+     * If we are a coach we obtain an array of membersocketIds. Let us
+     * call one of them in a Peer to Peer scenario.
+     *   
+     * @param {*} advice 
+     */
     handleCallAdvice = (advice) => {
 
         const role = this.props.params.sessionUserType;
@@ -171,10 +177,18 @@ class Peercast extends Component {
         this.setState({ sessionStatus: advice.reason });
 
         if (role === "coach" && advice.status === "ok") {
-            this.callPeer(advice.memberSocketId);
+            this.callMember(advice);
         }
         if (role !== "coach" && advice.status === "ok") {
             this.callPeer(advice.guideSocketId);
+        }
+    }
+
+    callMember = (advice) => {
+        const memberId = this.props.params.memberId;
+        if(advice.members && advice.members[memberId]) {
+             const memberSocketId = advice.members[memberId];
+             this.callPeer(memberSocketId);   
         }
     }
 
@@ -182,11 +196,11 @@ class Peercast extends Component {
 
         const sessionId = this.props.params.sessionId;
         const role = this.props.params.sessionUserType;
-        const fuzzyId = this.props.appStore.credentials.id;
+        const userId = this.props.appStore.credentials.id;
 
         this.setState({ sessionStatus: `Joining as ${role}` });
 
-        return { sessionId: sessionId, fuzzyId: fuzzyId, role: role };
+        return { sessionId: sessionId, userId: userId, role: role };
     }
 
     handleInvitation = ({ from: invitationFrom }) => {

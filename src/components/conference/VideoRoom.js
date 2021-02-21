@@ -241,7 +241,7 @@ class VideoRoom {
 			const videoCodec = feed["video_codec"];
 
 			const remoteFeedHandle = new RemoteFeedHandle(janus, this.opaqueId, mypvtid, this.myroom, this.remoteFeedListener);
-			remoteFeedHandle.subscribeTo(feedId, "video", videoCodec);
+			remoteFeedHandle.subscribeTo(feedId,videoCodec);
 		}
 	}
 

@@ -128,8 +128,8 @@ code {
   width:100%;
 }
 
-.activeBoard {
-  height:100%
+.hiddenBoard {
+  background-color:rgb(44, 147, 209);
 }
 
 .miniBoard {
@@ -505,7 +505,7 @@ code {
   width:85%;
   display: flex;
   flex-direction: column;
-  background: #646464;
+  background: black;
   border: 1px solid white;
   align-items: center;
   text-align: center;
