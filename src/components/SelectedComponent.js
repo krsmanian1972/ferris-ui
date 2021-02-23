@@ -24,6 +24,7 @@ import WeekSessions from './guide/WeekSessions';
 import JournalUI from './commons/JournalUI';
 import DiscussionUI from './commons/DiscussionUI';
 import DigestUI from './commons/DigestUI';
+import PlaygroundUI from './flow/PlaygroundUI';
 
 
 @inject("appStore")
@@ -74,6 +75,9 @@ class SelectedComponent extends Component {
             }
             case 'masterPlan': {
                 return <MasterPlanUI params={currentComponent.params} />;
+            }
+            case 'coinFlip' : {
+                return <PlaygroundUI params={currentComponent.params} />;
             }
             case 'login': {
                 return <Login />;

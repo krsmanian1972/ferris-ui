@@ -474,7 +474,9 @@ export default class SessionGrid {
                 var textureKey = "fgrid_" + i + "_" + j;
                 var texture = this.buildSessionTexture(textureKey, ["", "", "", ""], i);
                 var material = this.eventMaterialMatrix.get(textureKey);
-                material.map = texture;
+                if(material) {
+                    material.map = texture;
+                }
             }
         }
 
