@@ -1,7 +1,8 @@
 import * as THREE from 'three';
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
+
 import TextFactory from './TextFactory';
 import moment from 'moment';
+import { LineObserver } from './LineObserver';
 
 const fov = 28;
 const near = 1;
@@ -22,14 +23,12 @@ const unitLength = 2.00;
 const unitHeight = 1.20;
 const unitDepth = 0.5;
 
-const batchSize = 20
-
 const numberOfSlots = 3; //(Input -> Process -> Output)
 
 const legendLabels = ["START", "IN", "EASE", "WIP", "PUSH"];
 
 const infoLabels = ["Name", "Local Clock", "Activity", "Batch Size", ""];
-const infoValues = ["Raja", "88:88:88", "Dough", "20", ""];
+const infoValues = ["", "", "", "0", ""];
 
 export default class CoinFlipGame {
 
@@ -38,11 +37,42 @@ export default class CoinFlipGame {
 
     renderRequested = false;
 
-    constructor(container) {
+    isStarted = false;
+    startTime = null;
+
+    isDone = false;
+    endTime = null;
+
+    // seconds
+    duration = 0;
+
+    gameBootEvent = {
+        text:false,
+        frame:false,
+        cabin:false,
+    };
+
+    levers = [];
+
+    setBootEvent(event) {
+        this.gameBootEvent[event] = true;
+
+        if(this.gameBootEvent.text && this.gameBootEvent.frame && this.gameBootEvent.cabin) {
+            this.render();
+            this.onGameMounted();
+        }
+    }
+
+    constructor(container,onGameMounted,onGameError,onLeverSelected) {
         this.container = container;
+        this.onGameMounted = onGameMounted;
+        this.onGameError = onGameError;
+        this.onLeverSelected = onLeverSelected;
 
         this.textFactory = new TextFactory();
 
+        this.setBootEvent("text");
+        
         this.setupScene();
 
         this.setLight();
@@ -61,7 +91,7 @@ export default class CoinFlipGame {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(fov, width / height, near, far);
 
-        this.camera.position.set(0, 0, 20);
+        this.camera.position.set(8, 4, 20);
 
         this.scene.background = new THREE.Color(sceneColor);
         this.scene.fog = new THREE.Fog(sceneColor, 500, 10000);
@@ -71,23 +101,11 @@ export default class CoinFlipGame {
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.container.appendChild(this.renderer.domElement);
 
-        this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
-        this.orbitControls.maxPolarAngle = Math.PI * 0.5;
-        this.orbitControls.screenSpacePanning = true;
-
-        this.orbitControls.addEventListener('change', this.renderAgain);
-    }
-
-    renderAgain = () => {
-        if (!this.renderRequested) {
-            this.renderRequested = true;
-            requestAnimationFrame(this.render);
-        }
+        window.addEventListener("resize", this.handleWindowResize);
     }
 
     render = () => {
         this.renderRequested = undefined;
-        this.orbitControls.update();
         this.renderer.render(this.scene, this.camera);
     }
 
@@ -111,23 +129,7 @@ export default class CoinFlipGame {
         this.bottomY = point.y;
         this.maxY = this.bottomY + (unitSize * unitHeight);
         this.rightX = this.leftX + (unitLength * (numberOfSlots + 1));
-
     }
-
-    setGround = (texture) => {
-
-        const material = new THREE.MeshStandardMaterial({ map: texture, color: "gray" });
-        const geometry = new THREE.BoxBufferGeometry(unitLength * 29, unitHeight * 29, 0.1);
-
-        var ground = new THREE.Mesh(geometry, material);
-        ground.position.set(this.leftX, this.bottomY - 0.75, 0);
-        ground.rotateOnAxis(new THREE.Vector3(1, 0, 0), -Math.PI / 2);
-        ground.translateX(unitLength * 4);
-        this.scene.add(ground);
-
-        this.scene.translateZ(-unitLength * 2);
-    }
-
 
     handleWindowResize = () => {
         const width = this.container.clientWidth;
@@ -141,12 +143,8 @@ export default class CoinFlipGame {
     }
 
     setGameBoard = () => {
-
         new THREE.TextureLoader().load('./piano.png', this.buildFrames);
         new THREE.TextureLoader().load('./silver_sheet.png', this.buildCabins);
-
-        this.placeInventory();
-        this.placeOutInventory();
     }
 
 
@@ -158,9 +156,12 @@ export default class CoinFlipGame {
         // The second vertical Pillar
         this.buildPillars(this.rightX, texture)
 
+        // The Top Panel to hold the levers and info panel
         this.buildTopSlab(texture);
 
         this.render();
+
+        this.setBootEvent("frame");
     }
 
     /**
@@ -187,8 +188,8 @@ export default class CoinFlipGame {
             front.position.set(x_left, y, 0);
             back.position.set(x_left, y, -1);
 
-            var tag = this.textFactory.build(`Bin-${i + 1}`, 0.25, 0.1, violet);
-            var group = new THREE.Group();
+            const tag = this.textFactory.build(`Bin-${i + 1}`, 0.25, 0.1, violet);
+            const group = new THREE.Group();
             group.add(tag);
             group.position.copy(front.position.clone());
             group.position.y = group.position.y - unitHeight/4;
@@ -207,34 +208,53 @@ export default class CoinFlipGame {
 
         this.buildRack(this.rightX - unitLength, texture);
 
-        this.buildLevers(texture);
+        this.buildLevers();
 
         this.setMachine(texture);
 
         this.setGround(texture);
 
         this.render();
+
+        this.setBootEvent("cabin");
     }
 
-    buildLevers = (texture) => {
+    /**
+     * Pi/4 is Up and is the off state for Start and Done
+     * 
+     * Pi/2 is the Horizontal with the Z-Axis
+     */
+    buildLevers = () => {
 
-        const rollerMaterial = new THREE.MeshNormalMaterial({ map: texture});
+        const rollerMaterial = new THREE.MeshNormalMaterial();
         const geometry = new THREE.CylinderBufferGeometry(1 / 6, 1 / 6, 2);
 
-        const startRoller = new THREE.Mesh(geometry, rollerMaterial);
-        startRoller.position.set(this.leftX, this.maxY, 0);
-        startRoller.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
-        this.scene.add(startRoller);
+        this.startRoller = new THREE.Mesh(geometry, rollerMaterial);
+        this.startRoller.userData = {id:"ignition",state:"off"};
+        this.startRoller.position.set(this.leftX, this.maxY, 0);
+        this.startRoller.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 4);
+        this.scene.add(this.startRoller);
+        
+        this.machineLever = new THREE.Mesh(geometry, rollerMaterial);
+        this.machineLever.userData = {id:"machine",state:"off"};
+        this.machineLever.position.set(this.leftX + (unitLength * 2), this.maxY, 0);
+        this.machineLever.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
+        this.scene.add(this.machineLever);
 
-        const doneRoller = new THREE.Mesh(geometry, rollerMaterial);
-        doneRoller.position.set(this.rightX, this.maxY, 0);
-        doneRoller.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 4);
-        this.scene.add(doneRoller);
+        this.doneRoller = new THREE.Mesh(geometry, rollerMaterial);
+        this.doneRoller.userData = {id:"done",state:"off"};
+        this.doneRoller.position.set(this.rightX, this.maxY, 0);
+        this.doneRoller.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 4);
+        this.scene.add(this.doneRoller);
+    
+        this.levers.length = 0;
 
-        const pullRoller = new THREE.Mesh(geometry, rollerMaterial);
-        pullRoller.position.set(this.leftX + (unitLength * 2), this.maxY, 0);
-        pullRoller.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
-        this.scene.add(pullRoller);
+        this.levers.push(this.startRoller);
+        this.levers.push(this.doneRoller);
+        this.levers.push(this.machineLever);
+
+        this.leverControls = new LineObserver(this.levers, this.camera, this.renderer.domElement,true);
+        this.leverControls.addEventListener('onSelect', this.onLeverSelected);
     }
 
     setMachine = (texture) => {
@@ -353,31 +373,32 @@ export default class CoinFlipGame {
 
         for (var i = 0; i < totalSlabs; i++) {
 
-            var tilted = new THREE.Mesh(geometry, material);
+            const tilted = new THREE.Mesh(geometry, material);
             tilted.position.set(x, this.maxY, 0);
             tilted.rotateOnAxis(new THREE.Vector3(1, 0, 0), -Math.PI / 4);
             tilted.translateZ(-1 / 4);
             this.scene.add(tilted);
 
-            var legend = this.textFactory.build(legendLabels[i], 0.3, 0.1, cyan);
+            // The Legends to hint the State to the User
             var group = new THREE.Group();
+            const legend = this.textFactory.build(legendLabels[i], 0.3, 0.1, cyan);
             group.add(legend);
             group.position.set(x, this.maxY, 0);
             group.rotateOnAxis(new THREE.Vector3(1, 0, 0), -Math.PI / 4);
             group.translateZ(-1 / 4);
             group.translateY(-0.5);
             group.position.x = group.position.x - 0.6;
-            this.scene.add(group);
             this.legendGroup.push(group);
-
-            var backTilted = new THREE.Mesh(geometry, material);
+            this.scene.add(group);
+      
+            const backTilted = new THREE.Mesh(geometry, material);
             backTilted.position.set(x, this.maxY, 0);
             backTilted.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 4);
             backTilted.translateZ(1 / 4);
             backTilted.position.z -= 1;
             this.scene.add(backTilted);
 
-            var vertical = new THREE.Mesh(geometry, material);
+            const vertical = new THREE.Mesh(geometry, material);
             vertical.position.copy(tilted.position.clone());
             vertical.position.y = vertical.position.y + unitHeight - 0.25;
             vertical.position.z = vertical.position.z - 0.50;
@@ -406,11 +427,147 @@ export default class CoinFlipGame {
         this.render();
     }
 
-
     setLight = () => {
         const color = "white";
         const intensity = 1;
         const light = new THREE.AmbientLight(color, intensity);
         this.scene.add(light);
     }
+
+    setGround = (texture) => {
+
+        const material = new THREE.MeshStandardMaterial({ map: texture, color: "gray" });
+        const geometry = new THREE.BoxBufferGeometry(unitLength * 29, unitHeight * 29, 0.1);
+
+        var ground = new THREE.Mesh(geometry, material);
+        ground.position.set(this.leftX, this.bottomY - 0.75, 0);
+        ground.rotateOnAxis(new THREE.Vector3(1, 0, 0), -Math.PI / 2);
+        ground.translateX(unitLength * 4);
+        this.scene.add(ground);
+
+        this.scene.translateZ(-unitLength * 2);
+    }
+
+    updateLegendAt = (value,index) => {
+        legendLabels[index] = value;
+        const text = this.textFactory.build(legendLabels[index], 0.3, 0.1, cyan);
+        const group = this.legendGroup[index];
+        group.remove(...group.children);
+        group.add(text);
+    }
+
+    updateInfoValueAt = (value,index) => {
+        infoValues[index] = value;
+        const text = this.textFactory.build(infoValues[index], 0.3, 0.1, yellow);
+        const group = this.infoValueGroup[index];
+        group.remove(...group.children);
+        group.add(text);
+    }
+
+
+    /****
+     * The Set of Public Interfaces to change the state of the Game
+     */
+
+    setName = (name) => {
+        this.updateInfoValueAt(name,0);
+        this.render();
+    }
+
+    getName = () => {
+        return infoValues[0];
+    }
+
+    setActivity = (activity) => {
+        this.updateInfoValueAt(activity,2);
+    }
+
+    getActivity = () => {
+        return inforValues[2];
+    }
+
+    // The Fourth Item in the InfoValue
+    setBatchSize = (size) => {
+        this.updateInfoValueAt(size.toString(),3);
+        this.render();
+    }
+
+    getBatchSize = () => {
+        return parseInt(infoValues[3],10);
+    }
+
+    // The Fifth Item in the InfoValue is for Notification
+    setAdvice = (advice) => {
+        this.updateInfoValueAt(advice,4);
+        this.render();
+    }
+
+    getAdvice = () => {
+        return parseInt(infoValues[4],10);
+    }
+    
+    // Difference Between the start and the current time of the Game.
+    calcTimeElapsed = () => {
+        if(this.isDone && this.endTime) {
+            return this.duration;
+        }
+        return moment().diff(this.startTime,'seconds');
+    }
+
+    // Will be continuously updated when the game is started and until it is done
+    // The Clock is the 2nd item in the infoValue Panel
+    setClockText = () => {
+        const timeTaken = moment.duration(this.calcTimeElapsed(),'seconds').format("hh:mm:ss");
+        this.updateInfoValueAt(timeTaken,1);
+        this.render();
+    }
+
+    toggleGame = () => {
+        if(!this.isStarted) {
+            this.startGame();
+            return;
+        }
+        if(!this.isDone) {
+            this.endGame();
+            return;
+        }
+    }
+
+    startGame = () => {
+        if(this.isStarted) {
+            return;
+        }
+        
+        this.startRoller.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 4);
+        this.updateLegendAt("STOP",0);
+
+        this.isStarted = true;
+        this.startTime = moment();
+
+        this.isDone = false;
+        this.endTime = null;
+        this.duration = 0;
+
+        this.setClockText();
+
+    }
+
+    endGame = () => {
+        if(this.isDone) {
+            return;
+        }
+
+        this.startRoller.rotateOnAxis(new THREE.Vector3(1, 0, 0), -Math.PI / 4);
+        this.updateLegendAt("START",0);
+
+        this.isDone = true;
+        this.endTime = moment();
+        this.duration = this.endTime.diff(this.startTime,'seconds');
+
+        this.setClockText();
+
+        this.isStarted = false;
+        this.isDone = false;
+    }
+    
 }

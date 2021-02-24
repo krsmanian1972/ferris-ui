@@ -30,10 +30,36 @@ class PlaygroundUI extends Component {
     }
 
     componentDidMount() {
-        this.composer = new CoinFlipGame(this.container);
+        this.game = new CoinFlipGame(this.container,
+            this.onGameMounted,
+            this.onGameError,
+            this.onLeverSelected);
+    }
+
+    onLeverSelected = (event) => {
+        const leverId = event.object.userData.id;
+ 
+        if (leverId == "ignition") {
+            this.game.toggleGame();
+        }
+    }
+
+    onGameMounted = () => {
+        this.game.setName("Harini");
+        this.game.setActivity("Dough");
+        this.game.setBatchSize(20);
+        this.game.setAdvice("Go");
+
+        //this.game.startGame();
+
+        //this.game.placeInventory();
+        //this.game.placeOutInventory();
+    }
+
+    onGameError = () => {
 
     }
-  
+
 
     render() {
         return (

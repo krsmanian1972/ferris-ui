@@ -1,7 +1,7 @@
 import { EventDispatcher, Raycaster, Vector2 } from 'three';
 
 
-var LineObserver = function (_lineContainer, _camera, _domElement) {
+var LineObserver = function (_lineContainer, _camera, _domElement,_switch) {
     var _raycaster = new Raycaster();
     var _mouse = new Vector2();
     var _intersections = [];
@@ -23,8 +23,15 @@ var LineObserver = function (_lineContainer, _camera, _domElement) {
        
         if(!_selected) {
             _selected = _hovered;
-            _domElement.style.cursor = 'move';
             scope.dispatchEvent({ type: 'onSelect', object: _selected });
+            if(!_switch) { 
+                _domElement.style.cursor = 'move';
+            }
+            else {
+                _domElement.style.cursor = 'auto';
+                _selected = null;
+                _hovered == null;
+            }
         }
         else {
             _domElement.style.cursor = 'auto';
