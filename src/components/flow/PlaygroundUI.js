@@ -39,8 +39,11 @@ class PlaygroundUI extends Component {
     onLeverSelected = (event) => {
         const leverId = event.object.userData.id;
  
-        if (leverId == "ignition") {
+        if (leverId === "ignition") {
             this.game.toggleGame();
+        }
+        else if(leverId === "machine") {
+            this.game.toggleMachine();
         }
     }
 
