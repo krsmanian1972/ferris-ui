@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 import TextFactory from './TextFactory';
 import moment from 'moment';
 import { LineObserver } from './LineObserver';
@@ -18,6 +18,7 @@ const sceneColor = "rgb(37,56,74)";
 const gapX = 0.01;
 
 const unitSize = 5;
+const MAX_ITEM_PER_BIN = 4;
 
 const unitLength = 2.00;
 const unitHeight = 1.20;
@@ -27,13 +28,20 @@ const numberOfSlots = 3; //(Input -> Process -> Output)
 
 const legendLabels = ["START", "IN", "EASE", "WIP", "PUSH"];
 
-const infoLabels = ["Name", "Local Clock", "Activity", "Batch Size", ""];
-const infoValues = ["", "", "", "0", ""];
+const paramLabels = ["Name", "Inventory", "Activity", "Batch Size", ""];
+const paramValues = ["", "", "", "0", ""];
+
+const clockLabels = ["Local Clock", "", "Idle Time", "", "Advice"];
+const clockValues = ["", "", "", "", ""];
+
 
 export default class CoinFlipGame {
 
+    isReady = false;
+
     legendGroup = [];
-    infoValueGroup = [];
+    paramValueGroup = [];
+    clockValueGroup = [];
 
     renderRequested = false;
 
@@ -43,6 +51,7 @@ export default class CoinFlipGame {
     isDone = false;
     endTime = null;
 
+    levers = [];
     inventoryGroup = [];
     wipGroup = [];
 
@@ -63,9 +72,7 @@ export default class CoinFlipGame {
         cabin: false,
     };
 
-    levers = [];
-
-    setBootEvent(event) {
+    fireBootEvent(event) {
         this.gameBootEvent[event] = true;
 
         if (this.gameBootEvent.text && this.gameBootEvent.frame && this.gameBootEvent.cabin) {
@@ -74,18 +81,17 @@ export default class CoinFlipGame {
         }
     }
 
-    constructor(container, onGameMounted, onGameError, onLeverSelected) {
+    constructor(container, onGameMounted, onGameError) {
         this.container = container;
         this.onGameMounted = onGameMounted;
         this.onGameError = onGameError;
-        this.onLeverSelected = onLeverSelected;
-
+    
         this.textFactory = new TextFactory();
 
         this.discGeometry = new THREE.CylinderBufferGeometry(0.6, 0.6, 0.5 / 4);
         this.discMaterial = new THREE.MeshNormalMaterial();
 
-        this.setBootEvent("text");
+        this.fireBootEvent("text");
 
         this.setupScene();
 
@@ -95,11 +101,30 @@ export default class CoinFlipGame {
 
         this.setGameBoard();
 
+        this.leverControls = new LineObserver(this.levers, this.camera, this.renderer.domElement, true);
+        this.leverControls.addEventListener('onSelect', this.onLeverSelected);
+ 
         this.inventorySelector = new LineObserver(this.inventoryGroup, this.camera, this.renderer.domElement, true);
         this.inventorySelector.addEventListener('onSelect', this.onInventorySelect);
 
         this.wipSelector = new LineObserver(this.wipGroup, this.camera, this.renderer.domElement, true);
         this.wipSelector.addEventListener('onSelect', this.onWipSelect);
+
+    
+        this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.orbitControls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+		this.orbitControls.dampingFactor = 0.05;
+        this.orbitControls.maxPolarAngle = Math.PI /2 ;
+        this.orbitControls.minPolarAngle = Math.PI /2 ;
+        this.orbitControls.screenSpacePanning = false;
+        this.orbitControls.minDistance = 22;
+        this.orbitControls.maxDistance = 30;
+
+
+        this.orbitControls.addEventListener('change', this.renderAgain);
+        
+        window.addEventListener("resize", this.handleWindowResize);
+
 
         this.render();
     }
@@ -111,7 +136,7 @@ export default class CoinFlipGame {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(fov, width / height, near, far);
 
-        this.camera.position.set(8, 4, 20);
+        this.camera.position.set(-34, -26, 20);
 
         this.scene.background = new THREE.Color(sceneColor);
         this.scene.fog = new THREE.Fog(sceneColor, 500, 10000);
@@ -120,12 +145,18 @@ export default class CoinFlipGame {
         this.renderer.setSize(width, height);
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.container.appendChild(this.renderer.domElement);
+    }
 
-        window.addEventListener("resize", this.handleWindowResize);
+    renderAgain = () => {
+        if (!this.renderRequested) {
+            this.renderRequested = true;
+            requestAnimationFrame(this.render);
+        }
     }
 
     render = () => {
         this.renderRequested = undefined;
+        this.orbitControls.update();
         this.renderer.render(this.scene, this.camera);
     }
 
@@ -176,12 +207,12 @@ export default class CoinFlipGame {
         // The second vertical Pillar
         this.buildPillars(this.rightX, texture)
 
-        // The Top Panel to hold the levers and info panel
-        this.buildTopSlab(texture);
+        // The Top Panel to hold the levers, param panel and clock panel
+        this.buildTopPanels(texture);
 
         this.render();
 
-        this.setBootEvent("frame");
+        this.fireBootEvent("frame");
     }
 
     /**
@@ -236,7 +267,7 @@ export default class CoinFlipGame {
 
         this.render();
 
-        this.setBootEvent("cabin");
+        this.fireBootEvent("cabin");
     }
 
     /**
@@ -272,10 +303,7 @@ export default class CoinFlipGame {
         this.levers.push(this.startRoller);
         this.levers.push(this.doneRoller);
         this.levers.push(this.machineLever);
-
-        this.leverControls = new LineObserver(this.levers, this.camera, this.renderer.domElement, true);
-        this.leverControls.addEventListener('onSelect', this.onLeverSelected);
-    }
+   }
 
     setMachine = (texture) => {
 
@@ -314,9 +342,10 @@ export default class CoinFlipGame {
         }
     }
 
-    buildTopSlab = (texture) => {
+    buildTopPanels = (texture) => {
 
-        this.infoValueGroup.length = 0;
+        this.paramValueGroup.length = 0;
+        this.clockValueGroup.length = 0;
         this.legendGroup.length = 0;
 
         const material = new THREE.MeshStandardMaterial({ map: texture });
@@ -353,25 +382,47 @@ export default class CoinFlipGame {
             backTilted.position.z -= 1;
             this.scene.add(backTilted);
 
-            const vertical = new THREE.Mesh(geometry, material);
-            vertical.position.copy(tilted.position.clone());
-            vertical.position.y = vertical.position.y + unitHeight - 0.25;
-            vertical.position.z = vertical.position.z - 0.50;
-            this.scene.add(vertical);
+            const paramBoard = new THREE.Mesh(geometry, material);
+            paramBoard.position.copy(tilted.position.clone());
+            paramBoard.position.y = paramBoard.position.y + unitHeight - 0.25;
+            paramBoard.position.z = paramBoard.position.z - 0.50;
+            this.scene.add(paramBoard);
 
-            var value = this.textFactory.build(infoValues[i], 0.3, 0.1, yellow);
+            var value = this.textFactory.build(paramValues[i], 0.3, 0.1, yellow);
             var group = new THREE.Group();
             group.add(value);
-            group.position.copy(vertical.position.clone());
+            group.position.copy(paramBoard.position.clone());
             group.position.x = group.position.x - 0.6;
             group.position.y = group.position.y - 0.4;
             this.scene.add(group);
-            this.infoValueGroup.push(group);
+            this.paramValueGroup.push(group);
 
-            var label = this.textFactory.build(infoLabels[i], 0.2, 0.1, "white");
+            var label = this.textFactory.build(paramLabels[i], 0.2, 0.1, "white");
             var group = new THREE.Group();
             group.add(label);
-            group.position.copy(vertical.position.clone());
+            group.position.copy(paramBoard.position.clone());
+            group.position.x = group.position.x - 0.6;
+            group.position.y = group.position.y + 0.2;
+            this.scene.add(group);
+
+            const clockBoard = new THREE.Mesh(geometry, material);
+            clockBoard.position.copy(paramBoard.position.clone());
+            clockBoard.position.y = clockBoard.position.y + unitHeight;
+            this.scene.add(clockBoard);
+
+            var value = this.textFactory.build(clockValues[i], 0.3, 0.1, yellow);
+            var group = new THREE.Group();
+            group.add(value);
+            group.position.copy(clockBoard.position.clone());
+            group.position.x = group.position.x - 0.6;
+            group.position.y = group.position.y - 0.4;
+            this.scene.add(group);
+            this.clockValueGroup.push(group);
+
+            var label = this.textFactory.build(clockLabels[i], 0.2, 0.1, "white");
+            var group = new THREE.Group();
+            group.add(label);
+            group.position.copy(clockBoard.position.clone());
             group.position.x = group.position.x - 0.6;
             group.position.y = group.position.y + 0.2;
             this.scene.add(group);
@@ -392,15 +443,13 @@ export default class CoinFlipGame {
     setGround = (texture) => {
 
         const material = new THREE.MeshStandardMaterial({ map: texture, color: "gray" });
-        const geometry = new THREE.BoxBufferGeometry(unitLength * 29, unitHeight * 29, 0.1);
+        const geometry = new THREE.BoxBufferGeometry(unitLength * 8, unitHeight * 8, 0.1);
 
         var ground = new THREE.Mesh(geometry, material);
         ground.position.set(this.leftX, this.bottomY - 0.75, 0);
         ground.rotateOnAxis(new THREE.Vector3(1, 0, 0), -Math.PI / 2);
-        ground.translateX(unitLength * 4);
+        ground.translateX(unitLength * 2);
         this.scene.add(ground);
-
-        this.scene.translateZ(-unitLength * 2);
     }
 
     updateLegendAt = (value, index) => {
@@ -411,15 +460,24 @@ export default class CoinFlipGame {
         group.add(text);
     }
 
-    updateInfoValueAt = (value, index) => {
-        infoValues[index] = value;
-        const text = this.textFactory.build(infoValues[index], 0.3, 0.1, yellow);
-        const group = this.infoValueGroup[index];
+    updateParamValueAt = (value, index) => {
+        paramValues[index] = value;
+        const text = this.textFactory.build(paramValues[index], 0.3, 0.1, yellow);
+        const group = this.paramValueGroup[index];
+        group.remove(...group.children);
+        group.add(text);
+    }
+
+    updateClockValueAt = (value, index) => {
+        clockValues[index] = value;
+        const text = this.textFactory.build(clockValues[index], 0.3, 0.1, yellow);
+        const group = this.clockValueGroup[index];
         group.remove(...group.children);
         group.add(text);
     }
 
     // The Raw Material in-front-of the machine
+    // The Shape of the Inventory is Sphere
     placeInventory = () => {
 
         // Before we place the inventory ensure to remove any previous materials
@@ -440,17 +498,34 @@ export default class CoinFlipGame {
         const geometry = new THREE.SphereGeometry(radius, 50, 50);
         const material = new THREE.MeshNormalMaterial();
 
-        const x = this.leftX + (unitLength + gapX);
+        var z = -1/2;
 
-        for (var j = 0; j < unitSize; j++) {
-            const y = this.bottomY + (j * unitHeight) - radius - 0.1;
+        var bin = 0;
+        var count = 0;
+        const size = this.getInventorySize();
+        for(var i=0;i<size;i++) {
+            if(count === MAX_ITEM_PER_BIN) {
+                bin += 1;
+                count = 0;
+            }
+            const y = this.bottomY + (bin * unitHeight) - radius - 0.1;
 
-            this.setSphere(x - 0.5, y, -1 / 2, geometry, material);
-            this.setSphere(x + 0.5, y, -1 / 2, geometry, material);
-            this.setSphere(x - 0.5, y, 1 / 2, geometry, material);
-            this.setSphere(x + 0.5, y, 1 / 2, geometry, material);
+            var x = this.leftX + (unitLength + gapX);
+            if(count==0) {
+                x=x-0.5;z=-1/2;
+            }
+            if(count==1) {
+                x=x-0.5;z=1/2;
+            }
+            if(count==2) {
+                x=x+0.5;z=-1/2;
+            }
+            if(count==3) {
+                x=x+0.5;z=1/2;
+            }
+            this.setSphere(x,y,z, geometry, material);
+            count += 1;
         }
-
  
         this.render();
     }
@@ -463,46 +538,58 @@ export default class CoinFlipGame {
         this.scene.add(sphere);
     }
 
-
     /****
      * The Set of Public Interfaces to change the state of the Game
      */
 
     setName = (name) => {
-        this.updateInfoValueAt(name, 0);
+        this.updateParamValueAt(name, 0);
         this.render();
     }
 
     getName = () => {
-        return infoValues[0];
+        return paramValues[0];
     }
 
+    setInventorySize = (size) => {
+        this.updateParamValueAt(size.toString(), 1);
+        this.render();
+    }
+
+    getInventorySize = () => {
+        return parseInt(paramValues[1], 10); 
+    }
+
+
     setActivity = (activity) => {
-        this.updateInfoValueAt(activity, 2);
+        this.updateParamValueAt(activity, 2);
     }
 
     getActivity = () => {
-        return inforValues[2];
+        return paramValues[2];
     }
 
-    // The Fourth Item in the InfoValue
+    // The Fourth Item in the paramValue
     setBatchSize = (size) => {
-        this.updateInfoValueAt(size.toString(), 3);
+        this.updateParamValueAt(size.toString(), 3);
         this.render();
     }
 
     getBatchSize = () => {
-        return parseInt(infoValues[3], 10);
+        return parseInt(paramValues[3], 10);
     }
 
-    // The Fifth Item in the InfoValue is for Notification
+   
+    // The Fifth Item in the paramValue is for Notification
     setAdvice = (advice) => {
-        this.updateInfoValueAt(advice, 4);
+        this.isReady = (advice==="READY")
+        this.scene.rotateOnAxis(new THREE.Vector3(0, 1, 0), -1.0);
+        this.updateClockValueAt(advice, 4);
         this.render();
     }
 
     getAdvice = () => {
-        return parseInt(infoValues[4], 10);
+        return parseInt(paramValues[4], 10);
     }
 
     // Difference Between the start and the current time of the Game.
@@ -514,11 +601,27 @@ export default class CoinFlipGame {
     }
 
     // Will be continuously updated when the game is started and until it is done
-    // The Clock is the 2nd item in the infoValue Panel
+    // The Clock is the 2nd item in the paramValue Panel
     setClockText = () => {
-        const timeTaken = moment.duration(this.calcTimeElapsed(), 'seconds').format("hh:mm:ss");
-        this.updateInfoValueAt(timeTaken, 1);
+        const timeTaken = moment.duration(this.calcTimeElapsed(), 'seconds').format("HH:mm:ss",{ trim: false });
+        this.updateClockValueAt(timeTaken, 0);
         this.render();
+    }
+
+    onLeverSelected = (event) => {
+
+        if(!this.isReady) {
+            return
+        }
+
+        const leverId = event.object.userData.id;
+ 
+        if (leverId === "ignition") {
+            this.toggleGame();
+        }
+        else if(leverId === "machine") {
+            this.toggleMachine();
+        }
     }
 
     toggleGame = () => {
@@ -536,6 +639,8 @@ export default class CoinFlipGame {
         if (this.isStarted) {
             return;
         }
+
+        console.log(this.camera);
 
         this.resetMachine();
         this.placeInventory();
@@ -658,7 +763,7 @@ export default class CoinFlipGame {
 
         var x = this.rightX - unitLength - 0.4;
 
-        if (this.currentBinCount == 4) {
+        if (this.currentBinCount === MAX_ITEM_PER_BIN) {
             this.currentBin += 1;
             this.currentBinCount = 0;
         }

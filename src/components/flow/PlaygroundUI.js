@@ -11,7 +11,7 @@ const { Title } = Typography;
 
 const containerStyle = {
     height: window.innerHeight * 0.81,
-    width: window.innerWidth
+    width: window.innerWidth * 0.50,
 };
 
 const graphPaperStyle = {
@@ -33,30 +33,15 @@ class PlaygroundUI extends Component {
         this.game = new CoinFlipGame(this.container,
             this.onGameMounted,
             this.onGameError,
-            this.onLeverSelected);
-    }
-
-    onLeverSelected = (event) => {
-        const leverId = event.object.userData.id;
- 
-        if (leverId === "ignition") {
-            this.game.toggleGame();
-        }
-        else if(leverId === "machine") {
-            this.game.toggleMachine();
-        }
+        );
     }
 
     onGameMounted = () => {
         this.game.setName("Harini");
         this.game.setActivity("Dough");
-        this.game.setBatchSize(20);
-        this.game.setAdvice("Go");
-
-        //this.game.startGame();
-
-        //this.game.placeInventory();
-        //this.game.placeOutInventory();
+        this.game.setBatchSize(10);
+        this.game.setInventorySize(10);
+        this.game.setAdvice("READY");
     }
 
     onGameError = () => {
