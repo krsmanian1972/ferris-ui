@@ -32,8 +32,8 @@ class FlowComposer {
 
         this.container = container;
 
-        this.taskBarGeo = new THREE.PlaneGeometry(barWidth, barHeight, barDepth);
-        this.taskBarSquareGeo = new THREE.PlaneGeometry(squareBarWidth, squareBarHeight, barDepth);
+        this.taskBarGeo = new THREE.BoxBufferGeometry(barWidth, barHeight, barDepth);
+        this.taskBarSquareGeo = new THREE.BoxBufferGeometry(squareBarWidth, squareBarHeight, barDepth);
         this.connectorGeo = new THREE.SphereGeometry(connectorRadius);
 
         this.gridLineMaterial = new THREE.LineBasicMaterial({ color: gridColor });
@@ -406,17 +406,34 @@ class FlowComposer {
         const shape = task.taskType;
         const name = task.name;
         const role = task.roleId;
-        const line1 = task.duration.toString();
-        const line2 = task.min + ' -> ' + task.max;
-        const task_pos = this.parse_coordinates(task.coordinates);
+        const line1 = `Demand (Unit): ${task.demand}`;
+        const line2 = `Duration (sec): ${task.min} to ${task.max}`;
+        const task_pos = this.parseCoordinates(task.coordinates);
 
         const taskBar = this.buildTaskBarMesh(shape, name, role, line1, line2);
-        
+
         this.arrangeTaskBar(taskBar, taskId, task_pos, shape);
     }
 
     populateLinks = async () => {
         //this.taskLinkFactory.buildFrom(sourcePort, targetPort, points);
+    }
+
+    /**
+     * A Simple Connection where Bottom Port of the Source is Connected with
+     * the Top Port of the Target;
+     * @param {*} sourceTaskId 
+     * @param {*} targetTaskId 
+     */
+    linkBottomTop = (sourceTaskId, targetTaskId) => {
+        const sourcePort = this.connectorMap[sourceTaskId].connectorBottom;
+        const targetPort = this.connectorMap[targetTaskId].connectorTop;
+        const points = [];
+        const point1 = sourcePort.position.clone();
+        const point2 = targetPort.position.clone();
+        points.push(point1);
+        points.push(point2);
+        this.taskLinkFactory.buildFrom(sourcePort,targetPort,points);
     }
 
     buildTaskBarMesh = (shape, taskName, role, line1, line2) => {
@@ -447,8 +464,7 @@ class FlowComposer {
         return new THREE.Mesh(this.taskBarGeo, taskMaterial);
     }
 
-    parse_coordinates = (coordinates) => {
-
+    parseCoordinates = (coordinates) => {
         var task_pos;
 
         try {

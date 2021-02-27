@@ -3,7 +3,7 @@ import * as THREE from 'three';
 const taskBarColor = "gray";
 const barWidth = 3;
 const barHeight = 1;
-const barDepth = 0;
+const barDepth = 0.01;
 const squareBarWidth = 3;
 const squareBarHeight = 1;
 const connectorRadius = 0.06;
@@ -97,7 +97,7 @@ const buildStartStopTextMaterial = function (taskId, taskName, role, plannedPeri
     context.fillStyle = "black";
     context.textAlign = "center";
     context.font = boldFont;
-    context.fillText("START", canvas.width / 2, y);
+    context.fillText(taskName, canvas.width / 2, y);
 
     const texture = new THREE.CanvasTexture(canvas)
     texture.minFilter = THREE.LinearFilter;
