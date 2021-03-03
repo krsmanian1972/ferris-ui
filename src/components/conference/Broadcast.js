@@ -2,20 +2,20 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
 import { Row, Col, Space, Button, Tooltip, Tag } from 'antd';
-import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutlined, AudioMutedOutlined, EyeInvisibleOutlined, CompressOutlined, ExpandOutlined, CodepenOutlined } from '@ant-design/icons';
+import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutlined, AudioMutedOutlined, EyeInvisibleOutlined, CompressOutlined, ExpandOutlined, CodepenOutlined, ExperimentOutlined } from '@ant-design/icons';
 
 import NoteListStore from '../stores/NoteListStore';
 import NotesStore from '../stores/NotesStore';
 import NotesDrawer from '../commons/NotesDrawer';
 
-import Board from '../commons/Board';
-
 import VideoRoom from './VideoRoom';
 import Screencast from './Screencast';
 import VideoPanel from './VideoPanel';
 import ArtifactPanel from './ArtifactPanel';
+import GamePanel from './GamePanel';
 
-const MY_BOARD_KEY = 'myBoard';
+import PlaygroundUI from '../flow/PlaygroundUI';
+
 
 @inject("appStore")
 @observer
@@ -29,8 +29,7 @@ class Broadcast extends Component {
 			myScreenStream: null,
 
 			isActive: false,
-			isScreenActive: false,
-			isPrepared:false,
+			isPrepared: false,
 
 			status: '',
 			screenStatus: '',
@@ -42,6 +41,7 @@ class Broadcast extends Component {
 			isMinimized: false,
 
 			isScreenSharing: false,
+			isGameMode: false,
 
 			portalSize: { height: window.innerHeight, width: window.innerWidth }
 		}
@@ -214,7 +214,7 @@ class Broadcast extends Component {
 						<VideoPanel key="local" stream={myVideoStream} isLocal={true} username={this.myusername} />
 					</div>
 					<div className="broadcast-center" style={artifactPanelStyle}>
-						{this.renderArtifacts()}
+						{this.renderArtifacts(artifactPanelStyle)}
 					</div>
 				</div>
 				{this.renderControls(isActive)}
@@ -230,6 +230,13 @@ class Broadcast extends Component {
 		return "Stop Screen Sharing";
 	}
 
+	getLabTooltip = () => {
+		if (!this.state.isGameMode) {
+			return "Experiential Lab";
+		}
+		return "Quit Lab";
+	}
+
 	getShareScreenIcon = () => {
 		if (!this.state.isScreenSharing) {
 			return <ShareAltOutlined />;
@@ -237,14 +244,31 @@ class Broadcast extends Component {
 		return <StopOutlined />;
 	}
 
+	getLabIcon = () => {
+		if (!this.state.isGameMode) {
+			return <ExperimentOutlined />;
+		}
+		return <StopOutlined />;
+	}
+
 	toggleScreenSharing = () => {
 		if (!this.state.isScreenSharing) {
-			this.setState({ isScreenSharing: true});
+			this.setState({ isScreenSharing: true });
 			this.screencast.startScreenSharing();
 			return;
 		}
 
-		this.setState({ isScreenSharing: false});
+		this.setState({ isScreenSharing: false });
+		this.screencast.stopSharing();
+	}
+
+	toggleLabMode = () => {
+		if (!this.state.isGameMode) {
+			this.setState({ isGameMode: true });
+			return;
+		}
+
+		this.setState({ isGameMode: false });
 		this.screencast.stopSharing();
 	}
 
@@ -265,29 +289,56 @@ class Broadcast extends Component {
 		return peerScreens;
 	}
 
-	
+	getGameScreens = (height) => {
+		const peerScreens = [];
 
+		if (!this.screencast) {
+			return peerScreens;
+		}
+
+		for (const [key, remoteFeed] of this.screencast.remoteFeedMap) {
+			if (remoteFeed) {
+				const el = <GamePanel key={key} stream={remoteFeed.stream} username={remoteFeed.rfdisplay} height={height} />
+				peerScreens.push(el);
+			}
+		}
+
+		return peerScreens;
+	}
+
+	onGameStream = (canvasStream) => {
+		if (this.screencast) {
+			this.screencast.startCanvasSharing(canvasStream);
+		}
+	}
 	/**
 	 * Canvas Sharing will supersede Screen Sharing.
 	 * 
 	 */
-	renderArtifacts = () => {
-		const { isScreenSharing, myScreenStream,isPrepared } = this.state;
+	renderArtifacts = (artifactPanelStyle) => {
+		const { isGameMode, myScreenStream, isScreenSharing, isPrepared } = this.state;
 
-		if (!isScreenSharing && isPrepared) {
+		if (isGameMode && isPrepared) {
 			return (
-				<div className="activeItem">
-	
+				<div style={{ height: "100%", width: "100%", display: "flex", flexDirection: "row" }}>
+					<div style={{ width: "60%", alignItems: "center", textAlign: "center", justifyContent: "center" }}>
+						<PlaygroundUI height={artifactPanelStyle.height} screencast={this.screencast} username={this.myusername} onGameStream={this.onGameStream} />
+					</div>
+					<div style={{ width: "40%", display: "flex", flexDirection: "column", overflowY: "auto", alignItems: "center", textAlign: "center", justifyContent: "left" }}>
+						{this.getGameScreens(artifactPanelStyle.height).map(value => value)}
+					</div>
 				</div>
 			)
 		}
 
-		return (
-			<>
-				{this.getPeerScreens().map(value => value)}
-				{myScreenStream && <ArtifactPanel key="localScreen" stream={myScreenStream} username={this.myusername} />}
-			</>
-		)
+		if (isScreenSharing && isPrepared) {
+			return (
+				<>
+					{this.getPeerScreens().map(value => value)}
+					{myScreenStream && <ArtifactPanel key="localScreen" stream={myScreenStream} username={this.myusername} />}
+				</>
+			)
+		}
 	}
 
 	renderControls = (isActive) => {
@@ -312,6 +363,9 @@ class Broadcast extends Component {
 					<Space>
 						<Tooltip key="screen_tp" title={this.getShareScreenTooltip()}>
 							<Button key="screen_bt" disabled={!isActive} id="screenShare" type="primary" icon={this.getShareScreenIcon()} shape="circle" onClick={this.toggleScreenSharing} />
+						</Tooltip>
+						<Tooltip key="game_tp" title={this.getLabTooltip()}>
+							<Button key="game_bt" disabled={!isActive} id="game_bt" type="primary" icon={this.getLabIcon()} shape="circle" onClick={this.toggleLabMode} />
 						</Tooltip>
 						<Tag key="screen_tag_tp" color="#108ee9">{this.state.screenStatus}</Tag>
 					</Space>

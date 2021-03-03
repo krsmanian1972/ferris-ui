@@ -30,7 +30,7 @@ export default class JanusStore {
         const message = {
             request: "create",
             room: `scr-${conferenceId}`,
-            publishers: 2,
+            publishers: 6,
             bitrate: 500000,
         };
 

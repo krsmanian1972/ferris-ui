@@ -129,6 +129,10 @@ export default class CoinFlipGame {
         this.render();
     }
 
+    getGameCanvas = () => {
+        return this.renderer.getContext().canvas;
+    }
+
     setupScene = () => {
         const width = this.container.clientWidth;
         const height = this.container.clientHeight;
@@ -136,7 +140,7 @@ export default class CoinFlipGame {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(fov, width / height, near, far);
 
-        this.camera.position.set(-34, -26, 20);
+        this.camera.position.set(-40, -26, 20);
 
         this.scene.background = new THREE.Color(sceneColor);
         this.scene.fog = new THREE.Fog(sceneColor, 500, 10000);
@@ -543,6 +547,8 @@ export default class CoinFlipGame {
      */
 
     setName = (name) => {
+        name = !name?"Gopal":name;
+        name = name.substring(0,5);
         this.updateParamValueAt(name, 0);
         this.render();
     }
@@ -640,8 +646,6 @@ export default class CoinFlipGame {
             return;
         }
 
-        console.log(this.camera);
-
         this.resetMachine();
         this.placeInventory();
 
@@ -655,7 +659,18 @@ export default class CoinFlipGame {
         this.endTime = null;
         this.duration = 0;
 
+        this.tick();
+    }
+
+    tick = () => {
+        if(!this.isStarted && !this.isDone) {
+            return;
+        }
+        if(this.isStarted && this.isDone) {
+            return;
+        }
         this.setClockText();
+        setTimeout(() => this.tick(), 1000);
     }
 
     endGame = () => {

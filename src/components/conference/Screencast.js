@@ -9,6 +9,7 @@ var mypvtid = null;
 
 const LISTENER = "listener";
 const SCREEN_PUBLISHER = "screen_publisher";
+const STREAM_PUBLISHER = "stream_publisher";
 
 class Screencast {
 
@@ -47,6 +48,12 @@ class Screencast {
 	startScreenSharing = () => {
 		this.role = SCREEN_PUBLISHER;
 		this.publishScreen();
+	}
+
+	startCanvasSharing = (canvasStream) => {
+		this.role = STREAM_PUBLISHER;
+		this.canvasStream = canvasStream;
+		this.publishCanvas();
 	}
 
 	/**
@@ -136,7 +143,7 @@ class Screencast {
 			success: function (pluginHandle) {
 				localPlugin = pluginHandle;
 				me.doRegister();
-				const roomEvent = {isScreenActive: true, isPrepared: true, screenStatus: 'Registered'}
+				const roomEvent = { isScreenActive: true, isPrepared: true, screenStatus: 'Registered' }
 				me.roomListener(roomEvent);
 			},
 			error: function (error) {
@@ -195,6 +202,9 @@ class Screencast {
 			if (this.role === SCREEN_PUBLISHER) {
 				this.publishScreen();
 			}
+			else if(this.role === STREAM_PUBLISHER) {
+				this.publishCanvas();
+			}
 			else {
 				if (msg["publishers"]) {
 					const list = msg["publishers"];
@@ -229,7 +239,7 @@ class Screencast {
 			this.detachRemoteFeeds(unpublished);
 		}
 		else if (msg["error"]) {
-			const roomEvent = { myScreenStream: null, isScreenActive: false, screenStatus: 'Done', isScreenSharing:false };
+			const roomEvent = { myScreenStream: null, isScreenActive: false, screenStatus: 'Done', isScreenSharing: false };
 			this.roomListener(roomEvent);
 		}
 	}
@@ -244,6 +254,27 @@ class Screencast {
 			{
 
 				media: { video: "screen", audioSend: true, videoRecv: false },
+				success: function (jsep) {
+					const publish = { request: "configure", audio: true, video: true };
+					localPlugin.send({ message: publish, jsep: jsep });
+				},
+				error: function (error) {
+					Janus.error("WebRTC error:", error);
+					me.errorStatus(error);
+				}
+			});
+	}
+
+	publishCanvas = () => {
+
+		if (!localPlugin) {
+			return;
+		}
+		let me = this;
+		localPlugin.createOffer(
+			{
+				stream: this.canvasStream,
+				media: { video: "canvas", audioSend: true, videoRecv: true },
 				success: function (jsep) {
 					const publish = { request: "configure", audio: true, video: true };
 					localPlugin.send({ message: publish, jsep: jsep });
