@@ -320,7 +320,7 @@ class Broadcast extends Component {
 
 		if (isGameMode && isPrepared) {
 			return (
-				<div style={{ height: "100%", width: "100%", display: "flex", flexDirection: "row" }}>
+				<div style={{ height: "100%", width: "100%", display: "flex", flexDirection: "row",background:"rgb(37,56,74)" }}>
 					<div style={{ width: "60%", alignItems: "center", textAlign: "center", justifyContent: "center" }}>
 						<PlaygroundUI height={artifactPanelStyle.height} screencast={this.screencast} username={this.myusername} onGameStream={this.onGameStream} />
 					</div>

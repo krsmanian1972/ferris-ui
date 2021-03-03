@@ -31,11 +31,11 @@ const legendLabels = ["START", "IN", "EASE", "WIP", "PUSH"];
 const paramLabels = ["Name", "Inventory", "Activity", "Batch Size", ""];
 const paramValues = ["", "", "", "0", ""];
 
-const clockLabels = ["Local Clock", "", "Idle Time", "", "Advice"];
+const clockLabels = ["Local Clock", "", "Idle Time", "Settings", "Advice"];
 const clockValues = ["", "", "", "", ""];
 
 
-export default class CoinFlipGame {
+export default class ModhakamMakingGame {
 
     isReady = false;
 
@@ -81,10 +81,10 @@ export default class CoinFlipGame {
         }
     }
 
-    constructor(container, onGameMounted, onGameError) {
+    constructor(container, onGameMounted, onGameEvent) {
         this.container = container;
         this.onGameMounted = onGameMounted;
-        this.onGameError = onGameError;
+        this.onGameEvent = onGameEvent;
     
         this.textFactory = new TextFactory();
 
@@ -263,7 +263,7 @@ export default class CoinFlipGame {
 
         this.buildRack(this.rightX - unitLength, texture);
 
-        this.buildLevers();
+        this.buildLevers(texture);
 
         this.setMachine(texture);
 
@@ -279,10 +279,11 @@ export default class CoinFlipGame {
      * 
      * Pi/2 is the Horizontal with the Z-Axis
      */
-    buildLevers = () => {
+    buildLevers = (texture) => {
 
         const rollerMaterial = new THREE.MeshNormalMaterial();
         const geometry = new THREE.CylinderBufferGeometry(1 / 6, 1 / 6, 2);
+       
 
         this.startRoller = new THREE.Mesh(geometry, rollerMaterial);
         this.startRoller.userData = { id: "ignition", state: "off" };
@@ -302,11 +303,21 @@ export default class CoinFlipGame {
         this.doneRoller.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 4);
         this.scene.add(this.doneRoller);
 
+        const flowMaterial = new THREE.MeshLambertMaterial({map:texture,color:green});
+        const flowGeometry = new THREE.CylinderBufferGeometry(1 / 6, 1 / 4, 1);
+        this.flowLever = new THREE.Mesh(flowGeometry, flowMaterial);
+        this.flowLever.userData = { id: "flow", state: "off" };
+        this.flowLever.position.set(this.rightX-unitLength, this.maxY+unitHeight+unitHeight/2, -0.5);
+        this.flowLever.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
+        this.scene.add(this.flowLever);
+
+
         this.levers.length = 0;
 
         this.levers.push(this.startRoller);
         this.levers.push(this.doneRoller);
         this.levers.push(this.machineLever);
+        this.levers.push(this.flowLever);
    }
 
     setMachine = (texture) => {
@@ -627,6 +638,9 @@ export default class CoinFlipGame {
         }
         else if(leverId === "machine") {
             this.toggleMachine();
+        }
+        else if(leverId === "flow") {
+            this.onGameEvent({type:"lever",id:leverId});
         }
     }
 

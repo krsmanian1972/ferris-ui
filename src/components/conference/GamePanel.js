@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-const panelStyle = { borderRadius: "12px", width:"100%", marginTop: "1px", marginBottom:"1px", border: "1px groove white"};
+const panelStyle = { width:"100%", marginTop: "1px", marginBottom:"1px", border: "1px groove white"};
 
 function GamePanel({ stream, username, height }) {
 

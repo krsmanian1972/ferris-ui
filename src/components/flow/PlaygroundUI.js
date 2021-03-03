@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Button, Row, Col, Typography, Tooltip, Space } from 'antd';
-import { ScissorOutlined, CloseOutlined, AimOutlined, PlusOutlined } from '@ant-design/icons';
+import { Typography } from 'antd';
+import { AimOutlined } from '@ant-design/icons';
 
-import CoinFlipGame from './CoinFlipGame';
+import ModhakamMakingGame from './ModhakamMakingGame';
 import FlowComposer from './FlowComposer';
 
 const { Title } = Typography;
@@ -12,8 +12,7 @@ const { Title } = Typography;
 // The Outer Paper
 var playgroundStyle = {
     border: "1px groove white",
-    borderRadius: "12px",
-    width:"100%",
+    width: "100%",
     overflowY: "auto",
     display: "flex",
     flexDirection: "row"
@@ -21,13 +20,11 @@ var playgroundStyle = {
 
 var gameContainerStyle = {
     height: 0,
-    width: "100%",
-    marginRight:1
+    marginRight: 1
 };
 
 var flowContainerStyle = {
     maxHeight: 0,
-    width: "0%",
     overflowY: "auto",
 };
 
@@ -37,18 +34,21 @@ class PlaygroundUI extends Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            isShowFlow:true
+        }
     }
 
     componentDidMount() {
 
-        this.game = new CoinFlipGame(this.gameContainer,
+        this.game = new ModhakamMakingGame(this.gameContainer,
             this.onGameMounted,
-            this.onGameError,
+            this.onGameEvent,
         );
 
         this.flowComposer = new FlowComposer(this.flowContainer);
         this.buildTaskGraph()
-   }
+    }
 
     buildTaskGraph = () => {
 
@@ -70,8 +70,11 @@ class PlaygroundUI extends Component {
         this.flowComposer.linkBottomTop(4, 5);
     }
 
-    onGameError = () => {
 
+    onGameEvent = (gameEvent) => {
+        if (gameEvent.type === "lever" && gameEvent.id === "flow") {
+            this.toggleFlow();
+        }
     }
 
 
@@ -89,18 +92,32 @@ class PlaygroundUI extends Component {
         this.props.onGameStream(gameStream);
     }
 
+
+    toggleFlow = () => {
+        const flag = this.state.isShowFlow;
+        this.setState({ isShowFlow: !flag });
+    }
+
+    componentDidUpdate() {
+        this.game.handleWindowResize();
+        this.flowComposer.handleWindowResize();
+    }
+
     render() {
 
-        const pgStyle = {...playgroundStyle,maxHeight:this.props.height};
-        const gcStyle = {...gameContainerStyle,height:this.props.height};
-        const fcStyle = {...flowContainerStyle,maxHeight:this.props.height};
+        const fcWidth = this.state.isShowFlow?"40%":"0%";
+        const gcWidth = this.state.isShowFlow?"60%":"100%";
+
+        const pgStyle = { ...playgroundStyle, maxHeight: this.props.height };
+        const gcStyle = { ...gameContainerStyle, height: this.props.height,width:gcWidth };
+        const fcStyle = { ...flowContainerStyle, maxHeight: this.props.height,width:fcWidth };
 
         return (
             <div style={pgStyle} key="playground">
                 <div style={fcStyle} key="flowContainer" id="flowContainer" ref={ref => (this.flowContainer = ref)} />
                 <div style={gcStyle} key="gameContainer" id="gameContainer" ref={ref => (this.gameContainer = ref)} />
             </div>
-        )
+        )   
     }
 }
 
