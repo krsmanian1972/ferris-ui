@@ -30,8 +30,7 @@ class PlanningUI extends Component {
 
     showPlanDetail = (plan) => {
         const params = { plan: { ...plan }, parentKey: "planning"};
-        //this.props.appStore.currentComponent = { label: "Master Plan", key: "masterPlan", params: params };
-        this.props.appStore.currentComponent = { label: "Coin Flip", key: "coinFlip", params: params };
+        this.props.appStore.currentComponent = { label: "Master Plan", key: "masterPlan", params: params };
     }
 
     showNewPlan = () => {

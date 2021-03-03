@@ -36,18 +36,31 @@ class MasterPlanUI extends Component {
     }
 
     componentDidMount() {
+        this.buildTaskGraph();
+    }
+
+    buildTaskGraph = () => {
+
         this.composer = new FlowComposer(this.container);
 
-        const task1 = { id: 2, name: 'Work on it now', roleId: "Coach", duration: 2, min: 1, max: 2, coordinates: { x: 1, y: 1, z: 0 }, shape: '' };
-        const task2 = { id: 3, name: 'Work on it later', roleId: "Member", duration: 2, min: 1, max: 2, coordinates: { x: 1, y: 3, z: 0 }, shape: '' };
+        const task0 = { id: 0, name: 'Start', roleId: "", demand: 0, min: 0, max: 0, coordinates: '{ "x": 0, "y": 3.5, "z": 0 }', taskType: 'START_STOP_BOX' };
+        const task1 = { id: 1, name: 'Dough', roleId: "Gopal", demand: 15, min: 1, max: 2, coordinates: '{ "x": 0, "y": 2, "z": 0 }', taskType: '' };
+        const task2 = { id: 2, name: 'Pooranam', roleId: "Raja", demand: 15, min: 1, max: 2, coordinates: '{ "x": 0, "y": 0.5, "z": 0 }', taskType: '' };
+        const task3 = { id: 3, name: 'Modhakam', roleId: "Guruji", demand: 15, min: 1, max: 2, coordinates: '{ "x": 0, "y": -1.0, "z": 0 }', taskType: '' };
+        const task4 = { id: 4, name: 'Dispatch', roleId: "Harini", demand: 15, min: 1, max: 2, coordinates: '{ "x": 0, "y": -2.5, "z": 0 }', taskType: '' };
+        const task5 = { id: 5, name: 'End', roleId: "", demand: 0, min: 0, max: 0, coordinates: '{ "x": 0, "y": -4, "z": 0 }', taskType: 'START_STOP_BOX' };
 
-        const tasks = [];
-        tasks.push(task1);
-        tasks.push(task2);
+        const tasks = [task0, task1, task2, task3, task4, task5];
 
         this.composer.populateTasks(tasks);
-        //this.composer.populateLinks();
+
+        this.composer.linkBottomTop(0, 1);
+        this.composer.linkBottomTop(1, 2);
+        this.composer.linkBottomTop(2, 3);
+        this.composer.linkBottomTop(3, 4);
+        this.composer.linkBottomTop(4, 5);
     }
+
 
 
     deleteSelectedLine = () => {
