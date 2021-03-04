@@ -12,9 +12,8 @@ import VideoRoom from './VideoRoom';
 import Screencast from './Screencast';
 import VideoPanel from './VideoPanel';
 import ArtifactPanel from './ArtifactPanel';
-import GamePanel from './GamePanel';
 
-import PlaygroundUI from '../flow/PlaygroundUI';
+import ModhakamLauncher from '../games/ModhakamLauncher';
 
 
 @inject("appStore")
@@ -289,28 +288,15 @@ class Broadcast extends Component {
 		return peerScreens;
 	}
 
-	getGameScreens = (height) => {
-		const peerScreens = [];
 
-		if (!this.screencast) {
-			return peerScreens;
-		}
-
-		for (const [key, remoteFeed] of this.screencast.remoteFeedMap) {
-			if (remoteFeed) {
-				const el = <GamePanel key={key} stream={remoteFeed.stream} username={remoteFeed.rfdisplay} height={height} />
-				peerScreens.push(el);
-			}
-		}
-
-		return peerScreens;
+	/**
+	 * An event update function is expected to be return by the **Launcher
+	 * @param {*} eventSink 
+	 */
+	gameCallback = (eventSink) => {
+		this.gameEventSink = eventSink;
 	}
 
-	onGameStream = (canvasStream) => {
-		if (this.screencast) {
-			this.screencast.startCanvasSharing(canvasStream);
-		}
-	}
 	/**
 	 * Canvas Sharing will supersede Screen Sharing.
 	 * 
@@ -320,14 +306,10 @@ class Broadcast extends Component {
 
 		if (isGameMode && isPrepared) {
 			return (
-				<div style={{ height: "100%", width: "100%", display: "flex", flexDirection: "row",background:"rgb(37,56,74)" }}>
-					<div style={{ width: "60%", alignItems: "center", textAlign: "center", justifyContent: "center" }}>
-						<PlaygroundUI height={artifactPanelStyle.height} screencast={this.screencast} username={this.myusername} onGameStream={this.onGameStream} />
-					</div>
-					<div style={{ width: "40%", display: "flex", flexDirection: "column", overflowY: "auto", alignItems: "center", textAlign: "center", justifyContent: "left" }}>
-						{this.getGameScreens(artifactPanelStyle.height).map(value => value)}
-					</div>
-				</div>
+				<>
+					<ModhakamLauncher height={artifactPanelStyle.height} screencast={this.screencast} username={this.myusername} callback={this.gameCallback} />
+					{this.gameEventSink && this.gameEventSink()}
+				</>
 			)
 		}
 

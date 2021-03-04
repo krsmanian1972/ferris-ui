@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
-import TextFactory from './TextFactory';
 import moment from 'moment';
-import { LineObserver } from './LineObserver';
+
+import TextFactory from '../flow/TextFactory';
+import { LineObserver } from '../flow/LineObserver';
 
 const fov = 28;
 const near = 1;
@@ -35,7 +36,7 @@ const clockLabels = ["Local Clock", "", "Idle Time", "Settings", "Advice"];
 const clockValues = ["", "", "", "", ""];
 
 
-export default class ModhakamMakingGame {
+export default class DoughMaker {
 
     isReady = false;
 

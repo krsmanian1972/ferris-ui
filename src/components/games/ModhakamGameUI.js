@@ -4,8 +4,8 @@ import { inject, observer } from 'mobx-react';
 import { Typography } from 'antd';
 import { AimOutlined } from '@ant-design/icons';
 
-import ModhakamMakingGame from './ModhakamMakingGame';
-import FlowComposer from './FlowComposer';
+import DoughMaker from './DoughMaker';
+import FlowComposer from '../flow/FlowComposer';
 
 const { Title } = Typography;
 
@@ -30,7 +30,7 @@ var flowContainerStyle = {
 
 @inject("appStore")
 @observer
-class PlaygroundUI extends Component {
+class ModhakamGameUI extends Component {
 
     constructor(props) {
         super(props);
@@ -41,7 +41,7 @@ class PlaygroundUI extends Component {
 
     componentDidMount() {
 
-        this.game = new ModhakamMakingGame(this.gameContainer,
+        this.game = new DoughMaker(this.gameContainer,
             this.onGameMounted,
             this.onGameEvent,
         );
@@ -121,4 +121,4 @@ class PlaygroundUI extends Component {
     }
 }
 
-export default PlaygroundUI;
+export default ModhakamGameUI;
