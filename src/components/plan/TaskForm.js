@@ -94,6 +94,8 @@ class TaskForm extends Component {
 
         const store = this.props.taskStore;
         const startTimeMsg = store.startTimeMsg;
+        
+        // eslint-disable-next-line
         const change = store.change;
 
         return (

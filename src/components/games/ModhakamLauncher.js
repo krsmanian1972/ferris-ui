@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
-import { Typography } from 'antd';
-import { AimOutlined } from '@ant-design/icons';
 
 import ModhakamGameUI from './ModhakamGameUI';
 import GamePanel from './GamePanel';

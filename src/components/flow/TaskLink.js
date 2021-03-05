@@ -24,10 +24,6 @@ export default class TaskLink {
 
     group = new Group();
 
-    constructor() {
-
-    }
-
     start = (connector) => {
         this.source = connector;
 

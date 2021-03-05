@@ -16,7 +16,7 @@ const DONE = 'done';
 const ERROR = 'error';
 
 @observer
-export default class Milestones extends Component {
+class Milestones extends Component {
 
     constructor(props) {
         super(props);
@@ -116,3 +116,4 @@ export default class Milestones extends Component {
 
     }
 }
+export default Milestones;

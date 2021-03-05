@@ -22,7 +22,7 @@ function SessionSlot({ date, sessions, showSessionDetail }) {
     }
 
     const people = (event) => {
-        return <p style={{ float: 'left', width:"33.3%" }}>{event.program.name}::{event.session.people}</p>
+        return <p style={{ float: 'left', width: "33.3%" }}>{event.program.name}::{event.session.people}</p>
     }
 
     const bandText = (band) => {
@@ -36,25 +36,26 @@ function SessionSlot({ date, sessions, showSessionDetail }) {
     }
 
     const renderSession = (event, index) => {
-        const eventStart = moment(event.session.scheduleStart*1000);
-        const eventEnd = moment(event.session.scheduleEnd*1000);
-        
-        const timings = "@ "+eventStart.format('LT')+'-'+eventEnd.format('LT')
+        const eventStart = moment(event.session.scheduleStart * 1000);
+        const eventEnd = moment(event.session.scheduleEnd * 1000);
+
+        const timings = "@ " + eventStart.format('LT') + '-' + eventEnd.format('LT')
 
         return (
-                <div key={index} className={"slot-item " + event.session.band} onClick={() => showSessionDetail(event)}>
-                    <div className="slot-title">
-                        {people(event)}
-                        <p style={{fontSize: "12px",width:"33.3%"}}>{timings}</p>
-                        {bandText(event.session.band)}
-                    </div>
-                    <div>
-                        <p style={{ float: 'left' }}>{event.session.description}</p>
-                    </div>
+            <div key={index} className={"slot-item " + event.session.band} onClick={() => showSessionDetail(event)}>
+                <div className="slot-title">
+                    {people(event)}
+                    <p style={{ fontSize: "12px", width: "33.3%" }}>{timings}</p>
+                    {bandText(event.session.band)}
                 </div>
+                <div>
+                    <p style={{ float: 'left' }}>{event.session.description}</p>
+                </div>
+            </div>
         )
     }
 
+    // eslint-disable-next-line
     const renderObjective = (event, index) => {
         return (
             <div key={index} className={"slot-item "}>
@@ -72,34 +73,37 @@ function SessionSlot({ date, sessions, showSessionDetail }) {
 
     const renderTask = (event, index) => {
         return (
-                <div key={index} className={"slot-item task"}>
-                    <div className="slot-title">
-                        <p style={{width:"33.3%"}}>{event.program.name}</p>
-                        <p style={{fontSize: "10px", width:"33.3%"}}>TASK</p>
-                        {bandText(event.task.status)}
-                    </div>
-                    <div>
-                        <p style={{ float: 'left' }}>{event.task.name}</p>
-                    </div>
+            <div key={index} className={"slot-item task"}>
+                <div className="slot-title">
+                    <p style={{ width: "33.3%" }}>{event.program.name}</p>
+                    <p style={{ fontSize: "10px", width: "33.3%" }}>TASK</p>
+                    {bandText(event.task.status)}
                 </div>
+                <div>
+                    <p style={{ float: 'left' }}>{event.task.name}</p>
+                </div>
+            </div>
         )
     }
 
     const renderDetail = (sessions) => {
-        if(sessions.length === 0) {
-            return ( 
+        if (sessions.length === 0) {
+            return (
                 <div className="slot-detail"></div>
             )
         }
 
         return (
             <div className="slot-detail">
-               { sessions.map((event, index) => {
+                { sessions.map((event, index) => {
                     if (event.session) {
                         return renderSession(event, index)
                     }
                     else if (event.task) {
                         return renderTask(event, index)
+                    }
+                    else {
+                        return <></>
                     }
                 })
                 }

@@ -47,7 +47,7 @@ export default class LoginStore {
             const response = await this.apiProxy.query(apiHost, authenticationQuery, variables);
             const result = await response.json();
 
-            if (result.data == null) {
+            if (result.data === null) {
                 return { state: INVALID, data: null };
             }
             return { state: DONE, data: result.data.authenticate };

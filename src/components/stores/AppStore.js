@@ -31,7 +31,7 @@ class AppStore {
 
     apiProxy = new APIProxy();
     loginStore = new LoginStore({ apiProxy: this.apiProxy });
-    feedStore = new FeedStore({apiProxy: this.apiProxy});
+    feedStore = new FeedStore({ apiProxy: this.apiProxy });
 
     menus = [];
 
@@ -81,7 +81,7 @@ class AppStore {
         if (result.state !== DONE) {
             return;
         }
-        
+
         const data = result.data;
 
         this.credentials.email = data.email;
@@ -127,12 +127,12 @@ class AppStore {
     }
 
     resolveLandingPage() {
-        this.menus.map((menu, key) => {
+        for (let menu of this.menus) {
             if (menu.isLandingPage) {
                 this.transitionTo(menu.key);
                 return;
             }
-        })
+        }
     }
 
     registerSocket = () => {
@@ -153,7 +153,12 @@ class AppStore {
     }
 
     transitionTo(componentkeyName) {
-        this.menus.map((menu) => { (menu.key === componentkeyName) && (this.currentComponent = menu) });
+        for(let menu of this.menus) {
+            if(menu.key === componentkeyName) {
+                this.currentComponent = menu;
+                break;
+            }
+        }
     }
 
     isLoggedIn = () => {
@@ -176,16 +181,16 @@ class AppStore {
     updatePreferredRoute = (featureKey, sessionInfo) => {
         if (featureKey && sessionInfo && this.isLoggedIn()) {
             this.sessionInfo = sessionInfo;
-            this.currentComponent = {label:"window", key: featureKey, params:sessionInfo };
+            this.currentComponent = { label: "window", key: featureKey, params: sessionInfo };
         }
     }
 
     get isCoach() {
-        return this.credentials.role==="coach";
+        return this.credentials.role === "coach";
     }
 
     get isMember() {
-        return this.credentials.role==="member";
+        return this.credentials.role === "member";
     }
 
 }

@@ -8,10 +8,6 @@ import MemberSlot from './MemberSlot';
 @observer
 class MemberList extends Component {
 
-    constructor(props) {
-        super(props);
-    }
-
     componentDidMount() {
         this.props.store.fetchMembers();
     }

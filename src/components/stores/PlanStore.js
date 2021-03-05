@@ -88,7 +88,7 @@ export default class PlanStore {
             const response = await this.apiProxy.mutate(apiHost, updatePlanInfoQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = SAVING_ERROR;
                 return;
@@ -125,7 +125,7 @@ export default class PlanStore {
             const response = await this.apiProxy.mutate(apiHost, createMasterPlanQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = SAVING_ERROR;
                 return;
@@ -157,7 +157,7 @@ export default class PlanStore {
             const response = await this.apiProxy.mutate(apiHost, saveMasterPlanQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = SAVING_ERROR;
                 return;

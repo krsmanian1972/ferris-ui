@@ -39,7 +39,7 @@ const successNotification = () => {
 
 @inject('appStore')
 @observer
-export default class Registration extends Component {
+class Registration extends Component {
 
     constructor(props) {
         super(props);
@@ -109,3 +109,4 @@ export default class Registration extends Component {
     };
   
 }
+export default Registration;

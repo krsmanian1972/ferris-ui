@@ -17,7 +17,7 @@ const { Title } = Typography;
 
 @inject("appStore")
 @observer
-export default class LegacyPlan extends Component {
+class LegacyPlan extends Component {
     constructor(props) {
         super(props);
 
@@ -47,3 +47,4 @@ export default class LegacyPlan extends Component {
         )
     }
 }
+export default LegacyPlan;

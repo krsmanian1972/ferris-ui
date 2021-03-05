@@ -14,11 +14,6 @@ import BasePeerConnection from './BasePeerConnection';
  */
 class BoardStreamTransceiver extends BasePeerConnection {
 
-  constructor(peerId, connectionKey) {
-    super(peerId, connectionKey);
-
-  }
-
   onMediaStream = (stream) => {
     stream.getTracks().forEach((track) => {
       this.pc.addTrack(track, stream);

@@ -36,7 +36,6 @@ export default function AboutCoach({ coach, program, canEnroll, onEnroll, isYou 
     }
 
     const openProfileWindow = () => {
-        const title = `Profile of ${coach.name}`
         const url = `${baseUrl}?featureKey=${FEATURE_KEY}&fuzzyId=${coach.id}`;
         window.open(url, "_blank");
     }

@@ -29,6 +29,8 @@ const START = "START";
 const COACH = "coach";
 
 const MONO = "mono";
+
+// eslint-disable-next-line
 const MULTI = "multi";
 
 const ALLOWED_MINUTES = new Set([0, 15, 30, 45]);
@@ -118,7 +120,7 @@ export default class SessionStore {
             const response = await this.apiProxy.mutate(apiHost, createConferenceQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = ERROR_MESSAGE;
                 return;
@@ -165,7 +167,7 @@ export default class SessionStore {
             const response = await this.apiProxy.mutate(apiHost, createSessionQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = ERROR_MESSAGE;
                 return;
@@ -257,7 +259,7 @@ export default class SessionStore {
         const hours = value.hours();
         const minutes = value.minutes();
 
-        if (hours + minutes == 0) {
+        if (hours + minutes === 0) {
             this.durationMsg = { status: ERROR, help: "The minimum duration of a session is 15 minutes." };
             return;
         }
@@ -315,7 +317,7 @@ export default class SessionStore {
 
     setSessionPeople = (users) => {
 
-        if (users && users.length == 2) {
+        if (users && users.length === 2) {
             if (users[0].sessionUser.userType === COACH) {
                 this.people = { coach: users[0], member: users[1] }
             }
@@ -347,6 +349,7 @@ export default class SessionStore {
         if (this.duration && this.duration > 0 && this.startTime) {
             return moment(this.startTime).add(this.duration, 'minutes');
         }
+        return null;
     }
 
     /**
@@ -537,7 +540,7 @@ export default class SessionStore {
             const response = await this.apiProxy.query(apiHost, findSessionQuery, variables);
             const result = await response.json();
 
-            if (result.data == null) {
+            if (result.data === null) {
                 return { status: null };
 
             }

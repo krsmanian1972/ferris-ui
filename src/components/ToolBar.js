@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
 import { Dropdown, Menu, Layout, Typography, Row, Col, Space,Tooltip,Button } from 'antd';
-import { ClockCircleFilled, GroupOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
+import { TeamOutlined, UserOutlined } from '@ant-design/icons';
 
 import ownerLogo from '../images/krscode.png';
 
@@ -16,7 +16,7 @@ const caption = "KRS Code";
 
 @inject("appStore")
 @observer
-export default class ToolBar extends Component {
+class ToolBar extends Component {
 
     handleEvent = (e) => {
         const appStore = this.props.appStore;
@@ -83,7 +83,7 @@ export default class ToolBar extends Component {
             <Header style={{ position: 'fixed', zIndex: 1, width: '100%', background: '#fff', padding: "0px 5px 0px 5px" }}>
                 <Row>
                     <Col style={{ paddingTop: 5 }} span={2}>
-                        <img src={ownerLogo} align="left" width="26" height="52" title={caption} />
+                        <img alt="krscode" src={ownerLogo} align="left" width="26" height="52" title={caption} />
                     </Col>
                     {this.renderRoleTabs()}
                     {this.renderRightMenu()}
@@ -92,3 +92,5 @@ export default class ToolBar extends Component {
         )
     }
 }
+
+export default ToolBar;

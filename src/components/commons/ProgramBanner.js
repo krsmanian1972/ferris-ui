@@ -12,17 +12,14 @@ const contentStyle = { display: "flex", flexDirection: "row", justifyContent: "c
 @inject("appStore")
 @observer
 class ProgramBanner extends Component {
-    constructor(props) {
-        super(props);
-    }
-
+  
 
     getProgramBanner = (program) => {
         const url = `${assetHost}/programs/${program.id}/banner/banner.png`;
         return (
             <div style={{ textAlign: "center", height: 300 }}>
                 <div style={{ display: "inline-block", verticalAlign: "middle", height: 300 }}></div>
-                <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px", cursor: 'pointer' }} src={url} onClick={() => this.props.showProgramDetail(program.id)} />
+                <img alt={program.name} style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px", cursor: 'pointer' }} src={url} onClick={() => this.props.showProgramDetail(program.id)} />
             </div>
         )
     }
@@ -35,7 +32,7 @@ class ProgramBanner extends Component {
     }
 
     renderSlider = (programs, rowCount) => {
-        if (rowCount == 0) {
+        if (rowCount === 0) {
             return <></>
         }
 

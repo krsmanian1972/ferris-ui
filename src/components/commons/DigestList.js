@@ -9,10 +9,6 @@ import { SmileOutlined } from '@ant-design/icons';
 @observer
 class DigestList extends Component {
 
-    constructor(props) {
-        super(props);
-    }
-
     componentDidMount() {
         this.props.store.fetchPendingFeeds();
     }
@@ -59,7 +55,7 @@ class DigestList extends Component {
             }
         }
 
-        if(elements.length == 0) {
+        if(elements.length === 0) {
             return <Result 
                 icon={<SmileOutlined />}
                 title="Your message board is clean"

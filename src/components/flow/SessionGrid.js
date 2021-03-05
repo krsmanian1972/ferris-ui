@@ -8,7 +8,7 @@ const near = 1;
 const far = 2000;
 
 const sceneColor = "rgb(216,213,221)";
-const cyan = "#00b7eb";
+
 
 const gapX = 0.01;
 
@@ -98,8 +98,7 @@ export default class SessionGrid {
 
     setBoundary = () => {
 
-        var rect = this.renderer.domElement.getBoundingClientRect();
-
+  
         const x = - 1;
         const y = - 1;
 
@@ -226,13 +225,13 @@ export default class SessionGrid {
         this.scene.add(roller);
 
         // The distance between the two pillars
-        const dist = 1 + 0.25 + 0.25 + 0.25 + 0.25
+        /*const dist = 1 + 0.25 + 0.25 + 0.25 + 0.25
 
         const v1 = new THREE.Vector3(0, 0, 0);
         const v2 = new THREE.Vector3(dist, 0, 0);
         const v3 = new THREE.Vector3(dist / 2, dist / 2, 0);
 
-        const triangle = new THREE.Triangle(v1, v2, v3);
+        //const triangle = new THREE.Triangle(v1, v2, v3);
 
         const triGeo = new THREE.Geometry();
 
@@ -250,7 +249,7 @@ export default class SessionGrid {
         mesh.rotateOnAxis(new THREE.Vector3(0, 1, 0), -Math.PI / 2);
         mesh.position.z = mesh.position.z - (dist - 0.25 - 0.25);
         mesh.position.x = mesh.position.x + 0.25;
-        this.scene.add(mesh);
+        this.scene.add(mesh);*/
 
         this.render();
     }
@@ -354,7 +353,7 @@ export default class SessionGrid {
             this.scene.add(vertical);
 
             var date = this.textFactory.build("", 0.3, 0.1, "#fae78f");
-            var group = new THREE.Group();
+            group = new THREE.Group();
             group.add(date);
             group.position.copy(vertical.position.clone());
             group.position.x = group.position.x - 0.1
@@ -363,7 +362,7 @@ export default class SessionGrid {
             this.dateGroup.push(group);
 
             var month = this.textFactory.build("", 0.2, 0.1, "white");
-            var group = new THREE.Group();
+            group = new THREE.Group();
             group.add(month);
             group.position.copy(vertical.position.clone());
             group.position.x = group.position.x - 0.1
@@ -381,7 +380,7 @@ export default class SessionGrid {
     }
     
     setTime = () => {
-        time = moment();
+        let time = moment();
         var timeInHrs = parseInt(time.format('HH'));
         if (timeInHrs >= 19) {
             var diff = timeInHrs - 19;
@@ -406,30 +405,27 @@ export default class SessionGrid {
         }
 
         for (var i = 0; i < 6; i++) {
-
             var newTime = moment(time).add(i + 1, 'hours')
             this.times[i] = (newTime.format('hh') + ":00" + newTime.format('A'));
         }
 
-        for (var i = 0; i < 6; i++) {
-            var timeText = this.times[i];
-            var time = this.textFactory.build(timeText, 0.3, 0.1, "#fae78f");
-            var groupIndex = i;
+        for (i = 0; i < 6; i++) {
+            let timeText = this.textFactory.build(this.times[i], 0.3, 0.1, "#fae78f");
+            let groupIndex = i;
 
-            var group = this.timeGroup[groupIndex];
+            let group = this.timeGroup[groupIndex];
             group.remove(...group.children);
-            group.add(time);
+            group.add(timeText);
         }
 
         //update the other side of the pillar
-        for (var i = 6; i < 12; i++) {
-            var timeText = this.times[i - 6];
-            var time = this.textFactory.build(timeText, 0.3, 0.1, "#fae78f");
-            var groupIndex = i;
+        for (i = 6; i < 12; i++) {
+            let timeText = this.textFactory.build(this.times[i - 6], 0.3, 0.1, "#fae78f");
+            let groupIndex = i;
 
-            var group = this.timeGroup[groupIndex];
+            let group = this.timeGroup[groupIndex];
             group.remove(...group.children);
-            group.add(time);
+            group.add(timeText);
         }
 
     }
@@ -447,7 +443,7 @@ export default class SessionGrid {
             this.dates[i] = (moment().add(startValue + i, 'days'));
         }
 
-        for (var i = 0; i < this.dates.length; i++) {
+        for (i = 0; i < this.dates.length; i++) {
             var dateText = this.dates[i].format('D');
             var date = this.textFactory.build(dateText, 0.4, 0.1, "#fae78f");
             var monthText = this.dates[i].format('MMM');
@@ -460,16 +456,16 @@ export default class SessionGrid {
             group.remove(...group.children);
             group.add(date);
 
-            var group = this.monthGroup[groupIndex];
+            group = this.monthGroup[groupIndex];
             group.remove(...group.children);
             group.add(month);
 
-            var group = this.dayGroup[groupIndex];
+            group = this.dayGroup[groupIndex];
             group.remove(...group.children);
             group.add(day);
         }
 
-        for (var i = 0; i < numberOfDays; i++) {
+        for (i = 0; i < numberOfDays; i++) {
             for (var j = 0; j < unitSize; j++) {
                 var textureKey = "fgrid_" + i + "_" + j;
                 var texture = this.buildSessionTexture(textureKey, ["", "", "", ""], i);
@@ -486,7 +482,8 @@ export default class SessionGrid {
     updateEventMatrixWithDate = (result, dateStart, timeStart) => {
 
         var startValue = -1;
-        for (var i = 0; i < 7; i++) {
+        var i=0;
+        for (i = 0; i < 7; i++) {
             this.dates[i] = (moment(dateStart).add(startValue + i, 'days'));
         }
 
@@ -496,7 +493,7 @@ export default class SessionGrid {
         if (timeOffset >= 18) {
             timeOffset = 18;
         }
-        for (var i = 0; i < this.dates.length; i++) {
+        for (i = 0; i < this.dates.length; i++) {
             var dateText = this.dates[i].format('D');
             var date = this.textFactory.build(dateText, 0.4, 0.1, "#fae78f");
             var monthText = this.dates[i].format('MMM');
@@ -509,18 +506,18 @@ export default class SessionGrid {
             group.remove(...group.children);
             group.add(date);
 
-            var group = this.monthGroup[groupIndex];
+            group = this.monthGroup[groupIndex];
             group.remove(...group.children);
             group.add(month);
 
-            var group = this.dayGroup[groupIndex];
+            group = this.dayGroup[groupIndex];
             group.remove(...group.children);
             group.add(day);
         }
 
 
-        for (var i = 0; i < numberOfDays; i++) {
-            var day = moment(dateStart).add(startValue + i, 'days').format("YYYY-MM-DD");
+        for (i = 0; i < numberOfDays; i++) {
+            let day = moment(dateStart).add(startValue + i, 'days').format("YYYY-MM-DD");
             for (var j = 0; j < 6; j++) {
                 var textureKey = "fgrid_" + i + "_" + j;
                 var text0Text = "", text1Text = "", text2Text = "", text3Text = "";
@@ -536,23 +533,23 @@ export default class SessionGrid {
                 var text3Keys = text3.keys();
                 //prepare text for 1st row
                 for (var i0 = 0; i0 < text0.size; i0++) {
-                    var textDisplay = text0.get(text0Keys.next().value).name;
+                    let textDisplay = text0.get(text0Keys.next().value).name;
                     text0Text = text0Text + " :::" + textDisplay;
                 }
                 //prepare text for 2nd row
                 for (var i1 = 0; i1 < text1.size; i1++) {
-                    var textDisplay = text1.get(text1Keys.next().value).name;
+                    let textDisplay = text1.get(text1Keys.next().value).name;
                     text1Text = text1Text + " :::" + textDisplay;
                 }
 
                 //prepare text for 3rd row
                 for (var i2 = 0; i2 < text2.size; i2++) {
-                    var textDisplay = text2.get(text2Keys.next().value).name;
+                    let textDisplay = text2.get(text2Keys.next().value).name;
                     text2Text = text2Text + " :::" + textDisplay;
                 }
                 //prepare text for 4th row
                 for (var i3 = 0; i3 < text3.size; i3++) {
-                    var textDisplay = text3.get(text3Keys.next().value).name;
+                    let textDisplay = text3.get(text3Keys.next().value).name;
                     text3Text = text3Text + " :::" + textDisplay;
                 }
 

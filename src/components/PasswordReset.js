@@ -39,7 +39,7 @@ const successNotification = () => {
 
 @inject('appStore')
 @observer
-export default class PasswordReset extends Component {
+class PasswordReset extends Component {
 
     constructor(props) {
         super(props);
@@ -109,3 +109,4 @@ export default class PasswordReset extends Component {
     };
 
 }
+export default PasswordReset;

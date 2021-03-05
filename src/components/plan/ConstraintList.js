@@ -20,10 +20,6 @@ class ConstraintList extends Component {
 
     index = 0;
 
-    constructor(props) {
-        super(props);
-    }
-
     displayMessage = () => {
         const store = this.props.constraintStore;
 
@@ -82,7 +78,7 @@ class ConstraintList extends Component {
     }
 
     renderSlider = (options, rowCount) => {
-        if (rowCount == 0) {
+        if (rowCount === 0) {
             return <></>
         }
 
@@ -191,6 +187,8 @@ class ConstraintList extends Component {
     render() {
         const store = this.props.constraintStore;
         const options = store.options;
+
+        // eslint-disable-next-line
         const change = store.change;
         
         return (

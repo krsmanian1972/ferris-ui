@@ -10,11 +10,7 @@ import { cardHeaderStyle } from '../util/Style';
 const {Title} = Typography;
 
 @observer
-export default class EditableProgramDescription extends Component {
-
-    constructor(props) {
-        super(props);
-    }
+class EditableProgramDescription extends Component {
 
     handleDescription = (text) => {
         this.props.program.description = text;
@@ -79,3 +75,4 @@ export default class EditableProgramDescription extends Component {
 
     }
 }
+export default EditableProgramDescription;

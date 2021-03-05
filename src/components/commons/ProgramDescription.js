@@ -9,11 +9,7 @@ import { cardHeaderStyle } from '../util/Style';
 const { Title } = Typography;
 
 @observer
-export default class ProgramDescription extends Component {
-
-    constructor(props) {
-        super(props);
-    }
+class ProgramDescription extends Component {
 
     /**
      * We populate the description from the respective content location
@@ -35,3 +31,4 @@ export default class ProgramDescription extends Component {
         );
     }
 }
+export default ProgramDescription;

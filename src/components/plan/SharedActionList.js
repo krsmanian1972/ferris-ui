@@ -14,7 +14,7 @@ const titleBarStyle = { background: "rgb(59,109,171)", display: "flex", flexWrap
 const titleStyle = { display: "flex", alignItems: "center", paddingLeft: 10, fontWeight: "bold", color: "white" };
 
 @observer
-export default class SharedActionList extends ActionList {
+class SharedActionList extends ActionList {
 
     constructor(props) {
         super(props);
@@ -57,8 +57,10 @@ export default class SharedActionList extends ActionList {
         const contentStyle = { margin: "1%", padding: "1%", display: "flex", flexDirection: "column", height: height, overflow: "auto", background: "white" };
 
         const tasks = this.store.tasks;
-        const change = this.store.change;
         const rowCount = this.store.rowCount;
+        
+        // eslint-disable-next-line
+        const change = this.store.change;
 
         return (
             <div>
@@ -72,3 +74,4 @@ export default class SharedActionList extends ActionList {
         )
     }
 }
+export default SharedActionList

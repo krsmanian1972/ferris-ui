@@ -105,6 +105,7 @@ class ConferenceMembers extends Component {
 
     render() {
 
+        // eslint-disable-next-line
         const change = this.store.change;
 
         return (

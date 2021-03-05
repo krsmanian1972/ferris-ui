@@ -5,12 +5,8 @@ import { Result, Spin } from 'antd';
 
 import SessionSlot from './SessionSlot';
 
-
 @observer
 class TodaySessions extends Component {
-    constructor(props) {
-        super(props);
-    }
 
     /**
      * Let us re-build the roster for every 60 seconds

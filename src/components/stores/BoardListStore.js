@@ -59,6 +59,7 @@ export default class BoardListStore {
         }
         catch (e) {
             this.state = ERROR;
+            this.message= ERROR_MESSAGE;
         }
     }
 

@@ -62,6 +62,8 @@ class ActionResponseForm extends Component {
     render() {
 
         const store = this.props.taskStore;
+
+        // eslint-disable-next-line
         const change = store.change;
 
         return (

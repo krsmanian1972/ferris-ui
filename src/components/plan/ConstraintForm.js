@@ -78,6 +78,8 @@ class ConstraintForm extends Component {
     render() {
 
         const store = this.props.constraintStore;
+
+        // eslint-disable-next-line
         const change = store.change;
 
         return (

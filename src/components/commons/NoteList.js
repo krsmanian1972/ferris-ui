@@ -79,7 +79,7 @@ class NoteList extends Component {
             return <></>
         }
 
-        if (rowCount == 0) {
+        if (rowCount === 0) {
             return <Result icon={<SmileOutlined />}  />
         }
 

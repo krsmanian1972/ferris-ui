@@ -135,7 +135,7 @@ export default class ObservationStore {
             const response = await this.apiProxy.mutate(apiHost, updateObservationQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = SAVING_ERROR;
                 return;
@@ -172,7 +172,7 @@ export default class ObservationStore {
             const response = await this.apiProxy.mutate(apiHost, createObservationQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = SAVING_ERROR;
                 return;

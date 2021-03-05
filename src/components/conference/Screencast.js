@@ -4,7 +4,7 @@ import { rtcServerUrl } from '../stores/APIEndpoints';
 
 var janus = null;
 var localPlugin = null;
-var myid = null;
+
 var mypvtid = null;
 
 const LISTENER = "listener";
@@ -196,7 +196,6 @@ class Screencast {
 
 		if (event === "joined") {
 
-			myid = msg["id"];
 			mypvtid = msg["private_id"];
 
 			if (this.role === SCREEN_PUBLISHER) {

@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import BaseStreamHandler from './BaseStreamHandler';
 
 /**

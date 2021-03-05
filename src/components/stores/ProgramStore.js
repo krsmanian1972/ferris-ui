@@ -164,7 +164,7 @@ export default class ProgramStore {
             const response = await this.apiProxy.query(apiHost, programCoachesQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = LOADING_ERROR;
                 return;
@@ -196,7 +196,7 @@ export default class ProgramStore {
         const response = await this.apiProxy.getAsync(url);
         const data = await response.text();
 
-        if (response.status == 200) {
+        if (response.status === 200) {
             programModel.program.description = data;
         }
     }
@@ -221,14 +221,14 @@ export default class ProgramStore {
             const response = await this.apiProxy.query(apiHost, programsQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = LOADING_ERROR;
                 return;
             }
 
             const result = data.data.getPrograms.programs;
-            if (result.length != 1) {
+            if (result.length !== 1) {
                 this.state = ERROR;
                 this.message = NO_MATCHING_RECORD;
                 return;
@@ -271,7 +271,7 @@ export default class ProgramStore {
             const response = await this.apiProxy.mutate(apiHost, createProgramQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = CREATION_ERROR;
                 return;
@@ -348,7 +348,7 @@ export default class ProgramStore {
             const response = await this.apiProxy.mutate(apiHost, alterProgramStateQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = ACTIVATION_ERROR;
                 return;

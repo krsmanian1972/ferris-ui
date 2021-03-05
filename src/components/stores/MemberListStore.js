@@ -56,7 +56,7 @@ export default class MemberListStore {
             const response = await this.apiProxy.query(apiHost, coachMembersQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.message = ERROR_MESSAGE;
                 this.state = DONE;
                 return;
@@ -84,14 +84,14 @@ export default class MemberListStore {
             return;
         }
 
-        result.map(item=>{
-            var email = item.user.email;
+        for(let item of result) {
+            let email = item.user.email;
             if (!this.members.has(email)) {
                 this.members.set(email,[]);
             }
             this.members.get(email).push(item);
-        });
-
+        }
+        
         this.rowCount = this.members.size;
     }
 

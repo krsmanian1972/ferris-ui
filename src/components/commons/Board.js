@@ -95,14 +95,16 @@ class Board extends Component {
 
     expandInitialPanes = (panes, capacity) => {
 
-        for (var i = 0; i < panes.length; i++) {
+        var i = 0;
+        
+        for (i = 0; i < panes.length; i++) {
             panes[i].isLoaded = false;
         }
 
         const diff = capacity - panes.length;
         var boardIndex = panes.length + 1;
 
-        for (var i = 0; i < diff; i++) {
+        for (i = 0; i < diff; i++) {
             this.undoTabList[boardIndex] = [];
 
             const tab = { title: `Board-${boardIndex}`, key: `${boardIndex}`, closable: false, isLoaded: false };
@@ -223,7 +225,7 @@ class Board extends Component {
     }
 
     preventScrolling = (e) => {
-        if (e.target == this.canvas) {
+        if (e.target === this.canvas) {
             e.preventDefault();
         }
     }
@@ -319,8 +321,6 @@ class Board extends Component {
         this.ctx.beginPath();
         this.ctx.clearRect(this.cursorPos.x, this.cursorPos.y - 5, 8, 12);
 
-        var rect = this.canvas.getBoundingClientRect();
-
         //move the cursor to a new line
         this.y = this.y + 15;
         this.cursorPos = { x: this.x, y: this.y - 10 };
@@ -380,7 +380,7 @@ class Board extends Component {
         this.ctx.fillStyle = "white";
         this.ctx.fillText(this.sentence, this.x, this.y);
 
-        var dim = this.ctx.measureText(c);
+        dim = this.ctx.measureText(c);
         this.cursorPos = { x: this.cursorPos.x + dim.width, y: this.cursorPos.y };
 
         this.cursorBlinkFunc = setInterval(this.cursorBlink, cursorBlinkSpeed);
@@ -558,7 +558,7 @@ class Board extends Component {
                     {this.renderControls(isLoading)}
                 </div>
                 <div style={{position:"relative",width:"100%",height:"100%"}}>
-                    <div style={{ position:"absolute", top:0, left:0, zIndex:2, maxHeight: screen.height, overflow: "auto", border: "3px solid rgb(59,109,171)" }}>
+                    <div style={{ position:"absolute", top:0, left:0, zIndex:2, maxHeight: window.screen.height, overflow: "auto", border: "3px solid rgb(59,109,171)" }}>
                         <div key="container" id="container" ref={ref => (this.container = ref)}>
                             <canvas height={CANVAS_HEIGHT} width={CANVAS_WIDTH} key="canvas" ref={ref => (this.canvas = ref)} />
                             <canvas height={CANVAS_HEIGHT} width={CANVAS_WIDTH} className="hiddenBoard" key="hiddenCanvas" ref={ref => (this.hiddenCanvas = ref)} />

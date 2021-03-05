@@ -59,7 +59,7 @@ export default class ProfileStore {
             const response = await this.apiProxy.query(apiHost, findUserQuery, variables);
             const data = await response.json();
 
-            if (data.data.getUser == undefined) {
+            if (data.data.getUser === undefined) {
                 this.state = ERROR;
                 this.message = ERROR_MESSAGE;
                 return;

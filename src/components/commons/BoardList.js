@@ -52,7 +52,7 @@ class BoardList extends Component {
             return <></>
         }
 
-        if (boardCount == 0) {
+        if (boardCount === 0) {
             return <Result icon={<SmileOutlined />}/>
         }
 

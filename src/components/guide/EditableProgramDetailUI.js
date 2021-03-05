@@ -139,7 +139,7 @@ class EditableProgramDetailUI extends Component {
             <Card>
                 <div style={{ textAlign: "center", height: 350 }}>
                     <div style={{ display: "inline-block", verticalAlign: "middle", height: 350 }}></div>
-                    <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={url} />
+                    <img alt={program.name} style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={url} />
                 </div>
             </Card>
         )
@@ -169,7 +169,7 @@ class EditableProgramDetailUI extends Component {
                 extra={this.getBannerButton(program)}>
                 <div style={{ textAlign: "center", height: 260 }}>
                     <div style={{ display: "inline-block", verticalAlign: "middle", height: 260 }}></div>
-                    <img style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={url} />
+                    <img alt={program.name} style={{ maxWidth: "100%", maxHeight: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={url} />
                 </div>
             </Card>
         )
@@ -177,7 +177,7 @@ class EditableProgramDetailUI extends Component {
 
     renderProgramModel = () => {
 
-        const { program, coach } = this.store.programModel;
+        const { program } = this.store.programModel;
         const change = this.store.change;
 
         return (

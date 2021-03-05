@@ -82,7 +82,7 @@ class ScheduleForm extends Component {
 
         const store = this.props.sessionStore;
 
-        if(store.sessionType === "mono") {
+        if (store.sessionType === "mono") {
             await store.createSchedule(values);
         }
         else {
@@ -224,11 +224,14 @@ class ScheduleForm extends Component {
                         }
                         placeholder="Select an active Program"
                         onChange={this.onProgramChange}>
-                        {programs.map(item => {
-                            if (item.program.active) {
-                                return <Option key={item.program.id}>{item.program.name}</Option>
-                            }
-                        })}
+                        {
+                            // eslint-disable-next-line
+                            programs.map(item => {
+                                if (item.program.active) {
+                                    return <Option key={item.program.id}>{item.program.name}</Option>
+                                }
+                            })
+                        }
                     </Select>
                 </Form.Item>
 

@@ -27,7 +27,7 @@ class PeerBoard extends Component {
 
     render() {
 
-        const boardHeight = screen.height * 0.8;
+        const boardHeight = window.screen.height * 0.8;
         const matrixBoardStyle = { backgroundColor: "#646464", maxHeight: boardHeight, overflow: "auto" };
 
         return (

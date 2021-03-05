@@ -19,7 +19,7 @@ const titleBarStyle = { background: "rgb(59,109,171)", display: "flex", flexWrap
 const titleStyle = { display: "flex", alignItems: "center", paddingLeft: 10, fontWeight: "bold", color: "white" };
 
 @observer
-export default class SharedCoachingPlan extends Component {
+class SharedCoachingPlan extends Component {
 
     constructor(props) {
         super(props);
@@ -74,3 +74,4 @@ export default class SharedCoachingPlan extends Component {
         )
     }
 }
+export default SharedCoachingPlan;

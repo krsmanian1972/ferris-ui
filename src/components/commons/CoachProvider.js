@@ -4,7 +4,7 @@
  */
 import React, { Component } from 'react';
 import { observer } from 'mobx-react';
-import { Typography, Card, Tooltip, Button } from 'antd';
+import { Typography, Card, Tooltip, Button,Spin,Result } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 
 import CoachAssociationDrawer from '../guide/CoachAssociationDrawer';
@@ -16,11 +16,8 @@ import AboutCoach from './AboutCoach';
 const { Title } = Typography;
 
 @observer
-export default class CoachProvider extends Component {
-    constructor(props) {
-        super(props);
-    }
-
+class CoachProvider extends Component {
+  
     getAssociateCoachButton = () => {
         return (
             <Tooltip key="new_coach_tip" title="To associate a new coach into this program.">
@@ -137,3 +134,4 @@ export default class CoachProvider extends Component {
         return (this.renderCoaches());
     }
 }
+export default CoachProvider;

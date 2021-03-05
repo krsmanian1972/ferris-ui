@@ -131,7 +131,7 @@ class ActionList extends Component {
     }
 
     renderSlider = (tasks, rowCount) => {
-        if (rowCount == 0) {
+        if (rowCount === 0) {
             return <></>
         }
 
@@ -232,6 +232,8 @@ class ActionList extends Component {
 
     render() {
         const tasks = this.store.tasks;
+
+        // eslint-disable-next-line
         const change = this.store.change;
         const rowCount = this.store.rowCount;
 

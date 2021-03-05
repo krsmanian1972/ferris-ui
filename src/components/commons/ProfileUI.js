@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { Tooltip, Card, Switch, Typography, PageHeader, Statistic, Spin, Result, Upload, Button, Tag } from 'antd';
-import { UploadOutlined, MailOutlined } from '@ant-design/icons';
+import { UploadOutlined } from '@ant-design/icons';
 
 import Editor from "./Editor";
 
@@ -20,7 +20,7 @@ const FEATURE_KEY = "profile";
 
 @inject("appStore")
 @observer
-export default class ProfileUI extends Component {
+class ProfileUI extends Component {
 
     constructor(props) {
         super(props);
@@ -218,7 +218,7 @@ export default class ProfileUI extends Component {
             <div key="user_image" style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
                 <div style={{ width: "30%", height: 180 }}>
                     <div style={{ display: "inline-block", verticalAlign: "middle", height: 180 }}></div>
-                    <img style={{ maxHeight: "100%", maxWidth: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={this.getCoverUrl(user)} />
+                    <img alt="user" style={{ maxHeight: "100%", maxWidth: "100%", verticalAlign: "middle", display: "inline-block", borderRadius: "12px" }} src={this.getCoverUrl(user)} />
                 </div>
 
                 <div style={{ width: "70%", textAlign: "left", height: 180, marginLeft: 15 }}>
@@ -246,6 +246,7 @@ export default class ProfileUI extends Component {
 
     render() {
 
+        // eslint-disable-next-line
         const change = this.store.change;
         
         const title = this.getTitle();
@@ -276,3 +277,4 @@ export default class ProfileUI extends Component {
 
     }
 }
+export default ProfileUI;

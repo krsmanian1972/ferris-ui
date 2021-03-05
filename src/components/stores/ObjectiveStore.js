@@ -168,7 +168,7 @@ export default class ObjectiveStore {
             const response = await this.apiProxy.mutate(apiHost, updateObjectiveQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = SAVING_ERROR;
                 return;
@@ -179,7 +179,7 @@ export default class ObjectiveStore {
         }
         catch (e) {
             this.state = ERROR;
-            this.message = ENROLLMENT_ERROR;
+            this.message = SAVING_ERROR;
             console.log(e);
         }
     }
@@ -212,7 +212,7 @@ export default class ObjectiveStore {
             const response = await this.apiProxy.mutate(apiHost, createObjectiveQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = SAVING_ERROR;
                 return;
@@ -223,7 +223,7 @@ export default class ObjectiveStore {
         }
         catch (e) {
             this.state = ERROR;
-            this.message = ENROLLMENT_ERROR;
+            this.message = SAVING_ERROR;
             console.log(e);
         }
     }

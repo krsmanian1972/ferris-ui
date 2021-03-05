@@ -43,7 +43,7 @@ export default class NotesStore {
     }
 
     asUTC = (value) => {
-        if (value == undefined) {
+        if (value === undefined) {
             return null;
         }
         return value.utc().format();
@@ -56,9 +56,14 @@ export default class NotesStore {
      */
     asFiles = (upload) => {
         const files = [];
-        upload && upload.map(item => {
-            if (item.response == undefined) {
-                return;
+        if(!upload) {
+            return files;
+        }
+
+        for(let item of upload) {
+
+            if (item.response === undefined) {
+                continue;
             }
 
             const filepath = item.response.length > 0 ? item.response[0] : 'untraceable';
@@ -71,13 +76,13 @@ export default class NotesStore {
             };
 
             files.push(metadata);
-        })
+        }
         return files;
     }
 
     validDate = (newNotes) => {
         const remindAt = newNotes.remindAt;
-        if (remindAt == undefined) {
+        if (remindAt === undefined) {
             return true;
         }
 
@@ -88,12 +93,12 @@ export default class NotesStore {
     validFiles = (newNotes) => {
         const upload = newNotes.upload;
 
-        if (upload == undefined) {
+        if (upload === undefined) {
             return true;
         }
 
         for (var i = 0; i < upload.length; i++) {
-            if (upload[i].response == undefined) {
+            if (upload[i].response === undefined) {
                 return false;
             }
         }
@@ -145,7 +150,7 @@ export default class NotesStore {
             const response = await this.apiProxy.mutate(apiHost, createNotesQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = ERROR_MESSAGE;
                 return;

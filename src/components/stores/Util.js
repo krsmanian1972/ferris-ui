@@ -6,7 +6,7 @@ export function humanizeDate(rawDate) {
 }
 
 export function simpleDate(rawDate) {
-  if(rawDate == null)
+  if(rawDate === undefined)
   {
     return rawDate;
   }
@@ -96,5 +96,5 @@ export function yesOrNo(value) {
   {
     return "No";
   }
-  return value == true ? "Yes" : "No";
+  return value === true ? "Yes" : "No";
 }

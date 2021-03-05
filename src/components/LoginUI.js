@@ -28,7 +28,7 @@ const failureNotification = () => {
 
 @inject('appStore')
 @observer
-export default class LoginScreen extends Component {
+class LoginScreen extends Component {
 
     changePassword = () => {
         const params = { parentKey: "login" };
@@ -96,3 +96,5 @@ export default class LoginScreen extends Component {
         }
     };
 }
+
+export default LoginScreen

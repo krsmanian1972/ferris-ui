@@ -50,7 +50,6 @@ class SessionLauncher extends Component {
 
     openWindow() {
 
-        const title = this.props.session.name;
         const sessionId = this.props.session.id;
         const conferenceId = this.props.session.conferenceId;
         const enrollmentId = this.props.session.enrollmentId;
@@ -58,15 +57,9 @@ class SessionLauncher extends Component {
         const sessionUserType = this.props.sessionUser.userType;
         const memberId = this.props.memberId;
         const featureKey = this.getFeatureKey();
-
-        const h = screen.height * 0.75;
-        const w = screen.width * 0.75;
-        const l = (screen.width - w) / 2;
-        const t = (screen.height - h) / 2;
-
+  
         const url = `${baseUrl}?featureKey=${featureKey}&sessionId=${sessionId}&conferenceId=${conferenceId}&sessionUserId=${sessionUserId}&sessionUserType=${sessionUserType}&enrollmentId=${enrollmentId}&memberId=${memberId}`;
-        const specs = `toolbar=0 ,location=0, status=no,titlebar=1,menubar=0,width=${w},height=${h},left=${l},top=${t}`;
-
+  
         this.externalWindow = window.open(url, "_blank");
     }
 

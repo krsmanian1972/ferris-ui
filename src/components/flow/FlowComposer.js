@@ -14,10 +14,10 @@ const near = 0.1;
 const far = 1000;
 
 const gridSize = 4 * 10;
-const gridStep = 0.20;
+const gridStep = 4 * 10;
+const gridColor = "#f2f2f2";
 
 const sceneColor = 0xffffff;
-const gridColor = "#f2f2f2";
 
 const blueLine = "#4169E1";
 const greenLine = "#4e8d07"
@@ -220,7 +220,7 @@ class FlowComposer {
         }
 
         var outboundLinks = this.getLinksByType(taskId, "source");
-        for (var i = 0; i < outboundLinks.length; i++) {
+        for (i = 0; i < outboundLinks.length; i++) {
             outboundLinks[i] && outboundLinks[i].onMove("source");
         }
     }
@@ -370,7 +370,7 @@ class FlowComposer {
 
     setGraphPaper = () => {
 
-        const geometry = new THREE.Geometry();
+        /*const geometry = new THREE.Geometry();
 
         for (var i = -gridSize; i <= gridSize; i += gridStep) {
             geometry.vertices.push(new THREE.Vector3(-gridSize, i, 0));
@@ -379,8 +379,10 @@ class FlowComposer {
             geometry.vertices.push(new THREE.Vector3(i, gridSize, 0));
         }
 
-        const grid = new THREE.LineSegments(geometry, this.gridLineMaterial);
+        const grid = new THREE.LineSegments(geometry, this.gridLineMaterial);*/
 
+        const grid = new THREE.GridHelper(gridSize,gridStep,gridColor,gridColor);
+        grid.rotation.x = Math.PI / 2;
         this.scene.add(grid);
     }
 
@@ -571,7 +573,7 @@ class FlowComposer {
         }
 
         var outboundLinks = this.getLinksByType(taskId, "source");
-        for (var i = 0; i < outboundLinks.length; i++) {
+        for (i = 0; i < outboundLinks.length; i++) {
             this.taskLinkFactory.delete(outboundLinks[i]);
         }
     }

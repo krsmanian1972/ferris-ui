@@ -30,7 +30,7 @@ var LineObserver = function (_lineContainer, _camera, _domElement,_switch) {
             else {
                 _domElement.style.cursor = 'auto';
                 _selected = null;
-                _hovered == null;
+                _hovered = null;
             }
         }
         else {
@@ -61,7 +61,7 @@ var LineObserver = function (_lineContainer, _camera, _domElement,_switch) {
 
             var _filtered = applyFilter("Mesh");
 
-            if (_filtered.length == 0) {
+            if (_filtered.length === 0) {
                 return;
             }
 

@@ -47,16 +47,14 @@ export default class TaskLinkFactory {
 
     snapLineAtPoint = (line, point) => {
          if(!this.snapLink) {
-             //console.log(line);
              this.snapLink = this.taskLinks.get(line.userData.id);
-             var result = this.snapPointIndex =  this.findSnapPointIndex(this.snapLink, point);
+             this.snapPointIndex =  this.findSnapPointIndex(this.snapLink, point);
          }
     }
 
 
     findSnapPointIndex = (snapLink, point) =>{
         for(var i = 0; i < snapLink.points.length-1; i++){
-            console.log(i);
             var result = this.findDistanceSumMatches(snapLink.points[i],snapLink.points[i+1],point);
             if(result.status === true){
               console.log("Match at Index", i);
@@ -131,7 +129,7 @@ export default class TaskLinkFactory {
 
         const key = selectedLine.userData.id;
         const index = this.findLineIndex(key);
-        if(index == -1) {
+        if(index === -1) {
             return;
         }
         
@@ -150,7 +148,7 @@ export default class TaskLinkFactory {
 
         const key = taskLink.getKey();
         const index = this.findLineIndex(key);
-        if(index == -1) {
+        if(index === -1) {
             return;
         }
         
@@ -163,7 +161,7 @@ export default class TaskLinkFactory {
 
     getLineById = (key) => {
         const index = this.findLineIndex(key);
-        if(index == -1) {
+        if(index === -1) {
             return null;
         }
         

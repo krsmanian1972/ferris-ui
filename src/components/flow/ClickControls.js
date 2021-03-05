@@ -34,7 +34,7 @@ var ClickControls = function (_objects, _camera, _domElement) {
         if (_intersections.length > 0) {
             _selected = _intersections[0].object;
             _domElement.style.cursor = 'pointer';
-            if(event.button == 2) {
+            if(event.button === 2) {
                 scope.dispatchEvent({ type: 'onRightClick', object: _selected });
             }
             else {

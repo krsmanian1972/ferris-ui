@@ -5,9 +5,6 @@ const CANVAS_WIDTH = 1280
 const CANVAS_HEIGHT = 1280;
 
 class MiniBoard extends Component {
-    constructor(props) {
-        super(props);
-    }
 
     componentDidMount() {
         this.ctx = this.canvas.getContext("2d");
@@ -56,7 +53,7 @@ class MiniBoard extends Component {
 
         const boardKey = `mini-canvas-${this.props.boardId}`;
 
-        const boardHeight = screen.height * 0.5;
+        const boardHeight = window.screen.height * 0.5;
         const matrixBoardStyle = { backgroundColor: "#646464", maxHeight: boardHeight, overflow: "auto" };
         
         return (

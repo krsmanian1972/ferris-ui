@@ -94,6 +94,8 @@ class ObjectiveForm extends Component {
         const store = this.props.objectiveStore;
         const startTimeMsg = store.startTimeMsg;
         const endTimeMsg = store.endTimeMsg;
+
+        // eslint-disable-next-line
         const change = store.change;
 
         return (

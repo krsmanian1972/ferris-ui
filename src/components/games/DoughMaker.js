@@ -86,7 +86,7 @@ export default class DoughMaker {
         this.container = container;
         this.onGameMounted = onGameMounted;
         this.onGameEvent = onGameEvent;
-    
+
         this.textFactory = new TextFactory();
 
         this.discGeometry = new THREE.CylinderBufferGeometry(0.6, 0.6, 0.5 / 4);
@@ -104,26 +104,26 @@ export default class DoughMaker {
 
         this.leverControls = new LineObserver(this.levers, this.camera, this.renderer.domElement, true);
         this.leverControls.addEventListener('onSelect', this.onLeverSelected);
- 
+
         this.inventorySelector = new LineObserver(this.inventoryGroup, this.camera, this.renderer.domElement, true);
         this.inventorySelector.addEventListener('onSelect', this.onInventorySelect);
 
         this.wipSelector = new LineObserver(this.wipGroup, this.camera, this.renderer.domElement, true);
         this.wipSelector.addEventListener('onSelect', this.onWipSelect);
 
-    
+
         this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
         this.orbitControls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-		this.orbitControls.dampingFactor = 0.05;
-        this.orbitControls.maxPolarAngle = Math.PI /2 ;
-        this.orbitControls.minPolarAngle = Math.PI /2 ;
+        this.orbitControls.dampingFactor = 0.05;
+        this.orbitControls.maxPolarAngle = Math.PI / 2;
+        this.orbitControls.minPolarAngle = Math.PI / 2;
         this.orbitControls.screenSpacePanning = false;
         this.orbitControls.minDistance = 22;
         this.orbitControls.maxDistance = 30;
 
 
         this.orbitControls.addEventListener('change', this.renderAgain);
-        
+
         window.addEventListener("resize", this.handleWindowResize);
 
 
@@ -166,8 +166,6 @@ export default class DoughMaker {
     }
 
     setBoundary = () => {
-
-        var rect = this.renderer.domElement.getBoundingClientRect();
 
         const x = - 1;
         const y = - 1;
@@ -284,7 +282,7 @@ export default class DoughMaker {
 
         const rollerMaterial = new THREE.MeshNormalMaterial();
         const geometry = new THREE.CylinderBufferGeometry(1 / 6, 1 / 6, 2);
-       
+
 
         this.startRoller = new THREE.Mesh(geometry, rollerMaterial);
         this.startRoller.userData = { id: "ignition", state: "off" };
@@ -304,11 +302,11 @@ export default class DoughMaker {
         this.doneRoller.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 4);
         this.scene.add(this.doneRoller);
 
-        const flowMaterial = new THREE.MeshLambertMaterial({map:texture,color:green});
+        const flowMaterial = new THREE.MeshLambertMaterial({ map: texture, color: green });
         const flowGeometry = new THREE.CylinderBufferGeometry(1 / 6, 1 / 4, 1);
         this.flowLever = new THREE.Mesh(flowGeometry, flowMaterial);
         this.flowLever.userData = { id: "flow", state: "off" };
-        this.flowLever.position.set(this.rightX-unitLength, this.maxY+unitHeight+unitHeight/2, -0.5);
+        this.flowLever.position.set(this.rightX - unitLength, this.maxY + unitHeight + unitHeight / 2, -0.5);
         this.flowLever.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
         this.scene.add(this.flowLever);
 
@@ -319,7 +317,7 @@ export default class DoughMaker {
         this.levers.push(this.doneRoller);
         this.levers.push(this.machineLever);
         this.levers.push(this.flowLever);
-   }
+    }
 
     setMachine = (texture) => {
 
@@ -369,6 +367,10 @@ export default class DoughMaker {
 
         var x = this.leftX;
 
+        var group = null;
+        var label = null;
+        var value = null;
+
         const totalSlabs = numberOfSlots + 2;
 
         for (var i = 0; i < totalSlabs; i++) {
@@ -380,7 +382,7 @@ export default class DoughMaker {
             this.scene.add(tilted);
 
             // The Legends to hint the State to the User
-            var group = new THREE.Group();
+            group = new THREE.Group();
             const legend = this.textFactory.build(legendLabels[i], 0.3, 0.1, cyan);
             group.add(legend);
             group.position.set(x, this.maxY, 0);
@@ -404,8 +406,8 @@ export default class DoughMaker {
             paramBoard.position.z = paramBoard.position.z - 0.50;
             this.scene.add(paramBoard);
 
-            var value = this.textFactory.build(paramValues[i], 0.3, 0.1, yellow);
-            var group = new THREE.Group();
+            value = this.textFactory.build(paramValues[i], 0.3, 0.1, yellow);
+            group = new THREE.Group();
             group.add(value);
             group.position.copy(paramBoard.position.clone());
             group.position.x = group.position.x - 0.6;
@@ -413,8 +415,8 @@ export default class DoughMaker {
             this.scene.add(group);
             this.paramValueGroup.push(group);
 
-            var label = this.textFactory.build(paramLabels[i], 0.2, 0.1, "white");
-            var group = new THREE.Group();
+            label = this.textFactory.build(paramLabels[i], 0.2, 0.1, "white");
+            group = new THREE.Group();
             group.add(label);
             group.position.copy(paramBoard.position.clone());
             group.position.x = group.position.x - 0.6;
@@ -426,8 +428,8 @@ export default class DoughMaker {
             clockBoard.position.y = clockBoard.position.y + unitHeight;
             this.scene.add(clockBoard);
 
-            var value = this.textFactory.build(clockValues[i], 0.3, 0.1, yellow);
-            var group = new THREE.Group();
+            value = this.textFactory.build(clockValues[i], 0.3, 0.1, yellow);
+            group = new THREE.Group();
             group.add(value);
             group.position.copy(clockBoard.position.clone());
             group.position.x = group.position.x - 0.6;
@@ -435,8 +437,8 @@ export default class DoughMaker {
             this.scene.add(group);
             this.clockValueGroup.push(group);
 
-            var label = this.textFactory.build(clockLabels[i], 0.2, 0.1, "white");
-            var group = new THREE.Group();
+            label = this.textFactory.build(clockLabels[i], 0.2, 0.1, "white");
+            group = new THREE.Group();
             group.add(label);
             group.position.copy(clockBoard.position.clone());
             group.position.x = group.position.x - 0.6;
@@ -496,12 +498,14 @@ export default class DoughMaker {
     // The Shape of the Inventory is Sphere
     placeInventory = () => {
 
+        var i = 0;
+
         // Before we place the inventory ensure to remove any previous materials
-        for (var i = 0; i < this.inventoryGroup.length; i++) {
+        for (i = 0; i < this.inventoryGroup.length; i++) {
             this.scene.remove(this.inventoryGroup[i]);
         }
 
-        for (var i = 0; i < this.wipGroup.length; i++) {
+        for (i = 0; i < this.wipGroup.length; i++) {
             this.scene.remove(this.wipGroup[i]);
         }
 
@@ -514,35 +518,35 @@ export default class DoughMaker {
         const geometry = new THREE.SphereGeometry(radius, 50, 50);
         const material = new THREE.MeshNormalMaterial();
 
-        var z = -1/2;
+        var z = -1 / 2;
 
         var bin = 0;
         var count = 0;
         const size = this.getInventorySize();
-        for(var i=0;i<size;i++) {
-            if(count === MAX_ITEM_PER_BIN) {
+        for (i = 0; i < size; i++) {
+            if (count === MAX_ITEM_PER_BIN) {
                 bin += 1;
                 count = 0;
             }
             const y = this.bottomY + (bin * unitHeight) - radius - 0.1;
 
             var x = this.leftX + (unitLength + gapX);
-            if(count==0) {
-                x=x-0.5;z=-1/2;
+            if (count === 0) {
+                x = x - 0.5; z = -1 / 2;
             }
-            if(count==1) {
-                x=x-0.5;z=1/2;
+            if (count === 1) {
+                x = x - 0.5; z = 1 / 2;
             }
-            if(count==2) {
-                x=x+0.5;z=-1/2;
+            if (count === 2) {
+                x = x + 0.5; z = -1 / 2;
             }
-            if(count==3) {
-                x=x+0.5;z=1/2;
+            if (count === 3) {
+                x = x + 0.5; z = 1 / 2;
             }
-            this.setSphere(x,y,z, geometry, material);
+            this.setSphere(x, y, z, geometry, material);
             count += 1;
         }
- 
+
         this.render();
     }
 
@@ -559,8 +563,8 @@ export default class DoughMaker {
      */
 
     setName = (name) => {
-        name = !name?"Gopal":name;
-        name = name.substring(0,5);
+        name = !name ? "Gopal" : name;
+        name = name.substring(0, 5);
         this.updateParamValueAt(name, 0);
         this.render();
     }
@@ -575,7 +579,7 @@ export default class DoughMaker {
     }
 
     getInventorySize = () => {
-        return parseInt(paramValues[1], 10); 
+        return parseInt(paramValues[1], 10);
     }
 
 
@@ -597,10 +601,10 @@ export default class DoughMaker {
         return parseInt(paramValues[3], 10);
     }
 
-   
+
     // The Fifth Item in the paramValue is for Notification
     setAdvice = (advice) => {
-        this.isReady = (advice==="READY")
+        this.isReady = (advice === "READY")
         this.scene.rotateOnAxis(new THREE.Vector3(0, 1, 0), -1.0);
         this.updateClockValueAt(advice, 4);
         this.render();
@@ -621,27 +625,27 @@ export default class DoughMaker {
     // Will be continuously updated when the game is started and until it is done
     // The Clock is the 2nd item in the paramValue Panel
     setClockText = () => {
-        const timeTaken = moment.duration(this.calcTimeElapsed(), 'seconds').format("HH:mm:ss",{ trim: false });
+        const timeTaken = moment.duration(this.calcTimeElapsed(), 'seconds').format("HH:mm:ss", { trim: false });
         this.updateClockValueAt(timeTaken, 0);
         this.render();
     }
 
     onLeverSelected = (event) => {
 
-        if(!this.isReady) {
+        if (!this.isReady) {
             return
         }
 
         const leverId = event.object.userData.id;
- 
+
         if (leverId === "ignition") {
             this.toggleGame();
         }
-        else if(leverId === "machine") {
+        else if (leverId === "machine") {
             this.toggleMachine();
         }
-        else if(leverId === "flow") {
-            this.onGameEvent({type:"lever",id:leverId});
+        else if (leverId === "flow") {
+            this.onGameEvent({ type: "lever", id: leverId });
         }
     }
 
@@ -678,10 +682,10 @@ export default class DoughMaker {
     }
 
     tick = () => {
-        if(!this.isStarted && !this.isDone) {
+        if (!this.isStarted && !this.isDone) {
             return;
         }
-        if(this.isStarted && this.isDone) {
+        if (this.isStarted && this.isDone) {
             return;
         }
         this.setClockText();

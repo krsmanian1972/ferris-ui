@@ -340,7 +340,7 @@ export default class SessionListStore {
      * @param {*} events
      */
     fixSessionRoster = (roster, events) => {
-        events.map(event => {
+        for(let event of events) {
             const eventStart = moment(event.session.scheduleStart * 1000);
             const eventEnd = moment(event.session.scheduleEnd * 1000);
             event.session.band = this.getSlotBand(event);
@@ -353,7 +353,7 @@ export default class SessionListStore {
                     value.push(event);
                 }
             }
-        })
+        }
     }
 
     canAccomodate = (slotStart, slotEnd, eventStart, eventEnd) => {
@@ -361,10 +361,10 @@ export default class SessionListStore {
     }
 
     fixPlanRoster = (roster, events) => {
-        events.map(event => {
+        for(let event of events) {
 
             if (!event.task) {
-                return;
+                continue;
             }
 
             const item = event.task
@@ -380,7 +380,7 @@ export default class SessionListStore {
                     value.push(event);
                 }
             }
-        })
+        }
     }
 }
 

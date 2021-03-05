@@ -11,9 +11,6 @@ const VerticalRider = () => {
 
 @observer
 class DiscussionList extends Component {
-    constructor(props) {
-        super(props);
-    }
 
     componentWillUnmount() {
     

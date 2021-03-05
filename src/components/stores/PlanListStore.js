@@ -55,7 +55,7 @@ export default class PlanListStore {
             const response = await this.apiProxy.query(apiHost, masterPlansQuery, variables);
             const data = await response.json();
 
-            if (data.data.getMasterPlans == undefined) {
+            if (data.data.getMasterPlans === undefined) {
                 this.state = ERROR;
                 this.message = ERROR_MESSAGE;
                 return;

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
 import { Row, Col, Space, Button, Tooltip, Tag } from 'antd';
-import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutlined, AudioMutedOutlined, EyeInvisibleOutlined, CompressOutlined, ExpandOutlined, CodepenOutlined, ExperimentOutlined } from '@ant-design/icons';
+import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutlined, AudioMutedOutlined, EyeInvisibleOutlined, CompressOutlined, ExpandOutlined, ExperimentOutlined } from '@ant-design/icons';
 
 import NoteListStore from '../stores/NoteListStore';
 import NotesStore from '../stores/NotesStore';

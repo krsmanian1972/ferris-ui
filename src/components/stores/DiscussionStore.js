@@ -175,7 +175,7 @@ export default class DiscussionStore {
             const response = await this.apiProxy.mutate(apiHost, createDiscussionQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = ERROR_MESSAGE;
                 return;

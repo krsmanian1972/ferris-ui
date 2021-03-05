@@ -79,6 +79,8 @@ class ObservationForm extends Component {
     render() {
 
         const store = this.props.observationStore;
+
+        // eslint-disable-next-line
         const change = store.change;
 
         return (

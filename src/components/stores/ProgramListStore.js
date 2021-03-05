@@ -67,7 +67,7 @@ export default class ProgramListStore {
             const response = await this.apiProxy.query(apiHost, programsQuery, variables);
             const data = await response.json();
 
-            if (data.data.getPrograms == undefined) {
+            if (data.data.getPrograms === undefined) {
                 this.state = ERROR;
                 this.message = ERROR_MESSAGE;
                 return;

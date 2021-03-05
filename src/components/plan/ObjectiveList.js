@@ -26,10 +26,6 @@ class ObjectiveList extends Component {
 
     index = 0;
 
-    constructor(props) {
-        super(props);
-    }
-
     displayMessage = () => {
         const store = this.props.objectiveStore;
 
@@ -105,7 +101,7 @@ class ObjectiveList extends Component {
     }
 
     renderSlider = (objectives, rowCount) => {
-        if (rowCount == 0) {
+        if (rowCount === 0) {
             return <></>
         }
 
@@ -206,6 +202,8 @@ class ObjectiveList extends Component {
     render() {
         const store = this.props.objectiveStore;
         const objectives = store.objectives;
+
+        // eslint-disable-next-line
         const change = store.change;
 
         return (

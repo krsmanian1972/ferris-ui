@@ -61,6 +61,8 @@ class SessionFilterForm extends Component {
         const store = this.props.store;
         const startTimeMsg = store.startTimeMsg;
         const endTimeMsg = store.endTimeMsg;
+
+        // eslint-disable-next-line
         const change = store.change;
 
         return (

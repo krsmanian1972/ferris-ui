@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
-import _ from 'lodash';
 
 import { Button, Row, Col, Tooltip, Space,message } from 'antd';
 import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutlined, AudioMutedOutlined, EyeInvisibleOutlined, VerticalAlignTopOutlined, VerticalAlignBottomOutlined } from '@ant-design/icons';
@@ -400,7 +399,6 @@ class Peercast extends Component {
         const { localSrc, peerSrc, screenSrc, boardSrc, portalSize, isMinimized } = this.state;
         const viewHeight = portalSize.height * 0.94;
         const canShare = this.peerStreamStatus === "active";
-        const sessionUserId = this.props.params.sessionUserId;
 
         return (
             <div style={{ padding: 2, height: viewHeight }}>

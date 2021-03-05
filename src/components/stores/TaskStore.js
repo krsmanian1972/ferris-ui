@@ -251,7 +251,7 @@ export default class TaskStore {
             const response = await this.apiProxy.mutate(apiHost, updateTaskQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = SAVING_ERROR;
                 return;
@@ -294,7 +294,7 @@ export default class TaskStore {
             const response = await this.apiProxy.mutate(apiHost, createTaskQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = SAVING_ERROR;
                 return;
@@ -382,7 +382,7 @@ export default class TaskStore {
             const response = await this.apiProxy.mutate(apiHost, alterMemberTaskStateQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = START_ERROR;
                 return;
@@ -419,7 +419,7 @@ export default class TaskStore {
             const response = await this.apiProxy.mutate(apiHost, updateTaskResponseQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = SAVING_ERROR;
                 return;
@@ -466,7 +466,7 @@ export default class TaskStore {
             const response = await this.apiProxy.mutate(apiHost, alterCoachTaskStateQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = START_ERROR;
                 return;
@@ -501,7 +501,7 @@ export default class TaskStore {
             const response = await this.apiProxy.mutate(apiHost, updateTaskClosingNotesQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = SAVING_ERROR;
                 return;

@@ -136,7 +136,7 @@ export default class ConstraintStore {
             const response = await this.apiProxy.mutate(apiHost, updateOptionQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = SAVING_ERROR;
                 return;
@@ -174,7 +174,7 @@ export default class ConstraintStore {
             const response = await this.apiProxy.mutate(apiHost, createConstraintQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.state = ERROR;
                 this.message = SAVING_ERROR;
                 return;
@@ -185,7 +185,7 @@ export default class ConstraintStore {
         }
         catch (e) {
             this.state = ERROR;
-            this.message = ENROLLMENT_ERROR;
+            this.message = SAVING_ERROR;
             console.log(e);
         }
     }

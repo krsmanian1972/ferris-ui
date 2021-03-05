@@ -71,7 +71,7 @@ class ProgramList extends Component {
 
 
     renderSlider = (programs, rowCount) => {
-        if (rowCount == 0) {
+        if (rowCount === 0) {
             return <></>
         }
 
@@ -93,7 +93,7 @@ class ProgramList extends Component {
                                 <div key={program.id} style={{ display: "flex", flexDirection: "column" }}>
                                     <div style={{ textAlign: "center", height: 175, marginRight: 10, marginLeft: 10, cursor: 'pointer', border: this.state.imageBorder }} onClick={() => this.props.showProgramDetail(program.id)}>
                                         <div style={{ display: "inline-block", verticalAlign: "middle", height: 175 }}></div>
-                                        <img style={{ maxHeight: "100%", maxWidth: "100%", verticalAlign: "middle", display: "inline-block", border: this.state.imageBorder, borderRadius: "12px" }} src={this.getCoverUrl(program)} />
+                                        <img alt={program.name} style={{ maxHeight: "100%", maxWidth: "100%", verticalAlign: "middle", display: "inline-block", border: this.state.imageBorder, borderRadius: "12px" }} src={this.getCoverUrl(program)} />
                                     </div>
                                     {this.getName(program)}
                                 </div>
@@ -109,6 +109,8 @@ class ProgramList extends Component {
     render() {
         const store = this.props.programListStore;
         const programs = store.programs;
+
+        // eslint-disable-next-line
         const change = store.change;
 
         return (

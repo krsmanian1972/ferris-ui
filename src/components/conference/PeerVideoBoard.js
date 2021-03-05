@@ -142,11 +142,11 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoard, coachingP
             return peerWidgets.get(peerKey);
         }
 
-        if (myKey == "myBoard") {
+        if (myKey === "myBoard") {
             return myBoard;
         }
 
-        if (myKey == "actionPlan") {
+        if (myKey === "actionPlan") {
             return actionList;
         }
 

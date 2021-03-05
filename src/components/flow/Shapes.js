@@ -123,10 +123,6 @@ const buildRectTextMaterial = function (id, taskName, role, line1, line2) {
     let fontSize = 56;
     context.font = `${fontSize}px monospace`;
 
-    const textMetrics = context.measureText(role);
-    let width = textMetrics.width;
-    let height = fontSize * 7;
-
     // Re-apply font since canvas is resized.
     context.font = `${fontSize}px monospace`;
     context.textAlign = "center";
@@ -177,8 +173,6 @@ const buildRectTextMaterial = function (id, taskName, role, line1, line2) {
 const buildSquareTextMaterial = function (taskId, taskName, role, plannedPeriod, actualPeriod, shape) {
 
     const canvas = buildTaskCanvas(taskId, 256, 128);
-
-    var y = 30;//10
 
     const context = canvas.getContext('2d');
 

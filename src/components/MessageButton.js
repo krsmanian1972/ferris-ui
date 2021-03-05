@@ -7,7 +7,7 @@ const normal_style = { color: "white", background: "green" };
 const crowded_style = { color: "white", background: "blue" };
 
 @observer
-export default class MessageButton extends Component {
+class MessageButton extends Component {
 
     constructor(props) {
         super(props);
@@ -38,7 +38,7 @@ export default class MessageButton extends Component {
 
         const feedCount = this.store.feedCount;
 
-        if(feedCount == 0) {
+        if(feedCount === 0) {
             return <Button icon={<MessageOutlined />} onClick={this.showPendingFeeds}/>
         }
 
@@ -56,3 +56,4 @@ export default class MessageButton extends Component {
         )
     }
 }
+export default MessageButton;

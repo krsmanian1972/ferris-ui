@@ -1,13 +1,9 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Typography } from 'antd';
-import { AimOutlined } from '@ant-design/icons';
-
 import DoughMaker from './DoughMaker';
 import FlowComposer from '../flow/FlowComposer';
 
-const { Title } = Typography;
 
 // The Outer Paper
 var playgroundStyle = {

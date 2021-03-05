@@ -79,6 +79,8 @@ class ClosureForm extends Component {
     render() {
 
         const store = this.props.store;
+
+        // eslint-disable-next-line
         const change = store.change;
 
         return (

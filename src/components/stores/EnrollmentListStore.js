@@ -42,12 +42,13 @@ export default class EnrollmentListStore {
     setSearchable = (result) => {
         let selfIndex = -1;
 
-        result.map((item,index)=>{
+        for(let index=0;index<result.length;index++) {
+            let item = result[index];
             item.searchable = item.name+"::"+item.email;
             if(item.id===this.apiProxy.getUserFuzzyId()) {
                 selfIndex = index;
             }
-        });
+        }
 
         result.splice(selfIndex, 1);
     }
@@ -72,7 +73,7 @@ export default class EnrollmentListStore {
             const response = await this.apiProxy.query(apiHost, enrollmentsQuery, variables);
             const data = await response.json();
 
-            if (data.error == true) {
+            if (data.error === true) {
                 this.message = ERROR_MESSAGE;
                 this.state = DONE;
                 return;

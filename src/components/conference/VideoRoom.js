@@ -4,7 +4,7 @@ import { rtcServerUrl } from '../stores/APIEndpoints';
 
 var janus = null;
 var localPlugin = null;
-var myid = null;
+
 var mypvtid = null;
 
 class VideoRoom {
@@ -171,7 +171,6 @@ class VideoRoom {
 
 		if (event === "joined") {
 
-			myid = msg["id"];
 			mypvtid = msg["private_id"];
 
 			this.publishOwnFeed(true);

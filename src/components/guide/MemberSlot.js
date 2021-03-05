@@ -6,7 +6,7 @@ function MemberSlot({ email, details,showJournalUI }) {
     const memberName = details.length > 0 ? details[0].user.name : "Unknown";
 
     const newText = (isNew) => {
-        if (isNew == true) {
+        if (isNew === true) {
             return <p style={{ fontSize: "10px", float: 'right', color: 'blue' }}>New</p>
         }
     }

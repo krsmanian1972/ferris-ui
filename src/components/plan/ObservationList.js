@@ -22,10 +22,6 @@ class ObservationList extends Component {
 
     index = 0;
 
-    constructor(props) {
-        super(props);
-    }
-
     displayMessage = () => {
         const store = this.props.observationStore;
 
@@ -84,7 +80,7 @@ class ObservationList extends Component {
     }
 
     renderSlider = (observations, rowCount) => {
-        if (rowCount == 0) {
+        if (rowCount === 0) {
             return <></>
         }
 
@@ -193,6 +189,8 @@ class ObservationList extends Component {
     render() {
         const store = this.props.observationStore;
         const observations = store.observations;
+
+        // eslint-disable-next-line
         const change = store.change;
 
         return (
