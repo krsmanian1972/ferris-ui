@@ -71,10 +71,11 @@ class Peercast extends Component {
         const enrollmentId = this.props.params.enrollmentId;
         const memberId = this.props.params.memberId;
         const isCoach = this.props.params.sessionUserType === 'coach';
+        const sessionId = this.props.params.sessionId;
 
         this.initializeNotesStore(sessionUserId);
         
-        this.myBoard = <Board key={MY_BOARD_KEY} boardId={MY_BOARD_KEY} sessionUserId={sessionUserId} onCanvasStream={this.onCanvasStream} />
+        this.myBoard = <Board key={MY_BOARD_KEY} boardId={MY_BOARD_KEY} sessionUserId={sessionUserId} sessionId={sessionId} onCanvasStream={this.onCanvasStream} />
         this.coachingPlan = <SharedCoachingPlan key="gt" isCoach = {isCoach} enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
         this.actionList = <SharedActionList key="tt" isCoach = {isCoach} enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
     }

@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
-
 import { Button, Row, Col, Tabs, Tooltip, Space, Spin } from 'antd';
+
+import { fabric } from 'fabric';
 
 import { EditOutlined, ItalicOutlined, UndoOutlined, RedoOutlined, ScissorOutlined } from '@ant-design/icons';
 
@@ -17,7 +18,7 @@ const TEXTBOX = 'TEXTBOX';
 
 const cursorColour = '#FFFFFF';
 const cursorBlinkSpeed = 1 * 1000;
-const backgroundColour = 'black';
+const backgroundColour = '#646464';
 const cursorSize = { width: 1, height: 18 };
 
 const selected = { background: "white", color: "black", borderColor: "black" };
@@ -33,12 +34,15 @@ const CANVAS_HEIGHT = 1280;
 @inject("appStore")
 @observer
 class Board extends Component {
+
     constructor(props) {
         super(props);
 
+        this.fabricObjectMap = {};
+        this.objectCounter = 0;
         this.x = 0;
         this.y = 0;
-
+        this.currentJsonPatch = '';
         this.sentence = "";
         this.textWidth = 0;
 
@@ -58,17 +62,22 @@ class Board extends Component {
         this.newTabIndex = 3;
 
         this.hasCursor = false;
-
         this.state = {
             selectedButton: PEN,
             activeKey: initialPanes[0].key,
             panes: initialPanes,
             isLoading: true
         };
-
+        //stores all co-ordinates of the paint event and emit them over socket when we take screenshot
+        this.paintEvent = [];
+        console.log("sessionId :: " + this.props.sessionId);
+        this.sessionId = this.props.sessionId;
         this.provisionPriorBoards();
     }
 
+    setCanvasData = async() => {
+      console.log("Canvas Down Stream!!");
+    }
     /**
      * Let us lazily load the boards. We need to check if there is any
      * prior boards for this session. If Yes, Load the first and mark the
@@ -78,7 +87,9 @@ class Board extends Component {
 
         const listStore = new BoardListStore({ apiProxy: this.props.appStore.apiProxy });
         await listStore.load(this.props.sessionUserId);
-
+        //remove this to get the provisionBoard woriking
+        
+        listStore.boardCount = 0;
         if (listStore.boardCount === 0) {
             this.setState({ isLoading: false });
             return;
@@ -95,16 +106,14 @@ class Board extends Component {
 
     expandInitialPanes = (panes, capacity) => {
 
-        var i = 0;
-        
-        for (i = 0; i < panes.length; i++) {
+        for (var i = 0; i < panes.length; i++) {
             panes[i].isLoaded = false;
         }
 
         const diff = capacity - panes.length;
         var boardIndex = panes.length + 1;
 
-        for (i = 0; i < diff; i++) {
+        for (var j = 0; j < diff; j++) {
             this.undoTabList[boardIndex] = [];
 
             const tab = { title: `Board-${boardIndex}`, key: `${boardIndex}`, closable: false, isLoaded: false };
@@ -118,7 +127,7 @@ class Board extends Component {
 
     /**
      * Load the Board if not loaded already
-     * @param {*} boardKey 
+     * @param {*} boardKey
      */
     salvage = async (boardKey) => {
 
@@ -133,12 +142,12 @@ class Board extends Component {
 
     /**
      * Loading the board forcefully from the content repository.
-     * 
+     *
      * May be useful for the first time when the react-state is yet to commit
      * the reality.
-     * 
-     * @param {*} panes 
-     * @param {*} boardKey 
+     *
+     * @param {*} panes
+     * @param {*} boardKey
      */
     forceLoad = async (panes, boardKey) => {
         const boardFileName = `Board_${boardKey}`;
@@ -152,10 +161,12 @@ class Board extends Component {
             this.undoTabList[boardKey].push(data);
             panes[boardKey - 1].isLoaded = true;
         }
-        catch (e) {
+        catch(e) {
             this.undoTabList[boardKey] = [];
             panes[boardKey - 1].isLoaded = true;
         }
+
+
     }
 
     componentDidMount() {
@@ -164,64 +175,97 @@ class Board extends Component {
         this.y = 0;
         this.sentence = "";
         this.cursorPos = { x: 0, y: 0 };
+        this.currentFreeDrawing = [];
+        this.ctx = new fabric.Canvas('c', {isDrawingMode: false});
+        var rect = new fabric.Rect({
+            left: 100,
+            top: 100,
+            fill: 'red',
+            width: 20,
+            height: 20,
+            id: 'RECT1',
+            });
+        var rect2 = new fabric.Rect({
+                left: 180,
+                top: 100,
+                fill: 'red',
+                width: 20,
+                height: 20,
+                id: 'RECT2',
+                });
+        this.ctx.add(rect);
+        this.ctx.add(rect2);
+        rect.excludeFromExport = true;
+        rect2.excludeFromExport = true;
+        this.fabricObjectMap[this.props.sessionUserId + 'RECT1'] = rect;
+        this.fabricObjectMap[this.props.sessionUserId + 'RECT2'] = rect2;
 
-        this.hiddenCtx = this.hiddenCanvas.getContext("2d");
+        this.ctx.on('mouse:down', this.fabricOnMouseDown);
+        this.ctx.on('mouse:move', this.fabricOnMouseMove);
+        this.ctx.on('mouse:up', this.fabricOnMouseUp);
+        this.ctx.on('path:created', this.fabricOnPathCreated)
+        // var temp = this.ctx.measureText('M');
+        // this.yOffset = temp.actualBoundingBoxAscent;
+        // this.textWidth = temp.width;
 
-        this.ctx = this.canvas.getContext("2d");
-        this.ctx.font = "16px Courier";
-        this.ctx.fillStyle = "white";
 
-        var temp = this.ctx.measureText('M');
-        this.yOffset = temp.actualBoundingBoxAscent;
-        this.textWidth = temp.width;
+        // this.canvas.addEventListener('touchstart', this.onTouchStart);
+        // this.canvas.addEventListener('touchmove', this.onTouchMove);
 
-        //In mouse down start drawing
-        this.canvas.addEventListener('mousedown', this.onMouseDown);
-        this.canvas.addEventListener('mousemove', this.onMouseMove);
+        // window.addEventListener("keypress", this.write);
 
-        this.canvas.addEventListener('touchstart', this.onTouchStart);
-        this.canvas.addEventListener('touchmove', this.onTouchMove);
+        // this.container.addEventListener('touchstart', this.preventScrolling);
+        // this.container.addEventListener('touchmove', this.preventScrolling);
+        // this.container.addEventListener('touchend', this.preventScrolling);
 
-        window.addEventListener("keypress", this.write);
+        socket.on('canvasdownstream', async (data) => {
+            this.setCanvasData();
+            console.log("Received Down Stream!!");
+        });
+        socket.on('dsPaint', (data) => {
+             this.socketPaint(data);
+        });
 
-        this.container.addEventListener('touchstart', this.preventScrolling);
-        this.container.addEventListener('touchmove', this.preventScrolling);
-        this.container.addEventListener('touchend', this.preventScrolling);
-
-        this.video.addEventListener('play', this.videoPlayListener, false);
-
-        const stream = this.canvas.captureStream();
-
-        this.props.onCanvasStream(stream, this.canvasSink);
+        
     }
-
-    videoPlayListener = () => {
-        this.vw = this.video.videoWidth;
-        this.vh = this.video.videoHeight;
-        this.timerCallback();
-    }
-
-    timerCallback = () => {
-        if (this.video.paused || this.video.ended) {
-            return;
+    fabricOnMouseDown = (options) => {
+        if(this.mode === PEN){
+            this.currentFreeDrawing.push({x:options.e.clientX, y:options.e.clientY});
         }
-        this.copyVideo();
-        let self = this;
-        setTimeout(function () {
-            self.timerCallback();
-        }, 0);
     }
 
-    copyVideo = () => {
-        this.hiddenCtx.drawImage(this.video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        //let frame = this.hiddenCtx.getImageData(0, 0,CANVAS_WIDTH, CANVAS_HEIGHT);
-        //this.ctx.putImageData(frame, 0, 0);
-    }
-
-    canvasSink = (stream) => {
-        if (this.video && stream) {
-            this.video.srcObject = stream;
+    fabricOnMouseMove = (options) => {
+        if(this.mode === PEN){
+            this.currentFreeDrawing.push({x:options.e.clientX, y:options.e.clientY});
         }
+    }
+
+    fabricOnMouseUp = (options) => {
+        if(this.mode === PEN){
+            this.currentFreeDrawing = [];
+        }
+    }
+    fabricOnPathCreated = (options) => {
+        if(this.mode === PEN){
+            //console.log(options);
+            options.path['id'] = this.props.sessionUserId + 'LINE' + this.objectCounter;
+            this.fabricObjectMap[this.props.sessionUserId + 'LINE'+this.objectCounter] = options.path
+            this.objectCounter = this.objectCounter + 1;
+            //console.log("Export after object created");
+            this.currentJsonPatch = this.ctx.toJSON(['id']);
+            //console.log(this.currentJsonPatch);
+            //disable exporting the object
+            options.path['excludeFromExport'] = true;
+            //publish the patch to the listeners
+
+            socket.emit('usPaint', {jsonData: this.currentJsonPatch, sessionUserFuzzyId: this.props.sessionUserId, sessionId: this.sessionId })
+        }
+    }
+
+    socketPaint = (data) => {
+      console.log("SocketPaint Recieved");
+      console.log(data);
+      this.loadFromJsonPatch(data.data.jsonData);
     }
 
     preventScrolling = (e) => {
@@ -235,7 +279,8 @@ class Board extends Component {
 
             // Check whether we're holding the left click down while moving the mouse
             if (e.buttons === 1) {
-                this.paint(e);
+              this.paintEvent.push([e.clientX, e.clientY]);
+              this.paint(e);
             }
         }
     }
@@ -253,7 +298,7 @@ class Board extends Component {
         }
     }
 
-    // Let us transform the touchstart as MouseDownEvent and 
+    // Let us transform the touchstart as MouseDownEvent and
     // dispatch back to the canvas
     onTouchStart = (e) => {
         const touch = e.touches[0];
@@ -279,12 +324,19 @@ class Board extends Component {
         this.pushUndoList();
     }
 
+
     pushUndoList = () => {
         const screenShot = this.canvas.toDataURL();
         this.undoTabList[this.currentTab].push(screenShot);
 
         const name = `Board_${this.currentTab}`;
-        socket.emit('canvasupstream', { content: screenShot, sessionUserFuzzyId: this.props.sessionUserId, name: name });
+        //this.sessionId = this.props.params.sessionId;
+        //console.log(this.sessionId);
+        socket.emit('canvasupstream', { content: screenShot, sessionUserFuzzyId: this.props.sessionUserId, name: name, sessionId: this.sessionId });
+        console.log("Upstream::" + this.paintEvent);
+        socket.emit('usPaint', {paintEvent: this.paintEvent, sessionUserFuzzyId: this.props.sessionUserId, name: name, sessionId: this.sessionId });
+        //clear the array
+        this.paintEvent = [];
     }
 
     textBox = (event) => {
@@ -380,8 +432,8 @@ class Board extends Component {
         this.ctx.fillStyle = "white";
         this.ctx.fillText(this.sentence, this.x, this.y);
 
-        dim = this.ctx.measureText(c);
-        this.cursorPos = { x: this.cursorPos.x + dim.width, y: this.cursorPos.y };
+        var dimChar = this.ctx.measureText(c);
+        this.cursorPos = { x: this.cursorPos.x + dimChar.width, y: this.cursorPos.y };
 
         this.cursorBlinkFunc = setInterval(this.cursorBlink, cursorBlinkSpeed);
     }
@@ -419,26 +471,67 @@ class Board extends Component {
         this.sentence = '';
     }
 
+    loadFromJsonPatch = (jsonData) =>{
+        //console.log(this.currentJsonPatch.objects[0]);
+        //for(var i = 0; i < this.currentJsonPatch.)
+        if(jsonData.objects[0].type === "path"){
+            var pathArray = jsonData.objects[0].path;
+            var id = jsonData.objects[0].id;
+            
+            var lineArray = new fabric.Path(pathArray);
+            lineArray['id'] = id;
+
+            lineArray['fill'] = backgroundColour;
+            lineArray['stroke'] = '#000000';
+            this.fabricObjectMap[id] = lineArray;
+            lineArray['excludeFromExport'] = true;
+            this.ctx.add(lineArray);
+            this.ctx.renderAll();
+            //console.log(this.ctx);
+
+        }
+    }
+
     freeDrawing = () => {
         this.stopCursorBlink();
         this.mode = PEN;
         this.setState({ selectedButton: this.mode });
+        this.ctx.isDrawingMode = true;
+        //console.log(this.ctx);
+
     }
 
     textWrite = () => {
         this.mode = TEXTBOX;
         this.setState({ selectedButton: this.mode });
+        this.ctx.isDrawingMode = false;
+        this.loadFromJsonPatch();
+        //var json = this.ctx.toJSON(['id']);
+        //console.log(json);
+
+
     }
 
     erase = () => {
+        console.log("Original fabric canvas for comparision");
+        console.log(this.ctx);
         this.stopCursorBlink();
         this.mode = ERASER;
+        this.ctx.isDrawingMode = false;
         this.setState({ selectedButton: this.mode });
+        console.log("Erase the RECT1 object");
+        //erase the current Object
+        this.ctx.remove(this.fabricObjectMap['RECT1']);
+        this.ctx.remove(this.fabricObjectMap['LINE0']);
+        this.ctx.remove(this.fabricObjectMap['LINE1']);
+
+
+        
     }
 
     undoTab = (samePane) => {
 
-        this.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        this.ctx.clearRect(0,0,CANVAS_WIDTH,CANVAS_HEIGHT);
 
         if (this.undoTabList[this.currentTab].length === 0) {
             return;
@@ -557,14 +650,10 @@ class Board extends Component {
                 <div style={{ background: "rgb(59,109,171)", height: 30 }}>
                     {this.renderControls(isLoading)}
                 </div>
-                <div style={{position:"relative",width:"100%",height:"100%"}}>
-                    <div style={{ position:"absolute", top:0, left:0, zIndex:2, maxHeight: window.screen.height, overflow: "auto", border: "3px solid rgb(59,109,171)" }}>
-                        <div key="container" id="container" ref={ref => (this.container = ref)}>
-                            <canvas height={CANVAS_HEIGHT} width={CANVAS_WIDTH} key="canvas" ref={ref => (this.canvas = ref)} />
-                            <canvas height={CANVAS_HEIGHT} width={CANVAS_WIDTH} className="hiddenBoard" key="hiddenCanvas" ref={ref => (this.hiddenCanvas = ref)} />
-                        </div>
+                <div style={{ overflow: "auto", border: "3px solid rgb(59,109,171)" }}>
+                    <div key="container" id="container" ref={ref => (this.container = ref)}>
+                        <canvas height={CANVAS_HEIGHT} width={CANVAS_WIDTH} className="activeBoard" key="canvas" ref={ref => (this.canvas = ref)} id='c' />
                     </div>
-                    <video style={{position:"absolute",top:0,left:0,zIndex:-1}} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} key="cv" ref={ref => (this.video = ref)} autoPlay muted />
                 </div>
             </div>
         )
