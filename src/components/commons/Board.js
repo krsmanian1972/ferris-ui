@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
-import { Button, Row, Col, Tabs, Tooltip, Space, Spin } from 'antd';
+import { Button, Row, Col, Tabs, Tooltip, Space} from 'antd';
 
 import { fabric } from 'fabric';
 
@@ -16,11 +16,7 @@ const PEN = 'PEN';
 const ERASER = 'ERASER';
 const TEXTBOX = 'TEXTBOX';
 
-const cursorColour = '#FFFFFF';
-const cursorBlinkSpeed = 1 * 1000;
 const backgroundColour = '#646464';
-const cursorSize = { width: 1, height: 18 };
-
 const selected = { background: "white", color: "black", borderColor: "black" };
 const unselected = {};
 const initialPanes = [
@@ -58,7 +54,7 @@ class Board extends Component {
         const listStore = new BoardListStore({ apiProxy: this.props.appStore.apiProxy });
         await listStore.load(this.props.sessionUserId);
         //remove this to get the provisionBoard woriking
-        
+
         listStore.boardCount = 0;
         if (listStore.boardCount === 0) {
             this.setState({ isLoading: false });
@@ -131,7 +127,7 @@ class Board extends Component {
             this.undoTabList[boardKey].push(data);
             panes[boardKey - 1].isLoaded = true;
         }
-        catch(e) {
+        catch (e) {
             this.undoTabList[boardKey] = [];
             panes[boardKey - 1].isLoaded = true;
         }
@@ -141,21 +137,21 @@ class Board extends Component {
 
     componentDidMount() {
 
-        this.ctx = new fabric.Canvas('canvas', {isDrawingMode: true});
+        this.ctx = new fabric.Canvas('canvas', { isDrawingMode: true });
 
         this.ctx.on('mouse:down', this.fabricOnMouseDown);
         this.ctx.on('mouse:move', this.fabricOnMouseMove);
         this.ctx.on('mouse:up', this.fabricOnMouseUp);
-        this.ctx.on('path:created', this.fabricOnPathCreated)
+        this.ctx.on('path:created', this.fabricOnPathCreated);
+
         //rename
         socket.on('dsPaint', (data) => {
-             this.socketPaint(data);
+            this.socketPaint(data);
         });
 
         this.provisionPriorBoards();
-
-        
     }
+
     fabricOnMouseDown = (options) => {
     }
 
@@ -164,26 +160,34 @@ class Board extends Component {
 
     fabricOnMouseUp = (options) => {
     }
+
+    /**
+     * upstream paint
+     * @param {*} options 
+     */
     fabricOnPathCreated = (options) => {
-        if(this.mode === PEN){
-            //console.log(options);
-            options.path['id'] = this.props.sessionUserId + 'LINE' + this.objectCounter;
-            this.fabricObjectMap[this.props.sessionUserId + 'LINE'+this.objectCounter] = options.path
-            this.objectCounter = this.objectCounter + 1;
-            //console.log("Export after object created");
-            this.currentJsonPatch = this.ctx.toJSON(['id']);
-            //console.log(this.currentJsonPatch);
-            //disable exporting the object
-            options.path['excludeFromExport'] = true;
-            //publish the patch to the listeners
-            socket.emit('usPaint', {jsonData: this.currentJsonPatch, sessionUserFuzzyId: this.props.sessionUserId, sessionId: this.sessionId })
+        if (this.mode !== PEN) {
+            return;
         }
+
+        const objectId = this.props.sessionUserId + 'LINE' + this.objectCounter;
+
+        options.path['id'] = objectId;
+        options.path['excludeFromExport'] = true;
+
+        this.fabricObjectMap[objectId] = options.path;
+        this.objectCounter = this.objectCounter + 1;
+        this.currentJsonPatch = this.ctx.toJSON(['id']);
+
+        //publish the patch to the listeners
+        socket.emit('usPaint', { jsonData: this.currentJsonPatch, 
+            sessionUserFuzzyId: this.props.sessionUserId, 
+            sessionId: this.sessionId }
+        )
     }
 
     socketPaint = (data) => {
-      console.log("SocketPaint Recieved");
-      console.log(data);
-      this.loadFromJsonPatch(data.data.jsonData);
+        this.loadFromJsonPatch(data.data.jsonData);
     }
 
     // Save the current tab information as the user may switch to a differnt tab
@@ -194,45 +198,41 @@ class Board extends Component {
     pushUndoList = () => {
     }
 
-    loadFromJsonPatch = (jsonData) =>{
-        if(jsonData.objects[0].type === "path"){
-            var pathArray = jsonData.objects[0].path;
-            var id = jsonData.objects[0].id;
-            
-            var lineArray = new fabric.Path(pathArray);
-            lineArray['id'] = id;
-
-            lineArray['fill'] = backgroundColour;
-            lineArray['stroke'] = '#000000';
-            this.fabricObjectMap[id] = lineArray;
-            lineArray['excludeFromExport'] = true;
-            this.ctx.add(lineArray);
-            this.ctx.renderAll();
-            //console.log(this.ctx);
-
+    loadFromJsonPatch = (jsonData) => {
+        if (jsonData.objects[0].type !== "path") {
+            return;
         }
+
+        const pathArray = jsonData.objects[0].path;
+        const id = jsonData.objects[0].id;
+
+        const lineArray = new fabric.Path(pathArray);
+        lineArray['id'] = id;
+        lineArray['fill'] = backgroundColour;
+        lineArray['stroke'] = '#000000';
+        lineArray['excludeFromExport'] = true;
+
+        this.fabricObjectMap[id] = lineArray;
+        this.ctx.add(lineArray);
+        this.ctx.renderAll();
     }
 
     freeDrawing = () => {
         this.mode = PEN;
         this.setState({ selectedButton: this.mode });
         this.ctx.isDrawingMode = true;
-
     }
 
     textWrite = () => {
         this.mode = TEXTBOX;
         this.setState({ selectedButton: this.mode });
         this.ctx.isDrawingMode = false;
-        var text = new fabric.Textbox('Type your Text Here',  
-        { 
-            width: 450 
-        }); 
+        
+        const text = new fabric.Textbox('Type your Text Here',{width: 450});
         text['id'] = this.props.sessionUserId + 'LINE' + this.objectCounter;
-        this.objectCounter = this.objectCounter + 1;
-
         text['excludeFromExport'] = true;
 
+        this.objectCounter = this.objectCounter + 1;
         this.ctx.add(text);
     }
 
@@ -260,10 +260,6 @@ class Board extends Component {
     }
 
     renderControls = (isLoading) => {
-
-        // if (isLoading) {
-        //     return <Spin />
-        // }
 
         const { panes } = this.state;
 
