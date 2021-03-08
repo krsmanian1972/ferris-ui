@@ -39,50 +39,20 @@ class Board extends Component {
         super(props);
 
         this.fabricObjectMap = {};
+        //update objectCounter on Load
         this.objectCounter = 0;
-        this.x = 0;
-        this.y = 0;
-        this.currentJsonPatch = '';
-        this.sentence = "";
-        this.textWidth = 0;
-
-        this.cursorPos = { x: 0, y: 0 };
-        this.cursorSize = 10;
 
         this.mode = PEN;
 
-        this.redoList = [];
-        this.undoList = [];
-
-        this.undoTabList = {};
-        this.undoTabList[1] = [];
-        this.undoTabList[2] = [];
-
-        this.currentTab = 1;
-        this.newTabIndex = 3;
-
-        this.hasCursor = false;
         this.state = {
             selectedButton: PEN,
             activeKey: initialPanes[0].key,
             panes: initialPanes,
             isLoading: true
         };
-        //stores all co-ordinates of the paint event and emit them over socket when we take screenshot
-        this.paintEvent = [];
-        console.log("sessionId :: " + this.props.sessionId);
         this.sessionId = this.props.sessionId;
-        this.provisionPriorBoards();
     }
 
-    setCanvasData = async() => {
-      console.log("Canvas Down Stream!!");
-    }
-    /**
-     * Let us lazily load the boards. We need to check if there is any
-     * prior boards for this session. If Yes, Load the first and mark the
-     * rest of the panes as to be loaded.
-     */
     provisionPriorBoards = async () => {
 
         const listStore = new BoardListStore({ apiProxy: this.props.appStore.apiProxy });
@@ -171,79 +141,28 @@ class Board extends Component {
 
     componentDidMount() {
 
-        this.x = 0;
-        this.y = 0;
-        this.sentence = "";
-        this.cursorPos = { x: 0, y: 0 };
-        this.currentFreeDrawing = [];
-        this.ctx = new fabric.Canvas('c', {isDrawingMode: false});
-        var rect = new fabric.Rect({
-            left: 100,
-            top: 100,
-            fill: 'red',
-            width: 20,
-            height: 20,
-            id: 'RECT1',
-            });
-        var rect2 = new fabric.Rect({
-                left: 180,
-                top: 100,
-                fill: 'red',
-                width: 20,
-                height: 20,
-                id: 'RECT2',
-                });
-        this.ctx.add(rect);
-        this.ctx.add(rect2);
-        rect.excludeFromExport = true;
-        rect2.excludeFromExport = true;
-        this.fabricObjectMap[this.props.sessionUserId + 'RECT1'] = rect;
-        this.fabricObjectMap[this.props.sessionUserId + 'RECT2'] = rect2;
+        this.ctx = new fabric.Canvas('canvas', {isDrawingMode: true});
 
         this.ctx.on('mouse:down', this.fabricOnMouseDown);
         this.ctx.on('mouse:move', this.fabricOnMouseMove);
         this.ctx.on('mouse:up', this.fabricOnMouseUp);
         this.ctx.on('path:created', this.fabricOnPathCreated)
-        // var temp = this.ctx.measureText('M');
-        // this.yOffset = temp.actualBoundingBoxAscent;
-        // this.textWidth = temp.width;
-
-
-        // this.canvas.addEventListener('touchstart', this.onTouchStart);
-        // this.canvas.addEventListener('touchmove', this.onTouchMove);
-
-        // window.addEventListener("keypress", this.write);
-
-        // this.container.addEventListener('touchstart', this.preventScrolling);
-        // this.container.addEventListener('touchmove', this.preventScrolling);
-        // this.container.addEventListener('touchend', this.preventScrolling);
-
-        socket.on('canvasdownstream', async (data) => {
-            this.setCanvasData();
-            console.log("Received Down Stream!!");
-        });
+        //rename
         socket.on('dsPaint', (data) => {
              this.socketPaint(data);
         });
 
+        this.provisionPriorBoards();
+
         
     }
     fabricOnMouseDown = (options) => {
-        if(this.mode === PEN){
-            this.currentFreeDrawing.push({x:options.e.clientX, y:options.e.clientY});
-        }
     }
 
     fabricOnMouseMove = (options) => {
-        if(this.mode === PEN){
-            this.currentFreeDrawing.push({x:options.e.clientX, y:options.e.clientY});
-        }
     }
 
     fabricOnMouseUp = (options) => {
-        if(this.mode === PEN){
-            this.currentFreeDrawing = [];
-        }
     }
     fabricOnPathCreated = (options) => {
         if(this.mode === PEN){
@@ -257,7 +176,6 @@ class Board extends Component {
             //disable exporting the object
             options.path['excludeFromExport'] = true;
             //publish the patch to the listeners
-
             socket.emit('usPaint', {jsonData: this.currentJsonPatch, sessionUserFuzzyId: this.props.sessionUserId, sessionId: this.sessionId })
         }
     }
@@ -268,212 +186,15 @@ class Board extends Component {
       this.loadFromJsonPatch(data.data.jsonData);
     }
 
-    preventScrolling = (e) => {
-        if (e.target === this.canvas) {
-            e.preventDefault();
-        }
-    }
-
-    onMouseMove = (e) => {
-        if (this.mode === PEN || this.mode === ERASER) {
-
-            // Check whether we're holding the left click down while moving the mouse
-            if (e.buttons === 1) {
-              this.paintEvent.push([e.clientX, e.clientY]);
-              this.paint(e);
-            }
-        }
-    }
-
-    onMouseDown = (e) => {
-        // Reset current path if any...
-        this.ctx.beginPath();
-
-        //save board on every mouse down in a stack
-        this.pushUndoList();
-
-        //Place the textBox only if the user has selected the TextBox
-        if (this.mode === TEXTBOX && e.buttons === 1) {
-            this.textBox(e);
-        }
-    }
-
-    // Let us transform the touchstart as MouseDownEvent and
-    // dispatch back to the canvas
-    onTouchStart = (e) => {
-        const touch = e.touches[0];
-        const mouseEvent = new MouseEvent("mousedown", {
-            clientX: touch.clientX,
-            clientY: touch.clientY,
-            buttons: 1
-        });
-        this.canvas.dispatchEvent(mouseEvent);
-    }
-
-    onTouchMove = (e) => {
-        if (this.mode === PEN || this.mode === ERASER) {
-            const touch = e.touches[0];
-            const event = { clientX: touch.clientX, clientY: touch.clientY };
-            this.paint(event);
-        }
-    }
-
-
     // Save the current tab information as the user may switch to a differnt tab
     componentWillUnmount() {
-        this.pushUndoList();
     }
 
 
     pushUndoList = () => {
-        const screenShot = this.canvas.toDataURL();
-        this.undoTabList[this.currentTab].push(screenShot);
-
-        const name = `Board_${this.currentTab}`;
-        //this.sessionId = this.props.params.sessionId;
-        //console.log(this.sessionId);
-        socket.emit('canvasupstream', { content: screenShot, sessionUserFuzzyId: this.props.sessionUserId, name: name, sessionId: this.sessionId });
-        console.log("Upstream::" + this.paintEvent);
-        socket.emit('usPaint', {paintEvent: this.paintEvent, sessionUserFuzzyId: this.props.sessionUserId, name: name, sessionId: this.sessionId });
-        //clear the array
-        this.paintEvent = [];
-    }
-
-    textBox = (event) => {
-        if (!this.canvas) {
-            return;
-        }
-
-        if (this.mode !== TEXTBOX) {
-            return;
-        }
-
-        this.sentence = '';
-
-        clearInterval(this.cursorBlinkFunc);
-        this.ctx.beginPath();
-        this.ctx.clearRect(this.cursorPos.x, this.cursorPos.y - 5, 8, 8);
-
-        // Place Cursor at the double clicked Position
-        var rect = this.canvas.getBoundingClientRect();
-        this.x = Math.round((event.clientX - rect.left) / this.cursorSize * this.cursorSize);
-        this.y = Math.round((event.clientY - rect.top) / this.cursorSize * this.cursorSize);
-
-        this.cursorPos = { x: this.x, y: this.y - 10 };
-        this.cursorBlinkFunc = setInterval(this.cursorBlink, cursorBlinkSpeed);
-        this.hasCursor = true;
-    }
-
-    newLine = () => {
-
-        this.sentence = '';
-
-        clearInterval(this.cursorBlinkFunc);
-        this.eraseCursor();
-        this.ctx.beginPath();
-        this.ctx.clearRect(this.cursorPos.x, this.cursorPos.y - 5, 8, 12);
-
-        //move the cursor to a new line
-        this.y = this.y + 15;
-        this.cursorPos = { x: this.x, y: this.y - 10 };
-        this.cursorBlinkFunc = setInterval(this.cursorBlink, cursorBlinkSpeed);
-
-        this.pushUndoList();
-    }
-
-    cursorBlink = () => {
-
-        this.drawCursor();
-
-        setTimeout(() => this.eraseCursor(), cursorBlinkSpeed / 2);
-    }
-
-    drawCursor = () => {
-        const x = this.cursorPos.x;
-        const y = this.cursorPos.y;
-
-        this.ctx.moveTo(x, y);
-        this.ctx.lineTo(x, y + cursorSize.height);
-        this.ctx.lineWidth = cursorSize.width;
-        this.ctx.strokeStyle = cursorColour;
-        this.ctx.stroke();
-    }
-
-    eraseCursor = () => {
-        const x = this.cursorPos.x;
-        const y = this.cursorPos.y;
-
-        this.ctx.lineTo(x, y + cursorSize.height);
-        this.ctx.strokeStyle = backgroundColour;
-        this.ctx.stroke();
-    }
-
-
-    write = (event) => {
-
-        if (this.mode !== TEXTBOX) {
-            return;
-        }
-
-        var c = String.fromCharCode(event.keyCode);
-
-        if (event.keyCode === 13) {
-            this.newLine();
-            c = '';
-        }
-        this.sentence += c;
-        this.ctx.beginPath();
-
-        clearInterval(this.cursorBlinkFunc);
-
-        var dim = this.ctx.measureText(this.sentence);
-        this.ctx.clearRect(this.x - 5, this.y - this.yOffset, dim.width, this.textWidth + 5);
-
-        this.ctx.fillStyle = "white";
-        this.ctx.fillText(this.sentence, this.x, this.y);
-
-        var dimChar = this.ctx.measureText(c);
-        this.cursorPos = { x: this.cursorPos.x + dimChar.width, y: this.cursorPos.y };
-
-        this.cursorBlinkFunc = setInterval(this.cursorBlink, cursorBlinkSpeed);
-    }
-
-    paint = (e) => {
-
-        const rect = this.canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        if (this.mode === ERASER) {
-            this.ctx.strokeStyle = backgroundColour;
-            this.ctx.lineWidth = (cursorSize.width + 10);
-        }
-        else {
-            this.ctx.strokeStyle = "white";
-            this.ctx.lineWidth = cursorSize.width;
-        }
-        this.ctx.lineJoin = 'round';
-        this.ctx.lineCap = 'round';
-        this.ctx.lineTo(x, y);
-        this.ctx.stroke();
-    }
-
-    stopCursorBlink = () => {
-        if (!this.hasCursor) {
-            return;
-        }
-
-        clearInterval(this.cursorBlinkFunc);
-        this.eraseCursor();
-        this.ctx.beginPath();
-        this.ctx.clearRect(this.cursorPos.x, this.cursorPos.y - 5, 8, 0);
-        this.hasCursor = false;
-        this.sentence = '';
     }
 
     loadFromJsonPatch = (jsonData) =>{
-        //console.log(this.currentJsonPatch.objects[0]);
-        //for(var i = 0; i < this.currentJsonPatch.)
         if(jsonData.objects[0].type === "path"){
             var pathArray = jsonData.objects[0].path;
             var id = jsonData.objects[0].id;
@@ -493,11 +214,9 @@ class Board extends Component {
     }
 
     freeDrawing = () => {
-        this.stopCursorBlink();
         this.mode = PEN;
         this.setState({ selectedButton: this.mode });
         this.ctx.isDrawingMode = true;
-        //console.log(this.ctx);
 
     }
 
@@ -505,88 +224,32 @@ class Board extends Component {
         this.mode = TEXTBOX;
         this.setState({ selectedButton: this.mode });
         this.ctx.isDrawingMode = false;
-        this.loadFromJsonPatch();
-        //var json = this.ctx.toJSON(['id']);
-        //console.log(json);
+        var text = new fabric.Textbox('Type your Text Here',  
+        { 
+            width: 450 
+        }); 
+        text['id'] = this.props.sessionUserId + 'LINE' + this.objectCounter;
+        this.objectCounter = this.objectCounter + 1;
 
+        text['excludeFromExport'] = true;
 
+        this.ctx.add(text);
     }
 
     erase = () => {
-        console.log("Original fabric canvas for comparision");
-        console.log(this.ctx);
-        this.stopCursorBlink();
-        this.mode = ERASER;
-        this.ctx.isDrawingMode = false;
-        this.setState({ selectedButton: this.mode });
-        console.log("Erase the RECT1 object");
-        //erase the current Object
-        this.ctx.remove(this.fabricObjectMap['RECT1']);
-        this.ctx.remove(this.fabricObjectMap['LINE0']);
-        this.ctx.remove(this.fabricObjectMap['LINE1']);
-
-
-        
     }
 
     undoTab = (samePane) => {
-
-        this.ctx.clearRect(0,0,CANVAS_WIDTH,CANVAS_HEIGHT);
-
-        if (this.undoTabList[this.currentTab].length === 0) {
-            return;
-        }
-
-        var me = this;
-
-        var img = new Image();
-        img.src = this.undoTabList[this.currentTab].pop();
-
-        if (samePane === false) {
-            this.undoTabList[this.currentTab].push(img.src);
-        }
-
-        img.onload = function () {
-            me.ctx.drawImage(img, 0, 0, img.width, img.height);
-        }
     }
 
     onTabClick = async (activeTab, mouseEvent) => {
 
-        if (this.currentTab === activeTab) {
-            return;
-        }
-
-        this.stopCursorBlink();
-        this.pushUndoList();
-
-        await this.salvage(activeTab);
-
-        this.currentTab = activeTab;
-        this.undoTab(false);
-        this.freeDrawing();
     }
 
-    onEdit = (targetKey, action) => {
-        this[action](targetKey);
-    };
-
     add = () => {
-
-        const activeKey = `${this.newTabIndex}`;
-
-        this.undoTabList[this.newTabIndex] = [];
-
-        const { panes } = this.state;
-        panes.push({ title: `Board-${this.newTabIndex}`, key: activeKey, closable: false, isLoaded: true });
-
-        this.setState({ panes: panes, activeKey });
-
-        this.newTabIndex++;
     };
 
     undoEvent = () => {
-        this.undoTab(true);
     }
 
     getStyle = (compKey) => {
@@ -598,9 +261,9 @@ class Board extends Component {
 
     renderControls = (isLoading) => {
 
-        if (isLoading) {
-            return <Spin />
-        }
+        // if (isLoading) {
+        //     return <Spin />
+        // }
 
         const { panes } = this.state;
 
@@ -652,7 +315,7 @@ class Board extends Component {
                 </div>
                 <div style={{ overflow: "auto", border: "3px solid rgb(59,109,171)" }}>
                     <div key="container" id="container" ref={ref => (this.container = ref)}>
-                        <canvas height={CANVAS_HEIGHT} width={CANVAS_WIDTH} className="activeBoard" key="canvas" ref={ref => (this.canvas = ref)} id='c' />
+                        <canvas height={CANVAS_HEIGHT} width={CANVAS_WIDTH} className="activeBoard" key="canvas" ref={ref => (this.canvas = ref)} id='canvas' />
                     </div>
                 </div>
             </div>
