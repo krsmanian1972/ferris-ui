@@ -144,8 +144,8 @@ class Board extends Component {
         this.ctx.on('mouse:up', this.fabricOnMouseUp);
         this.ctx.on('path:created', this.fabricOnPathCreated);
 
-        //rename
-        socket.on('dsPaint', (data) => {
+        
+        socket.on('downstreamPaint', (data) => {
             this.socketPaint(data);
         });
 
@@ -162,6 +162,19 @@ class Board extends Component {
     }
 
     /**
+     * We need a unique id for each of the objects on the canvas.
+     * The Object Id is a combination of userId+"~"+Object Counter
+     * 
+     * Let us increment the objectCounter whenever we invoke this method.
+     * 
+     */
+    nextObjectId = () => {
+        const objectId = this.props.userId + '~' + this.objectCounter;
+        this.objectCounter = this.objectCounter+1;
+        return objectId;
+    }
+
+    /**
      * upstream paint
      * @param {*} options 
      */
@@ -170,18 +183,19 @@ class Board extends Component {
             return;
         }
 
-        const objectId = this.props.sessionUserId + 'LINE' + this.objectCounter;
+        const objectId = this.nextObjectId();
 
         options.path['id'] = objectId;
-        options.path['excludeFromExport'] = true;
-
-        this.fabricObjectMap[objectId] = options.path;
-        this.objectCounter = this.objectCounter + 1;
         this.currentJsonPatch = this.ctx.toJSON(['id']);
 
+        options.path['excludeFromExport'] = true;
+        this.fabricObjectMap[objectId] = options.path;
+
         //publish the patch to the listeners
-        socket.emit('usPaint', { jsonData: this.currentJsonPatch, 
-            sessionUserFuzzyId: this.props.sessionUserId, 
+        socket.emit('upstreamPaint', { 
+            jsonData: this.currentJsonPatch,
+            isCoach: this.props.isCoach, 
+            userId: this.props.userId, 
             sessionId: this.sessionId }
         )
     }
@@ -199,6 +213,9 @@ class Board extends Component {
     }
 
     loadFromJsonPatch = (jsonData) => {
+        if(jsonData.objects.length === 0) {
+            return;
+        }
         if (jsonData.objects[0].type !== "path") {
             return;
         }
@@ -209,7 +226,7 @@ class Board extends Component {
         const lineArray = new fabric.Path(pathArray);
         lineArray['id'] = id;
         lineArray['fill'] = backgroundColour;
-        lineArray['stroke'] = '#000000';
+        lineArray['stroke'] = 'white';
         lineArray['excludeFromExport'] = true;
 
         this.fabricObjectMap[id] = lineArray;
@@ -229,10 +246,9 @@ class Board extends Component {
         this.ctx.isDrawingMode = false;
         
         const text = new fabric.Textbox('Type your Text Here',{width: 450});
-        text['id'] = this.props.sessionUserId + 'LINE' + this.objectCounter;
+        text['id'] = this.nextObjectId();
         text['excludeFromExport'] = true;
 
-        this.objectCounter = this.objectCounter + 1;
         this.ctx.add(text);
     }
 

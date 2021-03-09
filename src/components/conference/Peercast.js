@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Button, Row, Col, Tooltip, Space,message } from 'antd';
+import { Button, Row, Col, Tooltip, Space, message } from 'antd';
 import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutlined, AudioMutedOutlined, EyeInvisibleOutlined, VerticalAlignTopOutlined, VerticalAlignBottomOutlined } from '@ant-design/icons';
 
 import socket from '../stores/socket';
@@ -72,12 +72,13 @@ class Peercast extends Component {
         const memberId = this.props.params.memberId;
         const isCoach = this.props.params.sessionUserType === 'coach';
         const sessionId = this.props.params.sessionId;
+        const userId = this.props.appStore.credentials.id;
 
         this.initializeNotesStore(sessionUserId);
-        
-        this.myBoard = <Board key={MY_BOARD_KEY} boardId={MY_BOARD_KEY} sessionUserId={sessionUserId} sessionId={sessionId} onCanvasStream={this.onCanvasStream} />
-        this.coachingPlan = <SharedCoachingPlan key="gt" isCoach = {isCoach} enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
-        this.actionList = <SharedActionList key="tt" isCoach = {isCoach} enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
+
+        this.myBoard = <Board key={MY_BOARD_KEY} isCoach={isCoach} userId={userId} boardId={MY_BOARD_KEY} sessionUserId={sessionUserId} sessionId={sessionId} onCanvasStream={this.onCanvasStream} />
+        this.coachingPlan = <SharedCoachingPlan key="gt" isCoach={isCoach} enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
+        this.actionList = <SharedActionList key="tt" isCoach={isCoach} enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
     }
 
     initializeNotesStore = (sessionUserId) => {
@@ -92,7 +93,7 @@ class Peercast extends Component {
             sessionUserId: sessionUserId,
         });
 
-        noteListStore.load(sessionUserId,null);
+        noteListStore.load(sessionUserId, null);
     }
 
     onCanvasStream = (stream) => {
@@ -184,11 +185,18 @@ class Peercast extends Component {
         }
     }
 
+    /**
+     * The member is a serialized version of a ES6 Map. Hence needs to be
+     * deserialized back to Map to obtain the member's socket id.
+     * @param {*} advice 
+     */
     callMember = (advice) => {
         const memberId = this.props.params.memberId;
-        if(advice.members && advice.members[memberId]) {
-             const memberSocketId = advice.members[memberId];
-             this.callPeer(memberSocketId);   
+
+        if (advice.members) {
+            let memberSocketMap = new Map(JSON.parse(advice.members));
+            const memberSocketId = memberSocketMap.get(memberId);
+            this.callPeer(memberSocketId);
         }
     }
 
@@ -252,8 +260,8 @@ class Peercast extends Component {
 
     toggleScreenSharing = () => {
         const canShare = this.peerStreamStatus === "active";
-        
-        if(!canShare) {
+
+        if (!canShare) {
             return;
         }
 
@@ -359,10 +367,10 @@ class Peercast extends Component {
     }
 
     getShareScreenIcon = () => {
-        if(!this.state.isScreenSharing) {
-            return <ShareAltOutlined/>;
+        if (!this.state.isScreenSharing) {
+            return <ShareAltOutlined />;
         }
-        return <StopOutlined/>;
+        return <StopOutlined />;
     }
 
     toggleVideoDevice = () => {
@@ -404,7 +412,7 @@ class Peercast extends Component {
         return (
             <div style={{ padding: 2, height: viewHeight }}>
 
-                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} boardSrc={boardSrc} myBoard={this.myBoard} coachingPlan={this.coachingPlan} actionList = {this.actionList} isMinimized={isMinimized} />
+                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} boardSrc={boardSrc} myBoard={this.myBoard} coachingPlan={this.coachingPlan} actionList={this.actionList} isMinimized={isMinimized} />
 
                 <Row style={{ marginTop: 8 }}>
                     <Col span={12}>
@@ -417,7 +425,7 @@ class Peercast extends Component {
                             </Tooltip>
 
                             <Tooltip title={this.getShareScreenTooltip()}>
-                                <Button disabled={!canShare} id="screenShare" type="primary" icon={this.getShareScreenIcon()} shape="circle" onClick={this.toggleScreenSharing}/>
+                                <Button disabled={!canShare} id="screenShare" type="primary" icon={this.getShareScreenIcon()} shape="circle" onClick={this.toggleScreenSharing} />
                             </Tooltip>
 
                             <Tooltip title={this.getVideoTooltip()}>
@@ -433,7 +441,7 @@ class Peercast extends Component {
                     </Col>
                 </Row>
 
-                <NotesDrawer notesStore={this.notesStore}/>
+                <NotesDrawer notesStore={this.notesStore} />
             </div>
         )
     }
