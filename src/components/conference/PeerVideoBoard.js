@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import PeerBoard from '../commons/PeerBoard';
+
 const standardStyle = {
     height: "100%",
     width: "100%",
@@ -9,33 +9,18 @@ const standardStyle = {
     overflow: "hidden",
 };
 
-var peerHook;
 
-const onInit = (reflect) => {
-    peerHook = reflect;
-}
-
-function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoard, coachingPlan, actionList, isMinimized }) {
-
-    var peerBoardVisibility = "none";
+function PeerVideoBoard({ localSrc, peerSrc, screenSrc, myBoard, coachingPlan, actionList, isMinimized, preference, isCoach,onArtifactChange }) {
 
     const [peerKey, setPeerKey] = useState('none');
-    const [myKey, setMyKey] = useState('none');
+    const [myKey, setMyKey] = useState(preference);
 
     const peerVideo = useRef(null);
     const peerScreen = useRef(null);
-    const peerBoard = useRef(null);
-    
+
     const localVideo = useRef(null);
 
     useEffect(() => {
-        if (peerBoard.current && boardSrc) {
-            peerBoard.current.srcObject = boardSrc;
-        }
-        if (boardSrc) {
-            peerHook(peerBoard.current);
-        }
-        
         if (peerScreen.current && screenSrc) {
             peerScreen.current.srcObject = screenSrc;
         }
@@ -47,18 +32,38 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoard, coachingP
         }
     });
 
+    /**
+     * A coach can lock a members accessible widgets.
+     * @returns 
+     */
+    const canSelect = () => {
+        if (isCoach) {
+            return true;
+        }
+        return preference === "none";
+    }
+
     const setSelected = (compKey, compCategory) => {
+        if (!canSelect()) {
+            return;
+        }
+
         if (compCategory === "peer") {
             setPeerKey(compKey);
             setMyKey("none");
+            onArtifactChange("none");
             return;
         }
 
         setMyKey(compKey);
         setPeerKey("none");
+        onArtifactChange(compKey);
     }
 
     const minimizeAll = () => {
+        if(preference !== "none") {
+            return;
+        }
         setPeerKey("none");
         setMyKey("none");
     }
@@ -69,10 +74,10 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoard, coachingP
         }
 
         if (peerKey === "none") {
-            return { width: "31%", marginRight: "1%" };
+            return { width: "48%", marginRight: "1%" };
         }
 
-        return { width: "48%", marginRight: "1%" };
+        return { width: "96%", marginRight: "1%" };
     }
 
     const getMyStyle = (compKey) => {
@@ -81,23 +86,45 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoard, coachingP
         }
 
         if (myKey === "none") {
-            return { width: "24%", marginRight: "1%" };
+            return { width: "24%", marginRight: "1%"};
         }
 
         return { width: "31%", marginRight: "1%" };
     }
 
-    const getSuspendedItems = (widgets, activeKey) => {
+    const getPeerItems = (widgets, activeKey) => {
+        
         let toSuspend = [];
         for (const [key, value] of widgets) {
-            if (key !== activeKey) {
+            
+            let isActive = (key === activeKey);
+
+            if (!isActive) {
                 toSuspend.push(value);
             }
         }
         return toSuspend;
     }
 
-    const getMiniBoardHeight = () => {
+    const getMyItems = (widgets, activeKey) => {
+
+        if(preference !== "none") {
+            return [];
+        }
+        
+        let toSuspend = [];
+        for (const [key, value] of widgets) {
+            
+            let isActive = (key === activeKey || key === preference);
+
+            if (!isActive) {
+                toSuspend.push(value);
+            }
+        }
+        return toSuspend;
+    }
+
+    const getWidgetHeight = () => {
         if (isMinimized === true) {
             return { height: "0%" };
         }
@@ -106,14 +133,12 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoard, coachingP
         }
     }
 
-
     const peerWidgets = new Map();
     peerWidgets.set("peerVideo", <video key="peerVideo" className="videoItem" style={getPeerStyle("peerVideo")} poster="videoPeer.png" ref={peerVideo} autoPlay onClick={() => setSelected("peerVideo", "peer")} />);
     peerWidgets.set("peerScreen", <video key="peerScreen" className="videoItem" style={getPeerStyle("peerScreen")} poster="peerScreen.png" ref={peerScreen} autoPlay onClick={() => setSelected("peerScreen", "peer")} />);
-    peerWidgets.set("peerBoard", <video key="peerBoard" className="videoItem" style={getPeerStyle("peerBoard")} poster="peerBoard.png" ref={peerBoard} autoPlay onClick={() => setSelected("peerBoard", "peer")} />);
 
     const boardKey = 'myBoard';
-    const boardDiv = <div key="myMiniBoard" className="non-videoItem" style={getMyStyle(boardKey)} onClick={() => setSelected(boardKey, "self")} >My Board</div>
+    const boardDiv = <div key="myBoardDiv" className="non-videoItem" style={getMyStyle(boardKey)} onClick={() => setSelected(boardKey, "self")} >Board</div>
 
     const planKey = "coachingPlan";
     const planDiv = <div key="coachingPlanDiv" className="non-videoItem" style={getMyStyle(planKey)} onClick={() => setSelected(planKey, "self")} >Coaching Plan</div>
@@ -127,26 +152,32 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoard, coachingP
     myWidgets.set(actionPlanKey, actionPlanDiv);
 
     const getActiveItem = () => {
-        
-        peerBoardVisibility = "none";
+
+        if(!isCoach && preference === boardKey) {
+            return myBoard;
+        }
+
+        if(!isCoach && preference === planKey) {
+            return coachingPlan;
+        }
+
+        if(!isCoach && preference === actionPlanKey) {
+            return actionList;
+        }
 
         if (myKey === "none" && peerKey === "none") {
             return <></>;
-        }
-
-        if (peerKey === "peerBoard") {
-            peerBoardVisibility = "block";
         }
 
         if (peerKey !== "none") {
             return peerWidgets.get(peerKey);
         }
 
-        if (myKey === "myBoard") {
+        if (myKey === boardKey) {
             return myBoard;
         }
 
-        if (myKey === "actionPlan") {
+        if (myKey === actionPlanKey) {
             return actionList;
         }
 
@@ -158,36 +189,34 @@ function VideoBoard({ localSrc, peerSrc, screenSrc, boardSrc, myBoard, coachingP
 
             <div className="activeItem">
                 {getActiveItem()}
-                <div style={{ display: peerBoardVisibility }}>
-                    <PeerBoard key="maxPeerBoard" onInit={onInit} />
-                </div>
             </div>
 
-            <div className="peerVideoContainer" style={getMiniBoardHeight()}>
-                {getSuspendedItems(peerWidgets, peerKey).map(value => value)}
+            <div className="peerVideoContainer" style={getWidgetHeight()}>
+                {getPeerItems(peerWidgets, peerKey).map(value => value)}
             </div>
 
-            <div className="myVideoContainer" style={getMiniBoardHeight()}>
-                {getSuspendedItems(myWidgets, myKey).map(value => value)}
-                <video key="myVideo" className="videoItem" style={getMyStyle("myVideo")} poster="videoSelf.png" onClick={() => minimizeAll()} ref={localVideo} autoPlay muted />
+            <div className="artifactsContainer" style={getWidgetHeight()}>
+                {getMyItems(myWidgets, myKey).map(value => value)}
             </div>
 
-
-
+            <div className="myVideoContainer" style={getWidgetHeight()}>
+                <video key="myVideo" className="videoItem" poster="videoSelf.png" onClick={() => minimizeAll()} ref={localVideo} autoPlay muted />
+            </div>
         </div>
-
     );
 }
 
-VideoBoard.propTypes = {
+PeerVideoBoard.propTypes = {
     localSrc: PropTypes.object,
     peerSrc: PropTypes.object,
     screenSrc: PropTypes.object,
-    boardSrc: PropTypes.object,
+
     myBoard: PropTypes.object,
     coachingPlan: PropTypes.object,
     actionList: PropTypes.object,
     isMinimized: PropTypes.bool,
+    preference: PropTypes.string,
+    isCoach: PropTypes.bool,
 };
 
-export default VideoBoard;
+export default PeerVideoBoard;

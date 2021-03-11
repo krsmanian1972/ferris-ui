@@ -83,6 +83,17 @@ code {
   position: absolute;
   bottom: 0;
   left: 0;
+  width: 30%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.artifactsContainer {
+  position: absolute;
+  bottom: 0;
+  right: 25%;
   width: 45%;
   display: flex;
   flex-wrap: wrap;
@@ -94,11 +105,8 @@ code {
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 45%;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
+  margin-right:5px;
+  margin-left:5px;
 }
 
 .videoItem {
@@ -110,6 +118,7 @@ code {
   font-weight: bold;
   color:white;
   background-color: #646464;
+  cursor:pointer;
 }
 
 .non-videoItem {
@@ -121,6 +130,7 @@ code {
   font-weight: bold;
   color:rgb(44, 147, 209);
   background-color: #000000;
+  cursor:pointer;
 }
 
 .activeItem {

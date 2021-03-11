@@ -136,7 +136,7 @@ class Board extends Component {
     }
 
     componentDidMount() {
-
+        
         this.ctx = new fabric.Canvas('canvas', { isDrawingMode: true });
 
         this.ctx.on('mouse:down', this.fabricOnMouseDown);
@@ -144,12 +144,13 @@ class Board extends Component {
         this.ctx.on('mouse:up', this.fabricOnMouseUp);
         this.ctx.on('path:created', this.fabricOnPathCreated);
 
-        
         socket.on('downstreamPaint', (data) => {
             this.socketPaint(data);
         });
 
         this.provisionPriorBoards();
+
+
     }
 
     fabricOnMouseDown = (options) => {

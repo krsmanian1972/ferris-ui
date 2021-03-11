@@ -7,13 +7,13 @@ import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutl
 import socket from '../stores/socket';
 import VideoStreamTransceiver from '../webrtc/VideoStreamTransceiver';
 import ScreenStreamTransceiver from '../webrtc/ScreenStreamTransceiver';
-import BoardStreamTransceiver from '../webrtc/BoardStreamTransceiver';
+
 
 import NoteListStore from '../stores/NoteListStore';
 import NotesStore from '../stores/NotesStore';
 import NotesDrawer from '../commons/NotesDrawer';
 
-import VideoBoard from './PeerVideoBoard';
+import PeerVideoBoard from './PeerVideoBoard';
 
 import Board from '../commons/Board';
 
@@ -22,7 +22,6 @@ import SharedActionList from '../plan/SharedActionList';
 
 const CONNECTION_KEY_VIDEO_STREAM = "peerVideoStream";
 const CONNECTION_KEY_SCREEN_STREAM = "peerScreenStream";
-const CONNECTION_KEY_BOARD_STREAM = "peerBoardStream";
 
 const MY_BOARD_KEY = 'myBoard';
 
@@ -45,7 +44,6 @@ class Peercast extends Component {
             localSrc: null,
             peerSrc: null,
             screenSrc: null,
-            boardSrc: null,
 
             videoDevice: 'On',
             audioDevice: 'On',
@@ -55,7 +53,9 @@ class Peercast extends Component {
 
             sessionStatus: '',
 
-            portalSize: { height: window.innerHeight, width: window.innerWidth }
+            portalSize: { height: window.innerHeight, width: window.innerWidth },
+
+            selectedArtifact: "none",
         };
 
         this.canvasStream = null;
@@ -70,15 +70,16 @@ class Peercast extends Component {
         const sessionUserId = this.props.params.sessionUserId;
         const enrollmentId = this.props.params.enrollmentId;
         const memberId = this.props.params.memberId;
-        const isCoach = this.props.params.sessionUserType === 'coach';
         const sessionId = this.props.params.sessionId;
         const userId = this.props.appStore.credentials.id;
 
+        this.isCoach = this.props.params.sessionUserType === 'coach';
+
         this.initializeNotesStore(sessionUserId);
 
-        this.myBoard = <Board key={MY_BOARD_KEY} isCoach={isCoach} userId={userId} boardId={MY_BOARD_KEY} sessionUserId={sessionUserId} sessionId={sessionId} onCanvasStream={this.onCanvasStream} />
-        this.coachingPlan = <SharedCoachingPlan key="gt" isCoach={isCoach} enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
-        this.actionList = <SharedActionList key="tt" isCoach={isCoach} enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
+        this.myBoard = <Board key={MY_BOARD_KEY} isCoach={this.isCoach} userId={userId} boardId={MY_BOARD_KEY} sessionUserId={sessionUserId} sessionId={sessionId} />
+        this.coachingPlan = <SharedCoachingPlan key="gt" isCoach={this.isCoach} enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
+        this.actionList = <SharedActionList key="tt" isCoach={this.isCoach} enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
     }
 
     initializeNotesStore = (sessionUserId) => {
@@ -96,20 +97,9 @@ class Peercast extends Component {
         noteListStore.load(sessionUserId, null);
     }
 
-    onCanvasStream = (stream) => {
-        this.canvasStream = stream;
-
-        const boardTransceiver = this.transceivers[CONNECTION_KEY_BOARD_STREAM]
-
-        if (boardTransceiver) {
-            boardTransceiver.start(this.canvasStream);
-        }
-    }
-
     buildTransceivers = (peerId) => {
         this.transceivers[CONNECTION_KEY_VIDEO_STREAM] = this.buildVideoTransceiver(peerId);
         this.transceivers[CONNECTION_KEY_SCREEN_STREAM] = this.buildScreenTransceiver(peerId);
-        this.transceivers[CONNECTION_KEY_BOARD_STREAM] = this.buildBoardTransceiver(peerId);
     }
 
     buildVideoTransceiver = (peerId) => {
@@ -132,14 +122,6 @@ class Peercast extends Component {
         return new ScreenStreamTransceiver(peerId, CONNECTION_KEY_SCREEN_STREAM)
             .on(CONNECTION_KEY_SCREEN_STREAM, (src) => {
                 const newState = { screenStatus: 'active', screenSrc: src };
-                this.setState(newState);
-            })
-    }
-
-    buildBoardTransceiver = (peerId) => {
-        return new BoardStreamTransceiver(peerId, CONNECTION_KEY_BOARD_STREAM)
-            .on(CONNECTION_KEY_BOARD_STREAM, (src) => {
-                const newState = { boardStatus: 'active', boardSrc: src };
                 this.setState(newState);
             })
     }
@@ -230,9 +212,13 @@ class Peercast extends Component {
             .on('call', (data) => this.handleNegotiation(data))
             .on('end', this.endCall.bind(this, false))
             .on('callAdvice', (data) => this.handleCallAdvice(data))
+            .on('showArtifact',(preference) => this.handleArtifactEvent(preference))
             .emit('joinSession', this.getSessionData());
     }
 
+    handleArtifactEvent = (preference) => {
+        this.setState({selectedArtifact:preference.artifactId});
+    }
 
     /**
      * The PeerId is the socket id of either the coach or the member
@@ -245,7 +231,6 @@ class Peercast extends Component {
 
         if (peerId) {
             this.transceivers[CONNECTION_KEY_VIDEO_STREAM].start(true);
-            this.transceivers[CONNECTION_KEY_BOARD_STREAM].start(this.canvasStream);
         }
     }
 
@@ -254,7 +239,6 @@ class Peercast extends Component {
         this.isCaller = false;
         this.buildTransceivers(peerId);
         this.transceivers[CONNECTION_KEY_VIDEO_STREAM].join(preference);
-        this.transceivers[CONNECTION_KEY_BOARD_STREAM].start(this.canvasStream);
         this.setState({ sessionStatus: "Joining Call" })
     }
 
@@ -404,15 +388,29 @@ class Peercast extends Component {
         return <p>{this.state.sessionStatus}</p>
     }
 
+    onArtifactChange = (artifactId) => {
+        if (!this.isCoach) {
+            return;
+        }
+
+        const sessionId = this.props.params.sessionId;
+        const userId = this.props.appStore.credentials.id;
+
+        const data = { sessionId: sessionId, userId: userId, artifactId: artifactId };
+
+        socket.emit('artifactChanged', data);
+    }
+
     render() {
-        const { localSrc, peerSrc, screenSrc, boardSrc, portalSize, isMinimized } = this.state;
+        const { localSrc, peerSrc, screenSrc, portalSize, isMinimized, selectedArtifact } = this.state;
         const viewHeight = portalSize.height * 0.94;
         const canShare = this.peerStreamStatus === "active";
+        const artifactPreference = this.isCoach ? "none" : selectedArtifact;
 
         return (
             <div style={{ padding: 2, height: viewHeight }}>
 
-                <VideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} boardSrc={boardSrc} myBoard={this.myBoard} coachingPlan={this.coachingPlan} actionList={this.actionList} isMinimized={isMinimized} />
+                <PeerVideoBoard localSrc={localSrc} peerSrc={peerSrc} screenSrc={screenSrc} myBoard={this.myBoard} coachingPlan={this.coachingPlan} actionList={this.actionList} isMinimized={isMinimized} preference={artifactPreference} isCoach={this.isCoach} onArtifactChange={this.onArtifactChange} />
 
                 <Row style={{ marginTop: 8 }}>
                     <Col span={12}>
