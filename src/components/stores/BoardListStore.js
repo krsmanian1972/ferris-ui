@@ -1,4 +1,4 @@
-import { decorate, observable, computed,action } from 'mobx';
+import { decorate, observable, computed, action } from 'mobx';
 
 import { assetHost } from '../stores/APIEndpoints';
 
@@ -15,7 +15,7 @@ export default class BoardListStore {
     message = EMPTY_MESSAGE;
 
     boards = [];
-    boardCount=0;
+    boardCount = 0;
 
     constructor(props) {
         this.apiProxy = props.apiProxy;
@@ -37,44 +37,45 @@ export default class BoardListStore {
      * Obtain the List of Boards for the given sessionUserFuzzyId
      *
      */
-    load = async(sessionUserId) => {
+    load = async (sessionId) => {
 
-        this.state  = PENDING;
+        this.state = PENDING;
         this.message = EMPTY_MESSAGE;
 
         try {
-
-            const url = `${assetHost}/boards/${sessionUserId}`;
+            const url = `${assetHost}/boards/${sessionId}`;
             const response = await this.apiProxy.getAsync(url);
-            if(response.status === 404) {
+
+            if (response.status === 404) {
                 this.state = DONE;
                 this.boards = [];
                 this.boardCount = 0;
                 return;
             }
             const data = await response.json();
+
             this.boards = data;
             this.boardCount = data.length;
             this.state = DONE;
         }
         catch (e) {
             this.state = ERROR;
-            this.message= ERROR_MESSAGE;
+            this.message = ERROR_MESSAGE;
         }
     }
 
 }
 
-decorate(BoardListStore,{
-    state:observable,
+decorate(BoardListStore, {
+    state: observable,
     message: observable,
 
-    boards:observable,
-    boardCount:observable,
+    boards: observable,
+    boardCount: observable,
 
-    isLoading:computed,
-    isError:computed,
-    isDone:computed,
+    isLoading: computed,
+    isError: computed,
+    isDone: computed,
 
-    load:action,
+    load: action,
 });

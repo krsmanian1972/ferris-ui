@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
-import { Button, Row, Col, Tabs, Tooltip, Space} from 'antd';
+import { Button, Row, Col, Tabs, Tooltip, Space } from 'antd';
 
 import { fabric } from 'fabric';
 
@@ -34,10 +34,10 @@ class Board extends Component {
     constructor(props) {
         super(props);
 
-        this.fabricObjectMap = {};
-        //update objectCounter on Load
+        this.fabricObjectMap = new Map();
         this.objectCounter = 0;
 
+        this.currentTab = 1;
         this.mode = PEN;
 
         this.state = {
@@ -46,16 +46,15 @@ class Board extends Component {
             panes: initialPanes,
             isLoading: true
         };
-        this.sessionId = this.props.sessionId;
+
+        this.isPushing = false;
     }
 
     provisionPriorBoards = async () => {
 
         const listStore = new BoardListStore({ apiProxy: this.props.appStore.apiProxy });
-        await listStore.load(this.props.sessionUserId);
-        //remove this to get the provisionBoard woriking
-
-        listStore.boardCount = 0;
+        await listStore.load(this.props.sessionId);
+   
         if (listStore.boardCount === 0) {
             this.setState({ isLoading: false });
             return;
@@ -64,8 +63,8 @@ class Board extends Component {
         const { panes } = this.state;
 
         this.expandInitialPanes(panes, listStore.boardCount);
-        await this.forceLoad(panes, 1);
-        this.undoTab(false);
+
+        this.pull();
 
         this.setState({ panes: panes, isLoading: false })
     }
@@ -79,64 +78,17 @@ class Board extends Component {
         const diff = capacity - panes.length;
         var boardIndex = panes.length + 1;
 
-        for (var j = 0; j < diff; j++) {
-            this.undoTabList[boardIndex] = [];
-
+        for (var j = 0; j < diff; j++) { 
             const tab = { title: `Board-${boardIndex}`, key: `${boardIndex}`, closable: false, isLoaded: false };
             panes.push(tab);
-
             boardIndex++;
         }
 
         this.newTabIndex = boardIndex;
     }
 
-    /**
-     * Load the Board if not loaded already
-     * @param {*} boardKey
-     */
-    salvage = async (boardKey) => {
-
-        const { panes } = this.state;
-
-        if (panes[boardKey - 1].isLoaded) {
-            return;
-        }
-
-        await this.forceLoad(panes, boardKey);
-    }
-
-    /**
-     * Loading the board forcefully from the content repository.
-     *
-     * May be useful for the first time when the react-state is yet to commit
-     * the reality.
-     *
-     * @param {*} panes
-     * @param {*} boardKey
-     */
-    forceLoad = async (panes, boardKey) => {
-        const boardFileName = `Board_${boardKey}`;
-
-        this.undoTabList[boardKey] = []
-
-        try {
-            const url = `${assetHost}/boards/${this.props.sessionUserId}/${boardFileName}`;
-            const response = await this.props.appStore.apiProxy.getAsync(url);
-            const data = await response.text();
-            this.undoTabList[boardKey].push(data);
-            panes[boardKey - 1].isLoaded = true;
-        }
-        catch (e) {
-            this.undoTabList[boardKey] = [];
-            panes[boardKey - 1].isLoaded = true;
-        }
-
-
-    }
-
     componentDidMount() {
-        
+
         this.ctx = new fabric.Canvas('canvas', { isDrawingMode: true });
 
         this.ctx.on('mouse:down', this.fabricOnMouseDown);
@@ -145,12 +97,16 @@ class Board extends Component {
         this.ctx.on('path:created', this.fabricOnPathCreated);
 
         socket.on('downstreamPaint', (data) => {
-            this.socketPaint(data);
+            this.socketEvent(data);
         });
 
         this.provisionPriorBoards();
 
+        this.alignWithCoach();
+    }
 
+    alignWithCoach = () => {
+        
     }
 
     fabricOnMouseDown = (options) => {
@@ -171,7 +127,7 @@ class Board extends Component {
      */
     nextObjectId = () => {
         const objectId = this.props.userId + '~' + this.objectCounter;
-        this.objectCounter = this.objectCounter+1;
+        this.objectCounter = this.objectCounter + 1;
         return objectId;
     }
 
@@ -190,39 +146,71 @@ class Board extends Component {
         this.currentJsonPatch = this.ctx.toJSON(['id']);
 
         options.path['excludeFromExport'] = true;
-        this.fabricObjectMap[objectId] = options.path;
+        this.fabricObjectMap.set(objectId, options.path);
 
         //publish the patch to the listeners
-        socket.emit('upstreamPaint', { 
+        socket.emit('upstreamPaint', {
+            type: "pathCreated",
             jsonData: this.currentJsonPatch,
-            isCoach: this.props.isCoach, 
-            userId: this.props.userId, 
-            sessionId: this.sessionId }
-        )
+            isCoach: this.props.isCoach,
+            userId: this.props.userId,
+            sessionId: this.props.sessionId
+        });
     }
 
-    socketPaint = (data) => {
-        this.loadFromJsonPatch(data.data.jsonData);
-    }
-
-    // Save the current tab information as the user may switch to a differnt tab
-    componentWillUnmount() {
-    }
-
-
-    pushUndoList = () => {
-    }
-
-    loadFromJsonPatch = (jsonData) => {
-        if(jsonData.objects.length === 0) {
-            return;
-        }
-        if (jsonData.objects[0].type !== "path") {
-            return;
+    /**
+     * Saving the canvas to a local storage
+     */
+    push = async () => {
+        this.isPushing = true;
+        for (let [id, path] of this.fabricObjectMap) {
+            path.excludeFromExport = false;
         }
 
-        const pathArray = jsonData.objects[0].path;
-        const id = jsonData.objects[0].id;
+        const whole = this.ctx.toJSON(['id']);
+        const name = `Board_${this.currentTab}`;
+        socket.emit('canvasupstream', {
+            content: whole,
+            sessionId: this.props.sessionId,
+            name: name
+        });
+
+        for (let [id, path] of this.fabricObjectMap) {
+            path.excludeFromExport = true;
+        }
+
+        this.isPushing = false;
+    }
+
+    pull = async () => {
+        const boardFileName = `Board_${this.currentTab}`;
+        const url = `${assetHost}/boards/${this.props.sessionId}/${boardFileName}`;
+        try {
+            const response = await this.props.appStore.apiProxy.getAsync(url);
+            const data = await response.text();
+            const jsonData = JSON.parse(data);
+
+            this.ctx.clear();
+            this.fabricObjectMap.clear();
+
+            const fabricObjects = jsonData.objects;
+            for (let i = 0; i < fabricObjects.length; i++) {
+                this.addPath(fabricObjects[i])
+            }
+
+            this.objectCounter = fabricObjects.length;
+            this.ctx.renderAll();
+        }
+        catch (e) {
+            this.objectCounter = 0;
+            this.ctx.clear();
+        }
+    }
+
+    addPath = (jsonPart) => {
+
+        const pathArray = jsonPart.path;
+        const id = jsonPart.id;
 
         const lineArray = new fabric.Path(pathArray);
         lineArray['id'] = id;
@@ -230,9 +218,33 @@ class Board extends Component {
         lineArray['stroke'] = 'white';
         lineArray['excludeFromExport'] = true;
 
-        this.fabricObjectMap[id] = lineArray;
+        this.fabricObjectMap.set(id, lineArray);
         this.ctx.add(lineArray);
+    }
+
+    loadFromJsonPatch = (jsonData) => {
+        if (jsonData.objects.length === 0) {
+            return;
+        }
+        if (jsonData.objects[0].type !== "path") {
+            return;
+        }
+
+        this.addPath(jsonData.objects[0]);
         this.ctx.renderAll();
+    }
+
+    socketEvent = (data) => {
+        if (data.type === "pathCreated") {
+            this.loadFromJsonPatch(data.jsonData);
+        }
+        if (data.type === "tabChanged") {
+            this.onTabClick(data.activeTab);
+        }
+    }
+
+    // Save the current tab information as the user may switch to a differnt tab
+    componentWillUnmount() {
     }
 
     freeDrawing = () => {
@@ -245,8 +257,8 @@ class Board extends Component {
         this.mode = TEXTBOX;
         this.setState({ selectedButton: this.mode });
         this.ctx.isDrawingMode = false;
-        
-        const text = new fabric.Textbox('Type your Text Here',{width: 450});
+
+        const text = new fabric.Textbox('Type your Text Here', { width: 450 });
         text['id'] = this.nextObjectId();
         text['excludeFromExport'] = true;
 
@@ -261,6 +273,26 @@ class Board extends Component {
 
     onTabClick = async (activeTab, mouseEvent) => {
 
+        if (this.currentTab === activeTab) {
+            return;
+        }
+
+        await this.push();
+        this.currentTab = activeTab;
+        this.setState({ activeKey: activeTab });
+        await this.pull();
+
+        if (this.props.isCoach) {
+            socket.emit('upstreamPaint', {
+                type: "tabChanged",
+                activeTab: this.currentTab,
+                isCoach: this.props.isCoach,
+                userId: this.props.userId,
+                sessionId: this.props.sessionId
+            });
+        }
+
+        this.freeDrawing();
     }
 
     add = () => {
@@ -278,14 +310,16 @@ class Board extends Component {
 
     renderControls = (isLoading) => {
 
-        const { panes } = this.state;
+        const { panes, activeKey } = this.state;
 
         return (
             <Row>
                 <Col span={12}>
                     <Tabs type="editable-card"
-                        defaultActiveKey="1" tabPosition="top" style={{ height: 30 }}
-                        onTabClick={this.onTabClick} onEdit={this.onEdit}>
+                        activeKey={activeKey}
+                        tabPosition="top" style={{ height: 30 }}
+                        onTabClick={this.onTabClick}
+                        onEdit={this.onEdit}>
                         {panes.map(pane => (
                             <TabPane tab={pane.title} key={pane.key} closable={pane.closable}>
                             </TabPane>
@@ -301,11 +335,11 @@ class Board extends Component {
                             <Tooltip title="TextBox">
                                 <Button onClick={this.textWrite} id="textBox" style={this.getStyle(TEXTBOX)} type="primary" icon={<ItalicOutlined />} shape={"circle"} />
                             </Tooltip>
-                            <Tooltip title="Undo">
-                                <Button onClick={this.undoEvent} id="undo" style={this.state.undoShape} type="primary" icon={<UndoOutlined />} shape={"circle"} />
+                            <Tooltip title="Save">
+                                <Button onClick={this.push} id="undo" type="primary" icon={<UndoOutlined />} shape={"circle"} />
                             </Tooltip>
-                            <Tooltip title="Redo">
-                                <Button onClick={this.redo} id="redo" style={this.state.redoShape} type="primary" icon={<RedoOutlined />} shape={"circle"} />
+                            <Tooltip title="Refresh">
+                                <Button onClick={this.pull} id="redo" type="primary" icon={<RedoOutlined />} shape={"circle"} />
                             </Tooltip>
                             <Tooltip title="Erase">
                                 <Button onClick={this.erase} id="erase" style={this.getStyle(ERASER)} type="primary" icon={<ScissorOutlined />} shape={"circle"} />
