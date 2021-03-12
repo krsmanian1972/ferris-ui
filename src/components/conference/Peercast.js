@@ -55,6 +55,7 @@ class Peercast extends Component {
 
             portalSize: { height: window.innerHeight, width: window.innerWidth },
 
+            // For Member (Not for Coach)
             selectedArtifact: "none",
         };
 
@@ -80,6 +81,9 @@ class Peercast extends Component {
         this.myBoard = <Board key={MY_BOARD_KEY} isCoach={this.isCoach} userId={userId} boardId={MY_BOARD_KEY} sessionUserId={sessionUserId} sessionId={sessionId} />
         this.coachingPlan = <SharedCoachingPlan key="gt" isCoach={this.isCoach} enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
         this.actionList = <SharedActionList key="tt" isCoach={this.isCoach} enrollmentId={enrollmentId} memberId={memberId} apiProxy={props.appStore.apiProxy} />
+
+        // For Coach (Not for member)
+        this.coachArtifactId = "none";
     }
 
     initializeNotesStore = (sessionUserId) => {
@@ -212,12 +216,8 @@ class Peercast extends Component {
             .on('call', (data) => this.handleNegotiation(data))
             .on('end', this.endCall.bind(this, false))
             .on('callAdvice', (data) => this.handleCallAdvice(data))
-            .on('showArtifact',(preference) => this.handleArtifactEvent(preference))
+            .on('showArtifact', (preference) => this.handleArtifactEvent(preference))
             .emit('joinSession', this.getSessionData());
-    }
-
-    handleArtifactEvent = (preference) => {
-        this.setState({selectedArtifact:preference.artifactId});
     }
 
     /**
@@ -239,7 +239,8 @@ class Peercast extends Component {
         this.isCaller = false;
         this.buildTransceivers(peerId);
         this.transceivers[CONNECTION_KEY_VIDEO_STREAM].join(preference);
-        this.setState({ sessionStatus: "Joining Call" })
+        this.setState({ sessionStatus: "Joining Call" });
+        this.onArtifactChange(this.coachArtifactId);
     }
 
     toggleScreenSharing = () => {
@@ -388,10 +389,34 @@ class Peercast extends Component {
         return <p>{this.state.sessionStatus}</p>
     }
 
+    /**
+     * Event Received from the Upstream Coach
+     * to synchronize the Member's artifact view.
+     * @param {*} preference 
+     */
+    handleArtifactEvent = (preference) => {
+        if (this.isCoach) {
+            return;
+        }
+        this.setState({ selectedArtifact: preference.artifactId });
+    }
+
+    /**
+     * When the coach changes the artifact view the member screen should
+     * reflect the change.
+     * 
+     * When the member joins the meeting after the coach, the member screen
+     * should be synchronized. So we send the onArtifactChange Message.
+     * 
+     * @param {*} artifactId 
+     * @returns 
+     */
     onArtifactChange = (artifactId) => {
         if (!this.isCoach) {
             return;
         }
+
+        this.coachArtifactId = artifactId;
 
         const sessionId = this.props.params.sessionId;
         const userId = this.props.appStore.credentials.id;

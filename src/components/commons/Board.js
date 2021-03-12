@@ -54,7 +54,7 @@ class Board extends Component {
 
         const listStore = new BoardListStore({ apiProxy: this.props.appStore.apiProxy });
         await listStore.load(this.props.sessionId);
-   
+
         if (listStore.boardCount === 0) {
             this.setState({ isLoading: false });
             return;
@@ -78,7 +78,7 @@ class Board extends Component {
         const diff = capacity - panes.length;
         var boardIndex = panes.length + 1;
 
-        for (var j = 0; j < diff; j++) { 
+        for (var j = 0; j < diff; j++) {
             const tab = { title: `Board-${boardIndex}`, key: `${boardIndex}`, closable: false, isLoaded: false };
             panes.push(tab);
             boardIndex++;
@@ -106,7 +106,14 @@ class Board extends Component {
     }
 
     alignWithCoach = () => {
-        
+        if (this.props.isCoach) {
+            return;
+        }
+        socket.emit('upstreamPaint', {
+            type: "whichTab",
+            userId: this.props.userId,
+            sessionId: this.props.sessionId
+        });
     }
 
     fabricOnMouseDown = (options) => {
@@ -159,9 +166,16 @@ class Board extends Component {
     }
 
     /**
-     * Saving the canvas to a local storage
+     * Saving the canvas to a local storage. 
+     * 
+     * Saving is allowed only from the Coach's canvas.
+     * 
      */
     push = async () => {
+        if (!this.props.isCoach) {
+            return;
+        }
+
         this.isPushing = true;
         for (let [id, path] of this.fabricObjectMap) {
             path.excludeFromExport = false;
@@ -182,9 +196,14 @@ class Board extends Component {
         this.isPushing = false;
     }
 
+    /**
+     * In the absence of version, the browser offers a cached version of the content.
+     * 
+     */
     pull = async () => {
         const boardFileName = `Board_${this.currentTab}`;
-        const url = `${assetHost}/boards/${this.props.sessionId}/${boardFileName}`;
+        const ver = new Date().getTime();
+        const url = `${assetHost}/boards/${this.props.sessionId}/${boardFileName}?nocache=${ver}`;
         try {
             const response = await this.props.appStore.apiProxy.getAsync(url);
             const data = await response.text();
@@ -195,7 +214,7 @@ class Board extends Component {
 
             const fabricObjects = jsonData.objects;
             for (let i = 0; i < fabricObjects.length; i++) {
-                this.addPath(fabricObjects[i])
+                this.addPath(fabricObjects[i]);
             }
 
             this.objectCounter = fabricObjects.length;
@@ -241,6 +260,9 @@ class Board extends Component {
         if (data.type === "tabChanged") {
             this.onTabClick(data.activeTab);
         }
+        if (data.type === "whichTab") {
+            this.publishMyTab();
+        }
     }
 
     // Save the current tab information as the user may switch to a differnt tab
@@ -282,17 +304,23 @@ class Board extends Component {
         this.setState({ activeKey: activeTab });
         await this.pull();
 
-        if (this.props.isCoach) {
-            socket.emit('upstreamPaint', {
-                type: "tabChanged",
-                activeTab: this.currentTab,
-                isCoach: this.props.isCoach,
-                userId: this.props.userId,
-                sessionId: this.props.sessionId
-            });
-        }
+        this.publishMyTab();
 
         this.freeDrawing();
+    }
+
+    publishMyTab = () => {
+        if (!this.props.isCoach) {
+            return;
+        }
+
+        socket.emit('upstreamPaint', {
+            type: "tabChanged",
+            activeTab: this.currentTab,
+            isCoach: this.props.isCoach,
+            userId: this.props.userId,
+            sessionId: this.props.sessionId
+        });
     }
 
     add = () => {
