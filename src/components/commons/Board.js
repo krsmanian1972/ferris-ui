@@ -90,11 +90,14 @@ class Board extends Component {
     componentDidMount() {
 
         this.ctx = new fabric.Canvas('canvas', { isDrawingMode: true });
-
+        this.ctx.freeDrawingBrush.color = '#FFFFFF';
+        
         this.ctx.on('mouse:down', this.fabricOnMouseDown);
         this.ctx.on('mouse:move', this.fabricOnMouseMove);
         this.ctx.on('mouse:up', this.fabricOnMouseUp);
         this.ctx.on('path:created', this.fabricOnPathCreated);
+        this.ctx.on('object:modified',this.fabricModified);
+
 
         socket.on('downstreamPaint', (data) => {
             this.socketEvent(data);
@@ -138,15 +141,16 @@ class Board extends Component {
         return objectId;
     }
 
+    fabricModified = (options) => {
+        console.log("------");
+        console.log(options);
+    }
     /**
      * upstream paint
      * @param {*} options 
      */
     fabricOnPathCreated = (options) => {
-        if (this.mode !== PEN) {
-            return;
-        }
-
+       
         const objectId = this.nextObjectId();
 
         options.path['id'] = objectId;
@@ -164,6 +168,20 @@ class Board extends Component {
             sessionId: this.props.sessionId
         });
     }
+
+    textWrite = () => {
+        this.mode = TEXTBOX;
+        this.setState({ selectedButton: this.mode });
+        this.ctx.isDrawingMode = false;
+        this.ctx.freeDrawingBrush.color = '#FFFFFF';
+
+        const text = new fabric.Textbox('Type your Text Here', { width: 450 });
+        text['id'] = this.nextObjectId();
+        //text['excludeFromExport'] = true;
+
+        this.ctx.add(text);
+    }
+
 
     /**
      * Saving the canvas to a local storage. 
@@ -273,21 +291,12 @@ class Board extends Component {
         this.mode = PEN;
         this.setState({ selectedButton: this.mode });
         this.ctx.isDrawingMode = true;
+        this.ctx.freeDrawingBrush.color = '#FFFFFF';
     }
 
-    textWrite = () => {
-        this.mode = TEXTBOX;
-        this.setState({ selectedButton: this.mode });
-        this.ctx.isDrawingMode = false;
-
-        const text = new fabric.Textbox('Type your Text Here', { width: 450 });
-        text['id'] = this.nextObjectId();
-        text['excludeFromExport'] = true;
-
-        this.ctx.add(text);
-    }
-
+   
     erase = () => {
+
     }
 
     undoTab = (samePane) => {
