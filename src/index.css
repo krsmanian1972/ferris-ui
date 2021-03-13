@@ -138,10 +138,6 @@ code {
   width:100%;
 }
 
-.hiddenBoard {
-  background-color:rgb(44, 147, 209);
-}
-
 .miniBoard {
   background-color: #646464;
   height:100%;

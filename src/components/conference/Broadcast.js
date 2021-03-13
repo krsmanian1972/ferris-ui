@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
 import { Row, Col, Space, Button, Tooltip, Tag } from 'antd';
-import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutlined, AudioMutedOutlined, EyeInvisibleOutlined, CompressOutlined, ExpandOutlined, ExperimentOutlined } from '@ant-design/icons';
+import { ShareAltOutlined, CameraOutlined, AudioOutlined, StopOutlined, BookOutlined, AudioMutedOutlined, EyeInvisibleOutlined, CompressOutlined, ExpandOutlined, ExperimentOutlined, CodepenOutlined } from '@ant-design/icons';
+
+import socket from '../stores/socket';
 
 import NoteListStore from '../stores/NoteListStore';
 import NotesStore from '../stores/NotesStore';
@@ -15,6 +17,9 @@ import ArtifactPanel from './ArtifactPanel';
 
 import ModhakamLauncher from '../games/ModhakamLauncher';
 
+import Board from '../commons/Board';
+
+const MY_BOARD_KEY = 'myBoard';
 
 @inject("appStore")
 @observer
@@ -41,9 +46,18 @@ class Broadcast extends Component {
 
 			isScreenSharing: false,
 			isGameMode: false,
+			isBoardMode: false,
 
-			portalSize: { height: window.innerHeight, width: window.innerWidth }
+			portalSize: { height: window.innerHeight, width: window.innerWidth },
+
+			// For Member (Not for Coach)
+			selectedArtifact: "none",
 		}
+
+		this.isCoach = this.props.params.sessionUserType === 'coach';
+
+		// For Coach (Not for member)
+		this.coachArtifactId = "none"
 	}
 
 	/**
@@ -63,6 +77,8 @@ class Broadcast extends Component {
 		});
 
 		this.auditUser();
+
+		this.registerSocketHooks();
 	}
 
 	auditUser = () => {
@@ -77,6 +93,68 @@ class Broadcast extends Component {
 
 		this.videoRoom.startRoom();
 		this.screencast.prepare();
+	}
+
+	registerSocketHooks = () => {
+		socket
+			.on('callAdvice', (advice) => this.handleCallAdvice(advice))
+			.on('call',(data) => this.handleNegotiation(data))
+			.on('showArtifact', (preference) => this.handleArtifactEvent(preference))
+			.emit('joinSession', this.getConferenceData());
+	}
+
+	/**
+	 * When the member joins the call in an on going conference 
+	 * the member shall ask the coach to publish its current artifact id. 
+	 * 
+	 * Current artifactId is the artifact the coach is showing to others.
+	 * 
+	 * @returns 
+	 */
+	 handleCallAdvice = (advice) => {
+
+        if (this.isCoach) {
+            return;
+        }
+		
+		if(advice.status !== "ok") {
+			return;
+		}
+
+		const conferenceId = this.props.params.conferenceId;
+		const userId = this.props.appStore.credentials.id;
+
+        socket.emit('call', {
+            type: "whichArtifact",
+            userId: userId,
+			to:advice.guideSocketId,
+            sessionId: conferenceId,
+        });
+    }
+
+	/**
+	 * When two peers needs to align on certain items.
+	 * Eg. A member asked the coach whichArtifact I should prefer
+	 * 
+	 * @param {*} data 
+	 */
+	handleNegotiation = (data) => {
+		if(data.type && data.type === "whichArtifact") {
+			this.onArtifactChange(this.coachArtifactId);
+		}
+	}
+
+	/**
+	 * Let us use the conference Id instead of sessionId.
+	 * All the different sessions have one common conferenceId
+	 * @returns 
+	 */
+	 getConferenceData = () => {
+		const conferenceId = this.props.params.conferenceId;
+		const role = this.props.params.sessionUserType;
+		const userId = this.props.appStore.credentials.id;
+
+		return { sessionId: conferenceId, userId: userId, role: role };
 	}
 
 	initializeNotesStore = () => {
@@ -197,13 +275,14 @@ class Broadcast extends Component {
 
 	render() {
 
-		const { myVideoStream, portalSize, isMinimized, isActive } = this.state;
+		const { myVideoStream, portalSize, isMinimized, isActive, selectedArtifact } = this.state;
 
 		const viewHeight = portalSize.height * 0.94;
 		const viewPanelHeight = viewHeight * 0.99;
 
 		const videoPanelStyle = isMinimized ? { height: viewPanelHeight, width: 10 } : { height: viewPanelHeight };
 		const artifactPanelStyle = isMinimized ? { height: viewPanelHeight, width: "100%" } : { height: viewPanelHeight };
+		const artifactPreference = this.isCoach ? "none" : selectedArtifact;
 
 		return (
 			<div style={{ padding: 2, height: viewHeight }}>
@@ -216,59 +295,89 @@ class Broadcast extends Component {
 						{this.renderArtifacts(artifactPanelStyle)}
 					</div>
 				</div>
-				{this.renderControls(isActive)}
+				{this.renderControls(isActive, artifactPreference)}
 				{this.opaqueId && <NotesDrawer notesStore={this.notesStore} />}
 			</div>
 		)
 	}
 
 	getShareScreenTooltip = () => {
-		if (!this.state.isScreenSharing) {
-			return "Start Screen Sharing";
+		if (this.state.selectedArtifact === "screen") {
+			return "Stop Screen Sharing";
 		}
-		return "Stop Screen Sharing";
+		return "Start Screen Sharing";
 	}
 
 	getLabTooltip = () => {
-		if (!this.state.isGameMode) {
-			return "Experiential Lab";
+		if (this.state.selectedArtifact === "lab") {
+			return "Exit from Lab";
 		}
-		return "Quit Lab";
+		return "Experiential Lab";
+	}
+
+	getBoardTooltip = () => {
+		if (this.state.selectedArtifact !== "myBoard") {
+			return "Blackboard";
+		}
+
+		return "Close Board";
 	}
 
 	getShareScreenIcon = () => {
-		if (!this.state.isScreenSharing) {
+		if (this.state.selectedArtifact !== "screen") {
 			return <ShareAltOutlined />;
 		}
 		return <StopOutlined />;
 	}
 
 	getLabIcon = () => {
-		if (!this.state.isGameMode) {
+		if (this.state.selectedArtifact !== "lab") {
 			return <ExperimentOutlined />;
 		}
 		return <StopOutlined />;
 	}
 
-	toggleScreenSharing = () => {
-		if (!this.state.isScreenSharing) {
-			this.setState({ isScreenSharing: true });
-			this.screencast.startScreenSharing();
-			return;
+	getBoardIcon = () => {
+		if (this.state.selectedArtifact !== "myBoard") {
+			return <CodepenOutlined />;
 		}
-
-		this.setState({ isScreenSharing: false });
-		this.screencast.stopSharing();
+		return <StopOutlined />;
 	}
 
-	toggleLabMode = () => {
-		if (!this.state.isGameMode) {
-			this.setState({ isGameMode: true });
+	/**
+	 * A coach can lock a members accessible widgets.
+	 * @returns 
+	 */
+	canAllowArtifactSelection = () => {
+		if (this.isCoach) {
+			return true;
+		}
+
+		return this.state.selectedArtifact === "none";
+	}
+
+	toggleArtifact = (artifactId) => {
+		if (!this.canAllowArtifactSelection()) {
 			return;
 		}
 
-		this.setState({ isGameMode: false });
-		this.screencast.stopSharing();
+		const currentArtifact = this.state.selectedArtifact;
+
+		if(artifactId === "screen" && currentArtifact !== "screen") {
+			this.screencast.startScreenSharing();
+		}
+
+		if(artifactId === "screen" && currentArtifact === "screen") {
+			this.screencast.stopSharing();
+		}
+
+		if(currentArtifact === artifactId) {
+			artifactId="none";
+		}
+
+		this.setState({selectedArtifact:artifactId});
+
+		this.onArtifactChange(artifactId);
 	}
 
 	getPeerScreens = () => {
@@ -298,13 +407,73 @@ class Broadcast extends Component {
 	}
 
 	/**
-	 * Canvas Sharing will supersede Screen Sharing.
+	* When the coach changes the artifact view the member screen should
+	* reflect the change.
+	* 
+	* When the member joins the meeting after the coach, the member screen
+	* should be synchronized. So we send the onArtifactChange Message.
+	* 
+	* @param {*} artifactId 
+	* @returns 
+	*/
+	onArtifactChange = (artifactId) => {
+		if (!this.isCoach) {
+			return;
+		}
+
+		this.coachArtifactId = artifactId;
+
+		const conferenceId = this.props.params.conferenceId;
+		const userId = this.props.appStore.credentials.id;
+
+		const data = { sessionId: conferenceId, 
+			userId: userId, 
+			artifactId: artifactId 
+		};
+
+		socket.emit('artifactChanged', data);
+	}
+
+	/**
+	 * Event Received from the Upstream Coach
+	 * to synchronize the Member's artifact view.
+	 * @param {*} preference 
+	 */
+	handleArtifactEvent = (preference) => {
+		
+		if (this.isCoach) {
+			return;
+		}
+
+		if(preference.artifactId === this.state.selectedArtifact) {
+			return;
+		}
+
+		this.setState({ selectedArtifact: preference.artifactId });
+	}
+
+	/**
+	 * Blackboard will be given the highest priority, followed by
+	 * Experiential Lab. 
+	 * 
+	 * ScreenSharing is the least priority artifact.
 	 * 
 	 */
 	renderArtifacts = (artifactPanelStyle) => {
-		const { isGameMode, myScreenStream, isScreenSharing, isPrepared } = this.state;
+		const {myScreenStream, selectedArtifact, isPrepared } = this.state;
 
-		if (isGameMode && isPrepared) {
+		if (selectedArtifact === "myBoard") {
+			const sessionUserId = this.props.params.sessionUserId;
+			const conferenceId = this.props.params.conferenceId;
+			const userId = this.props.appStore.credentials.id;
+			return (
+				<div className="activeItem" style={{ background: "#646464" }}>
+					<Board key={MY_BOARD_KEY} isCoach={this.isCoach} userId={userId} boardId={MY_BOARD_KEY} sessionUserId={sessionUserId} sessionId={conferenceId} />
+				</div>
+			)
+		}
+
+		if (selectedArtifact === "lab" && isPrepared) {
 			return (
 				<>
 					<ModhakamLauncher height={artifactPanelStyle.height} screencast={this.screencast} username={this.myusername} callback={this.gameCallback} />
@@ -313,7 +482,7 @@ class Broadcast extends Component {
 			)
 		}
 
-		if (isScreenSharing && isPrepared) {
+		if (selectedArtifact === "screen" && isPrepared) {
 			return (
 				<>
 					{this.getPeerScreens().map(value => value)}
@@ -323,7 +492,9 @@ class Broadcast extends Component {
 		}
 	}
 
-	renderControls = (isActive) => {
+	renderControls = (isActive, artifactPreference) => {
+
+		const disableArtifact = !(isActive && this.canAllowArtifactSelection());
 
 		return (
 			<Row style={{ marginTop: 8 }}>
@@ -343,11 +514,14 @@ class Broadcast extends Component {
 				</Col>
 				<Col span={6}>
 					<Space>
-						<Tooltip key="screen_tp" title={this.getShareScreenTooltip()}>
-							<Button key="screen_bt" disabled={!isActive} id="screenShare" type="primary" icon={this.getShareScreenIcon()} shape="circle" onClick={this.toggleScreenSharing} />
+						<Tooltip key="board_tp" title={this.getBoardTooltip()}>
+							<Button key="board_bt" disabled={disableArtifact} id="board_bt" type="primary" icon={this.getBoardIcon()} shape="circle" onClick={()=>this.toggleArtifact("myBoard")} />
 						</Tooltip>
 						<Tooltip key="game_tp" title={this.getLabTooltip()}>
-							<Button key="game_bt" disabled={!isActive} id="game_bt" type="primary" icon={this.getLabIcon()} shape="circle" onClick={this.toggleLabMode} />
+							<Button key="game_bt" disabled={disableArtifact} id="game_bt" type="primary" icon={this.getLabIcon()} shape="circle" onClick={()=>this.toggleArtifact("lab")} />
+						</Tooltip>
+						<Tooltip key="screen_tp" title={this.getShareScreenTooltip()}>
+							<Button key="screen_bt" disabled={disableArtifact} id="screen_bt" type="primary" icon={this.getShareScreenIcon()} shape="circle" onClick={()=>this.toggleArtifact("screen")} />
 						</Tooltip>
 						<Tag key="screen_tag_tp" color="#108ee9">{this.state.screenStatus}</Tag>
 					</Space>
