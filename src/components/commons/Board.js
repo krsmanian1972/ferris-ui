@@ -364,10 +364,6 @@ class Board extends Component {
         this.ctx.renderAll();
     }
 
-    removeObject = (jsonData) => {
-
-    }
-
     /**
      * When we receive events from upstream, we branch 
      * the Upstream events to the respective handlers
