@@ -91,12 +91,12 @@ class Board extends Component {
 
         this.ctx = new fabric.Canvas('canvas', { isDrawingMode: true });
         this.ctx.freeDrawingBrush.color = '#FFFFFF';
-        
+
         this.ctx.on('mouse:down', this.fabricOnMouseDown);
         this.ctx.on('mouse:move', this.fabricOnMouseMove);
         this.ctx.on('mouse:up', this.fabricOnMouseUp);
         this.ctx.on('path:created', this.fabricOnPathCreated);
-        this.ctx.on('object:modified',this.fabricModified);
+        this.ctx.on('after:render', this.fabricModified);
 
 
         socket.on('downstreamPaint', (data) => {
@@ -142,15 +142,14 @@ class Board extends Component {
     }
 
     fabricModified = (options) => {
-        console.log("------");
-        console.log(options);
+
     }
     /**
      * upstream paint
      * @param {*} options 
      */
     fabricOnPathCreated = (options) => {
-       
+
         const objectId = this.nextObjectId();
 
         options.path['id'] = objectId;
@@ -173,12 +172,15 @@ class Board extends Component {
         this.mode = TEXTBOX;
         this.setState({ selectedButton: this.mode });
         this.ctx.isDrawingMode = false;
-        this.ctx.freeDrawingBrush.color = '#FFFFFF';
 
         const text = new fabric.Textbox('Type your Text Here', { width: 450 });
         text['id'] = this.nextObjectId();
-        //text['excludeFromExport'] = true;
 
+        text.set('backgroundColor', backgroundColour);
+        text.set('stroke',"white");
+        text.set('fill',"white");
+        text.set("fontSize",20);
+        
         this.ctx.add(text);
     }
 
@@ -232,7 +234,13 @@ class Board extends Component {
 
             const fabricObjects = jsonData.objects;
             for (let i = 0; i < fabricObjects.length; i++) {
-                this.addPath(fabricObjects[i]);
+                const anObject = fabricObjects[i];
+                if (anObject.type === "textbox") {
+                    this.addText(anObject);
+                }
+                else {
+                    this.addPath(anObject);
+                }
             }
 
             this.objectCounter = fabricObjects.length;
@@ -244,19 +252,33 @@ class Board extends Component {
         }
     }
 
+    addText = (jsonPart) => {
+
+        const id = jsonPart.id;
+
+        const textBox = new fabric.Textbox(jsonPart.text,{...jsonPart});
+        textBox['excludeFromExport'] = true;
+
+        this.fabricObjectMap.set(id, textBox);
+        this.ctx.add(textBox);
+    }
+
     addPath = (jsonPart) => {
 
         const pathArray = jsonPart.path;
         const id = jsonPart.id;
 
-        const lineArray = new fabric.Path(pathArray);
-        lineArray['id'] = id;
-        lineArray['fill'] = backgroundColour;
-        lineArray['stroke'] = 'white';
-        lineArray['excludeFromExport'] = true;
+        const path = new fabric.Path(pathArray);
+        path.set("left",239.5);
+        path.set("top",50.5);
+        path['id'] = id;
+        path['fill'] = backgroundColour;
+        path['opacity'] = 1;
+        path['stroke'] = 'white';
+        path['excludeFromExport'] = true;
 
-        this.fabricObjectMap.set(id, lineArray);
-        this.ctx.add(lineArray);
+        this.fabricObjectMap.set(id, path);
+        this.ctx.add(path);
     }
 
     loadFromJsonPatch = (jsonData) => {
@@ -294,7 +316,7 @@ class Board extends Component {
         this.ctx.freeDrawingBrush.color = '#FFFFFF';
     }
 
-   
+
     erase = () => {
 
     }
