@@ -84,6 +84,8 @@ class Board extends Component {
         this.provisionPriorBoards();
 
         this.alignWithCoach();
+
+        this.publishMyTab();
     }
 
 
@@ -152,6 +154,7 @@ class Board extends Component {
         });
     }
 
+   
     /**
      * We need a unique id for each of the objects on the canvas.
      * The Object Id is a combination of userId+"~"+Object Counter
@@ -176,7 +179,7 @@ class Board extends Component {
      * @param {*} id 
      */
     peelCtr = (id) => {
-        if(id) {
+        if(!id) {
             return -1;
         }
         
@@ -187,7 +190,7 @@ class Board extends Component {
         }
 
         if(this.props.userId !== arr[0]) {
-            return -1;
+            return -2;
         }
 
         return parseInt(arr[1],10);
