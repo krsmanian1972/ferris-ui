@@ -92,12 +92,8 @@ class Board extends Component {
         this.ctx = new fabric.Canvas('canvas', { isDrawingMode: true });
         this.ctx.freeDrawingBrush.color = '#FFFFFF';
 
-        this.ctx.on('mouse:down', this.fabricOnMouseDown);
-        this.ctx.on('mouse:move', this.fabricOnMouseMove);
-        this.ctx.on('mouse:up', this.fabricOnMouseUp);
         this.ctx.on('path:created', this.fabricOnPathCreated);
-        this.ctx.on('after:render', this.fabricModified);
-
+        this.ctx.on('object:modified', this.fabricModified);
 
         socket.on('downstreamPaint', (data) => {
             this.socketEvent(data);
@@ -119,15 +115,6 @@ class Board extends Component {
         });
     }
 
-    fabricOnMouseDown = (options) => {
-    }
-
-    fabricOnMouseMove = (options) => {
-    }
-
-    fabricOnMouseUp = (options) => {
-    }
-
     /**
      * We need a unique id for each of the objects on the canvas.
      * The Object Id is a combination of userId+"~"+Object Counter
@@ -141,11 +128,9 @@ class Board extends Component {
         return objectId;
     }
 
-    fabricModified = (options) => {
-
-    }
     /**
-     * upstream paint
+     * When the user creates a new path in the canvas, we should notify
+     * the listeners.
      * @param {*} options 
      */
     fabricOnPathCreated = (options) => {
@@ -154,13 +139,13 @@ class Board extends Component {
 
         options.path['id'] = objectId;
         this.currentJsonPatch = this.ctx.toJSON(['id']);
-
         options.path['excludeFromExport'] = true;
         this.fabricObjectMap.set(objectId, options.path);
 
         //publish the patch to the listeners
         socket.emit('upstreamPaint', {
-            type: "pathCreated",
+            type: "canvasEvent",
+            action: "add",
             jsonData: this.currentJsonPatch,
             isCoach: this.props.isCoach,
             userId: this.props.userId,
@@ -168,22 +153,141 @@ class Board extends Component {
         });
     }
 
-    textWrite = () => {
+    /**
+     * When the user modifies a canvas element. For example when changing
+     * the text of a text box or transforming or translating 
+     * the text box,  we send the event to the listeners.
+     * 
+     * @param {*} event 
+     * 
+     */
+    fabricModified = (event) => {
+        const objectId = event.target.id;
+
+        const anObject = this.fabricObjectMap.get(objectId);
+        anObject.excludeFromExport = false;
+        this.currentJsonPatch = this.ctx.toJSON(['id']);
+        anObject.excludeFromExport = true;
+
+        socket.emit('upstreamPaint', {
+            type: "canvasEvent",
+            action: "modify",
+            jsonData: this.currentJsonPatch,
+            isCoach: this.props.isCoach,
+            userId: this.props.userId,
+            sessionId: this.props.sessionId
+        });
+    }
+
+    createTextBox = () => {
         this.mode = TEXTBOX;
         this.setState({ selectedButton: this.mode });
         this.ctx.isDrawingMode = false;
 
-        const text = new fabric.Textbox('Type your Text Here', { width: 450 });
-        text['id'] = this.nextObjectId();
+        const objectId = this.nextObjectId();
 
+        const text = new fabric.Textbox('Type your Text Here', { width: 450 });
         text.set('backgroundColor', backgroundColour);
-        text.set('stroke',"white");
-        text.set('fill',"white");
-        text.set("fontSize",20);
-        
+        text.set('stroke', "white");
+        text.set('fill', "white");
+        text.set("fontSize", 20);
+
+        text['id'] = objectId;
+        text.excludeFromExport = false;
+
         this.ctx.add(text);
+
+        this.fabricObjectMap.set(objectId, text);
+        this.currentJsonPatch = this.ctx.toJSON(['id']);
+        text.excludeFromExport = true;
+
+        //publish the patch to the listeners
+        socket.emit('upstreamPaint', {
+            type: "canvasEvent",
+            action: "add",
+            jsonData: this.currentJsonPatch,
+            isCoach: this.props.isCoach,
+            userId: this.props.userId,
+            sessionId: this.props.sessionId
+        });
     }
 
+    addText = (jsonPart) => {
+        const id = jsonPart.id;
+        const textBox = new fabric.Textbox(jsonPart.text, { ...jsonPart });
+        textBox.excludeFromExport = true;
+        this.fabricObjectMap.set(id, textBox);
+        this.ctx.add(textBox);
+    }
+
+    addPath = (jsonPart) => {
+        const id = jsonPart.id;
+        const path = new fabric.Path(jsonPart.path, { ...jsonPart });
+        path.excludeFromExport = true;
+        this.fabricObjectMap.set(id, path);
+        this.ctx.add(path);
+    }
+
+    addObject = (jsonData) => {
+        if (jsonData.objects.length === 0) {
+            return;
+        }
+
+        const anObject = jsonData.objects[0];
+
+        if (anObject.type === "textbox") {
+            this.addText(anObject);
+        }
+        else {
+            this.addPath(anObject);
+        }
+
+        this.ctx.renderAll();
+    }
+
+    modifyObject = (jsonData) => {
+        if (jsonData.objects.length === 0) {
+            return;
+        }
+
+        const anObject = jsonData.objects[0];
+        const currentObject = this.fabricObjectMap.get(anObject.id);
+        if (currentObject) {
+            this.ctx.remove(currentObject);
+        }
+
+        if (anObject.type === "textbox") {
+            this.addText(anObject);
+        }
+        else {
+            this.addPath(anObject);
+        }
+
+        this.ctx.renderAll();
+    }
+
+    /**
+     * Branching the Upstream events to the respective handlers
+     * @param {*} event 
+     * @returns 
+     */
+    socketEvent = (event) => {
+        if (event.type === "canvasEvent") {
+            if (event.action === "add") {
+                this.addObject(event.jsonData);
+                return;
+            }
+            if (event.action === "modify") {
+                this.modifyObject(event.jsonData);
+            }
+        }
+        if (event.type === "tabChanged") {
+            this.onTabClick(event.activeTab);
+        }
+        if (event.type === "whichTab") {
+            this.publishMyTab();
+        }
+    }
 
     /**
      * Saving the canvas to a local storage. 
@@ -252,59 +356,7 @@ class Board extends Component {
         }
     }
 
-    addText = (jsonPart) => {
-
-        const id = jsonPart.id;
-
-        const textBox = new fabric.Textbox(jsonPart.text,{...jsonPart});
-        textBox['excludeFromExport'] = true;
-
-        this.fabricObjectMap.set(id, textBox);
-        this.ctx.add(textBox);
-    }
-
-    addPath = (jsonPart) => {
-
-        const pathArray = jsonPart.path;
-        const id = jsonPart.id;
-
-        const path = new fabric.Path(pathArray);
-        path.set("left",239.5);
-        path.set("top",50.5);
-        path['id'] = id;
-        path['fill'] = backgroundColour;
-        path['opacity'] = 1;
-        path['stroke'] = 'white';
-        path['excludeFromExport'] = true;
-
-        this.fabricObjectMap.set(id, path);
-        this.ctx.add(path);
-    }
-
-    loadFromJsonPatch = (jsonData) => {
-        if (jsonData.objects.length === 0) {
-            return;
-        }
-        if (jsonData.objects[0].type !== "path") {
-            return;
-        }
-
-        this.addPath(jsonData.objects[0]);
-        this.ctx.renderAll();
-    }
-
-    socketEvent = (data) => {
-        if (data.type === "pathCreated") {
-            this.loadFromJsonPatch(data.jsonData);
-        }
-        if (data.type === "tabChanged") {
-            this.onTabClick(data.activeTab);
-        }
-        if (data.type === "whichTab") {
-            this.publishMyTab();
-        }
-    }
-
+   
     // Save the current tab information as the user may switch to a differnt tab
     componentWillUnmount() {
     }
@@ -392,7 +444,7 @@ class Board extends Component {
                                 <Button onClick={this.freeDrawing} id="pen" style={this.getStyle(PEN)} type="primary" icon={<EditOutlined />} shape={"circle"} />
                             </Tooltip>
                             <Tooltip title="TextBox">
-                                <Button onClick={this.textWrite} id="textBox" style={this.getStyle(TEXTBOX)} type="primary" icon={<ItalicOutlined />} shape={"circle"} />
+                                <Button onClick={this.createTextBox} id="textBox" style={this.getStyle(TEXTBOX)} type="primary" icon={<ItalicOutlined />} shape={"circle"} />
                             </Tooltip>
                             <Tooltip title="Save">
                                 <Button onClick={this.push} id="undo" type="primary" icon={<UndoOutlined />} shape={"circle"} />
