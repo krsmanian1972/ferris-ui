@@ -4,7 +4,7 @@ import { Button, Row, Col, Tabs, Tooltip, Space } from 'antd';
 
 import { fabric } from 'fabric';
 
-import { EditOutlined, ItalicOutlined, UndoOutlined, RedoOutlined, ScissorOutlined } from '@ant-design/icons';
+import { EditOutlined, ItalicOutlined, ScissorOutlined,SelectOutlined } from '@ant-design/icons';
 
 import socket from '../stores/socket';
 import BoardListStore from "../stores/BoardListStore";
@@ -12,11 +12,17 @@ import { assetHost } from '../stores/APIEndpoints';
 
 const { TabPane } = Tabs;
 
+const CANVAS = 'canvas'
 const PEN = 'PEN';
 const ERASER = 'ERASER';
 const TEXTBOX = 'TEXTBOX';
+const SELECTION = 'SELECTION';
 
-const backgroundColour = '#646464';
+const BACKGROUND_COLOR = '#646464';
+const COLOR = '#FFFFFF';
+const FONT_SIZE = 20;
+const DEFAULT_TEXT = 'Type here...'
+
 const selected = { background: "white", color: "black", borderColor: "black" };
 const unselected = {};
 const initialPanes = [
@@ -24,8 +30,20 @@ const initialPanes = [
     { title: 'Board-2', key: '2', closable: false, isLoaded: true },
 ];
 
-const CANVAS_WIDTH = 1280
+const CANVAS_WIDTH = 1280;
 const CANVAS_HEIGHT = 1280;
+
+const DOWNSTREAM_PAINT = "downstreamPaint";
+const UPSTREAM_PAINT = "upstreamPaint";
+
+const CANVAS_EVENT = "canvasEvent";
+const WHICH_TAB_EVENT = "whichTab";
+const TAB_CHANGED_EVENT = 'tabChanged';
+const TAB_CREATION_EVENT = 'newTab';
+
+const ADD_ACTION = "add";
+const MODIFY_ACTION = "modify";
+const ERASE_ACTION = "erase";
 
 @inject("appStore")
 @observer
@@ -50,6 +68,34 @@ class Board extends Component {
         this.isPushing = false;
     }
 
+    componentDidMount() {
+
+        this.ctx = new fabric.Canvas(CANVAS, { isDrawingMode: true });
+        this.ctx.freeDrawingBrush.color = COLOR;
+
+        this.ctx.on('path:created', this.fabricOnPathCreated);
+        this.ctx.on('object:modified', this.fabricOnModified);
+        this.ctx.on('object:removed',this.fabricOnRemoved);
+
+        socket.on(DOWNSTREAM_PAINT, (event) => {
+            this.socketEvent(event);
+        });
+
+        this.provisionPriorBoards();
+
+        this.alignWithCoach();
+    }
+
+
+    /**
+     * We prefer a lazy load approach to load the boards.
+     * 
+     * We start by creating placeholder tabs and load the first tab if available.
+     * 
+     * Our strategy is to load a board when the user clicks on the tab. Loading by demand.
+     * 
+     * Before we load a board we should save the current board (No dirty check as of now).
+     */
     provisionPriorBoards = async () => {
 
         const listStore = new BoardListStore({ apiProxy: this.props.appStore.apiProxy });
@@ -63,6 +109,9 @@ class Board extends Component {
         const { panes } = this.state;
 
         this.expandInitialPanes(panes, listStore.boardCount);
+
+        // Ensure that we start from the 1st Tab
+        this.currentTab = 1;
 
         this.pull();
 
@@ -87,29 +136,17 @@ class Board extends Component {
         this.newTabIndex = boardIndex;
     }
 
-    componentDidMount() {
-
-        this.ctx = new fabric.Canvas('canvas', { isDrawingMode: true });
-        this.ctx.freeDrawingBrush.color = '#FFFFFF';
-
-        this.ctx.on('path:created', this.fabricOnPathCreated);
-        this.ctx.on('object:modified', this.fabricModified);
-
-        socket.on('downstreamPaint', (data) => {
-            this.socketEvent(data);
-        });
-
-        this.provisionPriorBoards();
-
-        this.alignWithCoach();
-    }
-
+    /**
+     * if the user is not a coach, she/he will ask for which tab to focus. 
+     * Usefull when a user disconnects and join into an ongoing session.
+     * @returns 
+     */
     alignWithCoach = () => {
         if (this.props.isCoach) {
             return;
         }
-        socket.emit('upstreamPaint', {
-            type: "whichTab",
+        socket.emit(UPSTREAM_PAINT, {
+            type: WHICH_TAB_EVENT,
             userId: this.props.userId,
             sessionId: this.props.sessionId
         });
@@ -121,6 +158,8 @@ class Board extends Component {
      * 
      * Let us increment the objectCounter whenever we invoke this method.
      * 
+     * Kind of RDBMS sequence creating technique!!!
+     * 
      */
     nextObjectId = () => {
         const objectId = this.props.userId + '~' + this.objectCounter;
@@ -128,9 +167,55 @@ class Board extends Component {
         return objectId;
     }
 
+     /**
+     *
+     * check if the first part is matching the userId. if not return -1;
+     * return the second part as int.
+     * return -1 if something is wrong.
+     * 
+     * @param {*} id 
+     */
+    peelCtr = (id) => {
+        if(id) {
+            return -1;
+        }
+        
+        let arr = id.split("~");
+
+        if(arr.length !== 2) {
+            return -1;
+        }
+
+        if(this.props.userId !== arr[0]) {
+            return -1;
+        }
+
+        return parseInt(arr[1],10);
+    }
+   
+
+    /**
+     * To notify the members of the conference/session about a change in the canvas.
+     * The action may be either "add" or "modify".
+     * 
+     * @param {*} action 
+     */
+    emitCanvasEvent = (action) => {
+        socket.emit(UPSTREAM_PAINT, {
+            type: CANVAS_EVENT,
+            action: action,
+            jsonData: this.currentJsonPatch,
+            isCoach: this.props.isCoach,
+            userId: this.props.userId,
+            sessionId: this.props.sessionId
+        });
+    }
+    
+
     /**
      * When the user creates a new path in the canvas, we should notify
      * the listeners.
+     * 
      * @param {*} options 
      */
     fabricOnPathCreated = (options) => {
@@ -139,40 +224,47 @@ class Board extends Component {
 
         options.path['id'] = objectId;
         this.currentJsonPatch = this.ctx.toJSON(['id']);
+
         options.path['excludeFromExport'] = true;
         this.fabricObjectMap.set(objectId, options.path);
 
-        //publish the patch to the listeners
-        socket.emit('upstreamPaint', {
-            type: "canvasEvent",
-            action: "add",
-            jsonData: this.currentJsonPatch,
-            isCoach: this.props.isCoach,
-            userId: this.props.userId,
-            sessionId: this.props.sessionId
-        });
+        this.emitCanvasEvent(ADD_ACTION);
     }
 
     /**
-     * When the user modifies a canvas element. For example when changing
+     * When the user modifies a canvas element. 
+     * 
+     * For example when changing
      * the text of a text box or transforming or translating 
      * the text box,  we send the event to the listeners.
      * 
      * @param {*} event 
      * 
      */
-    fabricModified = (event) => {
+    fabricOnModified = (event) => {
+
         const objectId = event.target.id;
 
         const anObject = this.fabricObjectMap.get(objectId);
+
+        if(!anObject) {
+            return;
+        }
+
         anObject.excludeFromExport = false;
         this.currentJsonPatch = this.ctx.toJSON(['id']);
         anObject.excludeFromExport = true;
 
-        socket.emit('upstreamPaint', {
-            type: "canvasEvent",
-            action: "modify",
-            jsonData: this.currentJsonPatch,
+        this.emitCanvasEvent(MODIFY_ACTION);
+    }
+
+    fabricOnRemoved = (event) => {
+        const objectId = event.target.id;
+
+        socket.emit(UPSTREAM_PAINT, {
+            type: CANVAS_EVENT,
+            action: ERASE_ACTION,
+            jsonData: {id:objectId},
             isCoach: this.props.isCoach,
             userId: this.props.userId,
             sessionId: this.props.sessionId
@@ -186,30 +278,21 @@ class Board extends Component {
 
         const objectId = this.nextObjectId();
 
-        const text = new fabric.Textbox('Type your Text Here', { width: 450 });
-        text.set('backgroundColor', backgroundColour);
-        text.set('stroke', "white");
-        text.set('fill', "white");
-        text.set("fontSize", 20);
-
+        const text = new fabric.Textbox(DEFAULT_TEXT, { width: 450 });
         text['id'] = objectId;
-        text.excludeFromExport = false;
+        text.set('backgroundColor', BACKGROUND_COLOR);
+        text.set('stroke', COLOR);
+        text.set('fill', COLOR);
+        text.set("fontSize", FONT_SIZE);
 
         this.ctx.add(text);
 
+        text.excludeFromExport = false;
         this.fabricObjectMap.set(objectId, text);
         this.currentJsonPatch = this.ctx.toJSON(['id']);
         text.excludeFromExport = true;
 
-        //publish the patch to the listeners
-        socket.emit('upstreamPaint', {
-            type: "canvasEvent",
-            action: "add",
-            jsonData: this.currentJsonPatch,
-            isCoach: this.props.isCoach,
-            userId: this.props.userId,
-            sessionId: this.props.sessionId
-        });
+        this.emitCanvasEvent(ADD_ACTION);
     }
 
     addText = (jsonPart) => {
@@ -245,6 +328,18 @@ class Board extends Component {
         this.ctx.renderAll();
     }
 
+    deleteObject = (jsonData) => {
+        if(!jsonData) {
+            return;
+        }
+        const id = jsonData.id;
+        const anObject = this.fabricObjectMap.get(id);
+        if(anObject) {
+           this.ctx.remove(anObject);
+           this.fabricObjectMap.delete(id); 
+        }
+    }
+
     modifyObject = (jsonData) => {
         if (jsonData.objects.length === 0) {
             return;
@@ -266,25 +361,35 @@ class Board extends Component {
         this.ctx.renderAll();
     }
 
+    removeObject = (jsonData) => {
+
+    }
+
     /**
-     * Branching the Upstream events to the respective handlers
+     * When we receive events from upstream, we branch 
+     * the Upstream events to the respective handlers
      * @param {*} event 
      * @returns 
      */
     socketEvent = (event) => {
-        if (event.type === "canvasEvent") {
-            if (event.action === "add") {
+        if (event.type === CANVAS_EVENT) {
+            if (event.action === ADD_ACTION) {
                 this.addObject(event.jsonData);
-                return;
             }
-            if (event.action === "modify") {
+            else if (event.action === MODIFY_ACTION) {
                 this.modifyObject(event.jsonData);
             }
+            else if(event.action === ERASE_ACTION) {
+                this.deleteObject(event.jsonData);
+            }
         }
-        if (event.type === "tabChanged") {
-            this.onTabClick(event.activeTab);
+        else if (event.type === TAB_CHANGED_EVENT) {
+            this.onTabClick(event.activeKey);
         }
-        if (event.type === "whichTab") {
+        else if (event.type === TAB_CREATION_EVENT) {
+            this.onNewTab(event.activeKey);
+        }
+        else if (event.type === WHICH_TAB_EVENT) {
             this.publishMyTab();
         }
     }
@@ -301,7 +406,7 @@ class Board extends Component {
         }
 
         this.isPushing = true;
-        for (let [id, path] of this.fabricObjectMap) {
+        for (let path of this.fabricObjectMap.values()) {
             path.excludeFromExport = false;
         }
 
@@ -313,7 +418,7 @@ class Board extends Component {
             name: name
         });
 
-        for (let [id, path] of this.fabricObjectMap) {
+        for (let path of this.fabricObjectMap.values()) {
             path.excludeFromExport = true;
         }
 
@@ -326,6 +431,7 @@ class Board extends Component {
      */
     pull = async () => {
         const boardFileName = `Board_${this.currentTab}`;
+
         const ver = new Date().getTime();
         const url = `${assetHost}/boards/${this.props.sessionId}/${boardFileName}?nocache=${ver}`;
         try {
@@ -337,6 +443,8 @@ class Board extends Component {
             this.fabricObjectMap.clear();
 
             const fabricObjects = jsonData.objects;
+
+            var maxCtr= 1;
             for (let i = 0; i < fabricObjects.length; i++) {
                 const anObject = fabricObjects[i];
                 if (anObject.type === "textbox") {
@@ -345,9 +453,13 @@ class Board extends Component {
                 else {
                     this.addPath(anObject);
                 }
+                
+                const ctr = this.peelCtr(anObject.id);
+                maxCtr = Math.max(maxCtr,ctr);
             }
 
-            this.objectCounter = fabricObjects.length;
+            // Will get corrupted during deletion operation;
+            this.objectCounter = maxCtr;
             this.ctx.renderAll();
         }
         catch (e) {
@@ -356,9 +468,13 @@ class Board extends Component {
         }
     }
 
-   
-    // Save the current tab information as the user may switch to a differnt tab
+
+    /** 
+     * Save the current tab information as the user may switch to a different component.
+     * We won't save the drawings made by non-coach user.
+    */
     componentWillUnmount() {
+        this.push();
     }
 
     freeDrawing = () => {
@@ -368,23 +484,81 @@ class Board extends Component {
         this.ctx.freeDrawingBrush.color = '#FFFFFF';
     }
 
+    selection = () => {
+        this.mode = SELECTION;
+        this.setState({ selectedButton: this.mode });
+        this.ctx.isDrawingMode = false;
+    }
 
     erase = () => {
+        this.mode = ERASER;
+        this.setState({ selectedButton: this.mode });
+        this.ctx.isDrawingMode = false;
 
+        const activeObject = this.ctx.getActiveObject();
+        const id = activeObject.id;
+
+        this.ctx.remove(activeObject);
+        this.fabricObjectMap.delete(id);
     }
 
-    undoTab = (samePane) => {
+    /**
+    * The coach shall answer the whichTab question made by a non-coach user.
+    * @returns 
+    */
+    publishMyTab = () => {
+        if (!this.props.isCoach) {
+            return;
+        }
+
+        socket.emit(UPSTREAM_PAINT, {
+            type: TAB_CHANGED_EVENT,
+            activeKey: this.currentTab,
+            isCoach: this.props.isCoach,
+            userId: this.props.userId,
+            sessionId: this.props.sessionId
+        });
     }
 
-    onTabClick = async (activeTab, mouseEvent) => {
+    /**
+    * The coach shall answer the whichTab question made by a non-coach user.
+    * @returns 
+    */
+     publishNewTab = (activeKey) => {
+        if (!this.props.isCoach) {
+            return;
+        }
 
-        if (this.currentTab === activeTab) {
+        socket.emit(UPSTREAM_PAINT, {
+            type: TAB_CREATION_EVENT,
+            activeKey: activeKey,
+            isCoach: this.props.isCoach,
+            userId: this.props.userId,
+            sessionId: this.props.sessionId
+        });
+    }
+
+    /**
+     * When the User clicks on a Tab.
+     * 
+     * If we allow the coach and members to work on different tabs, it may cause mayhem.
+     * At the same time we can allow a member to refer a different tab during a session.
+     * 
+     * Important : Tab Handling should be revisited
+     *  
+     * @param {*} activeKey 
+     * @param {*} mouseEvent 
+     * @returns 
+     */
+    onTabClick = async (activeKey, mouseEvent) => {
+
+        if (this.currentTab === activeKey) {
             return;
         }
 
         await this.push();
-        this.currentTab = activeTab;
-        this.setState({ activeKey: activeTab });
+        this.currentTab = activeKey;
+        this.setState({ activeKey });
         await this.pull();
 
         this.publishMyTab();
@@ -392,24 +566,56 @@ class Board extends Component {
         this.freeDrawing();
     }
 
-    publishMyTab = () => {
+    /**
+     * Learnt from AntD, this interesting javascript technique. 
+     * Treaing a local method as value in the current instance.
+     * 
+     * The action is add which is a method name in the current instance.
+     * 
+     * @param {*} targetKey 
+     * @param {*} action 
+     */
+    onEdit = (targetKey, action) => {
+        this[action](targetKey);
+    };
+
+    /**
+     * When the coach creates a new tab, we provision a new pane
+     * and should notify all the connected peers to provision a new tab
+     * @returns 
+     */
+    add = async () => {
+
         if (!this.props.isCoach) {
             return;
         }
 
-        socket.emit('upstreamPaint', {
-            type: "tabChanged",
-            activeTab: this.currentTab,
-            isCoach: this.props.isCoach,
-            userId: this.props.userId,
-            sessionId: this.props.sessionId
-        });
-    }
+        const activeKey = `${this.newTabIndex}`;
 
-    add = () => {
+        const { panes } = this.state;
+        panes.push({ title: `Board-${this.newTabIndex}`, key: activeKey, closable: false, isLoaded: true });
+        this.setState({ panes: panes, activeKey });
+
+        this.publishNewTab(activeKey);
+
+        this.newTabIndex++;
     };
 
-    undoEvent = () => {
+    /**
+     * When we receive an event from the upstream to provision a new tab.
+     * @param {*} activeKey 
+     */
+    onNewTab = (activeKey) => {
+
+        if (this.props.isCoach) {
+            return;
+        }
+
+        const { panes } = this.state;
+        panes.push({ title: `Board-${this.newTabIndex}`, key: activeKey, closable: false, isLoaded: true });
+        this.setState({ panes: panes, activeKey });
+
+        this.newTabIndex++;
     }
 
     getStyle = (compKey) => {
@@ -446,11 +652,8 @@ class Board extends Component {
                             <Tooltip title="TextBox">
                                 <Button onClick={this.createTextBox} id="textBox" style={this.getStyle(TEXTBOX)} type="primary" icon={<ItalicOutlined />} shape={"circle"} />
                             </Tooltip>
-                            <Tooltip title="Save">
-                                <Button onClick={this.push} id="undo" type="primary" icon={<UndoOutlined />} shape={"circle"} />
-                            </Tooltip>
-                            <Tooltip title="Refresh">
-                                <Button onClick={this.pull} id="redo" type="primary" icon={<RedoOutlined />} shape={"circle"} />
+                            <Tooltip title="Select">
+                                <Button onClick={this.selection} id="selection" style={this.getStyle(SELECTION)} type="primary" icon={<SelectOutlined />} shape={"circle"} />
                             </Tooltip>
                             <Tooltip title="Erase">
                                 <Button onClick={this.erase} id="erase" style={this.getStyle(ERASER)} type="primary" icon={<ScissorOutlined />} shape={"circle"} />
@@ -473,7 +676,7 @@ class Board extends Component {
                 </div>
                 <div style={{ overflow: "auto", border: "3px solid rgb(59,109,171)" }}>
                     <div key="container" id="container" ref={ref => (this.container = ref)}>
-                        <canvas height={CANVAS_HEIGHT} width={CANVAS_WIDTH} className="activeBoard" key="canvas" ref={ref => (this.canvas = ref)} id='canvas' />
+                        <canvas height={CANVAS_HEIGHT} width={CANVAS_WIDTH} className="activeBoard" key={CANVAS} ref={ref => (this.canvas = ref)} id={CANVAS} />
                     </div>
                 </div>
             </div>
