@@ -17,7 +17,7 @@ class BoardList extends Component {
     constructor(props) {
         super(props);
         this.store = new BoardListStore({ apiProxy: props.appStore.apiProxy });
-        this.store.load(props.sessionUserId);
+        this.store.load(props.sessionId);
     }
 
     displayMessage = () => {
@@ -59,7 +59,7 @@ class BoardList extends Component {
         const settings = {
             dots: false,
             infinite: true,
-            slidesToShow: Math.min(2, boardCount),
+            slidesToShow: Math.min(1, boardCount),
             slidesToScroll: 1,
             swipeToSlide: true,
         };
@@ -71,7 +71,7 @@ class BoardList extends Component {
                     <Carousel ref={ref => (this.carousel = ref)} {...settings}>
                         {boards && boards.map(item => {
                             return (
-                                <MiniBoard key={item.Ok} apiProxy={this.props.appStore.apiProxy} boardId={item.Ok} sessionUserId={this.props.sessionUserId} listType="session" />
+                                <MiniBoard key={item.Ok} apiProxy={this.props.appStore.apiProxy} boardId={item.Ok} sessionId={this.props.sessionId} listType="session" />
                             )
                         })}
                     </Carousel>

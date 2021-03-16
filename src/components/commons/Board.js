@@ -70,7 +70,7 @@ class Board extends Component {
 
     componentDidMount() {
 
-        this.ctx = new fabric.Canvas(CANVAS, { isDrawingMode: true });
+        this.ctx = new fabric.Canvas(this.canvas, { isDrawingMode: true });
         this.ctx.freeDrawingBrush.color = COLOR;
 
         this.ctx.on('path:created', this.fabricOnPathCreated);
@@ -675,7 +675,7 @@ class Board extends Component {
                 </div>
                 <div style={{ overflow: "auto", border: "3px solid rgb(59,109,171)" }}>
                     <div key="container" id="container" ref={ref => (this.container = ref)}>
-                        <canvas height={CANVAS_HEIGHT} width={CANVAS_WIDTH} className="activeBoard" key={CANVAS} ref={ref => (this.canvas = ref)} id={CANVAS} />
+                        <canvas height={CANVAS_HEIGHT} width={CANVAS_WIDTH} className="activeBoard" key={CANVAS} ref={ref => (this.canvas = ref)} />
                     </div>
                 </div>
             </div>

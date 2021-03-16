@@ -212,9 +212,8 @@ class SessionDetailUI extends Component {
         if (session.sessionType === "mono" && people.coach) {
             return (
                 <div key="assets" style={{ marginTop: 10 }}>
-                    <BoardList key="cb" title="Coach Boards" sessionUserId={people.coach.sessionUser.id} />
-                    <BoardList key="ab" title="Actor Boards" sessionUserId={people.member.sessionUser.id} />
-
+                    <BoardList key="cb" title="Session Boards" sessionId={session.id} />
+       
                     <NoteList key="cn" title="Coach Notes" sessionUserId={people.coach.sessionUser.id} closingNotes={session.closingNotes} />
                     <NoteList key="an" title="Actor Notes" sessionUserId={people.member.sessionUser.id} />
                 </div>
