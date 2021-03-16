@@ -774,13 +774,9 @@ export const getBoardsQuery = `query($criteria: EventCriteria!){
     boards{
       session{
         id,
-        name
-      },
-      sessionUser{
-        id,
-        userType,
-        sessionId,
-        userId
+        name,
+        sessionType,
+        conferenceId,
       },
       urls
     }

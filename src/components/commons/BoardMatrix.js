@@ -57,19 +57,18 @@ class BoardMatrix extends Component {
         return (
             <div>
                 {
-                    boards && boards.map((board) => {
-                        const key = `board_${board.userSessionId}`;
-                        const sessionUserId = `board_${board.userSesionId}`;
+                    boards && boards.map((board,index) => {
+                        const key = `div_board_${index}`;
+                        const boardKey = `board_${index}`;
                         const boardId = board.url.slice(1, -1);
-                        const cn = board.userType === 'coach' ? "journal-coach-board" : "journal-member-board";
-
+    
                         return (
                             <div key={key} className="board-matrix-item">
                                 <div className="journal-boards">
                                     <p className="journal-board-title">{board.sessionName}</p>
-                                    <p className={cn}>{boardId} - {board.userType}</p>
+                                    <p>{boardId}</p>
                                 </div>
-                                <MiniBoard key={sessionUserId} apiProxy={this.props.apiProxy} boardId={boardId} sessionUserId={board.userSessionId} listType="matrix" />
+                                <MiniBoard key={boardKey} apiProxy={this.props.apiProxy} boardId={boardId} sessionId={board.sessionId} listType="matrix" />
                             </div>
                         )
                     })

@@ -6,7 +6,6 @@ const PENDING = 'pending';
 const DONE = 'done';
 const ERROR = 'error';
 
-
 const EMPTY_MESSAGE = { status: "", help: "" };
 const ERROR_MESSAGE = { status: "error", help: "Unable to fetch the Boards." };
 
@@ -36,6 +35,35 @@ export default class JournalBoardListStore {
         return this.state === ERROR;
     }
 
+    entryForUrl = (boards) => {
+
+        const entries = [];
+
+        for (var i = 0; i < boards.length; i++) {
+            let session = boards[i].session;
+            let urls = boards[i].urls;
+        
+            let artifactId = session.sessionType === "multi" ? session.conferenceId : session.id;
+            let sessionName = session.name;
+        
+            for (var j = 0; j < urls.length; j++) {
+                entries.push({
+                    sessionId: artifactId,
+                    sessionName: sessionName, 
+                    url: urls[j],
+                });
+            }
+        }
+
+        this.boardResults = entries;
+        this.rowCount = entries.length;
+    }
+
+    /**
+     * When we fetch the board we should be careful about boards at the conference level
+     * @param {*} programId 
+     * @param {*} userId 
+     */
     fetchBoardList = async (programId, userId) => {
         this.state = PENDING;
         this.message = EMPTY_MESSAGE;
@@ -49,17 +77,10 @@ export default class JournalBoardListStore {
         try {
             const response = await this.apiProxy.query(apiHost, getBoardsQuery, variables);
             const data = await response.json();
-            this.boards = data.data.getBoards.boards;
-            this.boardResults = [];
-            for (var i = 0; i < this.boards.length; i++) {
-                for (var j = 0; j < this.boards[i].urls.length; j++) {
-                    this.boardResults.push({
-                        userSessionId: this.boards[i].sessionUser.id,
-                        sessionName: this.boards[i].session.name, url: this.boards[i].urls[j],
-                        userType: this.boards[i].sessionUser.userType,
-                    });
-                }
-            }
+            const boards = data.data.getBoards.boards;
+
+            this.entryForUrl(boards);
+            
             this.state = DONE;
         }
 
@@ -74,9 +95,9 @@ decorate(JournalBoardListStore, {
     state: observable,
     message: observable,
 
-    boards: observable,
     boardResults: observable,
     rowCount: observable,
+    
     isLoading: computed,
     isError: computed,
     isDone: computed,
