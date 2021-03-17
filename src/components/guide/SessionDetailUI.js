@@ -48,11 +48,27 @@ class SessionDetailUI extends Component {
             enrollmentListStore: this.enrollmentListStore,
         });
         this.store.setSelectedEvent(this.props.params.event);
-        this.janusStore = new JanusStore({ apiProxy: props.appStore.apiProxy });
+
+        this.ensureJanusStore();
+    }
+
+    /**
+     * Create Janus store only if required.
+     */
+    ensureJanusStore = () => {
+        if(this.store.isCoach && this.store.isMulti && !this.store.isClosed) {
+            this.janusStore = new JanusStore({ apiProxy: this.props.appStore.apiProxy });
+        }
     }
 
     componentDidMount() {
         this.store.loadPeople();
+    }
+
+    componentWillUnmount() {
+        if(this.janusStore) {
+            this.janusStore.destroy();
+        }
     }
 
 
@@ -117,15 +133,15 @@ class SessionDetailUI extends Component {
         )
     }
 
-    renderPeople = (people, session) => {
+    renderPeople = (people) => {
 
-        if (people.coach && session.sessionType === "mono") {
+        if (people.coach && this.store.isMono) {
             return (
                 <SessionPeers people={people}/>
             )
         }
 
-        if (people.coach && session.sessionType === "multi"){
+        if (people.coach && this.store.isMulti){
             return (
                 <ConferenceMembers sessionStore = {this.store} />
             )
@@ -134,7 +150,8 @@ class SessionDetailUI extends Component {
 
     makeReady = async () => {
         const { session } = this.store.event;
-        if (session.sessionType === "multi") {
+
+        if (this.store.isMulti) {
             this.janusStore.provisionRooms(session.conferenceId);
         }
 
@@ -150,7 +167,7 @@ class SessionDetailUI extends Component {
 
     cancelEvent = () => {
         const { session } = this.store.event;
-        if (session.sessionType === "multi") {
+        if (this.store.isMulti) {
             this.janusStore.removeRooms(session.conferenceId);
         }
         
@@ -160,7 +177,7 @@ class SessionDetailUI extends Component {
 
     completeEvent = () => {
         const { session } = this.store.event;
-        if (session.sessionType === "multi") {
+        if (this.store.isMulti) {
             this.janusStore.removeRooms(session.conferenceId);
         }
         
@@ -209,7 +226,7 @@ class SessionDetailUI extends Component {
     }
 
     renderArtifacts = (people, session) => {
-        if (session.sessionType === "mono" && people.coach) {
+        if (this.store.isMono && people.coach) {
             return (
                 <div key="assets" style={{ marginTop: 10 }}>
                     <BoardList key="cb" title="Session Boards" sessionId={session.id} />
@@ -245,7 +262,7 @@ class SessionDetailUI extends Component {
                 >
                     {this.renderTopSegment(program, session, sessionUser, people)}
                     {this.renderArtifacts(people, session)}
-                    {this.renderPeople(people, session)}
+                    {this.renderPeople(people)}
                 </PageHeader>
 
                 <ClosureDrawer store={this.store} />

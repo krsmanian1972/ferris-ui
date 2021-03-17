@@ -15,10 +15,10 @@ export default class JanusStore {
      * @param {*} conferenceId 
      */
     provisionRooms = (conferenceId) => {
-        const message = { 
-            request: "create", 
-            room: conferenceId, 
-            publishers: 10 
+        const message = {
+            request: "create",
+            room: conferenceId,
+            publishers: 10
         };
 
         this.janusHandle.send({ message: message });
@@ -42,7 +42,7 @@ export default class JanusStore {
      * 
      * @param {*} conferenceId 
      */
-   
+
     removeRooms = (conferenceId) => {
         const videoRoomMsg = { request: "destroy", room: conferenceId };
         this.janusHandle.send({ message: videoRoomMsg });
@@ -65,6 +65,8 @@ export default class JanusStore {
                 console.log(error);
             },
         });
+
+        this.janusInstance = janus;
     }
 
     getJanusHandle = () => {
@@ -84,5 +86,14 @@ export default class JanusStore {
         }
 
         return attachCallback;
+    }
+
+    /**
+     * Let us inform stop polling janus to keep the session live.
+     */
+    destroy = () => {
+        if (this.janusInstance) {
+            this.janusInstance.destroy()
+        }
     }
 }

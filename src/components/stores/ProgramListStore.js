@@ -44,6 +44,15 @@ export default class ProgramListStore {
         const desire = "YOURS";
         this.fetchPrograms(desire);
     }
+
+    /**
+    * May be useful for explaining the features to the User
+    */
+    fetchPlatformPrograms = () => {
+        const desire = "PLATFROM";
+        this.fetchPrograms(desire);
+    }
+
     /**
      * Obtain the List of programs from the Ferris API
      *
@@ -58,8 +67,8 @@ export default class ProgramListStore {
         const variables = {
             criteria: {
                 userId: userFuzzyId,
-                programId:"",
-                desire:desire
+                programId: "",
+                desire: desire
             }
         }
 
@@ -91,7 +100,7 @@ decorate(ProgramListStore, {
     message: observable,
     programs: observable,
     rowCount: observable,
-    change:observable,
+    change: observable,
 
     isLoading: computed,
     isDone: computed,

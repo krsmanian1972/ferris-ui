@@ -28,8 +28,6 @@ const START = "START";
 const COACH = "coach";
 
 const MONO = "mono";
-
-// eslint-disable-next-line
 const MULTI = "multi";
 
 const ALLOWED_MINUTES = new Set([0, 15, 30, 45]);
@@ -294,7 +292,7 @@ export default class SessionStore {
 
             const users = data.data.getSessionUsers.users;
 
-            if (this.event.session.sessionType === MONO) {
+            if (this.isMono) {
                 this.setSessionPeople(users);
             }
             else {
@@ -359,6 +357,18 @@ export default class SessionStore {
             return true;
         }
         return this.event && this.event.sessionUser && this.event.sessionUser.userType === COACH;
+    }
+
+    get isMono() {
+        return this.event && this.event.session.sessionType === MONO;
+    }
+
+    get isMulti() {
+        return this.event && this.event.session.sessionType === MULTI;
+    }
+
+    get isClosed() {
+        return this.event.session && this.event.session.isClosed;
     }
 
     get canMakeReady() {
@@ -603,10 +613,14 @@ decorate(SessionStore, {
     isDone: computed,
     isError: computed,
     isInvalid: computed,
+
     isCoach: computed,
+    isMono: computed,
+    isMulti: computed,
 
     endTime: computed,
 
+    isClosed: computed,
     canMakeReady: computed,
     canCancelEvent: computed,
     canBroadcast: computed,

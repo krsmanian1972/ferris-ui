@@ -6,6 +6,7 @@ import { CodeOutlined } from '@ant-design/icons';
 
 import About from './About';
 
+
 const { Title } = Typography;
 
 const loginCard = {
@@ -13,6 +14,7 @@ const loginCard = {
     width: "50%",
     borderRadius: 12,
 };
+
 
 const failureNotification = () => {
     const args = {
@@ -77,7 +79,7 @@ class LoginScreen extends Component {
                 </div>
 
                 <div>
-                    <About/>
+                    <About />
                 </div>
             </>
         );

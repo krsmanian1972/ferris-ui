@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Dropdown, Menu, Layout, Typography, Row, Col, Space,Tooltip,Button } from 'antd';
+import { Dropdown, Menu, Layout, Typography, Row, Col, Space, Tooltip, Button } from 'antd';
 import { TeamOutlined, UserOutlined } from '@ant-design/icons';
 
 import ownerLogo from '../images/krscode.png';
@@ -27,9 +27,15 @@ class ToolBar extends Component {
         const appStore = this.props.appStore;
         if (!appStore.isLoggedIn()) {
             return (
-                <Col span={22} style={{ textAlign: "right" }}>
-                    <Text strong={true}>Ferris - The Coaching Assistant</Text>
-                </Col>
+                <>
+                    <Col span={12}  style={{ textAlign: "right" }} >
+                        <Text strong={true}>Ferris - The Coaching Assistant</Text>
+                    </Col>
+
+                    <Col span={10} style={{ textAlign: "right" }}>
+                        <Text strong={true}></Text>
+                    </Col>
+                </>
             )
         }
 
@@ -68,7 +74,7 @@ class ToolBar extends Component {
                 <Col span={6} style={{ textAlign: "right" }}>
                     <Space>
                         {this.membersButton()}
-                        <MessageButton appStore = {appStore}/>
+                        <MessageButton appStore={appStore} />
                         <Dropdown.Button overlay={<AccountMenu />} trigger={['click']} icon={<UserOutlined />}>
                             {appStore.credentials.username}
                         </Dropdown.Button>
