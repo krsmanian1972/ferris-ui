@@ -78,7 +78,7 @@ class Premise extends Component {
                         <Paragraph>
                             <ul>
                                 <li>Scheduling and rendering virtual meetings with your teams along with Shared black-boards and experiential games</li>
-                                <li>Scheduling, rendering and monitoring personalized coaching sessions to individuals</li>
+                                <li>Managing personalized coaching plans of individuals</li>
                                 <li>And most importantly journaling every session so that both the coach and the respective individuals access the notes and boards created during the meetings</li>
                             </ul>
                         </Paragraph>
@@ -92,16 +92,15 @@ class Premise extends Component {
     }
 
     /**
-     * What is a Program from the stand point of a Coach and member
-     *
-     */
+    * Enrolling in a program as offered by a coach.
+    */
     getProgramIntro = () => {
-        const url = `${assetHost}/platform/program.mp4`;
+        const url = `${assetHost}/platform/enroll.mp4`;
         return (
             <Card
                 headStyle={cardHeaderStyle}
                 style={{ marginTop: "10px", marginBottom: "10px" }}
-                title={<Title level={4}>Program - A Coach View</Title>}>
+                title={<Title level={4}>Coach and Programs - An invitation to the world</Title>}>
 
                 <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", textAlign: "center", alignItems: "center" }}>
                     <div style={{ width: "60%", textAlign: "left" }}>
@@ -110,7 +109,7 @@ class Premise extends Component {
 
                     <div style={{ width: "40%", marginLeft: 10, textAlign: "left" }}>
                         <Paragraph>
-                            Our humble definition of the word coach is "A person endeavors to pull an individual, team or an organization
+                            Our humble definition of the word coach is "One who endeavors to pull an individual, team or an organization
                             from its current state to a high-potential state".
                         </Paragraph>
 
@@ -120,11 +119,16 @@ class Premise extends Component {
                         </Paragraph>
 
                         <Paragraph>
-                            We call this great service as "Program". 
+                            We term this great service from the Coach as "Program".
                         </Paragraph>
 
                         <Paragraph>
-                            Program is a means for a coach to elaborate the offerings to the world.
+                            Ferris provides a comprehensive template, to allow a coach to systematically 
+                            elaborate a program and the potential outcome to a participating mentee.
+                        </Paragraph>
+
+                        <Paragraph>
+                            Ferris is a means to publish the offerings from a coach to the world.  
                         </Paragraph>
                     </div>
                 </div>
@@ -132,6 +136,37 @@ class Premise extends Component {
         )
     }
 
+    /**
+     * How to enroll in a program
+     */
+     getEnrollmentIntro = () => {
+        const url = `${assetHost}/platform/enrollment.mp4`;
+        return (
+            <Card
+                headStyle={cardHeaderStyle}
+                style={{ marginTop: "10px", marginBottom: "10px" }}
+                title={<Title level={4}>First step towards upskilling - Get Enrolled</Title>}>
+
+                <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", textAlign: "center", alignItems: "center" }}>
+                    <div style={{ width: "40%", marginRight: 10, textAlign: "left" }}>
+                        <Paragraph>
+                            We are happy to navigate you to the right coach for your context.
+                        </Paragraph>
+                        <Paragraph>
+                            Ferris is to connect you with more than 50 stellar mentors across 
+                            various fields.
+                        </Paragraph>
+                        <Paragraph>
+                            Wishing you all the best!!!  
+                        </Paragraph>
+                    </div>
+                    <div style={{ width: "60%", textAlign: "left" }}>
+                        <ReactPlayer width='100%' height='100%' controls url={url} />
+                    </div>
+                </div>
+            </Card>
+        )
+    }
 
     render() {
 
@@ -139,6 +174,7 @@ class Premise extends Component {
             <div>
                 {this.getPlatformIntro()}
                 {this.getProgramIntro()}
+                {this.getEnrollmentIntro()}
             </div>
         )
     }

@@ -29,7 +29,7 @@ class ToolBar extends Component {
             return (
                 <>
                     <Col span={12}  style={{ textAlign: "right" }} >
-                        <Text strong={true}>Ferris - The Coaching Assistant</Text>
+                        <Text style={{color:"rgb(69,49,28)"}} strong={true}>Ferris - The Coaching Assistant</Text>
                     </Col>
 
                     <Col span={10} style={{ textAlign: "right" }}>
