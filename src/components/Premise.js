@@ -39,11 +39,6 @@ class Premise extends Component {
         )
     }
 
-    getCoverUrl = (program) => {
-        const url = `${assetHost}/programs/${program.parentProgramId}/cover/cover.png`;
-        return url;
-    }
-
     /**
      * An introduction to why we design this platform and what are
      * the key differentiators.
@@ -95,7 +90,7 @@ class Premise extends Component {
     * Enrolling in a program as offered by a coach.
     */
     getProgramIntro = () => {
-        const url = `${assetHost}/platform/enroll.mp4`;
+        const url = `${assetHost}/platform/program.mp4`;
         return (
             <Card
                 headStyle={cardHeaderStyle}
