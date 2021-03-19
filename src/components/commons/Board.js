@@ -351,7 +351,9 @@ class Board extends Component {
         const anObject = jsonData.objects[0];
         const currentObject = this.fabricObjectMap.get(anObject.id);
         if (currentObject) {
+            this.ctx.off('object:removed');
             this.ctx.remove(currentObject);
+            this.ctx.on('object:removed',this.fabricOnRemoved);
         }
 
         if (anObject.type === "textbox") {
@@ -371,6 +373,7 @@ class Board extends Component {
      * @returns 
      */
     socketEvent = (event) => {
+        console.log(event);
         if (event.type === CANVAS_EVENT) {
             if (event.action === ADD_ACTION) {
                 this.addObject(event.jsonData);
@@ -490,15 +493,17 @@ class Board extends Component {
     }
 
     erase = () => {
-        this.mode = ERASER;
-        this.setState({ selectedButton: this.mode });
-        this.ctx.isDrawingMode = false;
+        console.log(this.ctx);
 
-        const activeObject = this.ctx.getActiveObject();
-        const id = activeObject.id;
+        // this.mode = ERASER;
+        // this.setState({ selectedButton: this.mode });
+        // this.ctx.isDrawingMode = false;
 
-        this.ctx.remove(activeObject);
-        this.fabricObjectMap.delete(id);
+        // const activeObject = this.ctx.getActiveObject();
+        // const id = activeObject.id;
+
+        // this.ctx.remove(activeObject);
+        // this.fabricObjectMap.delete(id);
     }
 
     /**
