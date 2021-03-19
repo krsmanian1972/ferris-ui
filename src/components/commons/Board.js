@@ -373,7 +373,7 @@ class Board extends Component {
      * @returns 
      */
     socketEvent = (event) => {
-        console.log(event);
+
         if (event.type === CANVAS_EVENT) {
             if (event.action === ADD_ACTION) {
                 this.addObject(event.jsonData);
@@ -493,17 +493,16 @@ class Board extends Component {
     }
 
     erase = () => {
-        console.log(this.ctx);
 
-        // this.mode = ERASER;
-        // this.setState({ selectedButton: this.mode });
-        // this.ctx.isDrawingMode = false;
+        this.mode = ERASER;
+        this.setState({ selectedButton: this.mode });
+        this.ctx.isDrawingMode = false;
 
-        // const activeObject = this.ctx.getActiveObject();
-        // const id = activeObject.id;
+        const activeObject = this.ctx.getActiveObject();
+        const id = activeObject.id;
 
-        // this.ctx.remove(activeObject);
-        // this.fabricObjectMap.delete(id);
+        this.ctx.remove(activeObject);
+        this.fabricObjectMap.delete(id);
     }
 
     /**
