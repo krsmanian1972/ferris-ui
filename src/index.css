@@ -79,17 +79,6 @@ code {
   overflow: hidden;
 }
 
-.peerVideoContainer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 30%;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-}
-
 .artifactsContainer {
   position: absolute;
   bottom: 0;
@@ -101,12 +90,18 @@ code {
   justify-content: center;
 }
 
+.peerVideoContainer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  margin-left:5px;
+}
+
 .myVideoContainer {
   position: absolute;
   bottom: 0;
   right: 0;
   margin-right:5px;
-  margin-left:5px;
 }
 
 .videoItem {

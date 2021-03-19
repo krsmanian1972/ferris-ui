@@ -10,9 +10,8 @@ import ProgramListStore from './stores/ProgramListStore';
 import { assetHost } from './stores/APIEndpoints';
 
 import { cardHeaderStyle } from './util/Style';
-import Paragraph from 'antd/lib/typography/Paragraph';
 
-const { Text, Title } = Typography;
+const { Text, Title,Paragraph } = Typography;
 
 
 @inject("appStore")
