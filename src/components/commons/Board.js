@@ -492,6 +492,10 @@ class Board extends Component {
         this.ctx.isDrawingMode = false;
 
         const activeObject = this.ctx.getActiveObject();
+
+        if(!activeObject){
+            return;
+        }
         const id = activeObject.id;
 
         this.ctx.remove(activeObject);
@@ -650,7 +654,7 @@ class Board extends Component {
                             <Tooltip title="Select">
                                 <Button onClick={this.selection} id="selection" style={this.getStyle(SELECTION)} type="primary" icon={<SelectOutlined />} shape={"circle"} />
                             </Tooltip>
-                            <Tooltip title="Erase">
+                            <Tooltip title="Erase; Select an object and then click erase!">
                                 <Button onClick={this.erase} id="erase" style={this.getStyle(ERASER)} type="primary" icon={<ScissorOutlined />} shape={"circle"} />
                             </Tooltip>
                         </Space>
