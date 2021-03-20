@@ -18,7 +18,7 @@ function ArtifactPanel({ stream, username }) {
         <div style={panelStyle}>
             <div className="activeItem">
                 <p style={nameStyle}>{username}</p>
-                <video poster="peerScreen.png" ref={videoEl} autoPlay muted />
+                <video poster="peerScreen.png" ref={videoEl} autoPlay/>
             </div>
         </div>
     )
