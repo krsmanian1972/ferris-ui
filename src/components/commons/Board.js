@@ -6,7 +6,7 @@ import { fabric } from 'fabric';
 
 import moment from 'moment';
 
-import { EditOutlined, ItalicOutlined, ScissorOutlined,SelectOutlined } from '@ant-design/icons';
+import { EditOutlined, ItalicOutlined, ScissorOutlined, SelectOutlined } from '@ant-design/icons';
 
 import socket from '../stores/socket';
 import BoardListStore from "../stores/BoardListStore";
@@ -77,7 +77,7 @@ class Board extends Component {
 
         this.ctx.on('path:created', this.fabricOnPathCreated);
         this.ctx.on('object:modified', this.fabricOnModified);
-        this.ctx.on('object:removed',this.fabricOnRemoved);
+        this.ctx.on('object:removed', this.fabricOnRemoved);
 
         socket.on(DOWNSTREAM_PAINT, (event) => {
             this.socketEvent(event);
@@ -156,7 +156,7 @@ class Board extends Component {
         });
     }
 
-   
+
     /**
      * We need a unique id for each of the objects on the canvas.
      * The Object Id is a combination of userId+"~"+Object Counter
@@ -170,33 +170,6 @@ class Board extends Component {
         var now = moment();
         return now;
     }
-
-     /**
-     *
-     * check if the first part is matching the userId. if not return -1;
-     * return the second part as int.
-     * return -1 if something is wrong.
-     * 
-     * @param {*} id 
-     */
-    peelCtr = (id) => {
-        if(!id) {
-            return -1;
-        }
-        
-        let arr = id.split("~");
-
-        if(arr.length !== 2) {
-            return -1;
-        }
-
-        if(this.props.userId !== arr[0]) {
-            return -2;
-        }
-
-        return parseInt(arr[1],10);
-    }
-   
 
     /**
      * To notify the members of the conference/session about a change in the canvas.
@@ -214,7 +187,7 @@ class Board extends Component {
             sessionId: this.props.sessionId
         });
     }
-    
+
 
     /**
      * When the user creates a new path in the canvas, we should notify
@@ -251,7 +224,7 @@ class Board extends Component {
 
         const anObject = this.fabricObjectMap.get(objectId);
 
-        if(!anObject) {
+        if (!anObject) {
             return;
         }
 
@@ -268,7 +241,7 @@ class Board extends Component {
         socket.emit(UPSTREAM_PAINT, {
             type: CANVAS_EVENT,
             action: ERASE_ACTION,
-            jsonData: {id:objectId},
+            jsonData: { id: objectId },
             isCoach: this.props.isCoach,
             userId: this.props.userId,
             sessionId: this.props.sessionId
@@ -333,14 +306,14 @@ class Board extends Component {
     }
 
     deleteObject = (jsonData) => {
-        if(!jsonData) {
+        if (!jsonData) {
             return;
         }
         const id = jsonData.id;
         const anObject = this.fabricObjectMap.get(id);
-        if(anObject) {
-           this.ctx.remove(anObject);
-           this.fabricObjectMap.delete(id); 
+        if (anObject) {
+            this.ctx.remove(anObject);
+            this.fabricObjectMap.delete(id);
         }
     }
 
@@ -354,7 +327,7 @@ class Board extends Component {
         if (currentObject) {
             this.ctx.off('object:removed');
             this.ctx.remove(currentObject);
-            this.ctx.on('object:removed',this.fabricOnRemoved);
+            this.ctx.on('object:removed', this.fabricOnRemoved);
         }
 
         if (anObject.type === "textbox") {
@@ -381,7 +354,7 @@ class Board extends Component {
             else if (event.action === MODIFY_ACTION) {
                 this.modifyObject(event.jsonData);
             }
-            else if(event.action === ERASE_ACTION) {
+            else if (event.action === ERASE_ACTION) {
                 this.deleteObject(event.jsonData);
             }
             this.push();
@@ -445,7 +418,6 @@ class Board extends Component {
 
             const fabricObjects = jsonData.objects;
 
-            var maxCtr= 1;
             for (let i = 0; i < fabricObjects.length; i++) {
                 const anObject = fabricObjects[i];
                 if (anObject.type === "textbox") {
@@ -476,7 +448,7 @@ class Board extends Component {
         this.mode = PEN;
         this.setState({ selectedButton: this.mode });
         this.ctx.isDrawingMode = true;
-        this.ctx.freeDrawingBrush.color = '#FFFFFF';
+        this.ctx.freeDrawingBrush.color = COLOR;
     }
 
     selection = () => {
@@ -493,7 +465,7 @@ class Board extends Component {
 
         const activeObject = this.ctx.getActiveObject();
 
-        if(!activeObject){
+        if (!activeObject) {
             return;
         }
         const id = activeObject.id;
@@ -524,7 +496,7 @@ class Board extends Component {
     * The coach shall answer the whichTab question made by a non-coach user.
     * @returns 
     */
-     publishNewTab = (activeKey) => {
+    publishNewTab = (activeKey) => {
         if (!this.props.isCoach) {
             return;
         }
@@ -613,8 +585,6 @@ class Board extends Component {
         const { panes } = this.state;
         panes.push({ title: `Board-${activeKey}`, key: activeKey, closable: false, isLoaded: true });
         this.setState({ panes: panes, activeKey });
-
-        //this.newTabIndex++;
     }
 
     getStyle = (compKey) => {
