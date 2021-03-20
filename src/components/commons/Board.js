@@ -4,6 +4,8 @@ import { Button, Row, Col, Tabs, Tooltip, Space } from 'antd';
 
 import { fabric } from 'fabric';
 
+import moment from 'moment';
+
 import { EditOutlined, ItalicOutlined, ScissorOutlined,SelectOutlined } from '@ant-design/icons';
 
 import socket from '../stores/socket';
@@ -165,9 +167,8 @@ class Board extends Component {
      * 
      */
     nextObjectId = () => {
-        const objectId = this.props.userId + '~' + this.objectCounter;
-        this.objectCounter = this.objectCounter + 1;
-        return objectId;
+        var now = moment();
+        return now;
     }
 
      /**
@@ -373,7 +374,6 @@ class Board extends Component {
      * @returns 
      */
     socketEvent = (event) => {
-
         if (event.type === CANVAS_EVENT) {
             if (event.action === ADD_ACTION) {
                 this.addObject(event.jsonData);
@@ -384,6 +384,7 @@ class Board extends Component {
             else if(event.action === ERASE_ACTION) {
                 this.deleteObject(event.jsonData);
             }
+            this.push();
         }
         else if (event.type === TAB_CHANGED_EVENT) {
             this.onTabClick(event.activeKey);
@@ -406,7 +407,6 @@ class Board extends Component {
         if (!this.props.isCoach) {
             return;
         }
-
         this.isPushing = true;
         for (let path of this.fabricObjectMap.values()) {
             path.excludeFromExport = false;
@@ -440,7 +440,6 @@ class Board extends Component {
             const response = await this.props.appStore.apiProxy.getAsync(url);
             const data = await response.text();
             const jsonData = JSON.parse(data);
-
             this.ctx.clear();
             this.fabricObjectMap.clear();
 
@@ -455,17 +454,11 @@ class Board extends Component {
                 else {
                     this.addPath(anObject);
                 }
-                
-                const ctr = this.peelCtr(anObject.id);
-                maxCtr = Math.max(maxCtr,ctr);
             }
 
-            // Will get corrupted during deletion operation;
-            this.objectCounter = maxCtr;
             this.ctx.renderAll();
         }
         catch (e) {
-            this.objectCounter = 0;
             this.ctx.clear();
         }
     }
@@ -594,7 +587,6 @@ class Board extends Component {
         }
 
         const activeKey = `${this.newTabIndex}`;
-
         const { panes } = this.state;
         panes.push({ title: `Board-${this.newTabIndex}`, key: activeKey, closable: false, isLoaded: true });
         this.setState({ panes: panes, activeKey });
@@ -615,10 +607,10 @@ class Board extends Component {
         }
 
         const { panes } = this.state;
-        panes.push({ title: `Board-${this.newTabIndex}`, key: activeKey, closable: false, isLoaded: true });
+        panes.push({ title: `Board-${activeKey}`, key: activeKey, closable: false, isLoaded: true });
         this.setState({ panes: panes, activeKey });
 
-        this.newTabIndex++;
+        //this.newTabIndex++;
     }
 
     getStyle = (compKey) => {
