@@ -50,7 +50,9 @@ export default class EnrollmentListStore {
             }
         }
 
-        result.splice(selfIndex, 1);
+        if(selfIndex !== -1) {
+            result.splice(selfIndex, 1);
+        }
     }
 
     /**
