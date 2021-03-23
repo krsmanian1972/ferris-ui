@@ -19,7 +19,7 @@ class ScheduleDrawer extends Component {
         
         return (
             <Drawer title={title} width={"55%"} closable={true} onClose={this.close} visible={store.showDrawer} destroyOnClose>
-                <ScheduleForm sessionStore = {store}/>
+                <ScheduleForm sessionStore = {store} programId = {this.props.programId} memberId={this.props.memberId}/>
             </Drawer>
         );
     }

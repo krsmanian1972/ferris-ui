@@ -30,7 +30,7 @@ const COACH = "coach";
 const MONO = "mono";
 const MULTI = "multi";
 
-const ALLOWED_MINUTES = new Set([0, 15, 30, 45]);
+const ALLOWED_MINUTES = new Set([0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]);
 
 export default class SessionStore {
 
@@ -122,7 +122,7 @@ export default class SessionStore {
 
             this.showDrawer = false;
             this.state = DONE;
-            this.sessionListStore.buildRoster();
+            this.sessionListStore && this.sessionListStore.buildRoster();
         }
         catch (e) {
             this.state = ERROR;
@@ -169,7 +169,7 @@ export default class SessionStore {
 
             this.showDrawer = false;
             this.state = DONE;
-            this.sessionListStore.buildRoster();
+            this.sessionListStore && this.sessionListStore.buildRoster();
         }
         catch (e) {
             this.state = ERROR;
@@ -229,14 +229,14 @@ export default class SessionStore {
 
         const minutes = start.minutes();
         if (!ALLOWED_MINUTES.has(minutes)) {
-            this.startTimeMsg = { status: ERROR, help: "Please select the minutes as one of 00,15,30 or 45." };
+            this.startTimeMsg = { status: ERROR, help: "Please select the minutes as multiples of 5" };
             return;
         }
 
-        const boundary = moment().add(15, 'minute');
+        const boundary = moment().add(5, 'minute');
         const flag = start && start > boundary;
         if (!flag) {
-            this.startTimeMsg = { status: ERROR, help: "Select a start time that is at least 15 minutes from now." };
+            this.startTimeMsg = { status: ERROR, help: "Select a start time that is after at least 5 minutes from now." };
             return;
         }
     }
@@ -397,8 +397,8 @@ export default class SessionStore {
     }
 
     get canAlterPeople() {
-        return this.isCoach 
-            && this.event.session 
+        return this.isCoach
+            && this.event.session
             && !this.event.session.isClosed;
     }
 

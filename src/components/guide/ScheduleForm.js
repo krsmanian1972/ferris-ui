@@ -42,7 +42,28 @@ class ScheduleForm extends Component {
 
     componentDidMount() {
         const store = this.props.sessionStore;
+        const programId = this.props.programId;
+        const memberId = this.props.memberId;
+
+        const startTime = this.idealTime();
+        const duration = moment(15, 'minutes');
+
         store.programListStore.fetchCoachPrograms();
+        if(programId) {
+            store.enrollmentListStore.fetchEnrollments(programId, 'ALL');
+        }
+       
+        this.formRef.current && this.formRef.current.setFieldsValue({ startTime, duration, programId, memberId });
+
+        store.validateDate(startTime);
+        store.validateDuration(duration);
+    }
+
+
+    idealTime = () => {
+        const now = moment();
+        const balance = 5 - (now.minute() % 5) + 5;
+        return moment(now).add(balance, "minutes");
     }
 
 
@@ -159,6 +180,40 @@ class ScheduleForm extends Component {
         );
     }
 
+    renderPrograms = () => {
+
+        const store = this.props.sessionStore;
+
+        const programs = store.programListStore.programs;
+        const programMsg = this.pick(store.programListStore.message, store.programMsg);
+
+        return (
+            <Form.Item name="programId"
+                rules={[{ required: true, message: 'Please select a Program' }]}
+                label={this.getProgramLabel()}
+                validateStatus={programMsg.status}
+                help={programMsg.help}>
+
+                <Select
+                    showSearch
+                    filterOption={(input, option) =>
+                        option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    }
+                    placeholder="Select an active Program"
+                    onChange={this.onProgramChange}>
+                    {
+                        // eslint-disable-next-line
+                        programs.map(item => {
+                            if (item.program.active) {
+                                return <Option key={item.program.id}>{item.program.name}</Option>
+                            }
+                        })
+                    }
+                </Select>
+            </Form.Item>
+        )
+    }
+
     renderMembers = () => {
         const store = this.props.sessionStore;
         if (store.sessionType === "multi") {
@@ -167,6 +222,7 @@ class ScheduleForm extends Component {
 
         const members = store.enrollmentListStore.members;
         const memberMsg = this.pick(store.enrollmentListStore.message, store.memberMsg);
+    
 
         return (
             <Form.Item name="memberId"
@@ -200,9 +256,6 @@ class ScheduleForm extends Component {
 
         const store = this.props.sessionStore;
 
-        const programs = store.programListStore.programs;
-        const programMsg = this.pick(store.programListStore.message, store.programMsg);
-
         const startTimeMsg = store.startTimeMsg;
         const durationMsg = store.durationMsg;
 
@@ -211,30 +264,8 @@ class ScheduleForm extends Component {
                 name="scheduleForm"
                 ref={this.formRef}
                 onFinish={this.onFinish} >
-                <Form.Item name="programId"
-                    rules={[{ required: true, message: 'Please select a Program' }]}
-                    label={this.getProgramLabel()}
-                    validateStatus={programMsg.status}
-                    help={programMsg.help}>
 
-                    <Select
-                        showSearch
-                        filterOption={(input, option) =>
-                            option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                        }
-                        placeholder="Select an active Program"
-                        onChange={this.onProgramChange}>
-                        {
-                            // eslint-disable-next-line
-                            programs.map(item => {
-                                if (item.program.active) {
-                                    return <Option key={item.program.id}>{item.program.name}</Option>
-                                }
-                            })
-                        }
-                    </Select>
-                </Form.Item>
-
+                {this.renderPrograms()}
                 {this.renderMembers()}
 
                 <Form.Item name="name"
@@ -264,7 +295,7 @@ class ScheduleForm extends Component {
                         format="DD-MMM-YYYY hh:mm A"
                         disabledDate={this.disabledDate}
                         onChange={this.validateDate}
-                        minuteStep={15} />
+                        minuteStep={5} />
                 </Form.Item>
 
                 <Form.Item
