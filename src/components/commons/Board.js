@@ -4,8 +4,6 @@ import { Button, Row, Col, Tabs, Tooltip, Space } from 'antd';
 
 import { fabric } from 'fabric';
 
-import moment from 'moment';
-
 import { EditOutlined, ItalicOutlined, ScissorOutlined, SelectOutlined } from '@ant-design/icons';
 
 import socket from '../stores/socket';
@@ -55,7 +53,6 @@ class Board extends Component {
         super(props);
 
         this.fabricObjectMap = new Map();
-        this.objectCounter = 0;
 
         this.currentTab = 1;
         this.mode = PEN;
@@ -136,8 +133,6 @@ class Board extends Component {
             panes.push(tab);
             boardIndex++;
         }
-
-        this.newTabIndex = boardIndex;
     }
 
     /**
@@ -159,16 +154,15 @@ class Board extends Component {
 
     /**
      * We need a unique id for each of the objects on the canvas.
-     * The Object Id is a combination of userId+"~"+Object Counter
      * 
-     * Let us increment the objectCounter whenever we invoke this method.
-     * 
+     * The original idea is was a combination of userId+"~"+Object Counter
      * Kind of RDBMS sequence creating technique!!!
      * 
+     * Now this idea is inspired from StackExchange. 
+     * The generated number is less likely to cause a clash during multi-party drawing.
      */
     nextObjectId = () => {
-        var now = moment();
-        return now;
+        return new Date().valueOf().toString(36) + Math.random().toString(36).substr(2);
     }
 
     /**
@@ -562,14 +556,14 @@ class Board extends Component {
             return;
         }
 
-        const activeKey = `${this.newTabIndex}`;
         const { panes } = this.state;
-        panes.push({ title: `Board-${this.newTabIndex}`, key: activeKey, closable: false, isLoaded: true });
+
+        const activeKey = `${panes.length+1}`;
+        
+        panes.push({ title: `Board-${activeKey}`, key: activeKey, closable: false, isLoaded: true });
         this.setState({ panes: panes, activeKey });
 
         this.publishNewTab(activeKey);
-
-        this.newTabIndex++;
     };
 
     /**

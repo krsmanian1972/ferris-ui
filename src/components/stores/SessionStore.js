@@ -236,7 +236,7 @@ export default class SessionStore {
         const boundary = moment().add(5, 'minute');
         const flag = start && start > boundary;
         if (!flag) {
-            this.startTimeMsg = { status: ERROR, help: "Select a start time that is after at least 5 minutes from now." };
+            this.startTimeMsg = { status: ERROR, help: "Select a start time that is at least 5 minutes from now." };
             return;
         }
     }
@@ -360,11 +360,11 @@ export default class SessionStore {
     }
 
     get isMono() {
-        return this.event && this.event.session.sessionType === MONO;
+        return this.event && this.event.session && this.event.session.sessionType === MONO;
     }
 
     get isMulti() {
-        return this.event && this.event.session.sessionType === MULTI;
+        return this.event && this.event.session && this.event.session.sessionType === MULTI;
     }
 
     get isClosed() {

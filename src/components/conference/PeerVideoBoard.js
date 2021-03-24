@@ -28,7 +28,7 @@ function PeerVideoBoard({ artifactId, localSrc, peerSrc, screenSrc, artifact, is
         }
     });
 
-    const peerScreenElement = <video key="peerScreen" className="videoItem" style={{ width: "100%" }} poster="peerScreen.png" ref={peerScreen} autoPlay />;
+    const peerScreenElement = <video key="peerScreen" className="videoItem" style={{ width: "100%" }} poster="peerScreen.png" ref={peerScreen} autoPlay muted/>;
 
     const getWidgetHeight = () => {
         if (isMinimized === true) {

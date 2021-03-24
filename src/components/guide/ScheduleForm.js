@@ -295,6 +295,7 @@ class ScheduleForm extends Component {
                         format="DD-MMM-YYYY hh:mm A"
                         disabledDate={this.disabledDate}
                         onChange={this.validateDate}
+                        allowClear={false}
                         minuteStep={5} />
                 </Form.Item>
 

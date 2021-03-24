@@ -28,12 +28,8 @@ class ToolBar extends Component {
         if (!appStore.isLoggedIn()) {
             return (
                 <>
-                    <Col span={12}  style={{ textAlign: "right" }} >
+                    <Col span={20}  style={{ textAlign: "center" }} >
                         <Text style={{color:"rgb(69,49,28)"}} strong={true}>Ferris - The Coaching Assistant</Text>
-                    </Col>
-
-                    <Col span={10} style={{ textAlign: "right" }}>
-                        <Text strong={true}></Text>
                     </Col>
                 </>
             )
