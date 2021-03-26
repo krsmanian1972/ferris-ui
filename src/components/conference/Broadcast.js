@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 
 import { Row, Col, Space, Button, Tooltip, Tag } from 'antd';
-import { CameraOutlined, AudioOutlined, BookOutlined, AudioMutedOutlined, EyeInvisibleOutlined, CompressOutlined, ExpandOutlined } from '@ant-design/icons';
+import { CameraOutlined, AudioOutlined, BookOutlined, AudioMutedOutlined, EyeInvisibleOutlined, CompressOutlined, ExpandOutlined, UnlockOutlined } from '@ant-design/icons';
 
 import socket from '../stores/socket';
 
@@ -52,15 +52,15 @@ class Broadcast extends Component {
 
 			// When the coach dictates a particular artifact for the member to view
 			controlledArtifactId: "none",
-
-			// When the member selects an artifact in the absence of controlled artifact
-			memberArtifactId: "none",
 		}
 
 		this.isCoach = this.props.params.sessionUserType === 'coach';
 
-		// For Coach (Not for member)
+		// For Coach (Not for member). We will use this to 
+		// temporarily hold the screen sharing id by a member.
+		// Because we have to supply this value to the newly joining person.
 		this.coachArtifactId = "none"
+		this.priorArtifactId = "none";
 	}
 
 	/**
@@ -307,30 +307,14 @@ class Broadcast extends Component {
 		)
 	}
 
-	/**
-	 * A coach can lock a members accessible widgets.
-	 * @returns 
-	 */
-	canAllowArtifactSelection = () => {
-		if (this.isCoach) {
+	toggleArtifact = (artifactId) => {
+
+		if (!this.isCoach) {
 			return true;
 		}
 
-		return this.state.controlledArtifactId === "none";
-	}
-
-	toggleArtifact = (artifactId) => {
-		if (!this.canAllowArtifactSelection()) {
-			return;
-		}
-
-		if (this.isCoach) {
-			this.setState({ controlledArtifactId: artifactId });
-			this.onArtifactChange(artifactId);
-		}
-		else {
-			this.setState({ memberArtifactId: artifactId });
-		}
+		this.setState({ controlledArtifactId: artifactId });
+		this.onArtifactChange(artifactId);
 	}
 
 	getPeerScreens = () => {
@@ -339,11 +323,11 @@ class Broadcast extends Component {
 		if (!this.screencast) {
 			return peerScreens;
 		}
-
 		for (const [key, remoteFeed] of this.screencast.remoteFeedMap) {
 			if (remoteFeed) {
 				const el = <ArtifactPanel key={key} stream={remoteFeed.stream} username={remoteFeed.rfdisplay} />
 				peerScreens.push(el);
+				break;
 			}
 		}
 
@@ -379,23 +363,57 @@ class Broadcast extends Component {
 		const conferenceId = this.props.params.conferenceId;
 		const userId = this.props.appStore.credentials.id;
 
-		const data = {
-			sessionId: conferenceId,
-			userId: userId,
-			artifactId: artifactId
-		};
+		const data = { sessionId: conferenceId, userId: userId, artifactId: artifactId };
 
 		socket.emit('artifactChanged', data);
 	}
 
-	/**
-	 * Event Received from the Upstream Coach
-	 * to synchronize the Member's artifact view.
-	 * @param {*} preference 
-	 */
 	handleArtifactEvent = (preference) => {
-		this.setState({ controlledArtifactId: preference.artifactId });
+
+		// A member can't control the artifact of a coach except the screen sharing
+		if (this.isCoach && preference.artifactId !== "screen") {
+			return;
+		}
+
+		// To avoid re-rendering the screen of existing member due to any late joinees
+		if (preference.artifactId === this.state.controlledArtifactId) {
+			return;
+		}
+
+		// The user is non-coach and the artifact_id is anything except screen
+		if (preference.artifactId !== "screen") {
+			this.setState({ controlledArtifactId: preference.artifactId });
+			return;
+		}
+
+		this.handleScreenEvent(preference);
 	}
+
+	handleScreenEvent = (preference) => {
+
+		// We should ignore the off when the coach is showing a different artifact.
+		if (preference.intent === "off") {
+			if (!preference.senderIsCoach) {
+				if (this.state.controlledArtifactId !== "none") {
+					return;
+				}
+			}
+
+			if (this.isCoach) {
+				this.coachArtifactId = "none";
+			}
+			this.setState({ controlledArtifactId: "none" });
+			return;
+		}
+
+		// Mark the coach artifactId as Screen To answer any whichArtifact by the late joinees;
+		if (this.isCoach) {
+			this.coachArtifactId = "screen";
+		}
+
+		this.setState({ controlledArtifactId: "screen" });
+	}
+
 
 	/**
 	 * Blackboard will be given the highest priority, followed by
@@ -437,38 +455,50 @@ class Broadcast extends Component {
 		}
 	}
 
-	onScreenSharing = (artifactId) => {
+	/**
+	 * When we are sharing our screen, we are not modifying the controlledArtifactId.
+	 * 
+	 * 
+	 * @param {*} intent 
+	 */
+	onScreenSharing = (intent) => {
+
+		this.coachArtifactId = intent === "on" ? "screen" : "none";
 
 		const sessionId = this.props.params.conferenceId;
 		const userId = this.props.appStore.credentials.id;
 
-		const data = { sessionId: sessionId, userId: userId, artifactId: artifactId };
+		const data = { sessionId: sessionId, userId: userId, artifactId: "screen", intent: intent, senderIsCoach: this.isCoach };
 
 		socket.emit('artifactChanged', data);
 	}
 
 	toggleScreenSharing = () => {
 
-		if (!this.state.isScreenSharing) {
+		if (!this.state.isScreenSharing && this.state.controlledArtifactId === "none") {
 			this.screencast.startScreenSharing();
 			this.setState({ isScreenSharing: true });
-			this.onScreenSharing("screen");
+			this.onScreenSharing("on");
 			return;
 		}
 
 		this.screencast.stopSharing();
 		this.setState({ isScreenSharing: false });
-		this.onScreenSharing("none");
+		this.onScreenSharing("off");
 	}
 
 	getScreenButton = (canShare) => {
 
 		if (!canShare) {
-			return <Button key="screen_bt" disabled={true} id="screen_bt" shape="round" >Screen</Button>
+			return <></>
 		}
 
 		if (this.state.isScreenSharing) {
 			return <Button key="screen_bt" id="screen_bt" style={{ background: "green", color: "white" }} shape="round" onClick={this.toggleScreenSharing} >Hide Screen</Button>
+		}
+
+		if (this.state.controlledArtifactId !== "none") {
+			return <Button key="screen_bt" disabled={true} id="screen_bt" shape="round" >Screen</Button>
 		}
 
 		return <Button key="screen_bt" id="screen_bt" style={{ background: "black", color: "rgb(44, 147, 209)" }} shape="round" onClick={this.toggleScreenSharing} >Show Screen</Button>
@@ -476,15 +506,15 @@ class Broadcast extends Component {
 
 	getButton = (label, artifactId) => {
 
+		if (!this.isCoach) {
+			return <></>
+		}
+
 		if (this.state.isScreenSharing) {
 			return <></>
 		}
 
-		const currentArtifactId = this.getCurrentArtifactId();
-		var shouldDisable = currentArtifactId === artifactId;
-		if (!this.isCoach && this.state.controlledArtifactId !== "none") {
-			shouldDisable = true;
-		}
+		const shouldDisable = this.state.controlledArtifactId === artifactId;
 
 		if (shouldDisable) {
 			return <Button key={artifactId} id={artifactId} disabled={true} shape="round">{label}</Button>
@@ -493,38 +523,29 @@ class Broadcast extends Component {
 		return <Button key={artifactId} id={artifactId} style={{ background: "black", color: "rgb(44, 147, 209)" }} shape="round" onClick={() => this.toggleArtifact(artifactId)}>{label}</Button>
 	}
 
+	/**
+	 * to release the controlled artifact
+	 * @returns
+	 */
 	getMagicButton = () => {
+
+		if (!this.isCoach) {
+			return <></>;
+		}
+
 		if (this.state.isScreenSharing) {
 			return <></>
 		}
 
-		const currentArtifactId = this.getCurrentArtifactId();
-		const shouldDisable = currentArtifactId === "none";
-
-		if (shouldDisable) {
+		if (this.state.controlledArtifactId === "none") {
 			return <></>
 		}
 
 		return (
-			<Tooltip title="Hide Artifacts">
-				<Button style={{ background: "black", color: "rgb(44, 147, 209)" }} icon={<EyeInvisibleOutlined />} shape="circle" onClick={() => this.toggleArtifact("none")} />
+			<Tooltip title="Release the artifact from the view of a member">
+				<Button style={{ background: "black", color: "rgb(44, 147, 209)" }} icon={<UnlockOutlined />} shape="circle" onClick={() => this.toggleArtifact("none")} />
 			</Tooltip>
 		)
-	}
-
-	/**
-	* We have three contexual artifacts. 
-	*/
-	getCurrentArtifactId = () => {
-		if (this.isCoach) {
-			return this.state.controlledArtifactId;
-		}
-
-		if (this.state.controlledArtifactId === "none") {
-			return this.state.memberArtifactId;
-		}
-
-		return this.state.controlledArtifactId;
 	}
 
 
