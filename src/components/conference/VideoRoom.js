@@ -10,8 +10,8 @@ var mypvtid = null;
 class VideoRoom {
 
 	remoteFeedMap = new Map();
-	
-	constructor(props,roomListener) {
+
+	constructor(props, roomListener) {
 		this.props = props;
 		this.roomListener = roomListener;
 	}
@@ -78,8 +78,7 @@ class VideoRoom {
 			const rfid = remoteFeed.rfid;
 			this.remoteFeedMap.set(rfid, remoteFeed);
 
-			const displayName = remoteFeed.rfdisplay;
-			const roomEvent = { status: `${displayName} Registered`, rfid: rfid };
+			const roomEvent = { status: "attached", rfid: rfid };
 			this.roomListener(roomEvent);
 		}
 		else if (feedEvent.event === "remoteStream") {
@@ -91,8 +90,7 @@ class VideoRoom {
 				remoteFeed.stream = stream;
 			}
 
-			const displayName = remoteFeed.rfdisplay;
-			const roomEvent = { status: `${displayName} Entered`, rfid: rfid };
+			const roomEvent = { status: "remoteStream", rfid: rfid };
 			this.roomListener(roomEvent);
 		}
 	}
@@ -104,8 +102,7 @@ class VideoRoom {
 			this.remoteFeedMap.set(rfid, null);
 			remoteFeed.detach();
 
-			const displayName = remoteFeed.rfdisplay;
-			const roomEvent = { status: `${displayName} Left`, rfid: rfid };
+			const roomEvent = { status: 'detached', rfid: rfid };
 			this.roomListener(roomEvent);
 		}
 	}
@@ -129,14 +126,14 @@ class VideoRoom {
 				me.handleJsep(jsep);
 			},
 			onlocalstream: function (stream) {
-				const roomEvent = { myVideoStream: stream, status: `Active`, isActive: true };
+				const roomEvent = { myVideoStream: stream, status: `Active`, isActive: true, type: "local" };
 				me.roomListener(roomEvent);
 			},
 			onremotestream: function (stream) {
 				// The publisher stream is sendonly, we don't expect anything here
 			},
 			oncleanup: function () {
-				const roomEvent = { myVideoStream: null, status: 'Done', isActive: false };
+				const roomEvent = { myVideoStream: null, status: 'Done', isActive: false, type: "local" };
 				me.roomListener(roomEvent);
 			}
 		};
@@ -181,7 +178,7 @@ class VideoRoom {
 			}
 		}
 		else if (event === "destroyed") {
-			const roomEvent = { myVideoStream: null, status: 'Done', isActive: false };
+			const roomEvent = { myVideoStream: null, status: 'Done', isActive: false, type: "local" };
 			this.roomListener(roomEvent);
 		}
 		else if (event === "event") {
@@ -207,7 +204,7 @@ class VideoRoom {
 			this.detachRemoteFeeds(unpublished);
 		}
 		else if (msg["error"]) {
-			const roomEvent = { myVideoStream: null, status: 'Done', isActive: false };
+			const roomEvent = { myVideoStream: null, status: 'Done', isActive: false, type: "local" };
 			this.roomListener(roomEvent);
 		}
 	}
@@ -240,7 +237,7 @@ class VideoRoom {
 			const videoCodec = feed["video_codec"];
 
 			const remoteFeedHandle = new RemoteFeedHandle(janus, this.opaqueId, mypvtid, this.myroom, this.remoteFeedListener);
-			remoteFeedHandle.subscribeTo(feedId,videoCodec);
+			remoteFeedHandle.subscribeTo(feedId, videoCodec);
 		}
 	}
 

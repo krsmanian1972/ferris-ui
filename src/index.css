@@ -483,11 +483,10 @@ code {
   justify-content:space-between;
 }
 
-
-.broadcast-workbench {
+.broadcast{
   display:flex;
   flex-direction:row;
-  margin-bottom:4px;
+  height:100%;
 }
 
 .broadcast-west {
@@ -498,7 +497,6 @@ code {
   align-items: center;
   text-align: center;
   justify-content: left;
-  overflow-y: auto;
   border: 1px solid white;
 }
 
@@ -511,5 +509,41 @@ code {
   align-items: center;
   text-align: center;
   justify-content: center;
+}
+
+.broadcast-workbench {
+  display:flex;
+  flex-direction: column;
+  height:100%;
+  width:100%;
+}
+
+.broadcast-top{
+  height:95%;
   overflow-y: auto;
 }
+
+.broadcast-south{
+  background-color: white;
+  height:5%;
+}
+
+.video_panel {
+  margin-top: 5px; 
+  margin-bottom: 5px; 
+  border-bottom: 1px groove white; 
+  background: #646464;
+}
+
+.video_local_name {
+  color: #fae78f; 
+  font-weight: bold; 
+  margin: 1px;
+}
+
+.video_remote_name {
+  color: white; 
+  font-weight:bold; 
+  margin: 1px;
+}
+
